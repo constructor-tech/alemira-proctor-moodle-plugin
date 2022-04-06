@@ -17,13 +17,13 @@
 /**
  * Availability plugin for integration with Examus proctoring system.
  *
- * @package    availability_examus
- * @copyright  2019-2020 Maksim Burnin <maksim.burnin@gmail.com>
+ * @package    availability_examus2
+ * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
  * @copyright  based on work by 2017 Max Pomazuev
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace availability_examus;
+namespace availability_examus2;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -33,7 +33,7 @@ use core_availability\info_module;
 use moodle_exception;
 use quiz;
 use stdClass;
-use availability_examus\state;
+use availability_examus2\state;
 
 /**
  * Examus condition
@@ -396,7 +396,7 @@ class condition extends \core_availability\condition {
         $info = new info_module($cm);
         try {
             $tree = $info->get_availability_tree();
-            $tree = $tree->get_all_children('\\availability_examus\\condition');
+            $tree = $tree->get_all_children('\\availability_examus2\\condition');
 
             self::$cached_trees[$cm->id] = $tree;
 
@@ -511,10 +511,10 @@ class condition extends \core_availability\condition {
 
         $allow = false;
 
-        if (isset($SESSION->availibilityexamustoken)) {
-            $accesscode = $SESSION->availibilityexamustoken;
+        if (isset($SESSION->availibilityexamus2token)) {
+            $accesscode = $SESSION->availibilityexamus2token;
 
-            $entry = $DB->get_record('availability_examus', [
+            $entry = $DB->get_record('availability_examus2', [
                 'userid' => $userid,
                 'courseid' => $courseid,
                 'cmid' => $cmid,
@@ -543,7 +543,7 @@ class condition extends \core_availability\condition {
      * @return string
      */
     public function get_description($full, $not, \core_availability\info $info) {
-        return get_string('use_examus', 'availability_examus');
+        return get_string('use_examus', 'availability_examus2');
     }
 
     /**
@@ -583,7 +583,7 @@ class condition extends \core_availability\condition {
         if($userentries) {
             $entries = isset($userentries[$cm->id]) ? $userentries[$cm->id] : [];
         } else {
-            $entries = $DB->get_records('availability_examus', [
+            $entries = $DB->get_records('availability_examus2', [
                 'userid' => $userid,
                 'courseid' => $courseid,
                 'cmid' => $cm->id,
@@ -607,7 +607,7 @@ class condition extends \core_availability\condition {
                     $entry->timemodified = time();
                     $entry->status = 'Rescheduled';
 
-                    $DB->update_record('availability_examus', $entry);
+                    $DB->update_record('availability_examus2', $entry);
                     $entry = common::reset_entry(['id' => $entry->id]);
                     return $entry;
                 }
@@ -625,7 +625,7 @@ class condition extends \core_availability\condition {
 
         if ($allowedattempts == null || count($entries) < $allowedattempts) {
             $entry = self::make_entry($courseid, $cm->id, $userid);
-            $entry->id = $DB->insert_record('availability_examus', $entry);
+            $entry->id = $DB->insert_record('availability_examus2', $entry);
             return $entry;
         }
 
@@ -640,7 +640,7 @@ class condition extends \core_availability\condition {
      */
     protected function get_debug_string() {
         global $SESSION;
-        return isset($SESSION->availibilityexamustoken) ? 'YES' : 'NO';
+        return isset($SESSION->availibilityexamus2token) ? 'YES' : 'NO';
     }
 
 }

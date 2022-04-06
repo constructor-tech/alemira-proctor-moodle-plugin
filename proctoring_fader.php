@@ -17,8 +17,8 @@
 /**
  * Availability plugin for integration with Examus proctoring system.
  *
- * @package    availability_examus
- * @copyright  2019-2020 Maksim Burnin <maksim.burnin@gmail.com>
+ * @package    availability_examus2
+ * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
  * @copyright  based on work by 2017 Max Pomazuev
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -42,8 +42,8 @@ defined('MOODLE_INTERNAL') || die();
  */
 (function(){
 
-const strAwaitingProctoring = <?php echo json_encode(get_string('fader_awaiting_proctoring', 'availability_examus')) ?>;
-const strInstructions = <?php echo json_encode(get_string('fader_instructions', 'availability_examus')) ?>;
+const strAwaitingProctoring = <?php echo json_encode(get_string('fader_awaiting_proctoring', 'availability_examus2')) ?>;
+const strInstructions = <?php echo json_encode(get_string('fader_instructions', 'availability_examus2')) ?>;
 const faderHTML = strAwaitingProctoring + strInstructions;
 
 const {sessionStorage, location} = window;

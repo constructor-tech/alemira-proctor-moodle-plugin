@@ -17,8 +17,8 @@
 /**
  * Availability plugin for integration with Examus proctoring system.
  *
- * @package    availability_examus
- * @copyright  2019-2020 Maksim Burnin <maksim.burnin@gmail.com>
+ * @package    availability_examus2
+ * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
  * @copyright  based on work by 2017 Max Pomazuev
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -34,7 +34,7 @@ require_capability('availability/examus:logaccess', $context);
 
 global $PAGE;
 
-$baseurl = '/availability/condition/examus/index.php';
+$baseurl = '/availability/condition/examus2/index.php';
 
 $action = optional_param('action', 'index', PARAM_ALPHA);
 
@@ -42,11 +42,11 @@ if ($action == 'renew') {
     $id = required_param('id', PARAM_TEXT);
     $force = optional_param('force', false, PARAM_TEXT);
 
-    if (\availability_examus\common::reset_entry(['id' => $id], $force)) {
-        redirect('index.php', get_string('new_entry_created', 'availability_examus'),
+    if (\availability_examus2\common::reset_entry(['id' => $id], $force)) {
+        redirect('index.php', get_string('new_entry_created', 'availability_examus2'),
                  null, \core\output\notification::NOTIFY_SUCCESS);
     } else {
-        redirect('index.php', get_string('entry_exist', 'availability_examus'),
+        redirect('index.php', get_string('entry_exist', 'availability_examus2'),
                  null, \core\output\notification::NOTIFY_ERROR);
     }
 }
@@ -56,7 +56,7 @@ if ($action == 'index') {
     $PAGE->set_context($context);
 
     echo $OUTPUT->header();
-    echo $OUTPUT->heading(get_string('pluginname', 'availability_examus'));
+    echo $OUTPUT->heading(get_string('pluginname', 'availability_examus2'));
     $filters = [
         'courseid'     => optional_param('courseid', null, PARAM_INT),
         'timemodified' => optional_param('timemodified', null, PARAM_INT),
@@ -84,7 +84,7 @@ if ($action == 'index') {
     }
 
     $page = optional_param('page', 0, PARAM_INT);
-    $log = new \availability_examus\log($filters, $page);
+    $log = new \availability_examus2\log($filters, $page);
     $log->render_filter_form();
     $log->render_table();
 }
@@ -97,9 +97,9 @@ if ($action == 'show') {
     $PAGE->set_context($context);
 
     echo $OUTPUT->header();
-    echo $OUTPUT->heading(get_string('pluginname', 'availability_examus'));
+    echo $OUTPUT->heading(get_string('pluginname', 'availability_examus2'));
 
-    $logdetails = new \availability_examus\log_details($id, $url);
+    $logdetails = new \availability_examus2\log_details($id, $url);
     $logdetails->render();
 }
 

@@ -1,5 +1,5 @@
 {
-  "moodle-availability_examus-form": {
+  "moodle-availability_examus2-form": {
     "requires": [
       "base",
       "node",

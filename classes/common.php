@@ -18,12 +18,12 @@
  * Availability plugin for integration with Examus proctoring system.
  *
  * @package    availability_examus
- * @copyright  2019-2020 Maksim Burnin <maksim.burnin@gmail.com>
+ * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
  * @copyright  based on work by 2017 Max Pomazuev
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace availability_examus;
+namespace availability_examus2;
 use \stdClass;
 defined('MOODLE_INTERNAL') || die();
 
@@ -42,12 +42,12 @@ class common {
     public static function reset_entry($conditions, $force = false) {
         global $DB;
 
-        $oldentry = $DB->get_record('availability_examus', $conditions);
+        $oldentry = $DB->get_record('availability_examus2_entries', $conditions);
 
         $notinited = $oldentry && $oldentry->status == 'Not inited';
 
         if ($oldentry && (!$notinited || $force)) {
-            $entries = $DB->get_records('availability_examus', [
+            $entries = $DB->get_records('availability_examus2', [
                 'userid' => $oldentry->userid,
                 'courseid' => $oldentry->courseid,
                 'cmid' => $oldentry->cmid,
@@ -58,7 +58,7 @@ class common {
                 if ($force) {
                     foreach ($entries as $old) {
                         $old->status = "Force reset";
-                        $DB->update_record('availability_examus', $old);
+                        $DB->update_record('availability_examus2_entries', $old);
                     }
                 }
 
@@ -72,7 +72,7 @@ class common {
                 $entry->timecreated = $timenow;
                 $entry->timemodified = $timenow;
 
-                $entry->id = $DB->insert_record('availability_examus', $entry);
+                $entry->id = $DB->insert_record('availability_examus2_entries', $entry);
 
                 return $entry;
             } else {
@@ -100,7 +100,7 @@ class common {
             $condition['cmid'] = $cmid;
         }
 
-        $DB->delete_records('availability_examus', $condition);
+        $DB->delete_records('availability_examus2_entries', $condition);
     }
 
     /**

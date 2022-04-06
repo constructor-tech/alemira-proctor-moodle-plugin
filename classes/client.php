@@ -22,29 +22,13 @@
  * @copyright  based on work by 2017 Max Pomazuev
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 namespace availability_examus2;
 
 defined('MOODLE_INTERNAL') || die();
 
-
 /**
- * Holds global state to pass data from event handlers to other code.
- *
- * Used to avoid using gloals and violating either.
- * actual codestyle for globals, or written codestyle rules.
+ * Frontend class
  */
-class state {
-    /**
-     * @var array $attempt Array containing data about current attempt
-     */
-    public static $attempt;
-
-    /**
-     * @var bool $apirequest Indicates to \availability_examus2\condition that the code
-     *                       is executing during API call, not user-interaction.
-     *                       This is done because API should see all CMs, otherwise
-     *                       avalible to user without concidering examus condition,
-     *                       because we need actual user session to check that.
-     */
-    public static $apirequest;
+class client {
 }

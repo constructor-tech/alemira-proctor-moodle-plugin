@@ -17,13 +17,13 @@
 /**
  * Availability plugin for integration with Examus proctoring system.
  *
- * @package    availability_examus
- * @copyright  2019-2020 Maksim Burnin <maksim.burnin@gmail.com>
+ * @package    availability_examus2
+ * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
  * @copyright  based on work by 2017 Max Pomazuev
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace availability_examus;
+namespace availability_examus2;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -57,7 +57,7 @@ class log_details {
      */
     public function render() {
         global $DB;
-        $entry = $DB->get_record('availability_examus', ['id' => $this->id]);
+        $entry = $DB->get_record('availability_examus2', ['id' => $this->id]);
         $user = $DB->get_record('user', ['id' => $entry->userid]);
 
         $course = $DB->get_record('course', ['id' => $entry->courseid]);
@@ -128,7 +128,7 @@ class log_details {
             $warnings[] = $warning;
         }
 
-        $table = new \flexible_table('availability_examus_show');
+        $table = new \flexible_table('availability_examus2_show');
 
         $table->define_columns(['key', 'value']);
         $table->define_headers(['Key', 'Value']);
@@ -140,12 +140,12 @@ class log_details {
         $threshold = $entry->threshold ? json_decode($entry->threshold) : (object)['attention' => null, 'rejected' => null];
 
         $table->add_data([
-            get_string('date_modified', 'availability_examus'),
+            get_string('date_modified', 'availability_examus2'),
             common::format_date($entry->timemodified)
         ]);
 
         $table->add_data([
-            get_string('time_scheduled', 'availability_examus'),
+            get_string('time_scheduled', 'availability_examus2'),
             common::format_date($entry->timescheduled)
         ]);
 
@@ -160,50 +160,50 @@ class log_details {
         ]);
 
         $table->add_data([
-            get_string('module', 'availability_examus'),
+            get_string('module', 'availability_examus2'),
             !empty($course) ? $cm->get_formatted_name() : null,
         ]);
         $table->add_data([
-            get_string('status', 'availability_examus'),
+            get_string('status', 'availability_examus2'),
             $entry->status,
         ]);
 
         if ($entry->review_link !== null) {
-            $reviewlink = "<a href='" . $entry->review_link . "'>" . get_string('link', 'availability_examus') . "</a>";
+            $reviewlink = "<a href='" . $entry->review_link . "'>" . get_string('link', 'availability_examus2') . "</a>";
         } else {
             $reviewlink = "-";
         }
 
         $table->add_data([
-            get_string('review', 'availability_examus'),
+            get_string('review', 'availability_examus2'),
             $reviewlink,
         ]);
         $table->add_data([
-            get_string('score', 'availability_examus'),
+            get_string('score', 'availability_examus2'),
             $entry->score,
         ]);
 
         $table->add_data([
-            get_string('threshold_attention', 'availability_examus'),
+            get_string('threshold_attention', 'availability_examus2'),
             $threshold->attention,
         ]);
 
         $table->add_data([
-            get_string('threshold_rejected', 'availability_examus'),
+            get_string('threshold_rejected', 'availability_examus2'),
             $threshold->rejected,
         ]);
 
         $table->add_data([
-            get_string('session_start', 'availability_examus'),
+            get_string('session_start', 'availability_examus2'),
             common::format_date($entry->session_start),
 
         ]);
         $table->add_data([
-            get_string('session_end', 'availability_examus'),
+            get_string('session_end', 'availability_examus2'),
             common::format_date($entry->session_end),
         ]);
         $table->add_data([
-            get_string('comment', 'availability_examus'),
+            get_string('comment', 'availability_examus2'),
             $entry->comment,
         ]);
         $table->print_html();
@@ -213,16 +213,16 @@ class log_details {
         }
 
         echo "<hr>";
-        echo "<h2>".get_string('log_details_warnings', 'availability_examus')."</h2>";
+        echo "<h2>".get_string('log_details_warnings', 'availability_examus2')."</h2>";
 
-        $table = new \flexible_table('availability_examus_show');
+        $table = new \flexible_table('availability_examus2_show');
 
         $table->define_columns(['type', 'title', 'start', 'end']);
         $table->define_headers([
-            get_string('log_details_warning_type', 'availability_examus'),
-            get_string('log_details_warning_title', 'availability_examus'),
-            get_string('log_details_warning_start', 'availability_examus'),
-            get_string('log_details_warning_end', 'availability_examus'),
+            get_string('log_details_warning_type', 'availability_examus2'),
+            get_string('log_details_warning_title', 'availability_examus2'),
+            get_string('log_details_warning_start', 'availability_examus2'),
+            get_string('log_details_warning_end', 'availability_examus2'),
         ]);
         $table->sortable(false);
         $table->set_attribute('class', 'generaltable generalbox');

@@ -17,20 +17,20 @@
 /**
  * Availability plugin for integration with Examus proctoring system.
  *
- * @package    availability_examus
- * @copyright  2019-2020 Maksim Burnin <maksim.burnin@gmail.com>
+ * @package    availability_examus2
+ * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
  * @copyright  based on work by 2017 Max Pomazuev
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use availability_examus\condition;
-use availability_examus\state;
+use availability_examus2\condition;
+use availability_examus2\state;
 
 /**
  * Hooks into navbar rendering, add link to log, if user has such capability
  * @return string
  */
-function availability_examus_render_navbar_output() {
+function availability_examus2_render_navbar_output() {
     global $PAGE;
 
     $context = context_system::instance();
@@ -39,8 +39,8 @@ function availability_examus_render_navbar_output() {
         return '';
     }
 
-    $title = get_string('log_section', 'availability_examus');
-    $url = new \moodle_url('/availability/condition/examus/index.php');
+    $title = get_string('log_section', 'availability_examus2');
+    $url = new \moodle_url('/availability/condition/examus2/index.php');
     $icon = new \pix_icon('i/log', '');
     $node = navigation_node::create($title, $url, navigation_node::TYPE_CUSTOM, null, null, $icon);
     $PAGE->flatnav->add($node);
@@ -55,7 +55,7 @@ function availability_examus_render_navbar_output() {
  *
  * @return string
  */
-function availability_examus_before_standard_html_head() {
+function availability_examus2_before_standard_html_head() {
     global $DB, $USER;
 
     if (isset(state::$attempt['attempt_id'])) {

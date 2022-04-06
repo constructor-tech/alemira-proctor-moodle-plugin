@@ -17,8 +17,8 @@
 /**
  * Availability plugin for integration with Examus proctoring system.
  *
- * @package    availability_examus
- * @copyright  2019-2020 Maksim Burnin <maksim.burnin@gmail.com>
+ * @package    availability_examus2
+ * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
  * @copyright  based on work by 2017 Max Pomazuev
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -31,15 +31,15 @@ global $DB, $SESSION;
 
 $accesscode = required_param('accesscode', PARAM_RAW);
 
-$entry = $DB->get_record('availability_examus', ['accesscode' => $accesscode]);
+$entry = $DB->get_record('availability_examus2', ['accesscode' => $accesscode]);
 
 if ($entry) {
     $entry->status = 'Started';
     $entry->timemodified = time();
-    $DB->update_record('availability_examus', $entry);
+    $DB->update_record('availability_examus2', $entry);
     $cmid = $entry->cmid;
 
-    $SESSION->availibilityexamustoken = $accesscode;
+    $SESSION->availibilityexamus2token = $accesscode;
 
     list(, $cm) = get_course_and_cm_from_cmid($cmid);
 

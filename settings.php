@@ -17,8 +17,8 @@
 /**
  * Availability plugin for integration with Examus proctoring system.
  *
- * @package    availability_examus
- * @copyright  2019-2020 Maksim Burnin <maksim.burnin@gmail.com>
+ * @package    availability_examus2
+ * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
  * @copyright  based on work by 2017 Max Pomazuev
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -28,9 +28,9 @@ defined('MOODLE_INTERNAL') || die();
 $ADMIN->add(
     'reports',
     new admin_externalpage(
-        'availability_examus_settings',
-        get_string('log_section', 'availability_examus'),
-        $CFG->wwwroot . '/availability/condition/examus/index.php',
+        'availability_examus2_settings',
+        get_string('log_section', 'availability_examus2'),
+        $CFG->wwwroot . '/availability/condition/examus2/index.php',
         'availability/examus:logaccess'
     )
 );

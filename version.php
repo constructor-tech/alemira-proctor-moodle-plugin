@@ -17,16 +17,16 @@
 /**
  * Availability plugin for integration with Examus proctoring system.
  *
- * @package    availability_examus
- * @copyright  2019-2020 Maksim Burnin <maksim.burnin@gmail.com>
+ * @package    availability_examus2
+ * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
  * @copyright  based on work by 2017 Max Pomazuev
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'availability_examus';
-$plugin->version = 2022040102;
-$plugin->release = 'v0.8';
+$plugin->component = 'availability_examus2';
+$plugin->version = 2022040501;
+$plugin->release = 'v2.0-beta';
 $plugin->requires = 2018111800;
 $plugin->maturity = MATURITY_STABLE;

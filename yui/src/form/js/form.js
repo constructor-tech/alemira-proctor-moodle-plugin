@@ -1,31 +1,31 @@
 /**
  * JavaScript for form editing profile conditions.
  *
- * @module moodle-availability_examus-form
+ * @module moodle-availability_examus2-form
  */
 /** @suppress checkVars */
-M.availability_examus = M.availability_examus || {};
+M.availability_examus2 = M.availability_examus2 || {};
 
-M.availability_examus.form = Y.Object(M.core_availability.plugin);
+M.availability_examus2.form = Y.Object(M.core_availability.plugin);
 
-M.availability_examus.form.rules = null;
+M.availability_examus2.form.rules = null;
 
-M.availability_examus.form.initInner = function(rules, groups, warnings, scoring) {
+M.availability_examus2.form.initInner = function(rules, groups, warnings, scoring) {
     this.rules = rules;
     this.groups = groups;
     this.warnings = warnings;
     this.scoring = scoring;
 };
 
-M.availability_examus.form.instId = 0;
+M.availability_examus2.form.instId = 0;
 
-M.availability_examus.form.getNode = function(json) {
+M.availability_examus2.form.getNode = function(json) {
     /**
      * @param {string} identifier A string identifier
      * @returns {string} A string from translations.
      */
     function getString(identifier, module) {
-        module = module || 'availability_examus';
+        module = module || 'availability_examus2';
         return M.util.get_string(identifier, module);
     }
 
@@ -96,9 +96,9 @@ M.availability_examus.form.getNode = function(json) {
 
     var html, node, value;
 
-    M.availability_examus.form.instId += 1;
+    M.availability_examus2.form.instId += 1;
 
-    var id = 'examus' + M.availability_examus.form.instId;
+    var id = 'examus' + M.availability_examus2.form.instId;
     var durationId = id + '_duration';
     var modeId = id + '_mode';
     var schedulingRequiredId = id + '_schedulingRequired';
@@ -370,7 +370,7 @@ M.availability_examus.form.getNode = function(json) {
     return node;
 };
 
-M.availability_examus.form.fillValue = function(value, node) {
+M.availability_examus2.form.fillValue = function(value, node) {
     var rulesInputs, warningsInputs, scoringInputs, key;
     value.duration = node.one('input[name=duration]').get('value').trim();
     value.mode = node.one('select[name=mode]').get('value').trim();
@@ -428,10 +428,10 @@ M.availability_examus.form.fillValue = function(value, node) {
     });
 };
 
-M.availability_examus.form.fillErrors = function(errors, node) {
+M.availability_examus2.form.fillErrors = function(errors, node) {
     var value = {};
     this.fillValue(value, node);
     if (value.duration === undefined || !(new RegExp('^\\d+$')).test(value.duration) || value.duration % 30 !== 0) {
-        errors.push('availability_examus:error_setduration');
+        errors.push('availability_examus2:error_setduration');
     }
 };

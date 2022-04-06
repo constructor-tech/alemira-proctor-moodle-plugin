@@ -17,15 +17,15 @@
 /**
  * Availability plugin for integration with Examus proctoring system.
  *
- * @package    availability_examus
- * @copyright  2019-2020 Maksim Burnin <maksim.burnin@gmail.com>
+ * @package    availability_examus2
+ * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
  * @copyright  based on work by 2017 Max Pomazuev
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-use availability_examus\state;
+use availability_examus2\state;
 
 /**
  * Finish attempt on attempt finish event.
@@ -38,7 +38,7 @@ function avalibility_examus_attempt_submitted_handler($event) {
     $cmid = $event->get_context()->instanceid;
 
     $userid = $event->userid;
-    $entries = $DB->get_records('availability_examus', [
+    $entries = $DB->get_records('availability_examus2', [
         'userid' => $userid,
         'courseid' => $event->courseid,
         'cmid' => $cmid,
@@ -47,7 +47,7 @@ function avalibility_examus_attempt_submitted_handler($event) {
 
     foreach ($entries as $entry) {
         $entry->status = "Finished";
-        $DB->update_record('availability_examus', $entry);
+        $DB->update_record('availability_examus2', $entry);
     }
 }
 
@@ -62,8 +62,8 @@ function avalibility_examus_attempt_started_handler($event) {
     $attempt = $event->get_record_snapshot('quiz_attempts', $event->objectid);
     $cmid = $event->get_context()->instanceid;
 
-    if (isset($SESSION->availibilityexamustoken)) {
-        $accesscode = $SESSION->availibilityexamustoken;
+    if (isset($SESSION->availibilityexamus2token)) {
+        $accesscode = $SESSION->availibilityexamus2token;
 
         $condition = [
             'accesscode' => $accesscode
@@ -78,12 +78,12 @@ function avalibility_examus_attempt_started_handler($event) {
         ];
     }
 
-    $entry = $DB->get_record('availability_examus', $condition);
+    $entry = $DB->get_record('availability_examus2', $condition);
 
     if ($entry && $attempt) {
         $entry->attemptid = $attempt->id;
         $entry->status = "Started";
-        $DB->update_record('availability_examus', $entry);
+        $DB->update_record('availability_examus2', $entry);
     }
 }
 
@@ -97,7 +97,7 @@ function avalibility_examus_attempt_deleted_handler($event) {
     $attempt = $event->get_record_snapshot('quiz_attempts', $event->objectid);
     $cm = get_coursemodule_from_id('quiz', $event->get_context()->instanceid, $event->courseid);
 
-    \availability_examus\common::reset_entry([
+    \availability_examus2\common::reset_entry([
         'cmid' => $cm->id,
         'attemptid' => $attempt->id
     ]);
@@ -111,7 +111,7 @@ function avalibility_examus_attempt_deleted_handler($event) {
 function avalibility_examus_user_enrolment_deleted(\core\event\user_enrolment_deleted $event) {
     $userid = $event->relateduserid;
 
-    \availability_examus\common::delete_empty_entries($userid, $event->courseid);
+    \availability_examus2\common::delete_empty_entries($userid, $event->courseid);
 }
 
 /**
@@ -122,7 +122,7 @@ function avalibility_examus_user_enrolment_deleted(\core\event\user_enrolment_de
 function avalibility_examus_course_module_deleted(\core\event\course_module_deleted $event) {
     global $DB;
     $cmid = $event->contextinstanceid;
-    $DB->delete_records('availability_examus', ['cmid' => $cmid]);
+    $DB->delete_records('availability_examus2', ['cmid' => $cmid]);
 }
 
 
