@@ -115,11 +115,11 @@ M.availability_examus2.form.getNode = function(json) {
         '<input type="text" name="duration" id="' + durationId + '" class="form-control">'
     );
 
-    html += formGroup(modeId, getString('mode'),
+    html += formGroup(modeId, getString('proctoring_mode'),
         '<select name="mode" id="' + modeId + '" class="custom-select">' +
-        '  <option value="normal">' + getString('normal_mode') + '</option>' +
+        '  <option value="online">' + getString('online_mode') + '</option>' +
         '  <option value="identification">' + getString('identification_mode') + '</option>' +
-        '  <option value="olympics">' + getString('olympics_mode') + '</option>' +
+        '  <option value="offline">' + getString('offline_mode') + '</option>' +
         '  <option value="auto">' + getString('auto_mode') + '</option>' +
         '</select>'
     );

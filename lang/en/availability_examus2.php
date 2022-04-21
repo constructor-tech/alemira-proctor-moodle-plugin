@@ -35,6 +35,13 @@ $string['description'] = 'Allows students to use Examus proctoring service';
 $string['pluginname'] = 'Proctoring by Examus';
 $string['title'] = 'Examus';
 
+$string['settings_examus_url'] = 'Examus URL';
+$string['settings_examus_url_desc'] = '';
+$string['settings_integration_name'] = 'Integration Name';
+$string['settings_integration_name_desc'] = '';
+$string['settings_jwt_secret'] = 'JWT Secret';
+$string['settings_jwt_secret_desc'] = '';
+
 $string['use_examus'] = 'Use examus app to view this module';
 $string['settings'] = 'Examus settings';
 $string['log_section'] = 'Examus log';

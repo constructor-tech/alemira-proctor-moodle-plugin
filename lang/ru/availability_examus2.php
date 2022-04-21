@@ -35,6 +35,13 @@ $string['description'] = 'Позволяет студентам использо
 $string['pluginname'] = 'Прокторинг "Экзамус"';
 $string['title'] = 'Экзамус';
 
+$string['settings_examus_url'] = 'Examus URL';
+$string['settings_examus_url_desc'] = '';
+$string['settings_integration_name'] = 'Integration Name';
+$string['settings_integration_name_desc'] = '';
+$string['settings_jwt_secret'] = 'JWT Secret';
+$string['settings_jwt_secret_desc'] = '';
+
 $string['use_examus'] = 'Используйте приложение "Экзамус", чтобы получить доступ к модулю';
 $string['settings'] = 'Настройки прокторинга "Экзамус"';
 $string['log_section'] = 'Журнал прокторинга "Экзамус"';
@@ -51,9 +58,9 @@ $string['new_entry_created'] = 'Новая запись успешно созд�
 $string['entry_exist'] = 'Новая запись уже существует';
 $string['date_modified'] = 'Дата последнего изменения';
 
-$string['mode'] = 'Режим прокторинга';
-$string['normal_mode'] = 'Синхронный';
-$string['olympics_mode'] = 'Асинхронный';
+$string['proctoring_mode'] = 'Режим прокторинга';
+$string['online_mode'] = 'Синхронный';
+$string['offline_mode'] = 'Асинхронный';
 $string['auto_mode'] = 'Автоматический';
 $string['identification_mode'] = 'Идентификация';
 
