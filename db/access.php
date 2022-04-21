@@ -26,21 +26,21 @@
 defined('MOODLE_INTERNAL') || die();
 
 $capabilities = [
-    'availability/examus:logaccess' => [
+    'availability/examus2:logaccess' => [
         'riskbitmask' => RISK_PERSONAL | RISK_CONFIG,
         'captype' => 'write',
         'contextlevel' => CONTEXT_SYSTEM,
         'archetypes' => []
     ],
 
-    'availability/examus:logaccess_all' => [
+    'availability/examus2:logaccess_all' => [
         'riskbitmask' => RISK_PERSONAL | RISK_CONFIG,
         'captype' => 'write',
         'contextlevel' => CONTEXT_SYSTEM,
         'archetypes' => []
     ],
 
-    'availability/examus:logaccess_course' => [
+    'availability/examus2:logaccess_course' => [
         'riskbitmask' => RISK_PERSONAL | RISK_CONFIG,
         'captype' => 'read',
         'contextlevel' => CONTEXT_COURSE,
@@ -48,20 +48,6 @@ $capabilities = [
             'teacher' => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW,
         ]
-    ],
-
-    'availability/examus:proctor_auth' => [
-        'riskbitmask' => RISK_PERSONAL,
-        'captype' => 'read',
-        'contextlevel' => CONTEXT_COURSE,
-        'archetypes' => []
-    ],
-
-    'availability/examus:reviewer_auth' => [
-        'riskbitmask' => RISK_PERSONAL,
-        'captype' => 'read',
-        'contextlevel' => CONTEXT_COURSE,
-        'archetypes' => []
     ],
 
 ];

@@ -514,7 +514,7 @@ class condition extends \core_availability\condition {
         if (isset($SESSION->availibilityexamus2token)) {
             $accesscode = $SESSION->availibilityexamus2token;
 
-            $entry = $DB->get_record('availability_examus2', [
+            $entry = $DB->get_record('availability_examus2_entries', [
                 'userid' => $userid,
                 'courseid' => $courseid,
                 'cmid' => $cmid,

@@ -57,7 +57,7 @@ class log_details {
      */
     public function render() {
         global $DB;
-        $entry = $DB->get_record('availability_examus2', ['id' => $this->id]);
+        $entry = $DB->get_record('availability_examus2_entries', ['id' => $this->id]);
         $user = $DB->get_record('user', ['id' => $entry->userid]);
 
         $course = $DB->get_record('course', ['id' => $entry->courseid]);

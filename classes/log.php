@@ -167,13 +167,13 @@ class log {
         $limitfrom = ($this->page * $this->perpage);
         $limitnum  = $this->perpage;
 
-        $query = 'SELECT '.implode(', ', $select).' FROM {availability_examus2} e '
+        $query = 'SELECT '.implode(', ', $select).' FROM {availability_examus2_entries} e '
                . ' LEFT JOIN {user} u ON u.id=e.userid '
                . ' LEFT JOIN {quiz_attempts} a ON a.id=e.attemptid '
                . (count($where) ? ' WHERE '.implode(' AND ', $where) : '')
                . ($orderby ? ' ORDER BY '. $orderby : '');
 
-        $querycount = 'SELECT count(e.id) as count FROM {availability_examus2} e '
+        $querycount = 'SELECT count(e.id) as count FROM {availability_examus2_entries} e '
                     . ' LEFT JOIN {user} u ON u.id=e.userid '
                     . ' LEFT JOIN {quiz_attempts} a ON a.id=e.attemptid '
                     . (count($where) ? ' WHERE '.implode(' AND ', $where) : '');
