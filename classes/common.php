@@ -125,4 +125,41 @@ class common {
         }
     }
 
+    public static function get_timebracket_for_cm($type, $cm){
+        $timebrackets = self::get_timebrackets_for_cms($type, [$cm]);
+        return reset($timebrackets);
+    }
+
+    public static function get_timebrackets_for_cms($type, $cms){
+        global $DB;
+        $ids = [];
+        $results = [];
+        foreach($cms as $cm) {
+            $ids[] = $cm->instance;
+        }
+        switch($type) {
+            case 'quiz':
+                $quizes = $DB->get_records_list('quiz', 'id', $ids);
+                foreach($quizes as $quiz) {
+                    $results[$quiz->id] = [
+                        'start' => $quiz->timeopen,
+                        'end' => $quiz->timeclose,
+                    ];
+                }
+                break;
+            case 'assign':
+                $assigns = $DB->get_records_list('assign', 'id', $ids);
+                foreach($assigns as $assign) {
+                    $results[$assign->id] = [
+                        'start' => $assign->allowsubmissionsfromdate,
+                        'end' => $assign->duedate,
+                    ];
+                }
+                break;
+        }
+        return $results;
+    }
+
+
+
 }

@@ -26,13 +26,15 @@
 defined('MOODLE_INTERNAL') || die();
 
 use availability_examus2\state;
-
+use availability_examus2\client;
+use availability_examus2\common;
+use availability_examus2\condition;
 /**
  * Finish attempt on attempt finish event.
  *
  * @param stdClass $event Event
  */
-function avalibility_examus_attempt_submitted_handler($event) {
+function avalibility_examus2_attempt_submitted_handler($event) {
     global $DB;
 
     $cmid = $event->get_context()->instanceid;
@@ -56,8 +58,8 @@ function avalibility_examus_attempt_submitted_handler($event) {
  *
  * @param stdClass $event Event
  */
-function avalibility_examus_attempt_started_handler($event) {
-    global $DB, $SESSION;
+function avalibility_examus2_attempt_started_handler($event) {
+    global $DB, $SESSION, $PAGE, $USER;
 
     $attempt = $event->get_record_snapshot('quiz_attempts', $event->objectid);
     $cmid = $event->get_context()->instanceid;
@@ -65,11 +67,11 @@ function avalibility_examus_attempt_started_handler($event) {
     if (isset($SESSION->availibilityexamus2token)) {
         $accesscode = $SESSION->availibilityexamus2token;
 
-        $condition = [
+        $cond = [
             'accesscode' => $accesscode
         ];
     } else {
-        $condition = [
+        $cond = [
             'attemptid' => null,
             'status' => 'Not inited',
             'userid' => $event->userid,
@@ -78,13 +80,71 @@ function avalibility_examus_attempt_started_handler($event) {
         ];
     }
 
-    $entry = $DB->get_record('availability_examus2', $condition);
+    $entry = $DB->get_record('availability_examus2_entries', $cond);
 
     if ($entry && $attempt) {
         $entry->attemptid = $attempt->id;
         $entry->status = "Started";
-        $DB->update_record('availability_examus2', $entry);
+        $DB->update_record('availability_examus2_entries', $entry);
     }
+
+    $returnurl = $PAGE->url->out();
+
+    $course = get_course($event->courseid);
+    $modinfo = get_fast_modinfo($course->id, $USER->id);
+    $cm = $modinfo->get_cm($cmid);
+    $condition = condition::get_examus_condition($cm);
+
+    if($condition->schedulingrequired){
+        $timebracket = common::get_timebracket_for_cm('quiz', $cm);
+        $timebracket = $timebracket ? $timebracket : [];
+    } else {
+        $timebracket = [];
+    }
+
+    if(empty($timebracket['start'])){
+        $timebracket['start'] = time();
+    }
+    if(empty($timebracket['end'])){
+        $timebracket['end'] = $timebracket['start'] + ($condition->duration * 60);
+    }
+
+
+    $client = new client();
+    $data = $client->exam_data($condition, $course, $cm);
+
+    $userdata = $client->user_data($USER);
+    $timedata = $client->time_data($timebracket);
+
+    $data = array_merge($data, $userdata, $timedata);
+
+    // We are allowing moodle transaction to commit.
+    // But we are replacing redirect page with our own.
+    core_shutdown_manager::register_function(function() use ($client, $data, $attempt) {
+        $headers = headers_list();
+        header_remove('location');
+
+        $location = null;
+        foreach ($headers as $header) {
+            preg_match('/^location\s*:\s*(.*)$/is', $header, $matches);
+            if(!empty($matches[1])){
+                $location = $matches[1];
+            }
+        }
+
+        if ($location) {
+            ob_end_clean();
+
+            $attemptdata = $client->attempt_data($attempt->id, $location);
+            $data = array_merge($data, $attemptdata);
+            $formdata = $client->get_form('start', $data);
+            //var_dump($data);die();
+            //var_dump($formdata);die();
+
+            $pagetitle = "Redirecting to Examus";
+            include(dirname(__FILE__).'/templates/redirect.php');
+        }
+    });
 }
 
 
@@ -93,7 +153,7 @@ function avalibility_examus_attempt_started_handler($event) {
  *
  * @param stdClass $event Event
  */
-function avalibility_examus_attempt_deleted_handler($event) {
+function avalibility_examus2_attempt_deleted_handler($event) {
     $attempt = $event->get_record_snapshot('quiz_attempts', $event->objectid);
     $cm = get_coursemodule_from_id('quiz', $event->get_context()->instanceid, $event->courseid);
 
@@ -108,7 +168,7 @@ function avalibility_examus_attempt_deleted_handler($event) {
  *
  * @param \core\event\user_enrolment_deleted $event Event
  */
-function avalibility_examus_user_enrolment_deleted(\core\event\user_enrolment_deleted $event) {
+function avalibility_examus2_user_enrolment_deleted(\core\event\user_enrolment_deleted $event) {
     $userid = $event->relateduserid;
 
     \availability_examus2\common::delete_empty_entries($userid, $event->courseid);
@@ -119,7 +179,7 @@ function avalibility_examus_user_enrolment_deleted(\core\event\user_enrolment_de
  *
  * @param \core\event\course_module_deleted $event Event
  */
-function avalibility_examus_course_module_deleted(\core\event\course_module_deleted $event) {
+function avalibility_examus2_course_module_deleted(\core\event\course_module_deleted $event) {
     global $DB;
     $cmid = $event->contextinstanceid;
     $DB->delete_records('availability_examus2', ['cmid' => $cmid]);
@@ -131,7 +191,7 @@ function avalibility_examus_course_module_deleted(\core\event\course_module_dele
  *
  * @param \mod_quiz\event\attempt_viewed $event Event
  */
-function avalibility_examus_attempt_viewed_handler($event) {
+function avalibility_examus2_attempt_viewed_handler($event) {
     $attempt = $event->get_record_snapshot('quiz_attempts', $event->objectid);
     $quiz = $event->get_record_snapshot('quiz', $attempt->quiz);
 

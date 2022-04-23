@@ -49,7 +49,7 @@ class condition extends \core_availability\condition {
         'duration', 'mode', 'schedulingrequired', 'autorescheduling',
         'istrial', 'rules', 'identification', 'noprotection',
         'useragreementurl', 'auxiliarycamera', 'customrules',
-        'scoring', 'groups',
+        'scoring', 'groups', 'warnings',
     ];
 
     const WARNINGS = [
@@ -164,14 +164,23 @@ class condition extends \core_availability\condition {
         if (!empty($structure->duration)) {
             $this->duration = $structure->duration;
         }
+
         if (!empty($structure->mode)) {
             $this->mode = $structure->mode;
+
+            // Old data conversion. Not needed for users who started with V2.
+            if ($this->mode == 'olympics') {
+                $this->mode = 'offline';
+            }
+            if ($this->mode == 'normal') {
+                $this->mode = 'online';
+            }
         }
 
         if (isset($structure->scheduling_required) && $structure->scheduling_required !== null) {
             $this->schedulingrequired = $structure->scheduling_required;
         } else {
-            $manualmodes = ['normal', 'identification'];
+            $manualmodes = ['online', 'identification'];
             $this->schedulingrequired = in_array($this->mode, $manualmodes);
         }
 
@@ -304,18 +313,16 @@ class condition extends \core_availability\condition {
      * @return Array of properties of current condition
      */
     public function to_json() {
-        $result = [];
         foreach ($this::PROPS as $prop) {
             $result[$prop] = $this->{$prop};
         }
 
-        if (!empty($result['rules'])) {
-            $rules = [];
-            foreach ($result['rules'] as $key => $value) {
-                $rules[] = ['key' => $key, 'value' => $value];
-            }
-            $result['rules'] = $rules;
-        }else{
+        foreach ($this::WARNINGS as $warn) {
+            $result[$prop] = $this->{$prop};
+        }
+
+
+        if (empty($result['rules'])) {
             $result['rules'] = [];
         }
 
@@ -354,7 +361,7 @@ class condition extends \core_availability\condition {
      * @return bool
      */
     public static function has_examus_condition($cm) {
-        $econds = self::get_examus_conditions($cm);
+        $econds = self::get_conditions($cm);
         return (bool) $econds;
     }
 
@@ -365,7 +372,7 @@ class condition extends \core_availability\condition {
      * @return bool
      */
     public static function get_examus_groups($cm) {
-        $econds = self::get_examus_conditions($cm);
+        $econds = self::get_conditions($cm);
         return (array) (isset($econds[0]->groups) ? $econds[0]->groups : []);
     }
 
@@ -378,7 +385,7 @@ class condition extends \core_availability\condition {
      * @return array
      */
     public static function get_examus_condition($cm) {
-        $conds = self::get_examus_conditions($cm);
+        $conds = self::get_conditions($cm);
         return $conds && isset($conds[0]) ? $conds[0] : null;
     }
 
@@ -388,7 +395,7 @@ class condition extends \core_availability\condition {
      * @param \cm_info $cm Cm
      * @return array
      */
-    private static function get_examus_conditions($cm) {
+    private static function get_conditions($cm) {
         if($cm && isset(self::$cached_trees[$cm->id])) {
             return self::$cached_trees[$cm->id];
         }
@@ -399,8 +406,8 @@ class condition extends \core_availability\condition {
             $tree = $tree->get_all_children('\\availability_examus2\\condition');
 
             self::$cached_trees[$cm->id] = $tree;
-
         } catch (moodle_exception $e) {
+
             return null;
         }
 
