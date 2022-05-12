@@ -31,6 +31,8 @@ $string['examus:logaccess_all'] = 'Доступ к отчету Экзамус(�
 $string['examus:proctor_auth'] = 'Авторизация в Examus App как проктор';
 $string['examus:reviewer_auth'] = 'Авторизация в Examus App как reviewer';
 
+$string['cron_update_scheduled_exams'] = 'Отправляет данные экзаменов в Examus';
+
 $string['description'] = 'Позволяет студентам использовать сервис прокторинга "Экзамус"';
 $string['pluginname'] = 'Прокторинг "Экзамус"';
 $string['title'] = 'Экзамус';
@@ -41,6 +43,10 @@ $string['settings_integration_name'] = 'Integration Name';
 $string['settings_integration_name_desc'] = '';
 $string['settings_jwt_secret'] = 'JWT Secret';
 $string['settings_jwt_secret_desc'] = '';
+$string['settings_account_name'] = 'Account Name';
+$string['settings_account_name_desc'] = '';
+$string['settings_account_id'] = 'Account ID';
+$string['settings_account_id_desc'] = '';
 
 $string['use_examus'] = 'Используйте приложение "Экзамус", чтобы получить доступ к модулю';
 $string['settings'] = 'Настройки прокторинга "Экзамус"';

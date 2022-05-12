@@ -31,6 +31,8 @@ $string['examus:logaccess_all'] = 'Examus log access for all courses';
 $string['examus:proctor_auth'] = 'Authorize to Examus App as a proctor';
 $string['examus:reviewer_auth'] = 'Authorize to Examus App as a reviewer';
 
+$string['cron_update_scheduled_exams'] = 'Updates scheduled exams data in Examus';
+
 $string['description'] = 'Allows students to use Examus proctoring service';
 $string['pluginname'] = 'Proctoring by Examus';
 $string['title'] = 'Examus';
@@ -41,6 +43,10 @@ $string['settings_integration_name'] = 'Integration Name';
 $string['settings_integration_name_desc'] = '';
 $string['settings_jwt_secret'] = 'JWT Secret';
 $string['settings_jwt_secret_desc'] = '';
+$string['settings_account_name'] = 'Account Name';
+$string['settings_account_name_desc'] = '';
+$string['settings_account_id'] = 'Account ID';
+$string['settings_account_id_desc'] = '';
 
 $string['use_examus'] = 'Use examus app to view this module';
 $string['settings'] = 'Examus settings';
@@ -58,7 +64,7 @@ $string['new_entry_created'] = 'New entry created';
 $string['entry_exist'] = 'New entry already exist';
 $string['date_modified'] = 'Date of last change';
 
-$string['mode'] = 'Proctoring mode';
+$string['proctoring_mode'] = 'Proctoring mode';
 $string['normal_mode'] = 'Real-time proctoring';
 $string['olympics_mode'] = 'Post-review';
 $string['auto_mode'] = 'Fully automated';

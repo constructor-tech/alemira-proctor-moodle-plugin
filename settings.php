@@ -25,12 +25,43 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$ADMIN->add(
-    'reports',
-    new admin_externalpage(
-        'availability_examus2_settings',
-        get_string('log_section', 'availability_examus2'),
-        $CFG->wwwroot . '/availability/condition/examus2/index.php',
-        'availability/examus:logaccess'
-    )
-);
+if ($hassiteconfig) {
+    // $ADMIN->add(
+    //     'blah',
+    //     new admin_externalpage(
+    //         'availability_examus2_settings',
+    //         get_string('settings', 'availability_examus2'),
+    //         $CFG->wwwroot . '/availability/condition/examus2/index.php',
+    //         'availability/examus2:logaccess'
+    //     )
+    // );
+
+    #$ADMIN->add('localplugins', new admin_category('avalibility_examus2', new lang_string('pluginname', 'availibility_examus2')));
+    #$page = new admin_settingpage('manage_availibility_examus2', new lang_string('settings', 'availibility_examus2'));
+    #$ADMIN->add('avalibility_examus2', $page);
+
+    if ($ADMIN->fulltree) {
+        $settings->add(new admin_setting_configtext('availability_examus2/examus_url',
+            new lang_string('settings_examus_url', 'availability_examus2'),
+            new lang_string('settings_examus_url_desc', 'availability_examus2'), '', PARAM_HOST));
+
+        $settings->add(new admin_setting_configtext('availability_examus2/integration_name',
+            new lang_string('settings_integration_name', 'availability_examus2'),
+            new lang_string('settings_integration_name_desc', 'availability_examus2'), '', PARAM_TEXT));
+
+        $settings->add(new admin_setting_configtext('availability_examus2/jwt_secret',
+            new lang_string('settings_jwt_secret', 'availability_examus2'),
+            new lang_string('settings_jwt_secret_desc', 'availability_examus2'), '', PARAM_TEXT));
+
+        $settings->add(new admin_setting_configtext('availability_examus2/account_id',
+            new lang_string('settings_account_id', 'availability_examus2'),
+            new lang_string('settings_account_id_desc', 'availability_examus2'), '', PARAM_TEXT));
+
+        $settings->add(new admin_setting_configtext('availability_examus2/account_name',
+            new lang_string('settings_account_name', 'availability_examus2'),
+            new lang_string('settings_account_name_desc', 'availability_examus2'), '', PARAM_TEXT));
+
+    }
+
+
+}
