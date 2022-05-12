@@ -75,7 +75,7 @@ class log_details {
             $warningsraw = json_decode($entry->warnings, true);
         }
 
-        $titles = @json_decode($entry->warning_titles, true);
+        $titles = @json_decode($entry->warningstitles, true);
         if (empty($titles) || !is_array($titles)) {
             $titles = [];
         }
@@ -195,13 +195,13 @@ class log_details {
 
         $table->add_data([
             get_string('session_start', 'availability_examus2'),
-            common::format_date($entry->session_start),
-
+            common::format_date($entry->sessionstart),
         ]);
         $table->add_data([
             get_string('session_end', 'availability_examus2'),
-            common::format_date($entry->session_end),
+            common::format_date($entry->sessionend),
         ]);
+
         $table->add_data([
             get_string('comment', 'availability_examus2'),
             $entry->comment,
