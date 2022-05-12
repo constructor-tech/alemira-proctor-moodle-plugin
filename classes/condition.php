@@ -498,7 +498,8 @@ class condition extends \core_availability\condition {
         $course = $info->get_course();
         $cm = $info->get_course_module();
 
-        $allow = self::is_available_internal($course->id, $cm->id, $userid);
+        //$allow = self::is_available_internal($course->id, $cm->id, $userid);
+        $allow = true;
 
         if ($not) {
             $allow = !$allow;
@@ -590,7 +591,7 @@ class condition extends \core_availability\condition {
         if($userentries) {
             $entries = isset($userentries[$cm->id]) ? $userentries[$cm->id] : [];
         } else {
-            $entries = $DB->get_records('availability_examus2', [
+            $entries = $DB->get_records('availability_examus2_entries', [
                 'userid' => $userid,
                 'courseid' => $courseid,
                 'cmid' => $cm->id,
@@ -614,7 +615,7 @@ class condition extends \core_availability\condition {
                     $entry->timemodified = time();
                     $entry->status = 'Rescheduled';
 
-                    $DB->update_record('availability_examus2', $entry);
+                    $DB->update_record('availability_examus2_entries', $entry);
                     $entry = common::reset_entry(['id' => $entry->id]);
                     return $entry;
                 }
@@ -632,7 +633,7 @@ class condition extends \core_availability\condition {
 
         if ($allowedattempts == null || count($entries) < $allowedattempts) {
             $entry = self::make_entry($courseid, $cm->id, $userid);
-            $entry->id = $DB->insert_record('availability_examus2', $entry);
+            $entry->id = $DB->insert_record('availability_examus2_entries', $entry);
             return $entry;
         }
 
