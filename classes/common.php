@@ -141,25 +141,31 @@ class common {
             case 'quiz':
                 $quizes = $DB->get_records_list('quiz', 'id', $ids);
                 foreach($quizes as $quiz) {
-                    $results[$quiz->id] = [
-                        'start' => $quiz->timeopen,
-                        'end' => $quiz->timeclose,
-                    ];
+                    $start = $quiz->timeopen;
+                    $end = $quiz->timeclose;
+
+                    if($start == 0 || $end == 0){
+                        continue;
+                    }
+
+                    $results[$quiz->id] = [ 'start' => $start, 'end' => $end ];
                 }
                 break;
+
             case 'assign':
                 $assigns = $DB->get_records_list('assign', 'id', $ids);
                 foreach($assigns as $assign) {
-                    $results[$assign->id] = [
-                        'start' => $assign->allowsubmissionsfromdate,
-                        'end' => $assign->duedate,
-                    ];
+                    $start = $assign->allowsubmissionsfromdate;
+                    $end = $assign->duedate;
+
+                    if($start == 0 || $end == 0){
+                        continue;
+                    }
+
+                    $results[$assign->id] = [ 'start' => $start, 'end' => $end ];
                 }
                 break;
         }
         return $results;
     }
-
-
-
 }
