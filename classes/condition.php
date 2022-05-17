@@ -108,7 +108,7 @@ class condition extends \core_availability\condition {
     public $duration = 60;
 
     /** @var string Default exam mode */
-    public $mode = 'normal';
+    public $mode = 'online';
 
     /** @var string Default calendar mode */
     public $schedulingrequired = true;
