@@ -245,7 +245,7 @@ M.availability_examus2.form.getNode = function(json) {
 
 
     if(json.creating){
-        json.mode = 'normal';
+        json.mode = 'online';
         json.scheduling_required = true;
     }
 
