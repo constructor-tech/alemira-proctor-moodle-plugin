@@ -65,8 +65,8 @@ $string['entry_exist'] = 'New entry already exist';
 $string['date_modified'] = 'Date of last change';
 
 $string['proctoring_mode'] = 'Proctoring mode';
-$string['normal_mode'] = 'Real-time proctoring';
-$string['olympics_mode'] = 'Post-review';
+$string['online_mode'] = 'Real-time proctoring';
+$string['offline_mode'] = 'Post-review';
 $string['auto_mode'] = 'Fully automated';
 $string['identification_mode'] = 'Live identification';
 
