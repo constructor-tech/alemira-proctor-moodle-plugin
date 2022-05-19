@@ -44,14 +44,14 @@ class common {
 
         $oldentry = $DB->get_record('availability_examus2_entries', $conditions);
 
-        $notinited = $oldentry && $oldentry->status == 'Not inited';
+        $notinited = $oldentry && $oldentry->status == 'new';
 
         if ($oldentry && (!$notinited || $force)) {
-            $entries = $DB->get_records('availability_examus2', [
+            $entries = $DB->get_records('availability_examus2_entries', [
                 'userid' => $oldentry->userid,
                 'courseid' => $oldentry->courseid,
                 'cmid' => $oldentry->cmid,
-                'status' => 'Not inited'
+                'status' => 'new'
             ]);
 
             if (count($entries) == 0 || $force) {
@@ -68,7 +68,7 @@ class common {
                 $entry->courseid = $oldentry->courseid;
                 $entry->cmid = $oldentry->cmid;
                 $entry->accesscode = md5(uniqid(rand(), 1));
-                $entry->status = 'Not inited';
+                $entry->status = 'new';
                 $entry->timecreated = $timenow;
                 $entry->timemodified = $timenow;
 
@@ -82,7 +82,7 @@ class common {
     }
 
     /**
-     * Deletes entries that have "Not inited" status
+     * Deletes entries that have "new" status
      * @param integer|string $userid
      * @param integer|string $courseid
      * @param integer|string|null $cmid
@@ -93,7 +93,7 @@ class common {
         $condition = [
           'userid' => $userid,
           'courseid' => $courseid,
-          'status' => 'Not inited'
+          'status' => 'new'
         ];
 
         if (!empty($cmid)) {

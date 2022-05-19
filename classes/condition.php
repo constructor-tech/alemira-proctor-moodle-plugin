@@ -567,7 +567,7 @@ class condition extends \core_availability\condition {
         $entry->courseid = $courseid;
         $entry->cmid = $cmid;
         $entry->accesscode = is_null($userid) ? '' : md5(uniqid(rand(), 1));
-        $entry->status = is_null($userid) ? null : 'Not inited';
+        $entry->status = is_null($userid) ? null : 'new';
         $entry->timecreated = $timenow;
         $entry->timemodified = $timenow;
         $entry->userid = $userid;
@@ -599,7 +599,7 @@ class condition extends \core_availability\condition {
         }
 
         foreach ($entries as $entry) {
-            if ($entry->status == 'Not inited') {
+            if ($entry->status == 'new') {
                 return $entry;
             }
         }

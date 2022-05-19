@@ -259,9 +259,9 @@ class log {
                     $row[] = "-";
                 }
 
-                $scheduled = $entry->status == 'Scheduled' && $entry->timescheduled;
+                $scheduled = $entry->status == 'scheduled' && $entry->timescheduled;
 
-                $notstarted = $entry->status == 'Not inited' || $scheduled;
+                $notstarted = $entry->status == 'new' || $scheduled;
 
                 $row[] = $entry->score;
 
