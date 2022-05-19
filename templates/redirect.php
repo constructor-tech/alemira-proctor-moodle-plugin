@@ -8,8 +8,10 @@
   </head>
   <body>
       <div style="text-align: center">
-          <form action="<?= $formdata['action'] ?>" method="POST" id="availability_examus_redirect_form">
-              <input type="hidden" value="<?= $formdata['token']?>" name="token">
+          <form action="<?= $formdata['action'] ?>" method="<?= $formdata['method'] ?>" id="availability_examus_redirect_form">
+              <?php if(isset($formdata['token'])): ?>
+                  <input type="hidden" value="<?= $formdata['token'] ?>" name="token">
+              <?php endif ?>
               <button type="submit">Go to Examus</button>
           </form>
       </div>
