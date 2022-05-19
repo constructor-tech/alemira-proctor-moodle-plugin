@@ -72,12 +72,12 @@ $handlers['review'] = function($entry, $request) {
 
     $sessionstart = null;
     if (!empty($request->sessionStart)) {
-        $sessionstart = DateTime::createFromFormat(DateTime::ISO8601, $request->sessionStart);
+        $sessionstart = DateTime::createFromFormat(Client::ISO8601U, $request->sessionStart);
         $sessionstart = $sessionstart->getTimestamp();
     }
     $sessionend = null;
     if (!empty($request->sessionEnd)) {
-        $sessionend = DateTime::createFromFormat(DateTime::ISO8601, $request->sessionEnd);
+        $sessionend = DateTime::createFromFormat(Client::ISO8601U, $request->sessionEnd);
         $sessionend = $sessionend->getTimestamp();
 
     }
@@ -109,7 +109,7 @@ $handlers['schedule'] = function($entry, $request) {
     }
 
     if($request->start) {
-        $timescheduled = DateTime::createFromFormat(DateTime::ISO8601, $request->start);
+        $timescheduled = DateTime::createFromFormat(Client::ISO8601U, $request->start);
         $entry->timescheduled = $timescheduled->getTimestamp();
     }
 

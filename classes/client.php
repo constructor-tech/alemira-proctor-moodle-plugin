@@ -31,23 +31,25 @@ defined('MOODLE_INTERNAL') || die();
  * Frontend class
  */
 class client {
-
+    const ISO8601U = "Y-m-d\TH:i:s.uO";
     protected $jwtsecret;
     protected $integrationname;
     protected $examusurl;
+    protected $accountid;
+    protected $accountname;
 
     function __construct() {
         $this->examusurl = get_config('availability_examus2', 'examus_url');
         $this->integrationname = get_config('availability_examus2', 'integration_name');
         $this->jwtsecret = get_config('availability_examus2', 'jwt_secret');
-
-        $this->require_jwt();
+        $this->accountid = get_config('availability_examus2', 'account_id');
+        $this->accountname = get_config('availability_examus2', 'account_name');
     }
 
     public function api_url($method) {
         $baseurl = 'https://'.$this->examusurl.'/api/v2/integration/simple/'.$this->integrationname.'/';
 
-        return $baseurl.$method;
+        return $baseurl.$method.'/';
     }
 
     public function form_url($method) {
@@ -56,14 +58,35 @@ class client {
         return $baseurl.$method.'/';
     }
 
+    public function get_finish_url($sessionid, $redurecturl){
+        $finishurl = $this->form_url('finish');
+        $finishurl .= $sessionid;
+        $finishurl .= '/?redirectUrl='.urlencode($redurecturl);
+
+        return $finishurl;
+    }
+
     public function get_form($method, $payload){
         $key = $this->jwtsecret;
         $jwt = \Firebase\JWT\JWT::encode($payload, $key, 'HS256');
 
         return [
             'action' => $this->form_url($method),
-            'token' => $jwt
+            'token' => $jwt,
+            'method' => 'POST',
         ];
+    }
+
+    public function decode($message){
+        // For versions of php-jwt >= 6.0.0
+        // Moodle bundles lower version at time of writing this
+        if(class_exists('\Firebase\JWT\Key')){
+            $key = new \Firebase\JWT\Key($this->jwtsecret, 'HS256');
+            return \Firebase\JWT\JWT::decode($message, $key);
+        } else {
+            $key = $this->jwtsecret;
+            return \Firebase\JWT\JWT::decode($message, $key, ['HS256']);
+        }
     }
 
     public function request($method, $body = []) {
@@ -105,15 +128,18 @@ class client {
     public function exam_data($condition, $course, $cm){
         $conditiondata = $condition->to_json();
 
+        $customrules = $conditiondata['customrules'];
+        $customrules = empty($customrules) ? '' : $customrules;
+
         $data = [
-            'accountId' => 123,
-            'accountName' => 'Название компании',
+            'accountId' => $this->accountid,
+            'accountName' => $this->accountname,
 
             'examId' => $cm->id,
             'examName' => $cm->name,
             'courseName' => $course->fullname,
             'duration' => $conditiondata['duration'],
-            'schedule' => $conditiondata['schedulingrequired'],
+            //'schedule' => $conditiondata['schedulingrequired'],
             'proctoring' => $conditiondata['mode'],
             'userAgreementUrl' => $conditiondata['useragreementurl'],
             'identification' => $conditiondata['identification'],
@@ -123,11 +149,8 @@ class client {
             'visibleWarnings' => $conditiondata['warnings'],
             'rules' => array_merge(
                 (array)$conditiondata['rules'],
-                ['custom_rules' => $conditiondata['customrules']]
+                ['custom_rules' => $customrules]
             ),
-
-            'startDate' => '2023-03-27T00:00:00Z',
-            'endDate' => '2023-03-30T12:55:00Z',
         ];
 
         return $data;
@@ -165,26 +188,12 @@ class client {
         ];
     }
 
-    protected function require_jwt(){
-        global $CFG;
-
-        if(class_exists('\Firebase\JWT\JWT')) {
-            return;
-        }
-
-        $files = [
-            'BeforeValidException.php',
-            'ExpiredException.php',
-            'SignatureInvalidException.php',
-            'JWK.php',
-            'JWT.php',
-            'Key.php',
-        ];
-
-        // Manually load php-jwt sources. We don't use autoloader no avaid collisions.
-        foreach($files as $file) {
-            require_once($CFG->dirroot.'/avalibility/examus2/php-jwt/src/'.$file);
-        }
+    /**
+     * Checksum abstracted into a short function.
+     * CRC32 is choosen for it's speed, low enthropy is considered
+     * not a significant factor.
+     */
+    public function checksum($data){
+        return hash('crc32b', json_encode($data));
     }
-
 }
