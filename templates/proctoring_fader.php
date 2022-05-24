@@ -45,7 +45,7 @@ defined('MOODLE_INTERNAL') || die();
 const strAwaitingProctoring = <?php echo json_encode(get_string('fader_awaiting_proctoring', 'availability_examus2')) ?>;
 const strInstructions = <?php echo json_encode(get_string('fader_instructions', 'availability_examus2')) ?>;
 const faderHTML = strAwaitingProctoring + strInstructions;
-
+const formData = <?php echo json_encode($formdata); ?>;
 const {sessionStorage, location} = window;
 
 const TAG = 'proctoring fader';
@@ -95,6 +95,19 @@ const createFader = () => {
   return fader;
 };
 
+const redirectToExamus = () => {
+  const form = document.createElement("form");
+  const input = document.createElement("input")
+  form.appendChild(input);
+  document.body.appendChild(form);
+
+  form.method = formData['method'];
+  form.action = formData['action'];
+  input.name = "token";
+  input.value = formData['token'];
+  form.submit();
+}
+
 /**
  * Run.
  */
@@ -106,7 +119,11 @@ window.addEventListener("DOMContentLoaded", () => {
   const fader = createFader();
   document.body.appendChild(fader);
 
-  proved.then(() => fader.remove());
+  redirectTimeout = setTimeout(() => redirectToExamus(), 15000);
+  proved
+   .then(() => fader.remove())
+   .then(() => clearTimeout(redirectTimeout));
+
 });
 
 })();
