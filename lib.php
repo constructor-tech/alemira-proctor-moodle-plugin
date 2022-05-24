@@ -35,7 +35,7 @@ function availability_examus2_render_navbar_output() {
 
     $context = context_system::instance();
 
-    if (!has_capability('availability/examus:logaccess', $context)) {
+    if (!has_capability('availability/examus2:logaccess', $context)) {
         return '';
     }
 

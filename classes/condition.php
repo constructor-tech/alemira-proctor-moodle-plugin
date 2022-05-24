@@ -599,7 +599,7 @@ class condition extends \core_availability\condition {
         }
 
         foreach ($entries as $entry) {
-            if ($entry->status == 'new') {
+            if (in_array($entry->status, ['started', 'scheduled', 'new'])) {
                 return $entry;
             }
         }
@@ -613,7 +613,7 @@ class condition extends \core_availability\condition {
 
                 if ($scheduled && $expired) {
                     $entry->timemodified = time();
-                    $entry->status = 'Rescheduled';
+                    $entry->status = 'rescheduled';
 
                     $DB->update_record('availability_examus2_entries', $entry);
                     $entry = common::reset_entry(['id' => $entry->id]);

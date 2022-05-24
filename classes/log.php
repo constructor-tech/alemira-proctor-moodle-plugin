@@ -361,11 +361,11 @@ class log {
      */
     public function get_status_list() {
         $statuses = [
-            'Started' => 'Started',
-            'Not inited' => 'Not inited',
-            'Rules Violation' => 'Rules Violation',
-            'Clean' => 'Clean',
-            'Suspicious' => 'Suspicious',
+            'started' => 'Started',
+            'not inited' => 'Not inited',
+            'rules violation' => 'Rules Violation',
+            'clean' => 'Clean',
+            'suspicious' => 'Suspicious',
         ];
 
         return $statuses;

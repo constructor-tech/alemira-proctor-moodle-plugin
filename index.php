@@ -30,7 +30,7 @@ require_once($CFG->libdir . '/adminlib.php');
 $context = context_system::instance();
 
 require_login();
-require_capability('availability/examus:logaccess', $context);
+require_capability('availability/examus2:logaccess', $context);
 
 global $PAGE;
 

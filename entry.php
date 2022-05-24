@@ -34,7 +34,7 @@ $accesscode = required_param('accesscode', PARAM_RAW);
 $entry = $DB->get_record('availability_examus2', ['accesscode' => $accesscode]);
 
 if ($entry) {
-    $entry->status = 'Started';
+    $entry->status = 'started';
     $entry->timemodified = time();
     $DB->update_record('availability_examus2', $entry);
     $cmid = $entry->cmid;
