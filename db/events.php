@@ -68,5 +68,4 @@ $observers = [
         'includefile' => '/availability/condition/examus2/locallib.php',
         'internal' => false,
     ],
-
 ];

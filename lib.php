@@ -27,28 +27,6 @@ use availability_examus2\condition;
 use availability_examus2\state;
 
 /**
- * Hooks into navbar rendering, add link to log, if user has such capability
- * @return string
- */
-function availability_examus2_render_navbar_output() {
-    global $PAGE;
-
-    $context = context_system::instance();
-
-    if (!has_capability('availability/examus2:logaccess', $context)) {
-        return '';
-    }
-
-    $title = get_string('log_section', 'availability_examus2');
-    $url = new \moodle_url('/availability/condition/examus2/index.php');
-    $icon = new \pix_icon('i/log', '');
-    $node = navigation_node::create($title, $url, navigation_node::TYPE_CUSTOM, null, null, $icon);
-    $PAGE->flatnav->add($node);
-
-    return '';
-}
-
-/**
  * Hooks into head rendering. Adds proctoring fader/shade and accompanying javascript
  * This is used to prevent users from seeing questions before it is known that
  * attempt is viewed thorough Examus WebApp
@@ -56,7 +34,19 @@ function availability_examus2_render_navbar_output() {
  * @return string
  */
 function availability_examus2_before_standard_html_head() {
-    global $DB, $USER;
+    global $DB, $USER, $PAGE;
+
+    $context = context_system::instance();
+
+    if (has_capability('availability/examus2:logaccess', $context)) {
+        $title = get_string('log_section', 'availability_examus2');
+        $url = new \moodle_url('/availability/condition/examus2/index.php');
+        $icon = new \pix_icon('i/log', '');
+        $node = navigation_node::create($title, $url, navigation_node::TYPE_CUSTOM, null, null, $icon);
+
+        // $this->page->primarynav->children->add($node);
+        // $PAGE->flatnav->add($node);
+    }
 
     if (isset(state::$attempt['attempt_id'])) {
         $attemptid = state::$attempt['attempt_id'];
@@ -73,6 +63,7 @@ function availability_examus2_before_standard_html_head() {
 
     $modinfo = get_fast_modinfo($courseid);
     $cm = $modinfo->get_cm($cmid);
+    $course = $cm->get_course();
 
     if (!condition::user_in_proctored_groups($cm, $USER->id)) {
         return '';
@@ -88,6 +79,12 @@ function availability_examus2_before_standard_html_head() {
         return '';
     }
 
+    // We want to let previews to happen without proctoring.
+    $quizobj = \quiz::create($cm->instance, $USER->id);
+    if ($quizobj->is_preview_user()) {
+        return;
+    }
+
     // Check that theres more rules, which pass.
     // If we have no examus accesstoken (condition fails),
     // but the module is still avalible, this means we should not
@@ -95,14 +92,99 @@ function availability_examus2_before_standard_html_head() {
     $availibilityinfo = new \core_availability\info_module($cm);
     $reason = '';
     $isavailiblegeneral = $availibilityinfo->is_available($reason, false, $USER->id);
-    $isavailibleexamus  = condition::is_available_internal($courseid, $cm->id, $USER->id);
-    if (!$isavailibleexamus && $isavailiblegeneral) {
+    if (!$isavailiblegeneral) {
         return '';
     }
+    $entry = $condition->create_entry_for_cm($USER->id, $cm);
 
-    ob_start();
-    include(dirname(__FILE__).'/proctoring_fader.php');
-    $output = ob_get_clean();
+    $timebracket = \availability_examus2\common::get_timebracket_for_cm('quiz', $cm);
+    $timebracket = $timebracket ? $timebracket : [];
 
-    return $output;
+    if (empty($timebracket['start'])) {
+        $timebracket['start'] = time();
+    }
+    if (empty($timebracket['end'])) {
+        $timebracket['end'] = $timebracket['start'] + ($condition->duration * 60);
+    }
+
+    $client = new \availability_examus2\client();
+    $data = $client->exam_data($condition, $course, $cm);
+    $userdata = $client->user_data($USER);
+    $timedata = $client->time_data($timebracket);
+    $attemptdata = $client->attempt_data($entry->accesscode, $PAGE->url->out(false));
+
+    $data = array_merge($data, $userdata, $timedata, $attemptdata);
+
+    if (in_array($entry->status, ['started', 'scheduled', 'new'])) {
+        $formdata = $client->get_form('start', $data);
+
+        // Our entry is active, we are showing user as fader.
+        ob_start();
+        include(dirname(__FILE__).'/templates/proctoring_fader.php');
+        $output = ob_get_clean();
+        return $output;
+    }
+}
+
+function availability_examus2_after_require_login() {
+    global $PAGE, $DB, $USER, $cm, $course;
+    $scriptname = isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'] : null;
+
+    if ($scriptname != '/mod/quiz/startattempt.php') {
+        return;
+    }
+
+    $modinfo = get_fast_modinfo($course->id);
+    $cm = $modinfo->get_cm($cm->id);
+
+    $condition = \availability_examus2\condition::get_examus_condition($cm);
+    if (!$condition) {
+        return;
+    }
+
+    // We want to let previews to happen without proctoring.
+    $quizobj = \quiz::create($cm->instance, $USER->id);
+    if ($quizobj->is_preview_user()) {
+        return;
+    }
+
+    // No need to schedule an exam.
+    if (!$condition->schedulingrequired) {
+        return;
+    }
+
+    $entry = $condition->create_entry_for_cm($USER->id, $cm);
+
+    if ($entry->status == 'started' || $entry->status == 'scheduled') {
+        return;
+    }
+
+    if ($entry->status == 'new') {
+        $timebracket = \availability_examus2\common::get_timebracket_for_cm('quiz', $cm);
+        $timebracket = $timebracket ? $timebracket : [];
+
+        if (empty($timebracket['start'])) {
+            $timebracket['start'] = time();
+        }
+        if (empty($timebracket['end'])) {
+            $timebracket['end'] = $timebracket['start'] + ($condition->duration * 60);
+        }
+
+        $location = new \moodle_url('/mod/quiz/index.php', ['id' => $cm->id]);
+
+        $client = new \availability_examus2\client();
+        $data = $client->exam_data($condition, $course, $cm);
+        $userdata = $client->user_data($USER);
+        $timedata = $client->time_data($timebracket);
+        $attemptdata = $client->attempt_data($entry->accesscode, $location->out(false));
+
+        $data = array_merge($data, $userdata, $timedata, $attemptdata);
+        $data['schedule'] = true;
+
+        $formdata = $client->get_form('start', $data);
+
+        $pagetitle = "Redirecting to Examus";
+        include(dirname(__FILE__).'/templates/redirect.php');
+        die();
+    }
 }

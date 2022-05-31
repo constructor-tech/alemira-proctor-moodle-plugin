@@ -148,7 +148,7 @@ class condition extends \core_availability\condition {
      */
     public $groups = [];
 
-    private static $cached_trees = [];
+    private static $cachedtrees = [];
 
     /**
      * Construct
@@ -157,7 +157,7 @@ class condition extends \core_availability\condition {
      */
     public function __construct($structure) {
         $scoringdefaults = [];
-        foreach($scoringdefaults as $key => $row){
+        foreach ($scoringdefaults as $key => $row) {
             $scoringdefaults = isset($row['default']) ? $row['default'] : null;
         }
 
@@ -191,21 +191,21 @@ class condition extends \core_availability\condition {
         if (!empty($structure->warnings)) {
             $warnings = array_merge(self::WARNINGS, (array)$structure->warnings);
             $this->warnings = (object)$warnings;
-        }else {
+        } else {
             $this->warnings = (object)self::WARNINGS;
         }
 
         if (!empty($structure->rules)) {
             $rules = array_merge(self::RULES, (array)$structure->rules);
             $this->rules = $structure->rules;
-        }else {
+        } else {
             $this->rules = (object)self::RULES;
         }
 
         if (!empty($structure->scoring)) {
             $scoring = array_merge($scoringdefaults, (array)$structure->scoring);
             $this->scoring = (object)$scoring;
-        }else {
+        } else {
             $this->scoring = (object)$scoringdefaults;
         }
 
@@ -245,10 +245,10 @@ class condition extends \core_availability\condition {
         $this->validate();
     }
 
-    public function validate(){
+    public function validate() {
         $keys = array_keys(self::RULES);
-        foreach($this->rules as $key => $value) {
-            if(!in_array($key, $keys)) {
+        foreach ($this->rules as $key => $value) {
+            if (!in_array($key, $keys)) {
                 unset($this->rules->{$key});
             } else {
                 $this->rules->{$key} = (bool) $this->rules->{$key};
@@ -256,8 +256,8 @@ class condition extends \core_availability\condition {
         }
 
         $keys = array_keys(self::WARNINGS);
-        foreach($this->warnings as $key => $value) {
-            if(!in_array($key, $keys)) {
+        foreach ($this->warnings as $key => $value) {
+            if (!in_array($key, $keys)) {
                 unset($this->warnings->{$key});
             } else {
                 $this->warnings->{$key} = (bool) $this->warnings->{$key};
@@ -265,12 +265,12 @@ class condition extends \core_availability\condition {
         }
 
         $keys = array_keys(self::SCORING);
-        foreach($this->scoring as $key => $value) {
-            if(!in_array($key, $keys)) {
+        foreach ($this->scoring as $key => $value) {
+            if (!in_array($key, $keys)) {
                 unset($this->scoring->{$key});
             } else {
                 $specs = self::SCORING[$key];
-                if($value !== null) {
+                if ($value !== null) {
                     $value = intval($value);
                     $value = min($specs['max'], $value);
                     $value = max($specs['min'], $value);
@@ -287,7 +287,7 @@ class condition extends \core_availability\condition {
      *
      * @return null
      */
-    public function from_json($data){
+    public function from_json($data) {
         foreach ($this::PROPS as $prop) {
             if (in_array($prop, ['rules'])) {
                 continue;
@@ -320,7 +320,6 @@ class condition extends \core_availability\condition {
         foreach ($this::WARNINGS as $warn) {
             $result[$prop] = $this->{$prop};
         }
-
 
         if (empty($result['rules'])) {
             $result['rules'] = [];
@@ -396,8 +395,8 @@ class condition extends \core_availability\condition {
      * @return array
      */
     private static function get_conditions($cm) {
-        if($cm && isset(self::$cached_trees[$cm->id])) {
-            return self::$cached_trees[$cm->id];
+        if ($cm && isset(self::$cachedtrees[$cm->id])) {
+            return self::$cachedtrees[$cm->id];
         }
 
         $info = new info_module($cm);
@@ -405,7 +404,7 @@ class condition extends \core_availability\condition {
             $tree = $info->get_availability_tree();
             $tree = $tree->get_all_children('\\availability_examus2\\condition');
 
-            self::$cached_trees[$cm->id] = $tree;
+            self::$cachedtrees[$cm->id] = $tree;
         } catch (moodle_exception $e) {
 
             return null;
@@ -439,10 +438,10 @@ class condition extends \core_availability\condition {
      * @param \cm_info $cm Cm
      * @params array $usergroups Array of usergroups
      */
-    public static function user_groups_intersect($cm, $usergroups){
+    public static function user_groups_intersect($cm, $usergroups) {
         $selectedgroups = self::get_examus_groups($cm);
 
-        if(empty($selectedgroups)){
+        if (empty($selectedgroups)) {
             return true;
         }
 
@@ -495,10 +494,6 @@ class condition extends \core_availability\condition {
             return true;
         }
 
-        $course = $info->get_course();
-        $cm = $info->get_course_module();
-
-        //$allow = self::is_available_internal($course->id, $cm->id, $userid);
         $allow = true;
 
         if ($not) {
@@ -588,7 +583,7 @@ class condition extends \core_availability\condition {
 
         $courseid = $cm->course;
 
-        if($userentries) {
+        if ($userentries) {
             $entries = isset($userentries[$cm->id]) ? $userentries[$cm->id] : [];
         } else {
             $entries = $DB->get_records('availability_examus2_entries', [

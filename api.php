@@ -48,13 +48,14 @@ try {
     exit;
 }
 
-$requestBody = file_get_contents('php://input');
-if (empty($requestBody)) {
+$requestbody = file_get_contents('php://input');
+if (empty($requestbody)) {
     echo('No request body');
     exit;
 }
 
-$request = json_decode($requestBody);
+// file_put_contents('/tmp/debug.log', $requestbody . PHP_EOL);
+$request = json_decode($requestbody);
 
 $accesscode = $request->sessionId;
 $entry = $DB->get_record('availability_examus2_entries', ['accesscode' => $accesscode]);
@@ -72,14 +73,11 @@ $handlers['review'] = function($entry, $request) {
 
     $sessionstart = null;
     if (!empty($request->sessionStart)) {
-        $sessionstart = DateTime::createFromFormat(Client::ISO8601U, $request->sessionStart);
-        $sessionstart = $sessionstart->getTimestamp();
+        $sessionstart = Client::parse_date($request->sessionStart);
     }
     $sessionend = null;
     if (!empty($request->sessionEnd)) {
-        $sessionend = DateTime::createFromFormat(Client::ISO8601U, $request->sessionEnd);
-        $sessionend = $sessionend->getTimestamp();
-
+        $sessionend = Client::parse_date($request->sessionEnd);
     }
 
     $warningtitles = $request->warningTitles;
@@ -102,25 +100,18 @@ $handlers['review'] = function($entry, $request) {
 $handlers['schedule'] = function($entry, $request) {
     global $DB;
     $event = $request->event;
-    if($event == 'scheduled') {
+    if ($event == 'scheduled') {
         $entry->status = 'Scheduled';
-    } elseif(!$entry->attemptid) {
+    } else if (!$entry->attemptid) {
         common::reset_entry(['accesscode' => $entry->accesscode]);
     }
 
-    if($request->start) {
-        $timescheduled = DateTime::createFromFormat(Client::ISO8601U, $request->start);
-        $entry->timescheduled = $timescheduled->getTimestamp();
+    if ($request->start) {
+        $entry->timescheduled = Client::parse_date($request->start);
     }
 
     $DB->update_record('availability_examus2_entries', $entry);
-
-    // if (!$entry->attemptid && $status != 'Scheduled') {
-    // common::reset_entry(['accesscode' => $entry->accesscode]);
-    //}
-
 };
-
 
 if ($entry) {
     if (isset($handlers[$method])) {

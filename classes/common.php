@@ -25,7 +25,6 @@
 
 namespace availability_examus2;
 use \stdClass;
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Collection of static methods, used throughout the code
@@ -125,26 +124,26 @@ class common {
         }
     }
 
-    public static function get_timebracket_for_cm($type, $cm){
+    public static function get_timebracket_for_cm($type, $cm) {
         $timebrackets = self::get_timebrackets_for_cms($type, [$cm]);
         return reset($timebrackets);
     }
 
-    public static function get_timebrackets_for_cms($type, $cms){
+    public static function get_timebrackets_for_cms($type, $cms) {
         global $DB;
         $ids = [];
         $results = [];
-        foreach($cms as $cm) {
+        foreach ($cms as $cm) {
             $ids[] = $cm->instance;
         }
-        switch($type) {
+        switch ($type) {
             case 'quiz':
                 $quizes = $DB->get_records_list('quiz', 'id', $ids);
-                foreach($quizes as $quiz) {
+                foreach ($quizes as $quiz) {
                     $start = $quiz->timeopen;
                     $end = $quiz->timeclose;
 
-                    if($start == 0 || $end == 0){
+                    if ($start == 0 || $end == 0) {
                         continue;
                     }
 
@@ -154,11 +153,11 @@ class common {
 
             case 'assign':
                 $assigns = $DB->get_records_list('assign', 'id', $ids);
-                foreach($assigns as $assign) {
+                foreach ($assigns as $assign) {
                     $start = $assign->allowsubmissionsfromdate;
                     $end = $assign->duedate;
 
-                    if($start == 0 || $end == 0){
+                    if ($start == 0 || $end == 0) {
                         continue;
                     }
 

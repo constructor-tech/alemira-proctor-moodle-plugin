@@ -23,26 +23,16 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-/**
- * availability examus upgrade
- * @param string $oldversion Oldversion
- * @return bool
- */
-function xmldb_availability_examus2_upgrade($oldversion) {
-    global $DB;
-    $dbman = $DB->get_manager();
+defined('MOODLE_INTERNAL') || die();
 
-    // Add a new column newcol to the mdl_myqtype_options.
-    if ($oldversion < 2022040508) {
-        $table = new xmldb_table('availability_examus2_exams');
-        $field = new xmldb_field('userid', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
-        if (!$dbman->field_exists($table, $field)) {
-            $dbman->add_field($table, $field);
-        }
-
-        // savepoint reached.
-
-        upgrade_plugin_savepoint(true, 2022040508, 'availability', 'examus2');
-    }
-    return true;
-}
+$tasks = [
+    [
+        'classname' => 'availability_examus2\task\update_scheduled_exams',
+        'blocking' => 0,
+        'minute' => '*/5',
+        'hour' => '*',
+        'day' => '*',
+        'mponth' => '*',
+        'dayofweek' => '*',
+    ],
+];

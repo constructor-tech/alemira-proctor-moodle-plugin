@@ -336,8 +336,8 @@ class log {
         if ($courserecords = $DB->get_records("course", null, "fullname", "id,shortname,fullname,category")) {
             foreach ($courserecords as $course) {
                 $coursecontext = \context_course::instance($course->id);
-                if (!has_capability('availability/examus:logaccess_all', $sitecontext)) {
-                    if (!has_capability('availability/examus:logaccess_course', $coursecontext)) {
+                if (!has_capability('availability/examus2:logaccess_all', $sitecontext)) {
+                    if (!has_capability('availability/examus2:logaccess_course', $coursecontext)) {
                         continue;
                     }
                 }

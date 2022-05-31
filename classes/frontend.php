@@ -25,8 +25,6 @@
 
 namespace availability_examus2;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Frontend class
  */
@@ -51,11 +49,11 @@ class frontend extends \core_availability\frontend {
             'auxiliary_camera', 'visible_warnings', 'scoring_params_header',
         ];
 
-        foreach(condition::WARNINGS as $key => $value) {
+        foreach (condition::WARNINGS as $key => $value) {
             $strings[] = $key;
         }
 
-        foreach(condition::SCORING as $key => $value) {
+        foreach (condition::SCORING as $key => $value) {
             $strings[] = 'scoring_'.$key;
         }
 

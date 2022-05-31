@@ -25,15 +25,13 @@
 
 namespace availability_examus2\task;
 
-defined('MOODLE_INTERNAL') || die();
-
 use availability_examus2\common;
 use availability_examus2\condition;
 use availability_examus2\client;
 
 /**
-*
-*/
+ * Sends scheduled exams to examus
+ */
 class update_scheduled_exams extends \core\task\scheduled_task {
 
     /**
@@ -49,6 +47,7 @@ class update_scheduled_exams extends \core\task\scheduled_task {
      * Execute the task.
      */
     public function execute() {
+        return;
         global $DB;
         $courses = get_courses();
         foreach ($courses as $course) {
@@ -57,9 +56,8 @@ class update_scheduled_exams extends \core\task\scheduled_task {
             foreach ($instancesbytypes as $type => $instances) {
                 $timebrackets = common::get_timebrackets_for_cms($type, $instances);
 
-                //get_enrolled_users(context $context, $withcapability = '', $groupid = 0, $userfields = 'u.*', $orderby = '', $limitfrom = 0, $limitnum = 0)
                 foreach ($instances as $cm) {
-                    if($cm->availability) {
+                    if ($cm->availability) {
                         $condition = condition::get_examus_condition($cm);
                     } else {
                         continue;
@@ -88,7 +86,7 @@ class update_scheduled_exams extends \core\task\scheduled_task {
                         $userids[] = $user->id;
                     }
                     if (empty($userids)) {
-                      return;
+                        return;
                     }
 
                     $client = new client();
@@ -121,9 +119,9 @@ class update_scheduled_exams extends \core\task\scheduled_task {
 
                     if ($oldchecksum != $checksum) {
                         mtrace('scheduling ' . $type . ' ' . $cm->id . ', checksum changed, ' . count($userids) . ' users');
-                        //$result = $client->request('exams', $data);
+                        // $result = $client->request('exams', $data);
 
-                        // create the instance
+                        // create the instance.
                         $task = new update_scheduled_exam();
                         $task->set_custom_data([
                             'examdata' => $data,
@@ -132,7 +130,7 @@ class update_scheduled_exams extends \core\task\scheduled_task {
                             'userids' => $userids,
                         ]);
 
-                        // queue it
+                        // queue it.
                         \core\task\manager::queue_adhoc_task($task);
 
                     } else {

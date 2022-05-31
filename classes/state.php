@@ -24,9 +24,6 @@
  */
 namespace availability_examus2;
 
-defined('MOODLE_INTERNAL') || die();
-
-
 /**
  * Holds global state to pass data from event handlers to other code.
  *

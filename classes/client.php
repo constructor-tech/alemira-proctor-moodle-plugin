@@ -25,10 +25,8 @@
 
 namespace availability_examus2;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
- * Frontend class
+ * Client class
  */
 class client {
     const ISO8601U = "Y-m-d\TH:i:s.uO";
@@ -38,7 +36,7 @@ class client {
     protected $accountid;
     protected $accountname;
 
-    function __construct() {
+    public function __construct() {
         $this->examusurl = get_config('availability_examus2', 'examus_url');
         $this->integrationname = get_config('availability_examus2', 'integration_name');
         $this->jwtsecret = get_config('availability_examus2', 'jwt_secret');
@@ -58,7 +56,7 @@ class client {
         return $baseurl.$method.'/';
     }
 
-    public function get_finish_url($sessionid, $redurecturl){
+    public function get_finish_url($sessionid, $redurecturl) {
         $finishurl = $this->form_url('finish');
         $finishurl .= $sessionid;
         $finishurl .= '/?redirectUrl='.urlencode($redurecturl);
@@ -66,7 +64,7 @@ class client {
         return $finishurl;
     }
 
-    public function get_form($method, $payload){
+    public function get_form($method, $payload) {
         $key = $this->jwtsecret;
         $jwt = \Firebase\JWT\JWT::encode($payload, $key, 'HS256');
 
@@ -77,10 +75,10 @@ class client {
         ];
     }
 
-    public function decode($message){
+    public function decode($message) {
         // For versions of php-jwt >= 6.0.0
-        // Moodle bundles lower version at time of writing this
-        if(class_exists('\Firebase\JWT\Key')){
+        // Moodle bundles lower version at time of writing this.
+        if (class_exists('\Firebase\JWT\Key')) {
             $key = new \Firebase\JWT\Key($this->jwtsecret, 'HS256');
             return \Firebase\JWT\JWT::decode($message, $key);
         } else {
@@ -110,22 +108,21 @@ class client {
         $result = curl_exec($ch);
         $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
-
-        if($result === false){
+        if ($result === false) {
             echo 'Curl Error: ' . curl_error($ch) . "\n";
             return;
         }
 
-        if($code < 200 || $code >= 300){
+        if ($code < 200 || $code >= 300) {
             echo "Non-200 code";
             var_dump($result);
             return;
-        }else{
+        } else {
             return json_decode($result);
         }
     }
 
-    public function exam_data($condition, $course, $cm){
+    public function exam_data($condition, $course, $cm) {
         $conditiondata = $condition->to_json();
 
         $customrules = $conditiondata['customrules'];
@@ -139,7 +136,7 @@ class client {
             'examName' => $cm->name,
             'courseName' => $course->fullname,
             'duration' => $conditiondata['duration'],
-            //'schedule' => $conditiondata['schedulingrequired'],
+            // 'schedule' => $conditiondata['schedulingrequired'],
             'proctoring' => $conditiondata['mode'],
             'userAgreementUrl' => $conditiondata['useragreementurl'],
             'identification' => $conditiondata['identification'],
@@ -156,7 +153,7 @@ class client {
         return $data;
     }
 
-    public function user_data($user){
+    public function user_data($user) {
         return [
             'userId' => $user->id,
             'firstName' => $user->firstname,
@@ -165,14 +162,14 @@ class client {
         ];
     }
 
-    public function attempt_data($attemptid, $url){
+    public function attempt_data($attemptid, $url) {
         return [
             'sessionId' => $attemptid,
             'sessionUrl' => $url,
         ];
     }
 
-    public function time_data($timebracket){
+    public function time_data($timebracket) {
         $dt = new \DateTime();
         $dt->setTimezone(new \DateTimeZone('+0000'));
 
@@ -193,7 +190,16 @@ class client {
      * CRC32 is choosen for it's speed, low enthropy is considered
      * not a significant factor.
      */
-    public function checksum($data){
+    public function checksum($data) {
         return hash('crc32b', json_encode($data));
+    }
+
+    public static function parse_date($date) {
+        if (!empty($date)) {
+            $date = preg_replace('/\.\d+/', '', $date);
+            $datetime = \DateTime::createFromFormat(\DateTime::ISO8601, $date);
+            return $datetime->getTimestamp();
+        }
+
     }
 }

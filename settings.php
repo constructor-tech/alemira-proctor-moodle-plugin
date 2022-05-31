@@ -26,19 +26,15 @@
 defined('MOODLE_INTERNAL') || die();
 
 if ($hassiteconfig) {
-    // $ADMIN->add(
-    //     'blah',
-    //     new admin_externalpage(
-    //         'availability_examus2_settings',
-    //         get_string('settings', 'availability_examus2'),
-    //         $CFG->wwwroot . '/availability/condition/examus2/index.php',
-    //         'availability/examus2:logaccess'
-    //     )
-    // );
-
-    #$ADMIN->add('localplugins', new admin_category('avalibility_examus2', new lang_string('pluginname', 'availibility_examus2')));
-    #$page = new admin_settingpage('manage_availibility_examus2', new lang_string('settings', 'availibility_examus2'));
-    #$ADMIN->add('avalibility_examus2', $page);
+    $ADMIN->add(
+        'reports',
+         new admin_externalpage(
+             'availability_examus2_settings',
+             get_string('log_section', 'availability_examus2'),
+             $CFG->wwwroot . '/availability/condition/examus2/index.php',
+             'availability/examus2:logaccess'
+         )
+    );
 
     if ($ADMIN->fulltree) {
         $settings->add(new admin_setting_configtext('availability_examus2/examus_url',
@@ -62,6 +58,4 @@ if ($hassiteconfig) {
             new lang_string('settings_account_name_desc', 'availability_examus2'), '', PARAM_TEXT));
 
     }
-
-
 }
