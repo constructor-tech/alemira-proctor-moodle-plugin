@@ -49,7 +49,7 @@ class condition extends \core_availability\condition {
         'duration', 'mode', 'schedulingrequired', 'autorescheduling',
         'istrial', 'rules', 'identification', 'noprotection',
         'useragreementurl', 'auxiliarycamera', 'customrules',
-        'scoring', 'groups', 'warnings',
+        'scoring', 'groups', 'warnings', 'ldb',
     ];
 
     const WARNINGS = [
@@ -139,6 +139,9 @@ class condition extends \core_availability\condition {
 
     /** @var string Auxiliary camera enabled */
     public $auxiliarycamera = false;
+
+    /** @var string Lockdown browser */
+    public $ldb = false;
 
     /** @var string List of custom rules */
     public $customrules = null;
@@ -242,6 +245,13 @@ class condition extends \core_availability\condition {
         } else {
             $this->auxiliarycamera = false;
         }
+
+        if (isset($structure->ldb)) {
+            $this->ldb = $structure->ldb;
+        } else {
+            $this->ldb = false;
+        }
+
         $this->validate();
     }
 

@@ -144,6 +144,7 @@ class client {
             'auxiliaryCamera' => $conditiondata['auxiliarycamera'],
             'scoreConfig' => $conditiondata['scoring'],
             'visibleWarnings' => $conditiondata['warnings'],
+            'ldb' => $conditiondata['ldb'],
             'rules' => array_merge(
                 (array)$conditiondata['rules'],
                 ['custom_rules' => $customrules]

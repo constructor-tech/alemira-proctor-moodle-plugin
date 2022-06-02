@@ -22,6 +22,8 @@ M.availability_examus2.form.initInner = function(rules, groups, warnings, scorin
 M.availability_examus2.form.instId = 0;
 
 M.availability_examus2.form.getNode = function(json) {
+    var html, node, value;
+
     /**
      * @param {string} identifier A string identifier
      * @returns {string} A string from translations.
@@ -96,8 +98,6 @@ M.availability_examus2.form.getNode = function(json) {
         }
     }
 
-    var html, node, value;
-
     M.availability_examus2.form.instId += 1;
 
     var id = 'examus' + M.availability_examus2.form.instId;
@@ -110,6 +110,7 @@ M.availability_examus2.form.getNode = function(json) {
     var customRulesId = id + '_customRules';
     var noProtectionId = id + '_noProtection';
     var auxiliaryCameraId = id + '_auxCamera';
+    var enableLdbId = id + '_ldb';
 
     var userAgreementId = id + 'userAgreement';
 
@@ -155,9 +156,14 @@ M.availability_examus2.form.getNode = function(json) {
         '<label for="' + noProtectionId + '">' + getString('enable') + '</label> '
     );
 
-    html += formGroup(isTrialId, getString('auxiliary_camera'),
+    html += formGroup(auxiliaryCameraId, getString('auxiliary_camera'),
         '<input type="checkbox" name="auxiliarycamera" id="' + auxiliaryCameraId + '" value="1">&nbsp;' +
         '<label for="' + auxiliaryCameraId + '">' + getString('enable') + '</label> '
+    );
+
+    html += formGroup(enableLdbId, getString('enable_ldb'),
+        '<input type="checkbox" name="ldb" id="' + enableLdbId + '" value="1">&nbsp;' +
+        '<label for="' + enableLdbId + '">' + getString('enable') + '</label> '
     );
 
     html += formGroup(userAgreementId, getString('user_agreement_url'),
@@ -186,7 +192,7 @@ M.availability_examus2.form.getNode = function(json) {
             var groups = (json.groups instanceof Array) ? json.groups : [];
 
             id = parseInt(this.groups[i].id);
-            groups = groups.map(function(gid){ return parseInt(gid)});
+            groups = groups.map(function(gid){ return parseInt(gid); });
 
             var checked = groups.indexOf(id) > -1 ? 'checked' : '';
 
@@ -210,16 +216,14 @@ M.availability_examus2.form.getNode = function(json) {
     var scoringOptions = '';
     for (var skey in this.scoring) {
         var skeyId = id + '_' + skey;
-        var smin = this.scoring[skey]['min'];
-        var smax = this.scoring[skey]['max'];
+        var smin = this.scoring[skey].min;
+        var smax = this.scoring[skey].max;
         var scoringInputHTML = '<input type="number" class="examus-scoring-input" value=""' +
             'name="' + skey + '"' +
             'id="scoring_' + skeyId + '"' +
             'min="' + smin + '" max="' + smax + '">';
 
-        scoringOptions +=formGroup(skeyId, getString('scoring_'+skey), scoringInputHTML);
-        //scoringOptions += '<label for="scoring_' + skeyId + '" style="white-space: break-spaces">' + getString('scoring_'+skey) + '</label>&nbsp;';
-        //scoringOptions += '<input type="number" name="' + skey + '" id="scoring_' + skeyId + '" value="" min="' + smin + '" max="' + smax + '"><br>';
+        scoringOptions += formGroup(skeyId, getString('scoring_'+skey), scoringInputHTML);
     }
 
 
@@ -228,7 +232,7 @@ M.availability_examus2.form.getNode = function(json) {
                  '<div class="warnings" style="white-space: nowrap" >' + moreLess(warningOptions) + '</div>',
                  true);
 
-    htmlTwo += formGroup(null, getString('visible_warnings'),
+    htmlTwo += formGroup(null, getString('scoring_params_header'),
                  moreLess(scoringOptions),
                  true);
 
@@ -282,6 +286,11 @@ M.availability_examus2.form.getNode = function(json) {
     if (json.auxiliarycamera !== undefined) {
         value = json.auxiliarycamera ? 'checked' : null;
         node.one('#' + auxiliaryCameraId).set('checked', value);
+    }
+
+    if (json.ldb !== undefined) {
+        value = json.ldb ? 'checked' : null;
+        node.one('#' + enableLdbId).set('checked', value);
     }
 
     if (json.scheduling_required !== undefined) {
@@ -384,6 +393,7 @@ M.availability_examus2.form.fillValue = function(value, node) {
     value.noprotection = node.one('input[name=noprotection]').get('checked');
     value.useragreementurl = node.one('input[name=useragreementurl]').get('value').trim();
     value.auxiliarycamera = node.one('input[name=auxiliarycamera]').get('checked');
+    value.ldb = node.one('input[name=ldb]').get('checked');
 
     value.rules = {};
     rulesInputs = node.all('.rules input');
