@@ -126,6 +126,9 @@ function availability_examus2_before_standard_html_head() {
     }
 }
 
+/**
+ * This hook is used for exams that require scheduling
+ **/
 function availability_examus2_after_require_login() {
     global $PAGE, $DB, $USER, $cm, $course;
     $scriptname = isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'] : null;
@@ -170,7 +173,7 @@ function availability_examus2_after_require_login() {
             $timebracket['end'] = $timebracket['start'] + ($condition->duration * 60);
         }
 
-        $location = new \moodle_url('/mod/quiz/index.php', ['id' => $cm->id]);
+        $location = new \moodle_url('/mod/quiz/view.php', ['id' => $cm->id]);
 
         $client = new \availability_examus2\client();
         $data = $client->exam_data($condition, $course, $cm);
