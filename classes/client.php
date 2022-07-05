@@ -136,7 +136,7 @@ class client {
             'examName' => $cm->name,
             'courseName' => $course->fullname,
             'duration' => $conditiondata['duration'],
-            // 'schedule' => $conditiondata['schedulingrequired'],
+            'schedule' => false,
             'proctoring' => $conditiondata['mode'],
             'userAgreementUrl' => $conditiondata['useragreementurl'],
             'identification' => $conditiondata['identification'],
