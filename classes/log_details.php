@@ -116,13 +116,11 @@ class log_details {
             }
 
             if (isset($warning['start']) && !is_numeric($warning['start'])) {
-                $datetime = \DateTime::createFromFormat(\DateTime::ISO8601, $warning['start']);
-                $warning['start'] = $datetime->getTimestamp();
+                $warning['start'] = common::parse_date($warning['start']);
             }
 
             if (isset($warning['end']) && !is_numeric($warning['end'])) {
-                $datetime = \DateTime::createFromFormat(\DateTime::ISO8601, $warning['end']);
-                $warning['end'] = $datetime->getTimestamp();
+                $warning['end'] = common::parse_date($warning['end']);
             }
 
             $warnings[] = $warning;

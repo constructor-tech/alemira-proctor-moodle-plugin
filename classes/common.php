@@ -167,4 +167,17 @@ class common {
         }
         return $results;
     }
+
+    /**
+     * Parses date string in ISO8601 ignoring fractions of a second
+     **/
+    public static function parse_date($date) {
+        if (!empty($date)) {
+            $date = preg_replace('/\.\d+/', '', $date);
+            $datetime = \DateTime::createFromFormat(\DateTime::ISO8601, $date);
+            return $datetime->getTimestamp();
+        }
+
+    }
+
 }

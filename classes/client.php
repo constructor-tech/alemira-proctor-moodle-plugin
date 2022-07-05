@@ -194,13 +194,4 @@ class client {
     public function checksum($data) {
         return hash('crc32b', json_encode($data));
     }
-
-    public static function parse_date($date) {
-        if (!empty($date)) {
-            $date = preg_replace('/\.\d+/', '', $date);
-            $datetime = \DateTime::createFromFormat(\DateTime::ISO8601, $date);
-            return $datetime->getTimestamp();
-        }
-
-    }
 }

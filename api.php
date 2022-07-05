@@ -73,11 +73,11 @@ $handlers['review'] = function($entry, $request) {
 
     $sessionstart = null;
     if (!empty($request->sessionStart)) {
-        $sessionstart = Client::parse_date($request->sessionStart);
+        $sessionstart = common::parse_date($request->sessionStart);
     }
     $sessionend = null;
     if (!empty($request->sessionEnd)) {
-        $sessionend = Client::parse_date($request->sessionEnd);
+        $sessionend = common::parse_date($request->sessionEnd);
     }
 
     $warningtitles = $request->warningTitles;
