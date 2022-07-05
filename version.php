@@ -26,7 +26,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'availability_examus2';
-$plugin->version = 2022040501;
+$plugin->version = 2022070501;
 $plugin->release = 'v2.0-beta';
 $plugin->requires = 2018111800;
 $plugin->maturity = MATURITY_STABLE;

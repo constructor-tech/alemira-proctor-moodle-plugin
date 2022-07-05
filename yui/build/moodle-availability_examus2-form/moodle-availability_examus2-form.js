@@ -203,7 +203,7 @@ M.availability_examus2.form.getNode = function(json) {
                 + '</label>';
         }
 
-        html += formGroup(null, getString('select_groups'), '<div class="groups"' + groupOptions + '</div>');
+        html += formGroup(null, getString('select_groups'), '<div class="groups">' + groupOptions + '</div>');
     }
 
 
@@ -219,6 +219,7 @@ M.availability_examus2.form.getNode = function(json) {
         var smin = this.scoring[skey].min;
         var smax = this.scoring[skey].max;
         var scoringInputHTML = '<input type="number" class="examus-scoring-input" value=""' +
+            'step="0.01" ' +
             'name="' + skey + '"' +
             'id="scoring_' + skeyId + '"' +
             'min="' + smin + '" max="' + smax + '">';
@@ -423,7 +424,7 @@ M.availability_examus2.form.fillValue = function(value, node) {
         key = scoringInput.get('name');
         var scoringValue = scoringInput.get('value').trim();
         if (scoringValue.length > 0) {
-            value.scoring[key] = parseInt(scoringValue);
+            value.scoring[key] = parseFloat(scoringValue);
         } else {
             value.scoring[key] = null;
         }
