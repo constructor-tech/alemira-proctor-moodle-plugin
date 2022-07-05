@@ -34,7 +34,7 @@ use availability_examus2\state;
  * @return string
  */
 function availability_examus2_before_standard_html_head() {
-    global $DB, $USER, $PAGE;
+    global $DB, $USER, $PAGE, $SESSION;
 
     $context = context_system::instance();
 
@@ -111,14 +111,18 @@ function availability_examus2_before_standard_html_head() {
     $data = $client->exam_data($condition, $course, $cm);
     $userdata = $client->user_data($USER);
     $timedata = $client->time_data($timebracket);
-    $attemptdata = $client->attempt_data($entry->accesscode, $PAGE->url->out(false));
+    $pageurl = $PAGE->url;
+    $pageurl->param('accesscode', $entry->accesscode);
+    $attemptdata = $client->attempt_data($entry->accesscode, $pageurl->out(false));
 
     $data = array_merge($data, $userdata, $timedata, $attemptdata);
 
     if (in_array($entry->status, ['started', 'scheduled', 'new'])) {
-        $formdata = $client->get_form('start', $data);
+        if(empty($SESSION->accesscode)){
+            $formdata = $client->get_form('start', $data);
+        }
 
-        // Our entry is active, we are showing user as fader.
+        // Our entry is active, we are showing user a fader.
         ob_start();
         include(dirname(__FILE__).'/templates/proctoring_fader.php');
         $output = ob_get_clean();
@@ -130,7 +134,13 @@ function availability_examus2_before_standard_html_head() {
  * This hook is used for exams that require scheduling
  **/
 function availability_examus2_after_require_login() {
-    global $PAGE, $DB, $USER, $cm, $course;
+    global $PAGE, $DB, $USER, $SESSION, $cm, $course;
+
+    $accesscode = optional_param('accesscode', null, PARAM_RAW);
+    if(!empty($accesscode)){
+        $SESSION->accesscode = $accesscode;
+    }
+
     $scriptname = isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'] : null;
 
     if ($scriptname != '/mod/quiz/startattempt.php') {
@@ -156,7 +166,11 @@ function availability_examus2_after_require_login() {
         return;
     }
 
-    $entry = $condition->create_entry_for_cm($USER->id, $cm);
+    if($accesscode){
+        $entry = $DB->get_record('availability_examus2_entries', ['accesscode' => $accesscode]);
+    } else {
+        $entry = $condition->create_entry_for_cm($USER->id, $cm);
+    }
 
     if ($entry->status == 'started' || $entry->status == 'scheduled') {
         return;
@@ -173,7 +187,10 @@ function availability_examus2_after_require_login() {
             $timebracket['end'] = $timebracket['start'] + ($condition->duration * 60);
         }
 
-        $location = new \moodle_url('/mod/quiz/view.php', ['id' => $cm->id]);
+        $location = new \moodle_url('/mod/quiz/view.php', [
+            'id' => $cm->id,
+            'accesscode' => $entry->accesscode,
+        ]);
 
         $client = new \availability_examus2\client();
         $data = $client->exam_data($condition, $course, $cm);

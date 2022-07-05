@@ -35,6 +35,7 @@ class state {
      * @var array $attempt Array containing data about current attempt
      */
     public static $attempt;
+    public static $accesscode;
 
     /**
      * @var bool $apirequest Indicates to \availability_examus2\condition that the code

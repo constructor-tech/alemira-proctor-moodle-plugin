@@ -38,6 +38,8 @@ use availability_examus2\condition;
 function avalibility_examus2_attempt_started_handler($event) {
     global $DB, $SESSION, $PAGE, $USER;
 
+    $accesscode = isset($SESSION->accesscode) ? $SESSION->accesscode : null;
+
     $attempt = $event->get_record_snapshot('quiz_attempts', $event->objectid);
 
     $course = get_course($event->courseid);
@@ -56,7 +58,28 @@ function avalibility_examus2_attempt_started_handler($event) {
         return;
     }
 
-    $entry = $condition->create_entry_for_cm($USER->id, $cm);
+    $inhibitredirect = false;
+    if($accesscode) {
+        // If we have an access code here, we are coming from Examus
+        $inhibitredirect = true;
+        $entry = $DB->get_record('availability_examus2_entries', ['accesscode' => $accesscode]);
+    }
+
+    // We need to reset entry if the user started new attempt.
+    if (!empty($entry) && $entry->status == "started" && $entry->attemptid != $attempt->id) {
+        $entry = $condition->create_entry_for_cm($USER->id, $cm);
+
+        // And we need to let examus know about new entry.
+        $inhibitredirect = false;
+    }
+
+    if ($inhibitredirect){
+        return;
+    }
+
+    if (empty($entry)) {
+        $entry = $condition->create_entry_for_cm($USER->id, $cm);
+    }
 
     if ($entry && $attempt) {
         $entry->attemptid = $attempt->id;
@@ -64,14 +87,8 @@ function avalibility_examus2_attempt_started_handler($event) {
         $DB->update_record('availability_examus2_entries', $entry);
     }
 
-    $returnurl = $PAGE->url->out();
-
-    // if ($condition->schedulingrequired) {
     $timebracket = common::get_timebracket_for_cm('quiz', $cm);
     $timebracket = $timebracket ? $timebracket : [];
-    // } else {
-    //    $timebracket = [];
-    // }
 
     if (empty($timebracket['start'])) {
         $timebracket['start'] = time();
@@ -121,18 +138,32 @@ function avalibility_examus2_attempt_started_handler($event) {
  * @param stdClass $event Event
  */
 function avalibility_examus2_attempt_submitted_handler($event) {
-    global $DB;
+    global $DB, $SESSION;
     $cmid = $event->get_context()->instanceid;
     $attempt = $event->get_record_snapshot('quiz_attempts', $event->objectid);
     $cm = get_coursemodule_from_id('quiz', $cmid);
 
     $userid = $event->userid;
+
+    if (!empty($SESSION->accesscode)) {
+        $accesscode = $SESSION->accesscode;
+        $SESSION->accesscode = null;
+
+    }
+
     $entries = $DB->get_records('availability_examus2_entries', [
         'userid' => $userid,
         'courseid' => $event->courseid,
         'cmid' => $cmid,
         'status' => "started"
     ], '-id');
+
+    if (isset($accesscode)) {
+        $entry = $DB->get_record('availability_examus2_entries', ['accesscode' => $accesscode]);
+
+        $entries[] = $entry;
+    }
+
 
     // We want to let previews to happen without proctoring.
     $quizobj = \quiz::create($cm->instance, $userid);
@@ -145,6 +176,7 @@ function avalibility_examus2_attempt_submitted_handler($event) {
         $DB->update_record('availability_examus2_entries', $entry);
     }
     $entry = reset($entries);
+
 
     core_shutdown_manager::register_function(function() use ($entry) {
         $headers = headers_list();
