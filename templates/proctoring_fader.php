@@ -96,6 +96,9 @@ const createFader = () => {
 };
 
 const redirectToExamus = () => {
+  if (!formData) {
+        return;
+  }
   const form = document.createElement("form");
   const input = document.createElement("input")
   form.appendChild(input);
