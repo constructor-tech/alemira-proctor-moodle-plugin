@@ -56,10 +56,10 @@ class client {
         return $baseurl.$method.'/';
     }
 
-    public function get_finish_url($sessionid, $redurecturl) {
+    public function get_finish_url($sessionid, $redirecturl) {
         $finishurl = $this->form_url('finish');
         $finishurl .= $sessionid;
-        $finishurl .= '/?redirectUrl='.urlencode($redurecturl);
+        $finishurl .= '/?redirectUrl='.urlencode($redirecturl);
 
         return $finishurl;
     }

@@ -110,7 +110,7 @@ function avalibility_examus2_attempt_started_handler($event) {
             $formdata = $client->get_form('start', $data);
 
             $pagetitle = "Redirecting to Examus";
-            include(dirname(__FILE__).'/templates/redirect.php');
+            include(dirname(__FILE__) . '/templates/redirect.php');
         }
     });
 }

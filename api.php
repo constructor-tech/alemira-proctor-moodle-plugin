@@ -101,7 +101,7 @@ $handlers['schedule'] = function($entry, $request) {
     global $DB;
     $event = $request->event;
     if ($event == 'scheduled') {
-        $entry->status = 'Scheduled';
+        $entry->status = 'scheduled';
     } else if (!$entry->attemptid) {
         common::reset_entry(['accesscode' => $entry->accesscode]);
     }

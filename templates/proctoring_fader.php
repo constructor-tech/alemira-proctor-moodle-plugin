@@ -45,7 +45,7 @@ defined('MOODLE_INTERNAL') || die();
 const strAwaitingProctoring = <?php echo json_encode(get_string('fader_awaiting_proctoring', 'availability_examus2')) ?>;
 const strInstructions = <?php echo json_encode(get_string('fader_instructions', 'availability_examus2')) ?>;
 const faderHTML = strAwaitingProctoring + strInstructions;
-const formData = <?php echo json_encode($formdata); ?>;
+const formData = <?php echo json_encode(isset($formdata) ? $formdata : null); ?>;
 const {sessionStorage, location} = window;
 
 const TAG = 'proctoring fader';
