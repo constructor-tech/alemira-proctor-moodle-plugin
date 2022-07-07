@@ -45,6 +45,11 @@ class common {
 
         $notinited = $oldentry && $oldentry->status == 'new';
 
+        if ($oldentry && !$notinited) {
+            $oldentry->status = "force_reset";
+            $DB->update_record('availability_examus2_entries', $oldentry);
+        }
+
         if ($oldentry && (!$notinited || $force)) {
             $entries = $DB->get_records('availability_examus2_entries', [
                 'userid' => $oldentry->userid,
@@ -56,7 +61,7 @@ class common {
             if (count($entries) == 0 || $force) {
                 if ($force) {
                     foreach ($entries as $old) {
-                        $old->status = "Force reset";
+                        $old->status = "force_reset";
                         $DB->update_record('availability_examus2_entries', $old);
                     }
                 }
