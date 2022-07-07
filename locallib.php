@@ -66,11 +66,21 @@ function avalibility_examus2_attempt_started_handler($event) {
     }
 
     // We need to reset entry if the user started new attempt.
-    if (!empty($entry) && $entry->status == "started" && $entry->attemptid != $attempt->id) {
-        $entry = $condition->create_entry_for_cm($USER->id, $cm);
+    if (!empty($entry)) {
+        $reset = false;
+        if ($entry->status == "started" && $entry->attemptid != $attempt->id) {
+            $reset = true;
+        }
+        if (!in_array($entry->status, ['new', 'scheduled', 'started'])){
+            $reset = true;
+        }
 
-        // And we need to let examus know about new entry.
-        $inhibitredirect = false;
+        if ($reset) {
+            $entry = $condition->create_entry_for_cm($USER->id, $cm);
+
+            // And we need to let examus know about new entry.
+            $inhibitredirect = false;
+        }
     }
 
     if ($inhibitredirect){
