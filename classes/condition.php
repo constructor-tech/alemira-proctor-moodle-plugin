@@ -612,7 +612,7 @@ class condition extends \core_availability\condition {
         foreach ($entries as $entry) {
             if ($this->autorescheduling) {
                 // Was schduled and not completed.
-                $scheduled = !$entry->attemptid && $entry->status == 'Scheduled';
+                $scheduled = !$entry->attemptid && $entry->status == 'scheduled';
                 // Consider expired, giving 15 minutes slack.
                 $expired = time() > $entry->timescheduled + self::EXPIRATION_SLACK;
 
