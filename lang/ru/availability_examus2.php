@@ -131,8 +131,8 @@ $string['comment'] = 'Комментарий';
 $string['details'] = 'Подробности';
 
 // Fader screen.
-$string['fader_awaiting_proctoring'] = 'Ожидание прокторинга';
-$string['fader_instructions'] = '<p>Используйте приложение Экзамус для прохождения тестирования</p>';
+$string['fader_awaiting_proctoring'] = 'Запуск прокторинга…';
+$string['fader_instructions'] = '<p>Пожалуйста, ожидайте</p>';
 
 $string['log_details_warnings'] = 'Нарушения';
 $string['log_details_warning_type'] = 'Тип';
