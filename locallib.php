@@ -101,10 +101,10 @@ function avalibility_examus2_attempt_started_handler($event) {
     $timebracket = $timebracket ? $timebracket : [];
 
     if (empty($timebracket['start'])) {
-        $timebracket['start'] = time();
+        $timebracket['start'] = strtotime('2022-01-01');
     }
     if (empty($timebracket['end'])) {
-        $timebracket['end'] = $timebracket['start'] + ($condition->duration * 60);
+        $timebracket['end'] = strtotime('2032-01-01');
     }
 
     $client = new client();
