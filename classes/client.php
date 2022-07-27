@@ -128,6 +128,13 @@ class client {
         $customrules = $conditiondata['customrules'];
         $customrules = empty($customrules) ? '' : $customrules;
 
+        $scoring = $conditiondata['scoring'];
+        foreach ($scoring as $key => $value){
+            if(is_null($value)){
+                unset($scoring->$key);
+            }
+        }
+
         $data = [
             'accountId' => $this->accountid,
             'accountName' => $this->accountname,
@@ -142,7 +149,7 @@ class client {
             'identification' => $conditiondata['identification'],
             'trial' => $conditiondata['istrial'],
             'auxiliaryCamera' => $conditiondata['auxiliarycamera'],
-            'scoreConfig' => $conditiondata['scoring'],
+            'scoreConfig' => $scoring,
             'visibleWarnings' => $conditiondata['warnings'],
             'ldb' => $conditiondata['ldb'],
             'rules' => array_merge(
