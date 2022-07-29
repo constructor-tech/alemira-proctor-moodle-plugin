@@ -621,7 +621,8 @@ class condition extends \core_availability\condition {
             $allowedattempts = null;
         }
 
-        if ($allowedattempts == null || count($entries) < $allowedattempts) {
+        // Allow any number of entrues for now
+        if (true) { //($allowedattempts == null || count($entries) < $allowedattempts) {
             $entry = self::make_entry($courseid, $cm->id, $userid);
             $entry->id = $DB->insert_record('availability_examus2_entries', $entry);
             return $entry;

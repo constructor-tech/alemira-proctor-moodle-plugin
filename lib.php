@@ -166,7 +166,7 @@ function availability_examus2_after_require_login() {
         return;
     }
 
-    if ($accesscode){
+    if ($accesscode) {
         $entry = $DB->get_record('availability_examus2_entries', ['accesscode' => $accesscode]);
     } else {
         $entry = $condition->create_entry_for_cm($USER->id, $cm);
@@ -176,15 +176,19 @@ function availability_examus2_after_require_login() {
         return;
     }
 
+    if ($entry->status != 'new'){
+        $entry = $condition->create_entry_for_cm($USER->id, $cm);
+    }
+
     if ($entry->status == 'new') {
         $timebracket = \availability_examus2\common::get_timebracket_for_cm('quiz', $cm);
         $timebracket = $timebracket ? $timebracket : [];
 
         if (empty($timebracket['start'])) {
-            $timebracket['start'] = time();
+            $timebracket['start'] = strtotime('2022-01-01');
         }
         if (empty($timebracket['end'])) {
-            $timebracket['end'] = $timebracket['start'] + ($condition->duration * 60);
+            $timebracket['end'] = strtotime('2032-01-01');
         }
 
         $location = new \moodle_url('/mod/quiz/view.php', [

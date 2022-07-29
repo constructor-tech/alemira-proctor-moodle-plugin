@@ -77,6 +77,7 @@ function avalibility_examus2_attempt_started_handler($event) {
 
         if ($reset) {
             $entry = $condition->create_entry_for_cm($USER->id, $cm);
+            $SESSION->accesscode = null;
 
             // And we need to let examus know about new entry.
             $inhibitredirect = false;
