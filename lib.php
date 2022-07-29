@@ -82,7 +82,7 @@ function availability_examus2_before_standard_html_head() {
     // We want to let previews to happen without proctoring.
     $quizobj = \quiz::create($cm->instance, $USER->id);
     if ($quizobj->is_preview_user()) {
-        return;
+        return '';
     }
 
     // Check that theres more rules, which pass.
@@ -166,7 +166,7 @@ function availability_examus2_after_require_login() {
         return;
     }
 
-    if($accesscode){
+    if ($accesscode){
         $entry = $DB->get_record('availability_examus2_entries', ['accesscode' => $accesscode]);
     } else {
         $entry = $condition->create_entry_for_cm($USER->id, $cm);
