@@ -35,6 +35,7 @@ class client {
     protected $examusurl;
     protected $accountid;
     protected $accountname;
+    protected $useremails;
 
     public function __construct() {
         $this->examusurl = get_config('availability_examus2', 'examus_url');
@@ -42,6 +43,7 @@ class client {
         $this->jwtsecret = get_config('availability_examus2', 'jwt_secret');
         $this->accountid = get_config('availability_examus2', 'account_id');
         $this->accountname = get_config('availability_examus2', 'account_name');
+        $this->useremails = get_config('availability_examus2', 'user_emails');
     }
 
     public function api_url($method) {
@@ -163,7 +165,7 @@ class client {
 
     public function user_data($user) {
         return [
-            'userId' => $user->id,
+            'userId' => $this->useremails ? $user->email : $user->id,
             'firstName' => $user->firstname,
             'lastName' => $user->lastname,
             'thirdName' => $user->middlename,

@@ -47,6 +47,8 @@ $string['settings_account_name'] = 'Account Name';
 $string['settings_account_name_desc'] = '';
 $string['settings_account_id'] = 'Account ID';
 $string['settings_account_id_desc'] = '';
+$string['settings_user_emails'] = 'Отправлять email пользователей в Examus';
+$string['settings_user_emails_desc'] = 'Когда выключено, будут отправться ID пользователей';
 
 $string['use_examus'] = 'Используйте приложение "Экзамус", чтобы получить доступ к модулю';
 $string['settings'] = 'Настройки прокторинга "Экзамус"';

@@ -47,6 +47,9 @@ $string['settings_account_name'] = 'Account Name';
 $string['settings_account_name_desc'] = '';
 $string['settings_account_id'] = 'Account ID';
 $string['settings_account_id_desc'] = '';
+$string['settings_user_emails'] = 'Send user emails to examus';
+$string['settings_user_emails_desc'] = 'When unchecked, user ID will be sent instead of email';
+
 
 $string['use_examus'] = 'Use examus app to view this module';
 $string['settings'] = 'Examus settings';
