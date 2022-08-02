@@ -24,6 +24,7 @@
  */
 
 use availability_examus2\client;
+use availability_examus2\common;
 
 require_once('../../../config.php');
 
@@ -107,7 +108,7 @@ $handlers['schedule'] = function($entry, $request) {
     }
 
     if ($request->start) {
-        $entry->timescheduled = Client::parse_date($request->start);
+        $entry->timescheduled = common::parse_date($request->start);
     }
 
     $DB->update_record('availability_examus2_entries', $entry);
