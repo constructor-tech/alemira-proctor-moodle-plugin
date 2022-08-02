@@ -324,31 +324,6 @@ class condition extends \core_availability\condition {
     }
 
     /**
-     * Delete empty entry
-     *
-     * @param int $userid User id
-     * @param int $courseid Course id
-     * @param int $cmid Cm id
-     */
-    private static function delete_empty_entry($userid, $courseid, $cmid) {
-        common::delete_empty_entries($userid, $courseid, $cmid);
-    }
-
-    /**
-     * delete empty entry for cm
-     *
-     * @param int $userid User id
-     * @param stdClass $cm Cm
-     * @return bool
-     */
-    public static function delete_empty_entry_for_cm($userid, $cm) {
-        $course = $cm->get_course();
-        $courseid = $course->id;
-        self::delete_empty_entry($userid, $courseid, $cm->id);
-    }
-
-
-    /**
      * has examus condition
      *
      * @param \cm_info $cm Cm
