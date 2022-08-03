@@ -48,7 +48,7 @@ $string['settings_account_name_desc'] = '';
 $string['settings_account_id'] = 'Account ID';
 $string['settings_account_id_desc'] = '';
 $string['settings_user_emails'] = 'Send user emails to examus';
-$string['settings_user_emails_desc'] = 'When unchecked, user ID will be sent instead of email';
+$string['settings_user_emails_desc'] = 'Make sure that all user email are unique before turning this option on! Having multiple users with same email can cause issues!';
 
 
 $string['use_examus'] = 'Use examus app to view this module';
