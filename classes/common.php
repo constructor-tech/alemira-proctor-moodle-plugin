@@ -31,6 +31,26 @@ use \stdClass;
  */
 class common {
     /**
+     * Finds most recent entry
+     * @todo Rework this function to be more readable
+     * @param \stdClass $entry Entry
+     * @return \stdClass|null entry or null
+     */
+    public static function most_recent_entry($entry) {
+        global $DB;
+
+        $entries = $DB->get_records('availability_examus2_entries', [
+            'userid' => $entry->userid,
+            'courseid' => $entry->courseid,
+            'cmid' => $entry->cmid,
+            'status' => 'new'
+        ], '-timecreated');
+        $entry = reset($entries);
+        return $entry;
+    }
+
+
+    /**
      * Resets user entry ensuring there is only one 'not inited' entry.
      * If there is already one not inited entry, return it(unless forse reset is requested)
      * @todo Rework this function to be more readable
@@ -53,9 +73,9 @@ class common {
         if ($oldentry && (!$notinited || $force)) {
             $entries = $DB->get_records('availability_examus2_entries', [
                 'userid' => $oldentry->userid,
-                'courseid' => $oldentry->courseid,
-                'cmid' => $oldentry->cmid,
-                'status' => 'new'
+                    'courseid' => $oldentry->courseid,
+                    'cmid' => $oldentry->cmid,
+                    'status' => 'new'
             ]);
 
             if (count($entries) == 0 || $force) {
@@ -95,9 +115,9 @@ class common {
         global $DB;
 
         $condition = [
-          'userid' => $userid,
-          'courseid' => $courseid,
-          'status' => 'new'
+            'userid' => $userid,
+                'courseid' => $courseid,
+                'status' => 'new'
         ];
 
         if (!empty($cmid)) {
@@ -131,7 +151,18 @@ class common {
 
     public static function get_timebracket_for_cm($type, $cm) {
         $timebrackets = self::get_timebrackets_for_cms($type, [$cm]);
-        return reset($timebrackets);
+        $timebracket = reset($timebrackets);
+        $timebracket = $timebracket ? $timebracket : [];
+
+        // Fill the void.
+        if (empty($timebracket['start'])) {
+            $timebracket['start'] = strtotime('2022-01-01');
+        }
+        if (empty($timebracket['end'])) {
+            $timebracket['end'] = strtotime('2032-01-01');
+        }
+
+        return $timebracket;
     }
 
     public static function get_timebrackets_for_cms($type, $cms) {
@@ -170,6 +201,7 @@ class common {
                 }
                 break;
         }
+
         return $results;
     }
 

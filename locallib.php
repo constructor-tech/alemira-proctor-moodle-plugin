@@ -99,14 +99,6 @@ function avalibility_examus2_attempt_started_handler($event) {
     }
 
     $timebracket = common::get_timebracket_for_cm('quiz', $cm);
-    $timebracket = $timebracket ? $timebracket : [];
-
-    if (empty($timebracket['start'])) {
-        $timebracket['start'] = strtotime('2022-01-01');
-    }
-    if (empty($timebracket['end'])) {
-        $timebracket['end'] = strtotime('2032-01-01');
-    }
 
     $client = new client();
     $data = $client->exam_data($condition, $course, $cm);

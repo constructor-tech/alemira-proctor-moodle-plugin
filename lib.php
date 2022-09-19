@@ -25,6 +25,7 @@
 
 use availability_examus2\condition;
 use availability_examus2\state;
+use availability_examus2\common;
 
 /**
  * Hooks into head rendering. Adds proctoring fader/shade and accompanying javascript
@@ -98,29 +99,32 @@ function availability_examus2_before_standard_html_head() {
     $entry = $condition->create_entry_for_cm($USER->id, $cm);
 
     $timebracket = \availability_examus2\common::get_timebracket_for_cm('quiz', $cm);
-    $timebracket = $timebracket ? $timebracket : [];
 
-    if (empty($timebracket['start'])) {
-        $timebracket['start'] = strtotime('2022-01-01');
-    }
-    if (empty($timebracket['end'])) {
-        $timebracket['end'] = strtotime('2032-01-01');
+    if (!empty($SESSION->accesscode) && $entry->accesscode != $SESSION->accesscode) {
+        $SESSION->accesscode = null;
     }
 
     $client = new \availability_examus2\client();
     $data = $client->exam_data($condition, $course, $cm);
     $userdata = $client->user_data($USER);
+    $biometrydata = $client->biometry_data($condition, $USER);
+
     $timedata = $client->time_data($timebracket);
     $pageurl = $PAGE->url;
     $pageurl->param('accesscode', $entry->accesscode);
     $attemptdata = $client->attempt_data($entry->accesscode, $pageurl->out(false));
 
-    $data = array_merge($data, $userdata, $timedata, $attemptdata);
+    $data = array_merge($data, $userdata, $timedata, $attemptdata, $biometrydata);
+
+    if($condition->schedulingrequired && empty($entry->timescheduled)){
+        $data['schedule'] = true;
+    }
 
     if (in_array($entry->status, ['started', 'scheduled', 'new'])) {
-        if(empty($SESSION->accesscode)){
-            $formdata = $client->get_form('start', $data);
-        }
+        // We have to formdata in any case because exam can be opened outside iframe
+        //if(empty($SESSION->accesscode)){n
+        $formdata = $client->get_form('start', $data);
+        //}
 
         // Our entry is active, we are showing user a fader.
         ob_start();
@@ -131,14 +135,34 @@ function availability_examus2_before_standard_html_head() {
 }
 
 /**
- * This hook is used for exams that require scheduling
+ * This hook is used for exams that require scheduling.
  **/
 function availability_examus2_after_require_login() {
     global $PAGE, $DB, $USER, $SESSION, $cm, $course;
 
+    $launchedfromframe = false;
     $accesscode = optional_param('accesscode', null, PARAM_RAW);
     if(!empty($accesscode)){
-        $SESSION->accesscode = $accesscode;
+        $launchedfromframe = true;
+
+        // We know accesscode is passed in params.
+        $entry = $DB->get_record('availability_examus2_entries', [
+            'accesscode' => $accesscode,
+        ]);
+
+        // If entry exists, we need to check if we have a newer one
+        if ($entry) {
+            $newentry = common::most_recent_entry($entry);
+            if($newentry) {
+                $entry = $newentry;
+            }
+        }
+
+        if (!in_array($entry->status, ['new', 'scheduled', 'started'])){
+            $entry = $condition->create_entry_for_cm($USER->id, $cm);
+        }
+
+        $SESSION->accesscode = $entry->accesscode;
     }
 
     $scriptname = isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'] : null;
@@ -162,53 +186,73 @@ function availability_examus2_after_require_login() {
     }
 
     // No need to schedule an exam.
-    if (!$condition->schedulingrequired) {
-        return;
+    // if (!$condition->schedulingrequired) {
+    //     return;
+    // }
+
+    if (!empty($entry) && $entry->cmid != $cm->id) {
+        // Entry belongs to other cm.
+        $entry = null;
+        $SESSION->accesscode = null;
     }
 
-    if ($accesscode) {
-        $entry = $DB->get_record('availability_examus2_entries', ['accesscode' => $accesscode]);
-    } else {
+    if (empty($entry)) {
         $entry = $condition->create_entry_for_cm($USER->id, $cm);
     }
 
-    if ($entry->status == 'started' || $entry->status == 'scheduled') {
+    // The attempt is already started, letting it open.
+    if ($entry->status == 'started' && !empty($SESSION->accesscode)) {
         return;
     }
 
-    if ($entry->status != 'new'){
-        $entry = $condition->create_entry_for_cm($USER->id, $cm);
+    // Allowing to start attempt, as it is scheduled and we are supposedly view through examus
+    if (
+        $entry->status == 'scheduled'
+            && $condition->schedulingrequired
+            && $entry->timescheduled
+            && $entry->timescheduled < time()
+            && !empty($SESSION->accesscode)
+    ) {
+        return;
     }
 
-    if ($entry->status == 'new') {
-        $timebracket = \availability_examus2\common::get_timebracket_for_cm('quiz', $cm);
-        $timebracket = $timebracket ? $timebracket : [];
+    // Allowing to start attempt, as it does not need scheduling
+    if (
+        $entry->status == 'new'
+            && !$condition->schedulingrequired
+            && !empty($SESSION->accesscode)
+    ) {
+        return;
+    }
 
-        if (empty($timebracket['start'])) {
-            $timebracket['start'] = strtotime('2022-01-01');
-        }
-        if (empty($timebracket['end'])) {
-            $timebracket['end'] = strtotime('2032-01-01');
-        }
 
-        $location = new \moodle_url('/mod/quiz/view.php', [
-            'id' => $cm->id,
+    // if (!in_array($entry->status, ['new', 'scheduled', 'started'])){
+    //     $entry = $condition->create_entry_for_cm($USER->id, $cm);
+    // }
+
+    $timebracket = \availability_examus2\common::get_timebracket_for_cm('quiz', $cm);
+
+    $location = new \moodle_url('/mod/quiz/view.php', [
+        'id' => $cm->id,
             'accesscode' => $entry->accesscode,
-        ]);
+    ]);
 
-        $client = new \availability_examus2\client();
-        $data = $client->exam_data($condition, $course, $cm);
-        $userdata = $client->user_data($USER);
-        $timedata = $client->time_data($timebracket);
-        $attemptdata = $client->attempt_data($entry->accesscode, $location->out(false));
+    $client = new \availability_examus2\client();
+    $data = $client->exam_data($condition, $course, $cm);
+    $userdata = $client->user_data($USER);
+    $biometrydata = $client->biometry_data($condition, $USER);
+    $timedata = $client->time_data($timebracket);
+    $attemptdata = $client->attempt_data($entry->accesscode, $location->out(false));
 
-        $data = array_merge($data, $userdata, $timedata, $attemptdata);
+    $data = array_merge($data, $userdata, $timedata, $attemptdata, $biometrydata);
+
+    if ($condition->schedulingrequired) {
         $data['schedule'] = true;
-
-        $formdata = $client->get_form('start', $data);
-
-        $pagetitle = "Redirecting to Examus";
-        include(dirname(__FILE__).'/templates/redirect.php');
-        die();
     }
+
+    $formdata = $client->get_form('start', $data);
+
+    $pagetitle = "Redirecting to Examus";
+    include(dirname(__FILE__).'/templates/redirect.php');
+    die();
 }

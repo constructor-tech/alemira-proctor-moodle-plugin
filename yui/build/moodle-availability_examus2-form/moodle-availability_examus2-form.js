@@ -111,7 +111,10 @@ M.availability_examus2.form.getNode = function(json) {
     var noProtectionId = id + '_noProtection';
     var auxiliaryCameraId = id + '_auxCamera';
     var enableLdbId = id + '_ldb';
-
+    var biometryEnabledId = id + '_biometryEnabled';
+    var biometrySkipfailId = id + '_biometrySkipfail';
+    var biometryFlowId = id + '_biometryFlow';
+    var biometryThemeId = id + '_biometryTheme';
     var userAgreementId = id + 'userAgreement';
 
     html = formGroup(durationId, getString('duration'),
@@ -227,6 +230,22 @@ M.availability_examus2.form.getNode = function(json) {
         scoringOptions += formGroup(skeyId, getString('scoring_'+skey), scoringInputHTML);
     }
 
+    var biometryOptions = '';
+    biometryOptions += formGroup(biometryEnabledId, getString('biometry_enabled'),
+        '<input type="checkbox" name="biometryenabled" id="' + biometryEnabledId + '" value="1">&nbsp;' +
+        '<label for="' + biometryEnabledId + '">' + getString('enable') + '</label> '
+    );
+    biometryOptions += formGroup(biometrySkipfailId, getString('biometry_skipfail'),
+        '<input type="checkbox" name="biometryskipfail" id="' + biometrySkipfailId + '" value="1">&nbsp;' +
+        '<label for="' + biometrySkipfailId + '">' + getString('enable') + '</label> '
+    );
+    biometryOptions += formGroup(biometryFlowId, getString('biometry_flow'),
+        '<input type="text" name="biometryflow" id="' + biometryFlowId + '" class="form-control">'
+    );
+    biometryOptions += formGroup(biometryThemeId, getString('biometry_theme'),
+        '<input type="text" name="biometrytheme" id="' + biometryThemeId + '" class="form-control">'
+    );
+
 
     var htmlTwo = '';
     htmlTwo += formGroup(null, getString('visible_warnings'),
@@ -235,6 +254,10 @@ M.availability_examus2.form.getNode = function(json) {
 
     htmlTwo += formGroup(null, getString('scoring_params_header'),
                  moreLess(scoringOptions),
+                 true);
+
+    htmlTwo += formGroup(null, getString('biometry_header'),
+                 moreLess(biometryOptions),
                  true);
 
 
@@ -301,6 +324,24 @@ M.availability_examus2.form.getNode = function(json) {
 
     if (json.rules === undefined) {
         json.rules = this.rules;
+    }
+
+    if (json.biometryenabled !== undefined) {
+        value = json.biometryenabled ? 'checked' : null;
+        node.one('#' + biometryEnabledId).set('checked', value);
+    }
+
+    if (json.biometryskipfail !== undefined) {
+        value = json.biometryskipfail ? 'checked' : null;
+        node.one('#' + biometrySkipfailId).set('checked', value);
+    }
+
+    if (json.biometryflow !== undefined) {
+        node.one('#' + biometryFlowId).set('value', json.biometryflow);
+    }
+
+    if (json.biometrytheme !== undefined) {
+        node.one('#' + biometryThemeId).set('value', json.biometrytheme);
     }
 
     if (json.warnings === undefined) {
@@ -395,6 +436,10 @@ M.availability_examus2.form.fillValue = function(value, node) {
     value.useragreementurl = node.one('input[name=useragreementurl]').get('value').trim();
     value.auxiliarycamera = node.one('input[name=auxiliarycamera]').get('checked');
     value.ldb = node.one('input[name=ldb]').get('checked');
+    value.biometryenabled = node.one('input[name=biometryenabled]').get('checked');
+    value.biometryskipfail = node.one('input[name=biometryskipfail]').get('checked');
+    value.biometryflow = node.one('input[name=biometryflow]').get('value').trim();
+    value.biometrytheme = node.one('input[name=biometrytheme]').get('value').trim();
 
     value.rules = {};
     rulesInputs = node.all('.rules input');

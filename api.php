@@ -55,10 +55,11 @@ if (empty($requestbody)) {
     exit;
 }
 
-// file_put_contents('/tmp/debug.log', $requestbody . PHP_EOL);
+file_put_contents('/tmp/debug.log', $requestbody . PHP_EOL);
 $request = json_decode($requestbody);
 
 $accesscode = $request->sessionId;
+
 $entry = $DB->get_record('availability_examus2_entries', ['accesscode' => $accesscode]);
 
 $method = optional_param('method', '', PARAM_TEXT);
@@ -99,19 +100,27 @@ $handlers['review'] = function($entry, $request) {
 };
 
 $handlers['schedule'] = function($entry, $request) {
-    global $DB;
+    global $DB, $SESSION;
     $event = $request->event;
+
     if ($event == 'scheduled') {
+        if ($entry->status != 'new') {
+            $entry = common::most_recent_entry($entry);
+            if(!$entry){
+                $entry = common::reset_entry(['accesscode' => $accesscode], true);
+            }
+        }
+
         $entry->status = 'scheduled';
-    } else if (!$entry->attemptid) {
-        common::reset_entry(['accesscode' => $entry->accesscode]);
-    }
-
-    if ($request->start) {
         $entry->timescheduled = common::parse_date($request->start);
+        $DB->update_record('availability_examus2_entries', $entry);
+    } else {
+        $entry->status = 'canceled';
+        $entry->timescheduled = null;
+        $DB->update_record('availability_examus2_entries', $entry);
+        common::reset_entry(['accesscode' => $accesscode], true);
     }
 
-    $DB->update_record('availability_examus2_entries', $entry);
 };
 
 if ($entry) {

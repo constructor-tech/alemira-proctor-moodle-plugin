@@ -47,6 +47,8 @@ class frontend extends \core_availability\frontend {
             'passport_identification', 'skip_identification', 'enable_ldb',
             'is_trial', 'custom_rules', 'noprotection', 'user_agreement_url',
             'auxiliary_camera', 'visible_warnings', 'scoring_params_header',
+            'biometry_header', 'biometry_enabled', 'biometry_skipfail', 'biometry_flow',
+            'biometry_theme',
         ];
 
         foreach (condition::WARNINGS as $key => $value) {

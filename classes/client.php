@@ -163,6 +163,26 @@ class client {
         return $data;
     }
 
+    public function biometry_data($condition, $user) {
+        global $PAGE;
+        $userpicture = new \user_picture($user);
+        $userpicture->size = 1; // Size f1.
+        $userpicture->includetoken = $user->id;
+        $profileimageurl = $userpicture->get_url($PAGE)->out(false);
+
+        $conditiondata = $condition->to_json();
+
+        return [
+            'biometricIdentification' => [
+                'enabled' => $conditiondata['biometryenabled'],
+                'skip_fail' => $conditiondata['biometryskipfail'],
+                'flow' => $conditiondata['biometryflow'],
+                'theme' => $conditiondata['biometrytheme'],
+                'photo_url' => $profileimageurl,
+            ],
+        ];
+    }
+
     public function user_data($user) {
         return [
             'userId' => $this->useremails ? $user->email : $user->id,

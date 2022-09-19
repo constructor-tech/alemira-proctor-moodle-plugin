@@ -23,10 +23,10 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+namespace availability_examus2;
 
-$plugin->component = 'availability_examus2';
-$plugin->version = 2022091401;
-$plugin->release = 'v2.0-beta';
-$plugin->requires = 2018111800;
-$plugin->maturity = MATURITY_STABLE;
+/**
+ * Account list class
+ */
+class admin_setting_accounts extends \admin_setting{
+}

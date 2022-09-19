@@ -49,7 +49,8 @@ class condition extends \core_availability\condition {
         'duration', 'mode', 'schedulingrequired', 'autorescheduling',
         'istrial', 'rules', 'identification', 'noprotection',
         'useragreementurl', 'auxiliarycamera', 'customrules',
-        'scoring', 'groups', 'warnings', 'ldb',
+        'scoring', 'groups', 'warnings', 'ldb', 'biometryenabled',
+        'biometryskipfail', 'biometryflow', 'biometrytheme',
     ];
 
     const WARNINGS = [
@@ -127,6 +128,18 @@ class condition extends \core_availability\condition {
 
     /** @var string Lockdown browser */
     public $ldb = false;
+
+    /** @var bool  */
+    public $biometryenabled = false;
+
+    /** @var bool  */
+    public $biometryskipfail = false;
+
+    /** @var string  */
+    public $biometryflow = null;
+
+    /** @var string  */
+    public $biometrytheme = null;
 
     /** @var string List of custom rules */
     public $customrules = null;
@@ -235,6 +248,30 @@ class condition extends \core_availability\condition {
             $this->ldb = $structure->ldb;
         } else {
             $this->ldb = false;
+        }
+
+        if (isset($structure->biometryenabled)) {
+            $this->biometryenabled = $structure->biometryenabled;
+        } else {
+            $this->biometryenabled = false;
+        }
+
+        if (isset($structure->biometryskipfail)) {
+            $this->biometryskipfail = $structure->biometryskipfail;
+        } else {
+            $this->biometryskipfail = false;
+        }
+
+        if (isset($structure->biometryflow)) {
+            $this->biometryflow = $structure->biometryflow;
+        } else {
+            $this->biometryflow = null;
+        }
+
+        if (isset($structure->biometrytheme)) {
+            $this->biometrytheme = $structure->biometrytheme;
+        } else {
+            $this->biometrytheme = null;
         }
 
         $this->validate();

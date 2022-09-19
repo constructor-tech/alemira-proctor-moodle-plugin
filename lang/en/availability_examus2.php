@@ -89,6 +89,12 @@ $string['custom_rules'] = "Custom rules";
 
 $string['user_agreement_url'] = "User agreement URL";
 
+$string['biometry_header'] = 'Biometric identification settings';
+$string['biometry_enabled'] = 'Enable biometric identification';
+$string['biometry_skipfail'] = 'Allow user to continue on failure of identification';
+$string['biometry_flow'] = 'Verification flow name';
+$string['biometry_theme'] = 'Theme';
+
 $string['time_scheduled'] = 'Scheduled';
 $string['time_finish'] = 'Attempt finished at';
 
