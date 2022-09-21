@@ -129,16 +129,16 @@ class condition extends \core_availability\condition {
     /** @var string Lockdown browser */
     public $ldb = false;
 
-    /** @var bool  */
+    /** @var bool Biometric identification enabled */
     public $biometryenabled = false;
 
-    /** @var bool  */
+    /** @var bool Biometric identification skips failures */
     public $biometryskipfail = false;
 
-    /** @var string  */
+    /** @var string Biometric flow name*/
     public $biometryflow = null;
 
-    /** @var string  */
+    /** @var string Biometric identification screen theme name */
     public $biometrytheme = null;
 
     /** @var string List of custom rules */
@@ -413,7 +413,6 @@ class condition extends \core_availability\condition {
 
             self::$cachedtrees[$cm->id] = $tree;
         } catch (moodle_exception $e) {
-
             return null;
         }
 
