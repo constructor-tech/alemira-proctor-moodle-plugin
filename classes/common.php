@@ -19,7 +19,6 @@
  *
  * @package    availability_examus
  * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
- * @copyright  based on work by 2017 Max Pomazuev
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

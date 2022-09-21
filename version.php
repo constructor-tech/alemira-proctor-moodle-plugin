@@ -19,7 +19,6 @@
  *
  * @package    availability_examus2
  * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
- * @copyright  based on work by 2017 Max Pomazuev
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -27,6 +26,6 @@ defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'availability_examus2';
 $plugin->version = 2022091401;
-$plugin->release = 'v2.0-beta';
+$plugin->release = 'v2.0';
 $plugin->requires = 2018111800;
 $plugin->maturity = MATURITY_STABLE;
