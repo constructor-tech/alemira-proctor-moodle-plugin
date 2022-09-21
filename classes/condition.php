@@ -497,10 +497,6 @@ class condition extends \core_availability\condition {
     public function is_available($not,
             \core_availability\info $info, $grabthelot, $userid) {
 
-        if (!$info instanceof \core_availability\info_module) {
-            return true;
-        }
-
         $allow = true;
 
         if ($not) {
@@ -508,42 +504,6 @@ class condition extends \core_availability\condition {
         }
         return $allow;
     }
-
-    /**
-     * is available internal
-     *
-     * @param bool $not Not
-     * @param int $userid User id
-     * @return bool
-     */
-    public static function is_available_internal($courseid, $cmid, $userid) {
-        global $DB, $SESSION;
-
-        $allow = false;
-
-        if (isset($SESSION->availibilityexamus2token)) {
-            $accesscode = $SESSION->availibilityexamus2token;
-
-            $entry = $DB->get_record('availability_examus2_entries', [
-                'userid' => $userid,
-                'courseid' => $courseid,
-                'cmid' => $cmid,
-                'accesscode' => $accesscode
-            ]);
-
-            if ($entry) {
-                $allow = true;
-            }
-        }
-
-        if (state::$apirequest) {
-            $allow = true;
-        }
-
-        return $allow;
-
-    }
-
 
     /**
      * get description
@@ -650,8 +610,7 @@ class condition extends \core_availability\condition {
      * @return string
      */
     protected function get_debug_string() {
-        global $SESSION;
-        return isset($SESSION->availibilityexamus2token) ? 'YES' : 'NO';
+        return 'YES';
     }
 
 }

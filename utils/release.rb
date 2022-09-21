@@ -31,11 +31,13 @@ code_renames = {
   old_name.capitalize => package_name.capitalize,
   old_name => package_name
 }
-text_pattern = Regexp.new 'examus', Regexp::IGNORECASE
+text_pattern = Regexp.new '(examus|экзамус)', Regexp::IGNORECASE
 text_renames = {
     'Examus' => package_name.capitalize,
     'EXAMUS' => package_name.upcase,
-    'examus' => package_name
+    'examus' => package_name,
+    'Экзамус' => package_name.capitalize,
+    'экзамус' => package_name,
 }
 
 version_regex = /plugin->version\s*=\s*(\d+)/
@@ -74,13 +76,12 @@ files.each do |src|
       matches += content.scan text_pattern
 
       if matches.count > 0
-        puts "Replacing matches: #{matches.uniq}"
+        puts "Replacing matches: #{matches.flatten.uniq}"
         content.gsub code_pattern, code_renames
         content.gsub text_pattern, text_renames
 
         File.write output_dir+dst, content
       end
     end
-
   end
 end
