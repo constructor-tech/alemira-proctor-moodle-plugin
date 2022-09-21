@@ -40,8 +40,6 @@ function xmldb_availability_examus2_upgrade($oldversion) {
             $dbman->add_field($table, $field);
         }
 
-        // savepoint reached.
-
         upgrade_plugin_savepoint(true, 2022040508, 'availability', 'examus2');
     }
     return true;

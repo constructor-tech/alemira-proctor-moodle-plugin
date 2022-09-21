@@ -158,7 +158,7 @@ class condition extends \core_availability\condition {
      */
     public function __construct($structure) {
         $scoringdefaults = [];
-        foreach(self::SCORING as $key => $row){
+        foreach (self::SCORING as $key => $row) {
             $scoringdefaults[$key] = isset($row['default']) ? $row['default'] : null;
         }
 
@@ -633,8 +633,8 @@ class condition extends \core_availability\condition {
             $allowedattempts = null;
         }
 
-        // Allow any number of entrues for now
-        if (true) { //($allowedattempts == null || count($entries) < $allowedattempts) {
+        // Allow any number of entrues for now.
+        if (true) {
             $entry = self::make_entry($courseid, $cm->id, $userid);
             $entry->id = $DB->insert_record('availability_examus2_entries', $entry);
             return $entry;

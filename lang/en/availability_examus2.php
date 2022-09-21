@@ -25,13 +25,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['examus:logaccess'] = 'Examus log access';
-$string['examus:logaccess_course'] = 'Examus log access for course';
-$string['examus:logaccess_all'] = 'Examus log access for all courses';
-$string['examus:proctor_auth'] = 'Authorize to Examus App as a proctor';
-$string['examus:reviewer_auth'] = 'Authorize to Examus App as a reviewer';
-
-$string['cron_update_scheduled_exams'] = 'Updates scheduled exams data in Examus';
+$string['examus2:logaccess'] = 'Examus log access';
+$string['examus2:logaccess_course'] = 'Examus log access for course';
+$string['examus2:logaccess_all'] = 'Examus log access for all courses';
 
 $string['description'] = 'Allows students to use Examus proctoring service';
 $string['pluginname'] = 'Proctoring by Examus';

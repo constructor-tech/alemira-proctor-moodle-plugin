@@ -45,8 +45,6 @@ function availability_examus2_before_standard_html_head() {
         $icon = new \pix_icon('i/log', '');
         $node = navigation_node::create($title, $url, navigation_node::TYPE_CUSTOM, null, null, $icon);
 
-        // $this->page->primarynav->children->add($node);
-        // $PAGE->flatnav->add($node);
     }
 
     if (isset(state::$attempt['attempt_id'])) {
@@ -116,15 +114,13 @@ function availability_examus2_before_standard_html_head() {
 
     $data = array_merge($data, $userdata, $timedata, $attemptdata, $biometrydata);
 
-    if($condition->schedulingrequired && empty($entry->timescheduled)){
+    if ($condition->schedulingrequired && empty($entry->timescheduled)) {
         $data['schedule'] = true;
     }
 
     if (in_array($entry->status, ['started', 'scheduled', 'new'])) {
-        // We have to formdata in any case because exam can be opened outside iframe
-        //if(empty($SESSION->accesscode)){n
+        // We have to pass formdata in any case because exam can be opened outside iframe.
         $formdata = $client->get_form('start', $data);
-        //}
 
         // Our entry is active, we are showing user a fader.
         ob_start();
@@ -142,7 +138,7 @@ function availability_examus2_after_require_login() {
 
     $launchedfromframe = false;
     $accesscode = optional_param('accesscode', null, PARAM_RAW);
-    if(!empty($accesscode)){
+    if (!empty($accesscode)) {
         $launchedfromframe = true;
 
         // We know accesscode is passed in params.
@@ -150,15 +146,15 @@ function availability_examus2_after_require_login() {
             'accesscode' => $accesscode,
         ]);
 
-        // If entry exists, we need to check if we have a newer one
+        // If entry exists, we need to check if we have a newer one.
         if ($entry) {
             $newentry = common::most_recent_entry($entry);
-            if($newentry) {
+            if ($newentry) {
                 $entry = $newentry;
             }
         }
 
-        if (!in_array($entry->status, ['new', 'scheduled', 'started'])){
+        if (!in_array($entry->status, ['new', 'scheduled', 'started'])) {
             $entry = $condition->create_entry_for_cm($USER->id, $cm);
         }
 
@@ -185,11 +181,6 @@ function availability_examus2_after_require_login() {
         return;
     }
 
-    // No need to schedule an exam.
-    // if (!$condition->schedulingrequired) {
-    //     return;
-    // }
-
     if (!empty($entry) && $entry->cmid != $cm->id) {
         // Entry belongs to other cm.
         $entry = null;
@@ -205,7 +196,7 @@ function availability_examus2_after_require_login() {
         return;
     }
 
-    // Allowing to start attempt, as it is scheduled and we are supposedly view through examus
+    // Allowing to start attempt, as it is scheduled and we are supposedly view through examus.
     if (
         $entry->status == 'scheduled'
             && $condition->schedulingrequired
@@ -216,7 +207,7 @@ function availability_examus2_after_require_login() {
         return;
     }
 
-    // Allowing to start attempt, as it does not need scheduling
+    // Allowing to start attempt, as it does not need scheduling.
     if (
         $entry->status == 'new'
             && !$condition->schedulingrequired
@@ -225,16 +216,11 @@ function availability_examus2_after_require_login() {
         return;
     }
 
-
-    // if (!in_array($entry->status, ['new', 'scheduled', 'started'])){
-    //     $entry = $condition->create_entry_for_cm($USER->id, $cm);
-    // }
-
     $timebracket = \availability_examus2\common::get_timebracket_for_cm('quiz', $cm);
 
     $location = new \moodle_url('/mod/quiz/view.php', [
         'id' => $cm->id,
-            'accesscode' => $entry->accesscode,
+        'accesscode' => $entry->accesscode,
     ]);
 
     $client = new \availability_examus2\client();

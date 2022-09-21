@@ -23,6 +23,13 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+/**
+ * This file provides API interface in accordance to
+ * Examus Simple Integration specification. It has not skip moodle's
+ * standard auth flow.
+ */
+// phpcs:disable moodle.Files.RequireLogin.Missing
+
 use availability_examus2\client;
 use availability_examus2\common;
 
@@ -106,7 +113,7 @@ $handlers['schedule'] = function($entry, $request) {
     if ($event == 'scheduled') {
         if ($entry->status != 'new') {
             $entry = common::most_recent_entry($entry);
-            if(!$entry){
+            if (!$entry) {
                 $entry = common::reset_entry(['accesscode' => $accesscode], true);
             }
         }

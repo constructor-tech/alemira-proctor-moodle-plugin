@@ -131,8 +131,8 @@ class client {
         $customrules = empty($customrules) ? '' : $customrules;
 
         $scoring = $conditiondata['scoring'];
-        foreach ($scoring as $key => $value){
-            if(is_null($value)){
+        foreach ($scoring as $key => $value) {
+            if (is_null($value)) {
                 unset($scoring->$key);
             }
         }

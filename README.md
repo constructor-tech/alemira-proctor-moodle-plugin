@@ -1,12 +1,15 @@
 # EXAMUS MOODLE PLUGIN
 
 ## Requirements
-1. Examus plugin was tested with Moodle versions 3.6 to 3.10.
+Examus plugin was tested with Moodle versions 3.6 to 4.0.
 
 ## Installation and integration
 
 ### Plugin installation
-Download ZIP file from [], login to your Moodle site as an admin, open `Site administration → Plugins → Install plugins`, upload the ZIP file and install it.
+Download ZIP file from (add link), login to your Moodle site as an admin, open `Site administration → Plugins → Install plugins`, upload the ZIP file and install it.
+
+### Integration setup
+TODO
 
 ## Usage
 

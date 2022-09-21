@@ -23,8 +23,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
 use availability_examus2\state;
 use availability_examus2\client;
 use availability_examus2\common;
@@ -59,8 +57,8 @@ function avalibility_examus2_attempt_started_handler($event) {
     }
 
     $inhibitredirect = false;
-    if($accesscode) {
-        // If we have an access code here, we are coming from Examus
+    if ($accesscode) {
+        // If we have an access code here, we are coming from Examus.
         $inhibitredirect = true;
         $entry = $DB->get_record('availability_examus2_entries', ['accesscode' => $accesscode]);
     }
@@ -71,7 +69,7 @@ function avalibility_examus2_attempt_started_handler($event) {
         if ($entry->status == "started" && $entry->attemptid != $attempt->id) {
             $reset = true;
         }
-        if (!in_array($entry->status, ['new', 'scheduled', 'started'])){
+        if (!in_array($entry->status, ['new', 'scheduled', 'started'])) {
             $reset = true;
         }
 
@@ -84,7 +82,7 @@ function avalibility_examus2_attempt_started_handler($event) {
         }
     }
 
-    if ($inhibitredirect){
+    if ($inhibitredirect) {
         return;
     }
 
@@ -167,7 +165,6 @@ function avalibility_examus2_attempt_submitted_handler($event) {
         $entries[] = $entry;
     }
 
-
     // We want to let previews to happen without proctoring.
     $quizobj = \quiz::create($cm->instance, $userid);
     if ($quizobj->is_preview_user()) {
@@ -179,7 +176,6 @@ function avalibility_examus2_attempt_submitted_handler($event) {
         $DB->update_record('availability_examus2_entries', $entry);
     }
     $entry = reset($entries);
-
 
     core_shutdown_manager::register_function(function() use ($entry) {
         $headers = headers_list();
