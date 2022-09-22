@@ -47,7 +47,7 @@ throw "Cant find version in version.php" unless version_match
 
 version = version_match[1]
 
-output_dir = "releases/#{package_name}-#{version}/"
+output_dir = "releases/#{package_name}/"
 
 if File.exists?(output_dir)
   throw "Output dir already exists, use -f flag" if !force
@@ -77,11 +77,15 @@ files.each do |src|
 
       if matches.count > 0
         puts "Replacing matches: #{matches.flatten.uniq}"
-        content.gsub code_pattern, code_renames
-        content.gsub text_pattern, text_renames
+        content.gsub! code_pattern, code_renames
+        content.gsub! text_pattern, text_renames
 
         File.write output_dir+dst, content
       end
     end
   end
+end
+puts "Creating archive"
+FileUtils.cd "releases" do
+  system("zip -r '#{package_name}-#{version}.zip' #{package_name}")
 end
