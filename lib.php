@@ -137,6 +137,12 @@ function availability_examus2_after_require_login() {
 
     $launchedfromframe = false;
     $accesscode = optional_param('accesscode', null, PARAM_RAW);
+
+    if ($cm && $course) {
+        $modinfo = get_fast_modinfo($course->id);
+        $cminfo = $modinfo->get_cm($cm->id);
+    }
+
     if (!empty($accesscode)) {
         $launchedfromframe = true;
 
@@ -154,7 +160,7 @@ function availability_examus2_after_require_login() {
         }
 
         if (!in_array($entry->status, ['new', 'scheduled', 'started'])) {
-            $entry = $condition->create_entry_for_cm($USER->id, $cm);
+            $entry = $condition->create_entry_for_cm($USER->id, $cminfo);
         }
 
         $SESSION->accesscode = $entry->accesscode;
@@ -166,28 +172,25 @@ function availability_examus2_after_require_login() {
         return;
     }
 
-    $modinfo = get_fast_modinfo($course->id);
-    $cm = $modinfo->get_cm($cm->id);
-
-    $condition = \availability_examus2\condition::get_examus_condition($cm);
+    $condition = \availability_examus2\condition::get_examus_condition($cminfo);
     if (!$condition) {
         return;
     }
 
     // We want to let previews to happen without proctoring.
-    $quizobj = \quiz::create($cm->instance, $USER->id);
+    $quizobj = \quiz::create($cminfo->instance, $USER->id);
     if ($quizobj->is_preview_user()) {
         return;
     }
 
-    if (!empty($entry) && $entry->cmid != $cm->id) {
+    if (!empty($entry) && $entry->cmid != $cminfo->id) {
         // Entry belongs to other cm.
         $entry = null;
         $SESSION->accesscode = null;
     }
 
     if (empty($entry)) {
-        $entry = $condition->create_entry_for_cm($USER->id, $cm);
+        $entry = $condition->create_entry_for_cm($USER->id, $cminfo);
     }
 
     // The attempt is already started, letting it open.
@@ -215,15 +218,15 @@ function availability_examus2_after_require_login() {
         return;
     }
 
-    $timebracket = \availability_examus2\common::get_timebracket_for_cm('quiz', $cm);
+    $timebracket = \availability_examus2\common::get_timebracket_for_cm('quiz', $cminfo);
 
     $location = new \moodle_url('/mod/quiz/view.php', [
-        'id' => $cm->id,
+        'id' => $cminfo->id,
         'accesscode' => $entry->accesscode,
     ]);
 
     $client = new \availability_examus2\client();
-    $data = $client->exam_data($condition, $course, $cm);
+    $data = $client->exam_data($condition, $course, $cminfo);
     $userdata = $client->user_data($USER);
     $biometrydata = $client->biometry_data($condition, $USER);
     $timedata = $client->time_data($timebracket);
