@@ -36,9 +36,13 @@ require_once('../../../config.php');
 
 global $DB;
 
-$url = new \moodle_url('/availability/condition/examus2/api.php');
-
-$auth = empty($_SERVER['HTTP_AUTHORIZATION']) ? null : $_SERVER['HTTP_AUTHORIZATION'];
+if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
+    $auth = $_SERVER['HTTP_AUTHORIZATION'];
+} elseif (isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
+    $auth = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
+} else {
+    $auth = null;
+}
 
 if (empty($auth) || !preg_match('/JWT /', $auth)) {
     echo('Not auth provided');
