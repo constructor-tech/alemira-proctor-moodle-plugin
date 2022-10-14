@@ -162,6 +162,8 @@ function avalibility_examus2_attempt_submitted_handler($event) {
         $entry = $DB->get_record('availability_examus2_entries', ['accesscode' => $accesscode]);
 
         $entries[] = $entry;
+    } else {
+        return;
     }
 
     // We want to let previews to happen without proctoring.

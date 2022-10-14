@@ -45,6 +45,7 @@ const strAwaitingProctoring = <?php echo json_encode(get_string('fader_awaiting_
 const strInstructions = <?php echo json_encode(get_string('fader_instructions', 'availability_examus2')) ?>;
 const faderHTML = strAwaitingProctoring + strInstructions;
 const formData = <?php echo json_encode(isset($formdata) ? $formdata : null); ?>;
+const noProtection <?php echo $condition->noprotection ? 'true' : 'false' ?>;
 const {sessionStorage, location} = window;
 
 const TAG = 'proctoring fader';
@@ -118,12 +119,15 @@ const redirectToExamus = () => {
 const proved = waitForProof();
 
 window.addEventListener("DOMContentLoaded", () => {
-  const fader = createFader();
-  document.body.appendChild(fader);
+  const fader = noProtection ? createFader() : null;
+
+  if (fader) {
+    document.body.appendChild(fader);
+  }
 
   redirectTimeout = setTimeout(() => redirectToExamus(), 15000);
   proved
-   .then(() => fader.remove())
+   .then(() => { if (fader) {fader.remove();} })
    .then(() => clearTimeout(redirectTimeout));
 
 });
