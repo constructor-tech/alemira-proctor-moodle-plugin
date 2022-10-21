@@ -31,15 +31,21 @@ function xmldb_availability_examus2_upgrade($oldversion) {
     global $DB;
     $dbman = $DB->get_manager();
 
-    // Add a new column newcol to the mdl_myqtype_options.
-    if ($oldversion < 2022040508) {
-        $table = new xmldb_table('availability_examus2_exams');
-        $field = new xmldb_field('userid', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+    if ($oldversion < 2022102101) {
+        // Removing table that was used during earli stages of development and slipped into release.
+        $oldtable = new xmldb_table('availability_examus2_exams');
+        if ($dbman->table_exists($oldtable)) {
+            $dbman->drop_table($oldtable);
+        }
+
+        $table = new xmldb_table('availability_examus2_entries');
+        $field = new xmldb_field('archiveurl', XMLDB_TYPE_TEXT);
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
-
-        upgrade_plugin_savepoint(true, 2022040508, 'availability', 'examus2');
     }
+
+    upgrade_plugin_savepoint(true, 2022102101, 'availability', 'examus2');
+
     return true;
 }

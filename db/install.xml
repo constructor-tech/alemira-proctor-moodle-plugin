@@ -14,6 +14,7 @@
         <FIELD NAME="accesscode" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="status" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="Not inited" SEQUENCE="false"/>
         <FIELD NAME="review_link" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Review link"/>
+        <FIELD NAME="archiveurl" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Archive url"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The time this record was created"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The time this record was modified"/>
         <FIELD NAME="timescheduled" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="The time this record was scheduled"/>
@@ -34,25 +35,6 @@
       <INDEXES>
         <INDEX NAME="accesscode" UNIQUE="true" FIELDS="accesscode"/>
       </INDEXES>
-    </TABLE>
-    <TABLE NAME="availability_examus2_exams" COMMENT="Exams sent to Examus">
-        <FIELDS>
-            <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-            <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
-            <FIELD NAME="cmid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
-            <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
-            <FIELD NAME="timeuploaded" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The time this exam was uloaded into Examus"/>
-            <FIELD NAME="checksum" TYPE="char" LENGTH="8" NOTNULL="true" SEQUENCE="false" COMMENT="The checksum of uploaded payload (exam data)"/>
-        </FIELDS>
-        <KEYS>
-            <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-            <KEY NAME="courseid" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
-            <KEY NAME="cmid" TYPE="foreign" FIELDS="cmid" REFTABLE="course_modules" REFFIELDS="id"/>
-        </KEYS>
-        <INDEXES>
-            <INDEX NAME="ix_timeuploaded" UNIQUE="false" FIELDS="timeuploaded" />
-            <INDEX NAME="ux_courseid_cmid_userid" UNIQUE="true" FIELDS="courseid,cmid,userid" />
-        </INDEXES>
     </TABLE>
   </TABLES>
 </XMLDB>
