@@ -136,6 +136,19 @@ class log_details {
 
         $threshold = $entry->threshold ? json_decode($entry->threshold) : (object)['attention' => null, 'rejected' => null];
 
+        if ($entry->review_link !== null) {
+            $reviewlink = "<a href='" . $entry->review_link . "'>" . get_string('log_report_link', 'availability_examus2') . "</a>";
+        } else {
+            $reviewlink = null;
+        }
+
+        if ($entry->archiveurl !== null) {
+            $archiveurl = "<a href='" . $entry->archiveurl . "'>" . get_string('log_archive_link', 'availability_examus2') . "</a>";
+        } else {
+            $archiveurl = null;
+        }
+
+
         $table->add_data([
             get_string('date_modified', 'availability_examus2'),
             common::format_date($entry->timemodified)
@@ -165,16 +178,11 @@ class log_details {
             $entry->status,
         ]);
 
-        if ($entry->review_link !== null) {
-            $reviewlink = "<a href='" . $entry->review_link . "'>" . get_string('link', 'availability_examus2') . "</a>";
-        } else {
-            $reviewlink = "-";
-        }
-
         $table->add_data([
-            get_string('review', 'availability_examus2'),
-            $reviewlink,
+            get_string('log_review', 'availability_examus2'),
+            implode(', ', array_filter([$reviewlink, $archiveurl])),
         ]);
+
         $table->add_data([
             get_string('score', 'availability_examus2'),
             $entry->score,

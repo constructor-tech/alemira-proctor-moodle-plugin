@@ -49,13 +49,14 @@ $string['use_examus'] = 'Используйте приложение "Экзам
 $string['settings'] = 'Настройки прокторинга "Экзамус"';
 $string['log_section'] = 'Журнал прокторинга "Экзамус"';
 $string['status'] = 'Статус';
-$string['review'] = 'Результат';
 $string['module'] = 'Модуль';
 $string['new_entry'] = 'Новая запись';
 $string['new_entry_force'] = 'Новая запись';
 $string['error_setduration'] = 'Длительность в минутах должна быть кратна 30 (30, 60, 90)';
 $string['duration'] = 'Длительность в минутах, кратная 30';
-$string['link'] = 'Архив';
+$string['log_review'] = 'Результат';
+$string['log_archive_link'] = 'Архив';
+$string['log_report_link'] = 'Отчет';
 
 $string['new_entry_created'] = 'Новая запись успешно создана';
 $string['entry_exist'] = 'Новая запись уже существует';

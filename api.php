@@ -80,6 +80,9 @@ $handlers['review'] = function($entry, $request) {
     if (isset($request->reportUrl)) {
         $entry->review_link = $request->reportUrl;
     }
+    if (isset($request->archive)) {
+        $entry->archiveurl = $request->archive;
+    }
 
     $timenow = time();
 

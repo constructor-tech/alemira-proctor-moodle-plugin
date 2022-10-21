@@ -102,6 +102,7 @@ class log {
             'u.id userid',
             'e.status status',
             'review_link',
+            'archiveurl',
             'cmid',
             'courseid',
             'score',
@@ -204,7 +205,7 @@ class log {
             get_string('course'),
             get_string('module', 'availability_examus2'),
             get_string('status', 'availability_examus2'),
-            get_string('review', 'availability_examus2'),
+            get_string('log_review', 'availability_examus2'),
             get_string('score', 'availability_examus2'),
             '',
             ''
@@ -249,14 +250,23 @@ class log {
                     $cm = null;
                 }
 
+                $reportlinks = [];
+                if ($entry->review_link !== null) {
+                     $reportlinks[] = "<a href='" . $entry->review_link . "'>"
+                                    . get_string('log_report_link', 'availability_examus2')
+                                    . "</a>";
+                }
+                if ($entry->archiveurl !== null) {
+                     $reportlinks[] = "<a href='" . $entry->archiveurl . "'>"
+                                    . get_string('log_archive_link', 'availability_examus2')
+                                    . "</a>";
+                }
+
+
                 $row[] = $course->fullname;
                 $row[] = $cm ? $cm->get_formatted_name() : '';
                 $row[] = $entry->status;
-                if ($entry->review_link !== null) {
-                    $row[] = "<a href='" . $entry->review_link . "'>" . get_string('link', 'availability_examus2') . "</a>";
-                } else {
-                    $row[] = "-";
-                }
+                $row[] = implode(',&nbsp;', $reportlinks);
 
                 $scheduled = $entry->status == 'scheduled' && $entry->timescheduled;
 
