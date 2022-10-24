@@ -191,9 +191,9 @@ class client {
         ];
     }
 
-    public function attempt_data($attemptid, $url) {
+    public function attempt_data($sessionid, $url) {
         return [
-            'sessionId' => $attemptid,
+            'sessionId' => $sessionid,
             'sessionUrl' => $url,
         ];
     }
