@@ -45,7 +45,6 @@ $string['settings_account_id_desc'] = '';
 $string['settings_user_emails'] = 'Send user emails to examus';
 $string['settings_user_emails_desc'] = 'Make sure that all user email are unique before turning this option on! Having multiple users with same email can cause issues!';
 
-
 $string['use_examus'] = 'Use examus app to view this module';
 $string['settings'] = 'Examus settings';
 $string['log_section'] = 'Examus log';
@@ -58,7 +57,8 @@ $string['duration'] = 'Duration in minutes (a multiple of 30)';
 $string['log_review'] = 'Review';
 $string['log_archive_link'] = 'Video';
 $string['log_report_link'] = 'Report';
-
+$string['log_attempt'] = 'Attemt';
+$string['log_attempt_link'] = 'Review attempt';
 
 $string['new_entry_created'] = 'New entry created';
 $string['entry_exist'] = 'New entry already exist';

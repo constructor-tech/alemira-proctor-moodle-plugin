@@ -43,9 +43,10 @@ function xmldb_availability_examus2_upgrade($oldversion) {
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
+
+        upgrade_plugin_savepoint(true, 2022102101, 'availability', 'examus2');
     }
 
-    upgrade_plugin_savepoint(true, 2022102101, 'availability', 'examus2');
 
     return true;
 }

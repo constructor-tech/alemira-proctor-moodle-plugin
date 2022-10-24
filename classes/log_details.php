@@ -143,9 +143,16 @@ class log_details {
         }
 
         if ($entry->archiveurl !== null) {
-            $archiveurl = "<a href='" . $entry->archiveurl . "'>" . get_string('log_archive_link', 'availability_examus2') . "</a>";
+            $archivelink = "<a href='" . $entry->archiveurl . "'>" . get_string('log_archive_link', 'availability_examus2') . "</a>";
         } else {
-            $archiveurl = null;
+            $archivelink = null;
+        }
+
+        if ($entry->attemptid) {
+            $attempturl  = new \moodle_url('/mod/quiz/review.php', ['attempt' => $entry->attemptid]);
+            $attemptlink = '<a href="' . $attempturl . '">' . get_string('log_attempt_link', 'availability_examus2') . '</a>';
+        } else {
+            $attemptlink = null;
         }
 
 
@@ -173,6 +180,7 @@ class log_details {
             get_string('module', 'availability_examus2'),
             !empty($course) ? $cm->get_formatted_name() : null,
         ]);
+
         $table->add_data([
             get_string('status', 'availability_examus2'),
             $entry->status,
@@ -180,7 +188,12 @@ class log_details {
 
         $table->add_data([
             get_string('log_review', 'availability_examus2'),
-            implode(', ', array_filter([$reviewlink, $archiveurl])),
+            implode(', ', array_filter([$reviewlink, $archivelink])),
+        ]);
+
+        $table->add_data([
+            get_string('log_attempt', 'availability_examus2'),
+            $attemptlink,
         ]);
 
         $table->add_data([

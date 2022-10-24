@@ -36,7 +36,7 @@ class frontend extends \core_availability\frontend {
      */
     protected function get_javascript_strings() {
         $strings = [
-            'title', 'error_setduration', 'duration', 'link', 'proctoring_mode', 'online_mode',
+            'title', 'error_setduration', 'duration', 'proctoring_mode', 'online_mode',
             'rules', 'offline_mode', 'identification_mode', 'auto_mode', 'allow_to_use_websites',
             'allow_to_use_books', 'allow_to_use_paper', 'allow_to_use_messengers',
             'allow_to_use_calculator', 'allow_to_use_excel', 'allow_to_use_human_assistant',
