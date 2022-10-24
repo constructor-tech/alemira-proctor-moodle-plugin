@@ -39,6 +39,7 @@ function avalibility_examus2_attempt_started_handler($event) {
 
     $attempt = $event->get_record_snapshot('quiz_attempts', $event->objectid);
 
+
     $course = get_course($event->courseid);
     $modinfo = get_fast_modinfo($course->id, $USER->id);
     $cmid = $event->get_context()->instanceid;
@@ -79,6 +80,12 @@ function avalibility_examus2_attempt_started_handler($event) {
             // And we need to let examus know about new entry.
             $inhibitredirect = false;
         }
+
+        if ($entry && $attempt) {
+            $entry->attemptid = $attempt->id;
+            $entry->status = "started";
+            $DB->update_record('availability_examus2_entries', $entry);
+        }
     }
 
     if ($inhibitredirect) {
@@ -87,9 +94,6 @@ function avalibility_examus2_attempt_started_handler($event) {
 
     if (empty($entry)) {
         $entry = $condition->create_entry_for_cm($USER->id, $cm);
-    }
-
-    if ($entry && $attempt) {
         $entry->attemptid = $attempt->id;
         $entry->status = "started";
         $DB->update_record('availability_examus2_entries', $entry);
@@ -141,6 +145,7 @@ function avalibility_examus2_attempt_submitted_handler($event) {
     global $DB, $SESSION;
     $cmid = $event->get_context()->instanceid;
     $attempt = $event->get_record_snapshot('quiz_attempts', $event->objectid);
+
     $cm = get_coursemodule_from_id('quiz', $cmid);
 
     $userid = $event->userid;
