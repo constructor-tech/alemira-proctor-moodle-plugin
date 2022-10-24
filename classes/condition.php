@@ -401,16 +401,10 @@ class condition extends \core_availability\condition {
      * @return array
      */
     private static function get_conditions($cm) {
-        if ($cm && isset(self::$cachedtrees[$cm->id])) {
-            return self::$cachedtrees[$cm->id];
-        }
-
         $info = new info_module($cm);
         try {
             $tree = $info->get_availability_tree();
             $tree = $tree->get_all_children('\\availability_examus2\\condition');
-
-            self::$cachedtrees[$cm->id] = $tree;
         } catch (moodle_exception $e) {
             return null;
         }
