@@ -149,8 +149,13 @@ class log_details {
         }
 
         if ($entry->attemptid) {
-            $attempturl  = new \moodle_url('/mod/quiz/review.php', ['attempt' => $entry->attemptid]);
-            $attemptlink = '<a href="' . $attempturl . '">' . get_string('log_attempt_link', 'availability_examus2') . '</a>';
+            $attempt = $DB->get_record('quiz_attempts', ['id' => $entry->attemptid]);
+            if ($attempt) {
+                $attempturl  = new \moodle_url('/mod/quiz/review.php', ['attempt' => $entry->attemptid]);
+                $attemptlink = '<a href="' . $attempturl . '">' . $entry->attemptid . '</a>';
+            } else {
+                $attemptlink = $entry->attemptid . ' ('. get_string('log_attempt_missing', 'availability_examus2') . ')';
+            }
         } else {
             $attemptlink = null;
         }

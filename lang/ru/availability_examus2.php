@@ -58,7 +58,7 @@ $string['log_review'] = 'Результат';
 $string['log_archive_link'] = 'Архив';
 $string['log_report_link'] = 'Отчет';
 $string['log_attempt'] = 'Попытка';
-$string['log_attempt_link'] = 'Просмотреть попытку';
+$string['log_attempt_missing'] = 'удалена';
 
 $string['new_entry_created'] = 'Новая запись успешно создана';
 $string['entry_exist'] = 'Новая запись уже существует';

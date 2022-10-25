@@ -58,7 +58,7 @@ $string['log_review'] = 'Review';
 $string['log_archive_link'] = 'Video';
 $string['log_report_link'] = 'Report';
 $string['log_attempt'] = 'Attemt';
-$string['log_attempt_link'] = 'Review attempt';
+$string['log_attempt_missing'] = 'deleted';
 
 $string['new_entry_created'] = 'New entry created';
 $string['entry_exist'] = 'New entry already exist';
