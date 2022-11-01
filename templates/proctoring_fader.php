@@ -43,10 +43,11 @@ defined('MOODLE_INTERNAL') || die();
 
 const strAwaitingProctoring = <?php echo json_encode(get_string('fader_awaiting_proctoring', 'availability_examus2')) ?>;
 const strInstructions = <?php echo json_encode(get_string('fader_instructions', 'availability_examus2')) ?>;
+const strReset = <?php echo json_encode(get_string('fader_reset', 'availability_examus2')) ?>;
 const faderHTML = strAwaitingProctoring + strInstructions;
 const formData = <?php echo json_encode(isset($formdata) ? $formdata : null); ?>;
 const noProtection = <?php echo $condition->noprotection ? 'true' : 'false' ?>;
-const {sessionStorage, location} = window;
+const reset = <?php echo $entryreset ? 'true' : 'false' ?>;
 
 const TAG = 'proctoring fader';
 const expectedData = 'proctoringReady_n6EY';
@@ -71,10 +72,10 @@ const waitForProof = () => new Promise(resolve => {
 /**
  * Prepare the element to cover quiz contents.
  */
-const createFader = () => {
+const createFader = (html) => {
   const fader = document.createElement("div");
 
-  fader.innerHTML = faderHTML;
+  fader.innerHTML = html;
 
   Object.assign(fader.style, {
     position: 'fixed',
@@ -91,6 +92,8 @@ const createFader = () => {
     alignContent: 'center',
     flexDirection: 'column',
   });
+
+  document.body.appendChild(fader);
 
   return fader;
 };
@@ -119,16 +122,27 @@ const redirectToExamus = () => {
 const proved = waitForProof();
 
 window.addEventListener("DOMContentLoaded", () => {
-  const fader = noProtection ? null : createFader();
+    const fader = noProtection ? null : createFader(faderHTML);
 
-  if (fader) {
-    document.body.appendChild(fader);
-  }
+    redirectTimeout = setTimeout(() => {
+         redirectToExamus();
+    }, 15000);
 
-  redirectTimeout = setTimeout(() => redirectToExamus(), 15000);
-  proved
-   .then(() => { if (fader) {fader.remove();} })
-   .then(() => clearTimeout(redirectTimeout));
+    proved.then(() => {
+        if (reset) {
+            if (fader) {
+                fader.innerHTML = strReset;
+            } else {
+                createFader(strReset);
+            }
+        } else {
+            if (fader) {
+                fader.remove();
+            }
+        }
+        clearTimeout(redirectTimeout)
+    });
+
 
 });
 

@@ -39,14 +39,13 @@ function avalibility_examus2_attempt_started_handler($event) {
 
     $attempt = $event->get_record_snapshot('quiz_attempts', $event->objectid);
 
-
     $course = get_course($event->courseid);
     $modinfo = get_fast_modinfo($course->id, $USER->id);
     $cmid = $event->get_context()->instanceid;
     $cm = $modinfo->get_cm($cmid);
 
     $condition = condition::get_examus_condition($cm);
-    if (!$condition) {
+    if (!$condition || !$attempt) {
         return;
     }
 
@@ -63,77 +62,48 @@ function avalibility_examus2_attempt_started_handler($event) {
         $entry = $DB->get_record('availability_examus2_entries', ['accesscode' => $accesscode]);
     }
 
-    // We need to reset entry if the user started new attempt.
     if (!empty($entry)) {
-        $reset = false;
-        if ($entry->status == "started" && $entry->attemptid != $attempt->id) {
-            $reset = true;
-        }
-        if (!in_array($entry->status, ['new', 'scheduled', 'started'])) {
-            $reset = true;
-        }
-
-        if ($reset) {
-            $entry = $condition->create_entry_for_cm($USER->id, $cm);
-            $SESSION->accesscode = null;
-
-            // And we need to let examus know about new entry.
-            $inhibitredirect = false;
-        }
-
-        if ($entry && $attempt) {
+        if (empty($entry->attemptid)) {
             $entry->attemptid = $attempt->id;
+            $entry->timemodified = time();
+        }
+        if (in_array($entry->status, ['new', 'scheduled' , 'started'])) {
             $entry->status = "started";
-            $DB->update_record('availability_examus2_entries', $entry);
+            $entry->timemodified = time();
+        }
+        $DB->update_record('availability_examus2_entries', $entry);
+
+        if ($entry->status == "started" && $entry->attemptid != $attempt->id) {
+            $entry = $condition->create_entry_for_cm($USER->id, $cm);
+
+            if ($accesscode) {
+                // The user is coming from examus, we can't redirect.
+                // We have to let user know that they need to restart manually.
+                $inhibitredirect = true;
+                $SESSION->availability_examus2_reset = true;
+            } else {
+                // The user is not coming from examus.
+                $inhibitredirect = false;
+            }
+        }
+    } else {
+        $entry = $condition->create_entry_for_cm($USER->id, $cm);
+        $entry->attemptid = $attempt->id;
+        $entry->status = "started";
+        $entry->timemodified = time();
+        $DB->update_record('availability_examus2_entries', $entry);
+
+        if ($accesscode) {
+            $inhibitredirect = true;
+            $SESSION->availability_examus2_reset = true;
+        } else {
+            $inhibitredirect = false;
         }
     }
 
     if ($inhibitredirect) {
         return;
     }
-
-    if (empty($entry)) {
-        $entry = $condition->create_entry_for_cm($USER->id, $cm);
-        $entry->attemptid = $attempt->id;
-        $entry->status = "started";
-        $DB->update_record('availability_examus2_entries', $entry);
-    }
-
-    $timebracket = common::get_timebracket_for_cm('quiz', $cm);
-
-    $client = new client();
-    $data = $client->exam_data($condition, $course, $cm);
-
-    $userdata = $client->user_data($USER);
-    $timedata = $client->time_data($timebracket);
-
-    $data = array_merge($data, $userdata, $timedata);
-
-    // We are allowing moodle transaction to commit.
-    // But we are replacing redirect page with our own.
-    core_shutdown_manager::register_function(function() use ($client, $data, $entry) {
-        $headers = headers_list();
-        header_remove('location');
-
-        $location = null;
-        foreach ($headers as $header) {
-            preg_match('/^location\s*:\s*(.*)$/is', $header, $matches);
-            if (!empty($matches[1])) {
-                $location = $matches[1];
-            }
-        }
-
-        if ($location) {
-            ob_end_clean();
-
-            $attemptdata = $client->attempt_data($entry->accesscode, $location);
-            $data = array_merge($data, $attemptdata);
-            $formdata = $client->get_form('start', $data);
-
-            $pagetitle = "Redirecting to Examus";
-            include(dirname(__FILE__) . '/templates/redirect.php');
-        }
-    });
 }
 
 /**
@@ -152,8 +122,7 @@ function avalibility_examus2_attempt_submitted_handler($event) {
 
     if (!empty($SESSION->accesscode)) {
         $accesscode = $SESSION->accesscode;
-        $SESSION->accesscode = null;
-
+        unset($SESSION->accesscode);
     }
 
     $entries = $DB->get_records('availability_examus2_entries', [
@@ -225,7 +194,7 @@ function avalibility_examus2_attempt_deleted_handler($event) {
 }
 
 /**
- * user enrolment deleted handles
+ * User enrolment deleted handles
  *
  * @param \core\event\user_enrolment_deleted $event Event
  */
@@ -236,7 +205,7 @@ function avalibility_examus2_user_enrolment_deleted(\core\event\user_enrolment_d
 }
 
 /**
- * course mudule deleted handler
+ * Course module deleted handler
  *
  * @param \core\event\course_module_deleted $event Event
  */

@@ -142,6 +142,7 @@ $string['details'] = 'Details';
 // Fader screen.
 $string['fader_awaiting_proctoring'] = 'Examus proctoring starts...';
 $string['fader_instructions'] = '<p>please wait</p>';
+$string['fader_reset'] = 'Session was reset, you need to restart the exam';
 
 $string['log_details_warnings'] = 'Warnings';
 $string['log_details_warning_type'] = 'Type';

@@ -34,7 +34,7 @@ use availability_examus2\common;
  * @return string
  */
 function availability_examus2_before_standard_html_head() {
-    global $DB, $USER, $PAGE, $SESSION;
+    global $DB, $USER;
 
     $context = context_system::instance();
 
@@ -46,6 +46,7 @@ function availability_examus2_before_standard_html_head() {
 
     }
 
+    // If there is no active attempt, do nothing
     if (isset(state::$attempt['attempt_id'])) {
         $attemptid = state::$attempt['attempt_id'];
         $attempt = $DB->get_record('quiz_attempts', ['id' => $attemptid]);
@@ -55,6 +56,33 @@ function availability_examus2_before_standard_html_head() {
     } else {
         return '';
     }
+
+    return availability_examus2_handle_proctoring_fader();
+}
+
+/**
+ * This hook is used for exams that require scheduling.
+ **/
+function availability_examus2_after_require_login() {
+    global $USER, $cm, $course;
+
+    // Handles redirect from examus.
+    $accesscode = optional_param('accesscode', null, PARAM_RAW);
+    if (!empty($accesscode)) {
+        availability_examus2_handle_accesscode_param($accesscode);
+        return;
+    }
+
+    // User is trying to start an attempt, redirect to examus if it is not started.
+    $scriptname = isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'] : null;
+    if ($scriptname == '/mod/quiz/startattempt.php') {
+        availability_examus2_handle_start_attempt($course, $cm, $USER);
+    }
+
+}
+
+function availability_examus2_handle_proctoring_fader() {
+    global $DB, $USER, $PAGE, $SESSION;
 
     $cmid = state::$attempt['cm_id'];
     $courseid = state::$attempt['course_id'];
@@ -83,23 +111,14 @@ function availability_examus2_before_standard_html_head() {
         return '';
     }
 
-    // Check that theres more rules, which pass.
-    // If we have no examus accesstoken (condition fails),
-    // but the module is still avalible, this means we should not
-    // enfoce proctoring.
-    $availibilityinfo = new \core_availability\info_module($cm);
-    $reason = '';
-    $isavailiblegeneral = $availibilityinfo->is_available($reason, false, $USER->id);
-    if (!$isavailiblegeneral) {
-        return '';
-    }
     $entry = $condition->create_entry_for_cm($USER->id, $cm);
-
-    $timebracket = \availability_examus2\common::get_timebracket_for_cm('quiz', $cm);
 
     if (!empty($SESSION->accesscode) && $entry->accesscode != $SESSION->accesscode) {
         $SESSION->accesscode = null;
+        $SESSION->availibility_examus2_reset = true;
     }
+
+    $timebracket = \availability_examus2\common::get_timebracket_for_cm('quiz', $cm);
 
     $client = new \availability_examus2\client();
     $data = $client->exam_data($condition, $course, $cm);
@@ -120,6 +139,7 @@ function availability_examus2_before_standard_html_head() {
     if (in_array($entry->status, ['started', 'scheduled', 'new'])) {
         // We have to pass formdata in any case because exam can be opened outside iframe.
         $formdata = $client->get_form('start', $data);
+        $entryreset = isset($SESSION->availibility_examus2_reset) && $SESSION->availibility_examus2_reset;
 
         // Our entry is active, we are showing user a fader.
         ob_start();
@@ -129,93 +149,96 @@ function availability_examus2_before_standard_html_head() {
     }
 }
 
-/**
- * This hook is used for exams that require scheduling.
- **/
-function availability_examus2_after_require_login() {
-    global $PAGE, $DB, $USER, $SESSION, $cm, $course;
+function availability_examus2_handle_accesscode_param($accesscode) {
+    global $SESSION, $DB;
 
-    $launchedfromframe = false;
-    $accesscode = optional_param('accesscode', null, PARAM_RAW);
+    // User is coming from examus, reset is done if it was requested before.
+    unset($SESSION->availibility_examus2_reset);
 
-    if ($cm && $course) {
-        $modinfo = get_fast_modinfo($course->id);
-        $cminfo = $modinfo->get_cm($cm->id);
-    }
+    $SESSION->accesscode = $accesscode;
 
-    if (!empty($accesscode)) {
-        $launchedfromframe = true;
+    // We know accesscode is passed in params.
+    $entry = $DB->get_record('availability_examus2_entries', [
+        'accesscode' => $accesscode,
+    ]);
 
-        // We know accesscode is passed in params.
-        $entry = $DB->get_record('availability_examus2_entries', [
-            'accesscode' => $accesscode,
-        ]);
+    // If entry exists, we need to check if we have a newer one.
+    if ($entry) {
 
-        // If entry exists, we need to check if we have a newer one.
-        if ($entry) {
-            $newentry = common::most_recent_entry($entry);
-            if ($newentry) {
-                $entry = $newentry;
-            }
+        $newentry = common::most_recent_entry($entry);
+        if ($newentry && $newentry->id != $entry->id) {
+            $entry = $newentry;
+            $SESSION->availibility_examus2_reset = true;
         }
 
+        $modinfo = get_fast_modinfo($entry->courseid);
+        $cminfo = $modinfo->get_cm($entry->cmid);
+
+        // The entry is already finished or canceled, we need to reset it
         if (!in_array($entry->status, ['new', 'scheduled', 'started'])) {
             $entry = $condition->create_entry_for_cm($USER->id, $cminfo);
+            $SESSION->availibility_examus2_reset = true;
         }
-
-        $SESSION->accesscode = $entry->accesscode;
+    } else {
+        // If entry does not exist, we need to create a new one and redirect
+        $SESSION->availibility_examus2_reset = true;
     }
 
-    $scriptname = isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'] : null;
+}
 
-    if ($scriptname != '/mod/quiz/startattempt.php') {
-        return;
-    }
+function availability_examus2_handle_start_attempt($course, $cm, $user){
+    global $SESSION, $DB;
+    $modinfo = get_fast_modinfo($course->id);
+    $cminfo = $modinfo->get_cm($cm->id);
 
-    $condition = \availability_examus2\condition::get_examus_condition($cminfo);
+    $condition = condition::get_examus_condition($cminfo);
     if (!$condition) {
         return;
     }
 
     // We want to let previews to happen without proctoring.
-    $quizobj = \quiz::create($cminfo->instance, $USER->id);
+    $quizobj = \quiz::create($cminfo->instance, $user->id);
     if ($quizobj->is_preview_user()) {
         return;
     }
 
-    if (!empty($entry) && $entry->cmid != $cminfo->id) {
-        // Entry belongs to other cm.
-        $entry = null;
-        $SESSION->accesscode = null;
-    }
+    $accesscode = isset($SESSION->accesscode) ? $SESSION->accesscode : null;
+    $entry = null;
+    $reset = false;
+    if ($accesscode) {
+        $entry = $DB->get_record('availability_examus2_entries', [
+            'accesscode' => $accesscode,
+        ]);
 
-    if (empty($entry)) {
-        $entry = $condition->create_entry_for_cm($USER->id, $cminfo);
+        // Entry is old
+        if ($entry && !in_array($entry->status, ['new', 'scheduled', 'started'])) {
+            $reset = true;
+        }
+
+        // Entry belongs to other cm.
+        if ($entry && $entry->cmid != $cminfo->id) {
+            $reset = true;
+        }
+
+        if (!$entry) {
+            $reset = true;
+        }
+
+        if ($reset) {
+            unset($SESSION->accesscode);
+            $SESSION->availibility_examus2_reset = true;
+        }
+
+        // We don't want to redirect at this stage/
+        // Because its possible that the user is working through Web-app.
+        return;
+    } else {
+        $entry = $condition->create_entry_for_cm($user->id, $cminfo);
     }
 
     // The attempt is already started, letting it open.
-    if ($entry->status == 'started' && !empty($SESSION->accesscode)) {
-        return;
-    }
-
-    // Allowing to start attempt, as it is scheduled and we are supposedly view through examus.
-    if (
-        $entry->status == 'scheduled'
-            && $condition->schedulingrequired
-            && $entry->timescheduled
-            && $entry->timescheduled < time()
-            && !empty($SESSION->accesscode)
-    ) {
-        return;
-    }
-
-    // Allowing to start attempt, as it does not need scheduling.
-    if (
-        $entry->status == 'new'
-            && !$condition->schedulingrequired
-            && !empty($SESSION->accesscode)
-    ) {
-        return;
+    if ($entry->status == 'started') {
+      return;
     }
 
     $timebracket = \availability_examus2\common::get_timebracket_for_cm('quiz', $cminfo);
@@ -227,8 +250,8 @@ function availability_examus2_after_require_login() {
 
     $client = new \availability_examus2\client();
     $data = $client->exam_data($condition, $course, $cminfo);
-    $userdata = $client->user_data($USER);
-    $biometrydata = $client->biometry_data($condition, $USER);
+    $userdata = $client->user_data($user);
+    $biometrydata = $client->biometry_data($condition, $user);
     $timedata = $client->time_data($timebracket);
     $attemptdata = $client->attempt_data($entry->accesscode, $location->out(false));
 
