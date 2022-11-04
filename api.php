@@ -65,7 +65,6 @@ if (empty($requestbody)) {
     exit;
 }
 
-file_put_contents('/tmp/debug.log', $requestbody . PHP_EOL);
 $request = json_decode($requestbody);
 
 $accesscode = $request->sessionId;
