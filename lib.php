@@ -60,25 +60,26 @@ function availability_examus2_before_standard_html_head() {
     return availability_examus2_handle_proctoring_fader();
 }
 
+function availability_examus2_after_config() {
+    global $SESSION;
+    $accesscode = optional_param('accesscode', null, PARAM_RAW);
+
+    if (!empty($accesscode)) {
+        availability_examus2_handle_accesscode_param($accesscode);
+    }
+}
+
 /**
  * This hook is used for exams that require scheduling.
  **/
 function availability_examus2_after_require_login() {
     global $USER, $cm, $course;
 
-    // Handles redirect from examus.
-    $accesscode = optional_param('accesscode', null, PARAM_RAW);
-    if (!empty($accesscode)) {
-        availability_examus2_handle_accesscode_param($accesscode);
-        return;
-    }
-
     // User is trying to start an attempt, redirect to examus if it is not started.
     $scriptname = isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'] : null;
     if ($scriptname == '/mod/quiz/startattempt.php') {
         availability_examus2_handle_start_attempt($course, $cm, $USER);
     }
-
 }
 
 function availability_examus2_handle_proctoring_fader() {
