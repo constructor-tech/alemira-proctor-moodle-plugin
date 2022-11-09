@@ -162,6 +162,11 @@ class log_details {
 
 
         $table->add_data([
+            'accesscode',
+            $entry->accesscode
+        ]);
+
+        $table->add_data([
             get_string('date_modified', 'availability_examus2'),
             common::format_date($entry->timemodified)
         ]);
