@@ -213,13 +213,4 @@ class client {
             'endDate' => $end,
         ];
     }
-
-    /**
-     * Checksum abstracted into a short function.
-     * CRC32 is choosen for it's speed, low enthropy is considered
-     * not a significant factor.
-     */
-    public function checksum($data) {
-        return hash('crc32b', json_encode($data));
-    }
 }
