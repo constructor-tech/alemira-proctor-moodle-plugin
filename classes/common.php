@@ -69,7 +69,7 @@ class common {
 
         foreach ($entries as $entry) {
             if (in_array($entry->status, ['started', 'scheduled', 'new'])) {
-                //    return $entry;
+                return $entry;
             }
         }
 
