@@ -182,13 +182,20 @@ class client {
         ];
     }
 
-    public function user_data($user) {
-        return [
+    public function user_data($user, $lang = null) {
+        $data = [
             'userId' => $this->useremails ? $user->email : $user->id,
             'firstName' => $user->firstname,
             'lastName' => $user->lastname,
             'thirdName' => $user->middlename,
         ];
+
+        if ($lang) {
+            $lang = explode('_', $lang)[0];
+            $data['language'] = $lang;
+        }
+
+        return $data;
     }
 
     public function attempt_data($sessionid, $url) {

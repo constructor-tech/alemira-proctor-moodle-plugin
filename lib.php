@@ -120,10 +120,11 @@ function availability_examus2_handle_proctoring_fader() {
     }
 
     $timebracket = common::get_timebracket_for_cm('quiz', $cm);
+    $lang = current_language();
 
     $client = new \availability_examus2\client();
-    $data = $client->exam_data($condition, $course, $cm, $lang);
-    $userdata = $client->user_data($USER);
+    $data = $client->exam_data($condition, $course, $cm);
+    $userdata = $client->user_data($USER, $lang);
     $biometrydata = $client->biometry_data($condition, $USER);
 
     $timedata = $client->time_data($timebracket);
@@ -256,9 +257,11 @@ function availability_examus2_handle_start_attempt($course, $cm, $user){
         'accesscode' => $entry->accesscode,
     ]);
 
+    $lang = current_language();
+
     $client = new \availability_examus2\client();
     $data = $client->exam_data($condition, $course, $cminfo);
-    $userdata = $client->user_data($user);
+    $userdata = $client->user_data($user, $lang);
     $biometrydata = $client->biometry_data($condition, $user);
     $timedata = $client->time_data($timebracket);
     $attemptdata = $client->attempt_data($entry->accesscode, $location->out(false));
@@ -272,6 +275,7 @@ function availability_examus2_handle_start_attempt($course, $cm, $user){
     $formdata = $client->get_form('start', $data);
 
     $pagetitle = "Redirecting to Examus";
+
     include(dirname(__FILE__).'/templates/redirect.php');
     die();
 }
