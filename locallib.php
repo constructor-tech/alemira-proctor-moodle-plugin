@@ -87,7 +87,7 @@ function avalibility_examus2_attempt_started_handler($event) {
             }
         }
     } else {
-        $entry = $condition->create_entry($USER->id, $cm);
+        $entry = common::create_entry($condition, $USER->id, $cm);
         $entry->attemptid = $attempt->id;
         $entry->status = "started";
         $entry->timemodified = time();
