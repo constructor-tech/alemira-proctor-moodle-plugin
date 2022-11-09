@@ -112,17 +112,17 @@ function availability_examus2_handle_proctoring_fader() {
         return '';
     }
 
-    $entry = $condition->create_entry_for_cm($USER->id, $cm);
+    $entry = common::create_entry($condition, $USER->id, $cm);
 
     if (!empty($SESSION->accesscode) && $entry->accesscode != $SESSION->accesscode) {
         $SESSION->accesscode = null;
         $SESSION->availibility_examus2_reset = true;
     }
 
-    $timebracket = \availability_examus2\common::get_timebracket_for_cm('quiz', $cm);
+    $timebracket = common::get_timebracket_for_cm('quiz', $cm);
 
     $client = new \availability_examus2\client();
-    $data = $client->exam_data($condition, $course, $cm);
+    $data = $client->exam_data($condition, $course, $cm, $lang);
     $userdata = $client->user_data($USER);
     $biometrydata = $client->biometry_data($condition, $USER);
 
@@ -165,6 +165,13 @@ function availability_examus2_handle_accesscode_param($accesscode) {
 
     // If entry exists, we need to check if we have a newer one.
     if ($entry) {
+        $modinfo = get_fast_modinfo($entry->courseid);
+        $cminfo = $modinfo->get_cm($entry->cmid);
+
+        $condition = condition::get_examus_condition($cminfo);
+        if (!$condition) {
+            return;
+        }
 
         $newentry = common::most_recent_entry($entry);
         if ($newentry && $newentry->id != $entry->id) {
@@ -177,7 +184,7 @@ function availability_examus2_handle_accesscode_param($accesscode) {
 
         // The entry is already finished or canceled, we need to reset it
         if (!in_array($entry->status, ['new', 'scheduled', 'started'])) {
-            $entry = $condition->create_entry_for_cm($USER->id, $cminfo);
+            $entry = common::create_entry($condition, $entry->userid, $cminfo);
             $SESSION->availibility_examus2_reset = true;
         }
     } else {
@@ -230,11 +237,11 @@ function availability_examus2_handle_start_attempt($course, $cm, $user){
             $SESSION->availibility_examus2_reset = true;
         }
 
-        // We don't want to redirect at this stage/
+        // We don't want to redirect at this stage.
         // Because its possible that the user is working through Web-app.
         return;
     } else {
-        $entry = $condition->create_entry_for_cm($user->id, $cminfo);
+        $entry = common::create_entry($condition, $user->id, $cminfo);
     }
 
     // The attempt is already started, letting it open.
@@ -242,7 +249,7 @@ function availability_examus2_handle_start_attempt($course, $cm, $user){
       return;
     }
 
-    $timebracket = \availability_examus2\common::get_timebracket_for_cm('quiz', $cminfo);
+    $timebracket = common::get_timebracket_for_cm('quiz', $cminfo);
 
     $location = new \moodle_url('/mod/quiz/view.php', [
         'id' => $cminfo->id,
