@@ -50,14 +50,14 @@ function availability_examus2_before_standard_html_head() {
     if (isset(state::$attempt['attempt_id'])) {
         $attemptid = state::$attempt['attempt_id'];
         $attempt = $DB->get_record('quiz_attempts', ['id' => $attemptid]);
-        if (!$attempt || $attempt->state != 'inprogress') {
+        if (!$attempt || $attempt->state != \quiz_attempt::IN_PROGRESS) {
             return '';
+        } else {
+            return availability_examus2_handle_proctoring_fader($attempt);
         }
     } else {
         return '';
     }
-
-    return availability_examus2_handle_proctoring_fader();
 }
 
 function availability_examus2_after_config() {
@@ -82,7 +82,7 @@ function availability_examus2_after_require_login() {
     }
 }
 
-function availability_examus2_handle_proctoring_fader() {
+function availability_examus2_handle_proctoring_fader($attempt) {
     global $DB, $USER, $PAGE, $SESSION;
 
     $cmid = state::$attempt['cm_id'];
@@ -138,7 +138,10 @@ function availability_examus2_handle_proctoring_fader() {
         $data['schedule'] = true;
     }
 
-    if (in_array($entry->status, ['started', 'scheduled', 'new'])) {
+    $entryisactive = in_array($entry->status, ['started', 'scheduled', 'new']);
+    $attemptinprogess = $attempt && $attempt->state == \quiz_attempt::IN_PROGRESS;
+
+    if ($entryisactive || $attemptinprogess) {
         // We have to pass formdata in any case because exam can be opened outside iframe.
         $formdata = $client->get_form('start', $data);
         $entryreset = isset($SESSION->availibility_examus2_reset) && $SESSION->availibility_examus2_reset;
