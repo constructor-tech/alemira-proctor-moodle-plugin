@@ -29,6 +29,33 @@ namespace availability_examus2;
  */
 class client {
     const ISO8601U = "Y-m-d\TH:i:s.uO";
+
+    const LANGUAGE_MAP = [
+        'ar' =>'ar',
+        'de' => 'de',
+        'de_ch' => 'de_CH',
+        'el' => 'el',
+        'en' => 'en',
+        'es' => 'es',
+        'fr' => 'fr',
+        //'' => 'fr_CH', // hmmm
+        'hu' => 'hu',
+        'id' => 'id',
+        'it' => 'it',
+        //'it' => 'it_CH',
+        'kk' => 'kk',
+        'it' => 'lt',
+        'ms' => 'ms',
+        'pt' => 'pt',
+        'ro' => 'ro',
+        'ru' => 'ru',
+        'th' => 'th',
+        'tr' => 'tr',
+        'vi' => 'vi',
+        'zh_cn' => 'zh_CN',
+        'zh' => 'zh_CN'
+    ];
+
     protected $jwtsecret;
     protected $integrationname;
     protected $examusurl;
