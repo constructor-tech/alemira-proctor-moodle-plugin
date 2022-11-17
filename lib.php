@@ -122,10 +122,10 @@ function availability_examus2_handle_proctoring_fader($attempt) {
     $timebracket = common::get_timebracket_for_cm('quiz', $cm);
     $lang = current_language();
 
-    $client = new \availability_examus2\client();
-    $data = $client->exam_data($condition, $course, $cm);
+    $client = new \availability_examus2\client($condition);
+    $data = $client->exam_data($course, $cm);
     $userdata = $client->user_data($USER, $lang);
-    $biometrydata = $client->biometry_data($condition, $USER);
+    $biometrydata = $client->biometry_data($USER);
 
     $timedata = $client->time_data($timebracket);
     $pageurl = $PAGE->url;
@@ -262,10 +262,10 @@ function availability_examus2_handle_start_attempt($course, $cm, $user){
 
     $lang = current_language();
 
-    $client = new \availability_examus2\client();
-    $data = $client->exam_data($condition, $course, $cminfo);
+    $client = new \availability_examus2\client($condition);
+    $data = $client->exam_data($course, $cminfo);
     $userdata = $client->user_data($user, $lang);
-    $biometrydata = $client->biometry_data($condition, $user);
+    $biometrydata = $client->biometry_data($user);
     $timedata = $client->time_data($timebracket);
     $attemptdata = $client->attempt_data($entry->accesscode, $location->out(false));
 

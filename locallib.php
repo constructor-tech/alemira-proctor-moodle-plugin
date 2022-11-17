@@ -167,7 +167,7 @@ function avalibility_examus2_attempt_submitted_handler($event) {
         if ($location) {
             ob_end_clean();
 
-            $client = new client();
+            $client = new client(null);
             $newlocation = $client->get_finish_url($entry->accesscode, $location);
 
             header('Location: ' . $newlocation);

@@ -62,8 +62,10 @@ class client {
     protected $accountid;
     protected $accountname;
     protected $useremails;
+    protected $condition;
 
-    public function __construct() {
+    public function __construct($condition) {
+        $this->condition = $condition;
         $this->examusurl = get_config('availability_examus2', 'examus_url');
         $this->integrationname = get_config('availability_examus2', 'integration_name');
         $this->jwtsecret = get_config('availability_examus2', 'jwt_secret');
@@ -150,8 +152,8 @@ class client {
         }
     }
 
-    public function exam_data($condition, $course, $cm) {
-        $conditiondata = $condition->to_json();
+    public function exam_data($course, $cm) {
+        $conditiondata = $this->condition->to_json();
 
         $customrules = $conditiondata['customrules'];
         $customrules = empty($customrules) ? '' : $customrules;
@@ -189,14 +191,14 @@ class client {
         return $data;
     }
 
-    public function biometry_data($condition, $user) {
+    public function biometry_data($user) {
         global $PAGE;
         $userpicture = new \user_picture($user);
         $userpicture->size = 1; // Size f1.
         $userpicture->includetoken = $user->id;
         $profileimageurl = $userpicture->get_url($PAGE)->out(false);
 
-        $conditiondata = $condition->to_json();
+        $conditiondata = $this->condition->to_json();
 
         return [
             'biometricIdentification' => [
