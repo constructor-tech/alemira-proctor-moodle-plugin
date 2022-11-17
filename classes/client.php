@@ -30,6 +30,8 @@ namespace availability_examus2;
 class client {
     const ISO8601U = "Y-m-d\TH:i:s.uO";
 
+    // Not used in map, because no reliable way to deduce from source lang.
+    // fr_CH, it_CH.
     const LANGUAGE_MAP = [
         'ar' =>'ar',
         'de' => 'de',
@@ -38,11 +40,9 @@ class client {
         'en' => 'en',
         'es' => 'es',
         'fr' => 'fr',
-        //'' => 'fr_CH', // hmmm
         'hu' => 'hu',
         'id' => 'id',
         'it' => 'it',
-        //'it' => 'it_CH',
         'kk' => 'kk',
         'it' => 'lt',
         'ms' => 'ms',
@@ -211,7 +211,7 @@ class client {
         ];
     }
 
-    public function user_data($user, $lang = null) {
+    public function user_data($user, $moodlelang = null) {
         $data = [
             'userId' => $this->useremails ? $user->email : $user->id,
             'firstName' => $user->firstname,
@@ -219,9 +219,11 @@ class client {
             'thirdName' => $user->middlename,
         ];
 
-        if ($lang) {
-            $lang = explode('_', $lang)[0];
-            $data['language'] = $lang;
+        if ($moodlelang) {
+            $lang = $this->map_language($moodlelang);
+            if ($lang) {
+                $data['language'] = $lang;
+            }
         }
 
         return $data;
@@ -248,5 +250,19 @@ class client {
             'startDate' => $start,
             'endDate' => $end,
         ];
+    }
+
+    public function map_language($lang){
+        if (isset(self::LANGUAGE_MAP[$lang])) {
+            return self::LANGUAGE_MAP[$lang];
+        } else {
+            $lang = explode('_', $lang)[0];
+
+            if (isset(self::LANGUAGE_MAP[$lang])) {
+                return self::LANGUAGE_MAP[$lang];
+            } else {
+                return null;
+            }
+        }
     }
 }
