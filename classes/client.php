@@ -35,7 +35,7 @@ class client {
     const LANGUAGE_MAP = [
         'ar' =>'ar',
         'de' => 'de',
-        'de_ch' => 'de_CH',
+        'de_ch' => 'de-ch',
         'el' => 'el',
         'en' => 'en',
         'es' => 'es',
@@ -52,8 +52,8 @@ class client {
         'th' => 'th',
         'tr' => 'tr',
         'vi' => 'vi',
-        'zh_cn' => 'zh_CN',
-        'zh' => 'zh_CN'
+        'zh_cn' => 'zh-cn',
+        'zh' => 'zh-cn'
     ];
 
     protected $jwtsecret;
