@@ -48,7 +48,7 @@ class condition extends \core_availability\condition {
         'duration', 'mode', 'schedulingrequired', 'autorescheduling',
         'istrial', 'rules', 'identification', 'noprotection',
         'useragreementurl', 'auxiliarycamera', 'customrules',
-        'scoring', 'groups', 'warnings', 'ldb', 'biometryenabled',
+        'scoring', 'warnings', 'ldb', 'biometryenabled',
         'biometryskipfail', 'biometryflow', 'biometrytheme',
     ];
 
@@ -143,11 +143,6 @@ class condition extends \core_availability\condition {
     /** @var string List of custom rules */
     public $customrules = null;
 
-    /**
-     * @var array Apply condition to specified groups
-     */
-    public $groups = [];
-
     private static $cachedtrees = [];
 
     /**
@@ -211,10 +206,6 @@ class condition extends \core_availability\condition {
 
         if (!empty($structure->customrules)) {
             $this->customrules = $structure->customrules;
-        }
-
-        if (!empty($structure->groups)) {
-            $this->groups = $structure->groups;
         }
 
         if (!empty($structure->identification)) {
@@ -371,19 +362,6 @@ class condition extends \core_availability\condition {
     }
 
     /**
-     * get examus groups
-     *
-     * @param \cm_info $cm Cm
-     * @return bool
-     */
-    public static function get_examus_groups($cm) {
-        $econds = self::get_conditions($cm);
-        return (array) (isset($econds[0]->groups) ? $econds[0]->groups : []);
-    }
-
-
-
-    /**
      * get examus conditions
      *
      * @param \cm_info $cm Cm
@@ -413,46 +391,6 @@ class condition extends \core_availability\condition {
     }
 
     /**
-     * Check if condition is limiteted to groups, and is user is part
-     * of these groups.
-     * There is possibility to make this method private and move it
-     * to has_examus_condition, or maybe something else.
-     *
-     * @param \cm_info $cm Cm
-     * @params int $userid userid
-     */
-    public static function user_in_proctored_groups($cm, $userid) {
-        global $DB;
-        $user = $DB->get_record('user', ['id' => $userid]);
-        $usergroups = $DB->get_records('groups_members', ['userid' => $user->id], null, 'groupid');
-        return self::user_groups_intersect($cm, $usergroups);
-    }
-
-    /**
-     * Check if condition is limiteted to groups, and at least one
-     * usergroup intersects with them
-     * There is possibility to make this method private and move it
-     * to has_examus_condition, or maybe something else.
-     *
-     * @param \cm_info $cm Cm
-     * @params array $usergroups Array of usergroups
-     */
-    public static function user_groups_intersect($cm, $usergroups) {
-        $selectedgroups = self::get_examus_groups($cm);
-
-        if (empty($selectedgroups)) {
-            return true;
-        }
-
-        foreach ($usergroups as $usergroup) {
-            if (in_array($usergroup->groupid, $selectedgroups)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
      * Export for moodle storage
      *
      * @return object
@@ -467,7 +405,6 @@ class condition extends \core_availability\condition {
             'rules' => (array) $this->rules,
             'warnings' => (array) $this->warnings,
             'scoring' => (array) $this->scoring,
-            'groups' => (array) $this->groups,
             'istrial' => (bool) $this->istrial,
             'identification' => $this->identification,
             'noprotection' => (bool) $this->noprotection,

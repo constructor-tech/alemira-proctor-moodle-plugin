@@ -92,10 +92,6 @@ function availability_examus2_handle_proctoring_fader($attempt) {
     $cm = $modinfo->get_cm($cmid);
     $course = $cm->get_course();
 
-    if (!condition::user_in_proctored_groups($cm, $USER->id)) {
-        return '';
-    }
-
     $condition = condition::get_examus_condition($cm);
 
     if (!$condition) {
