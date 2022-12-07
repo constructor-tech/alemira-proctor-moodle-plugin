@@ -33,7 +33,7 @@ class client {
     // Not used in map, because no reliable way to deduce from source lang.
     // fr_CH, it_CH.
     const LANGUAGE_MAP = [
-        'ar' =>'ar',
+        'ar' => 'ar',
         'de' => 'de',
         'de_ch' => 'de-ch',
         'el' => 'el',
