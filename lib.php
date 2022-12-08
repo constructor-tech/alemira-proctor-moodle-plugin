@@ -50,14 +50,23 @@ function availability_examus2_before_standard_html_head() {
     if (isset(state::$attempt['attempt_id'])) {
         $attemptid = state::$attempt['attempt_id'];
         $attempt = $DB->get_record('quiz_attempts', ['id' => $attemptid]);
-        if (!$attempt || $attempt->state != 'inprogress') {
+        if (!$attempt || $attempt->state != \quiz_attempt::IN_PROGRESS) {
             return '';
+        } else {
+            return availability_examus2_handle_proctoring_fader($attempt);
         }
     } else {
         return '';
     }
+}
 
-    return availability_examus2_handle_proctoring_fader();
+function availability_examus2_after_config() {
+    global $SESSION;
+    $accesscode = optional_param('accesscode', null, PARAM_RAW);
+
+    if (!empty($accesscode)) {
+        availability_examus2_handle_accesscode_param($accesscode);
+    }
 }
 
 /**
@@ -66,22 +75,14 @@ function availability_examus2_before_standard_html_head() {
 function availability_examus2_after_require_login() {
     global $USER, $cm, $course;
 
-    // Handles redirect from examus.
-    $accesscode = optional_param('accesscode', null, PARAM_RAW);
-    if (!empty($accesscode)) {
-        availability_examus2_handle_accesscode_param($accesscode);
-        return;
-    }
-
     // User is trying to start an attempt, redirect to examus if it is not started.
     $scriptname = isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'] : null;
     if ($scriptname == '/mod/quiz/startattempt.php') {
         availability_examus2_handle_start_attempt($course, $cm, $USER);
     }
-
 }
 
-function availability_examus2_handle_proctoring_fader() {
+function availability_examus2_handle_proctoring_fader($attempt) {
     global $DB, $USER, $PAGE, $SESSION;
 
     $cmid = state::$attempt['cm_id'];
@@ -111,19 +112,20 @@ function availability_examus2_handle_proctoring_fader() {
         return '';
     }
 
-    $entry = $condition->create_entry_for_cm($USER->id, $cm);
+    $entry = common::create_entry($condition, $USER->id, $cm);
 
     if (!empty($SESSION->accesscode) && $entry->accesscode != $SESSION->accesscode) {
         $SESSION->accesscode = null;
         $SESSION->availibility_examus2_reset = true;
     }
 
-    $timebracket = \availability_examus2\common::get_timebracket_for_cm('quiz', $cm);
+    $timebracket = common::get_timebracket_for_cm('quiz', $cm);
+    $lang = current_language();
 
-    $client = new \availability_examus2\client();
-    $data = $client->exam_data($condition, $course, $cm);
-    $userdata = $client->user_data($USER);
-    $biometrydata = $client->biometry_data($condition, $USER);
+    $client = new \availability_examus2\client($condition);
+    $data = $client->exam_data($course, $cm);
+    $userdata = $client->user_data($USER, $lang);
+    $biometrydata = $client->biometry_data($USER);
 
     $timedata = $client->time_data($timebracket);
     $pageurl = $PAGE->url;
@@ -136,7 +138,10 @@ function availability_examus2_handle_proctoring_fader() {
         $data['schedule'] = true;
     }
 
-    if (in_array($entry->status, ['started', 'scheduled', 'new'])) {
+    $entryisactive = in_array($entry->status, ['started', 'scheduled', 'new']);
+    $attemptinprogess = $attempt && $attempt->state == \quiz_attempt::IN_PROGRESS;
+
+    if ($entryisactive || $attemptinprogess) {
         // We have to pass formdata in any case because exam can be opened outside iframe.
         $formdata = $client->get_form('start', $data);
         $entryreset = isset($SESSION->availibility_examus2_reset) && $SESSION->availibility_examus2_reset;
@@ -164,6 +169,13 @@ function availability_examus2_handle_accesscode_param($accesscode) {
 
     // If entry exists, we need to check if we have a newer one.
     if ($entry) {
+        $modinfo = get_fast_modinfo($entry->courseid);
+        $cminfo = $modinfo->get_cm($entry->cmid);
+
+        $condition = condition::get_examus_condition($cminfo);
+        if (!$condition) {
+            return;
+        }
 
         $newentry = common::most_recent_entry($entry);
         if ($newentry && $newentry->id != $entry->id) {
@@ -176,7 +188,7 @@ function availability_examus2_handle_accesscode_param($accesscode) {
 
         // The entry is already finished or canceled, we need to reset it
         if (!in_array($entry->status, ['new', 'scheduled', 'started'])) {
-            $entry = $condition->create_entry_for_cm($USER->id, $cminfo);
+            $entry = common::create_entry($condition, $entry->userid, $cminfo);
             $SESSION->availibility_examus2_reset = true;
         }
     } else {
@@ -229,11 +241,11 @@ function availability_examus2_handle_start_attempt($course, $cm, $user){
             $SESSION->availibility_examus2_reset = true;
         }
 
-        // We don't want to redirect at this stage/
+        // We don't want to redirect at this stage.
         // Because its possible that the user is working through Web-app.
         return;
     } else {
-        $entry = $condition->create_entry_for_cm($user->id, $cminfo);
+        $entry = common::create_entry($condition, $user->id, $cminfo);
     }
 
     // The attempt is already started, letting it open.
@@ -241,17 +253,19 @@ function availability_examus2_handle_start_attempt($course, $cm, $user){
       return;
     }
 
-    $timebracket = \availability_examus2\common::get_timebracket_for_cm('quiz', $cminfo);
+    $timebracket = common::get_timebracket_for_cm('quiz', $cminfo);
 
     $location = new \moodle_url('/mod/quiz/view.php', [
         'id' => $cminfo->id,
         'accesscode' => $entry->accesscode,
     ]);
 
-    $client = new \availability_examus2\client();
-    $data = $client->exam_data($condition, $course, $cminfo);
-    $userdata = $client->user_data($user);
-    $biometrydata = $client->biometry_data($condition, $user);
+    $lang = current_language();
+
+    $client = new \availability_examus2\client($condition);
+    $data = $client->exam_data($course, $cminfo);
+    $userdata = $client->user_data($user, $lang);
+    $biometrydata = $client->biometry_data($user);
     $timedata = $client->time_data($timebracket);
     $attemptdata = $client->attempt_data($entry->accesscode, $location->out(false));
 
@@ -264,6 +278,7 @@ function availability_examus2_handle_start_attempt($course, $cm, $user){
     $formdata = $client->get_form('start', $data);
 
     $pagetitle = "Redirecting to Examus";
+
     include(dirname(__FILE__).'/templates/redirect.php');
     die();
 }

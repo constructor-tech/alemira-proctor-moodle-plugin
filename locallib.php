@@ -74,7 +74,7 @@ function avalibility_examus2_attempt_started_handler($event) {
         $DB->update_record('availability_examus2_entries', $entry);
 
         if ($entry->status == "started" && $entry->attemptid != $attempt->id) {
-            $entry = $condition->create_entry_for_cm($USER->id, $cm);
+            $entry = $condition->create_entry($USER->id, $cm);
 
             if ($accesscode) {
                 // The user is coming from examus, we can't redirect.
@@ -87,7 +87,7 @@ function avalibility_examus2_attempt_started_handler($event) {
             }
         }
     } else {
-        $entry = $condition->create_entry_for_cm($USER->id, $cm);
+        $entry = common::create_entry($condition, $USER->id, $cm);
         $entry->attemptid = $attempt->id;
         $entry->status = "started";
         $entry->timemodified = time();
@@ -167,7 +167,7 @@ function avalibility_examus2_attempt_submitted_handler($event) {
         if ($location) {
             ob_end_clean();
 
-            $client = new client();
+            $client = new client(null);
             $newlocation = $client->get_finish_url($entry->accesscode, $location);
 
             header('Location: ' . $newlocation);

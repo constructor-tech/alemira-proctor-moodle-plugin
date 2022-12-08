@@ -24,6 +24,7 @@
 
 namespace availability_examus2;
 use \stdClass;
+use availability_examus2\condition;
 
 /**
  * Collection of static methods, used throughout the code
@@ -48,6 +49,78 @@ class common {
         return $entry;
     }
 
+    /**
+     * create entry if not exist
+     *
+     * @param integer $userid User id
+     * @param integer $cm Cm id
+     * @return stdClass
+     */
+    public static function create_entry(condition $condition, $userid, $cm) {
+        global $DB;
+
+        $courseid = $cm->course;
+
+        $entries = $DB->get_records('availability_examus2_entries', [
+            'userid' => $userid,
+            'courseid' => $courseid,
+            'cmid' => $cm->id,
+        ], 'id');
+
+        foreach ($entries as $entry) {
+            if (in_array($entry->status, ['started', 'scheduled', 'new'])) {
+                return $entry;
+            }
+        }
+
+        foreach ($entries as $entry) {
+            if ($condition->autorescheduling) {
+                // Was schduled and not completed.
+                $scheduled = !$entry->attemptid && $entry->status == 'scheduled';
+                // Consider expired, giving 15 minutes slack.
+                $expired = time() > $entry->timescheduled + self::EXPIRATION_SLACK;
+
+                if ($scheduled && $expired) {
+                    $entry->timemodified = time();
+                    $entry->status = 'rescheduled';
+
+                    $DB->update_record('availability_examus2_entries', $entry);
+                    $entry = common::reset_entry(['id' => $entry->id]);
+                    return $entry;
+                }
+
+            }
+        }
+
+        if ($cm->modname == 'quiz') {
+            $quiz = \quiz_access_manager::load_quiz_and_settings($cm->instance);
+            $allowedattempts = $quiz->attempts;
+            $allowedattempts = $allowedattempts > 0 ? $allowedattempts : null;
+        } else {
+            $allowedattempts = null;
+        }
+
+        $usedentries = 0;
+        foreach($entries as $entry){
+            if (!in_array($entry->status, ['rescheduled', 'canceled', 'force_reset'])) {
+                $usedentries++;
+            }
+        }
+
+        // Create new entry if not exists already.
+        // Respect limited number of attempts
+        if (is_null($allowedattempts) || $usedentries < $allowedattempts) {
+            $entry = condition::make_entry($courseid, $cm->id, $userid);
+            $entry->id = $DB->insert_record('availability_examus2_entries', $entry);
+
+            return $entry;
+        } else {
+            // Taking last entry no matter the status.
+            // This is done to trigger "exam finished" page.
+            $entry = end($entries);
+            return $entry;
+        }
+    }
 
     /**
      * Resets user entry ensuring there is only one 'not inited' entry.
@@ -72,15 +145,15 @@ class common {
         if ($oldentry && (!$notinited || $force)) {
             $entries = $DB->get_records('availability_examus2_entries', [
                 'userid' => $oldentry->userid,
-                    'courseid' => $oldentry->courseid,
-                    'cmid' => $oldentry->cmid,
-                    'status' => 'new'
+                'courseid' => $oldentry->courseid,
+                'cmid' => $oldentry->cmid,
+                'status' => 'new'
             ]);
 
             if (count($entries) == 0 || $force) {
                 if ($force) {
                     foreach ($entries as $old) {
-                        $old->status = "force_reset";
+                        $old->status = 'force_reset';
                         $DB->update_record('availability_examus2_entries', $old);
                     }
                 }
@@ -115,8 +188,8 @@ class common {
 
         $condition = [
             'userid' => $userid,
-                'courseid' => $courseid,
-                'status' => 'new'
+            'courseid' => $courseid,
+            'status' => 'new'
         ];
 
         if (!empty($cmid)) {

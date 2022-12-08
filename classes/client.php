@@ -29,14 +29,43 @@ namespace availability_examus2;
  */
 class client {
     const ISO8601U = "Y-m-d\TH:i:s.uO";
+
+    // Not used in map, because no reliable way to deduce from source lang.
+    // fr_CH, it_CH.
+    const LANGUAGE_MAP = [
+        'ar' => 'ar',
+        'de' => 'de',
+        'de_ch' => 'de-ch',
+        'el' => 'el',
+        'en' => 'en',
+        'es' => 'es',
+        'fr' => 'fr',
+        'hu' => 'hu',
+        'id' => 'id',
+        'it' => 'it',
+        'kk' => 'kk',
+        'it' => 'lt',
+        'ms' => 'ms',
+        'pt' => 'pt',
+        'ro' => 'ro',
+        'ru' => 'ru',
+        'th' => 'th',
+        'tr' => 'tr',
+        'vi' => 'vi',
+        'zh_cn' => 'zh-cn',
+        'zh' => 'zh-cn'
+    ];
+
     protected $jwtsecret;
     protected $integrationname;
     protected $examusurl;
     protected $accountid;
     protected $accountname;
     protected $useremails;
+    protected $condition;
 
-    public function __construct() {
+    public function __construct($condition) {
+        $this->condition = $condition;
         $this->examusurl = get_config('availability_examus2', 'examus_url');
         $this->integrationname = get_config('availability_examus2', 'integration_name');
         $this->jwtsecret = get_config('availability_examus2', 'jwt_secret');
@@ -123,8 +152,8 @@ class client {
         }
     }
 
-    public function exam_data($condition, $course, $cm) {
-        $conditiondata = $condition->to_json();
+    public function exam_data($course, $cm) {
+        $conditiondata = $this->condition->to_json();
 
         $customrules = $conditiondata['customrules'];
         $customrules = empty($customrules) ? '' : $customrules;
@@ -162,14 +191,14 @@ class client {
         return $data;
     }
 
-    public function biometry_data($condition, $user) {
+    public function biometry_data($user) {
         global $PAGE;
         $userpicture = new \user_picture($user);
         $userpicture->size = 1; // Size f1.
         $userpicture->includetoken = $user->id;
         $profileimageurl = $userpicture->get_url($PAGE)->out(false);
 
-        $conditiondata = $condition->to_json();
+        $conditiondata = $this->condition->to_json();
 
         return [
             'biometricIdentification' => [
@@ -182,13 +211,22 @@ class client {
         ];
     }
 
-    public function user_data($user) {
-        return [
+    public function user_data($user, $moodlelang = null) {
+        $data = [
             'userId' => $this->useremails ? $user->email : $user->id,
             'firstName' => $user->firstname,
             'lastName' => $user->lastname,
             'thirdName' => $user->middlename,
         ];
+
+        if ($moodlelang) {
+            $lang = $this->map_language($moodlelang);
+            if ($lang) {
+                $data['language'] = $lang;
+            }
+        }
+
+        return $data;
     }
 
     public function attempt_data($sessionid, $url) {
@@ -214,12 +252,17 @@ class client {
         ];
     }
 
-    /**
-     * Checksum abstracted into a short function.
-     * CRC32 is choosen for it's speed, low enthropy is considered
-     * not a significant factor.
-     */
-    public function checksum($data) {
-        return hash('crc32b', json_encode($data));
+    public function map_language($lang){
+        if (isset(self::LANGUAGE_MAP[$lang])) {
+            return self::LANGUAGE_MAP[$lang];
+        } else {
+            $lang = explode('_', $lang)[0];
+
+            if (isset(self::LANGUAGE_MAP[$lang])) {
+                return self::LANGUAGE_MAP[$lang];
+            } else {
+                return null;
+            }
+        }
     }
 }

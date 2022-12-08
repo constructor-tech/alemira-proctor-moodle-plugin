@@ -50,7 +50,7 @@ if (empty($auth) || !preg_match('/JWT /', $auth)) {
 }
 $token = explode(' ', $_SERVER['HTTP_AUTHORIZATION'])[1];
 
-$client = new client();
+$client = new client(null);
 
 try {
     $client->decode($token);
@@ -65,7 +65,6 @@ if (empty($requestbody)) {
     exit;
 }
 
-file_put_contents('/tmp/debug.log', $requestbody . PHP_EOL);
 $request = json_decode($requestbody);
 
 $accesscode = $request->sessionId;
