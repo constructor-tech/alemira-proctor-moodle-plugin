@@ -120,7 +120,6 @@ $string['scoring_forbidden_device'] = 'Forbidden hardware';
 $string['scoring_voice'] = 'Microphone voice is detected';
 $string['scoring_phone'] = 'A phone is used';
 
-$string['select_groups'] = 'Use Examus only for selected groups';
 $string['scheduling_required'] = 'A calendar entry is required';
 $string['apply_filter'] = 'Apply filter';
 $string['allcourses'] = 'All courses';

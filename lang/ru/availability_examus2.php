@@ -119,7 +119,6 @@ $string['scoring_forbidden_device'] = 'Запрещенное оборудова
 $string['scoring_voice'] = 'Звуки голосов в трансляции';
 $string['scoring_phone'] = 'Использование телефона';
 
-$string['select_groups'] = 'Использовать Examus только для выбраных групп';
 $string['scheduling_required'] = 'Обязательна запись в календаре';
 $string['apply_filter'] = 'Применить фильтры';
 $string['allcourses'] = 'Все курсы';

@@ -41,7 +41,7 @@ class frontend extends \core_availability\frontend {
             'allow_to_use_books', 'allow_to_use_paper', 'allow_to_use_messengers',
             'allow_to_use_calculator', 'allow_to_use_excel', 'allow_to_use_human_assistant',
             'allow_absence_in_frame', 'allow_voices', 'allow_wrong_gaze_direction',
-            'select_groups', 'auto_rescheduling', 'enable', 'scheduling_required',
+            'auto_rescheduling', 'enable', 'scheduling_required',
             'identification', 'face_passport_identification', 'face_identification',
             'passport_identification', 'skip_identification', 'enable_ldb',
             'is_trial', 'custom_rules', 'noprotection', 'user_agreement_url',
@@ -78,10 +78,7 @@ class frontend extends \core_availability\frontend {
 
         $courseid = $course->id;
 
-        $groups = [];
-        $groups = $DB->get_records('groups', ['courseid' => $courseid], 'name', 'id,name');
-
-        return [$rules, $groups, $warnings, $scoring];
+        return [$rules, $warnings, $scoring];
     }
 
     /**
