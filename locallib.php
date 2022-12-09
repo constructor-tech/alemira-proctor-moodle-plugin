@@ -148,6 +148,9 @@ function avalibility_examus2_attempt_submitted_handler($event) {
 
     foreach ($entries as $entry) {
         $entry->status = "finished";
+        if (empty($entry->attemptid)) {
+            $entry->attemptid = $attempt->id;
+        }
         $DB->update_record('availability_examus2_entries', $entry);
     }
     $entry = reset($entries);
