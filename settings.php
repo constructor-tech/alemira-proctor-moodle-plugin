@@ -58,6 +58,6 @@ if ($hassiteconfig) {
 
         $settings->add(new admin_setting_configcheckbox('availability_examus2/user_emails',
             new lang_string('settings_user_emails', 'availability_examus2'),
-            new lang_string('settings_user_emails_desc', 'availability_examus2'), 0));
+            new lang_string('settings_user_emails_desc', 'availability_examus2'), 1));
     }
 }

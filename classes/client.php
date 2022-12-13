@@ -213,10 +213,11 @@ class client {
 
     public function user_data($user, $moodlelang = null) {
         $data = [
-            'userId' => $this->useremails ? $user->email : $user->id,
+            'userId' => $user->username,
             'firstName' => $user->firstname,
             'lastName' => $user->lastname,
             'thirdName' => $user->middlename,
+            'email' => $this->useremails ? $user->email : null,
         ];
 
         if ($moodlelang) {

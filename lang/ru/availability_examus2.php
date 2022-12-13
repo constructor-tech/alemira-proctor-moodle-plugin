@@ -43,7 +43,7 @@ $string['settings_account_name_desc'] = '';
 $string['settings_account_id'] = 'Account ID';
 $string['settings_account_id_desc'] = '';
 $string['settings_user_emails'] = 'Отправлять email пользователей в Examus';
-$string['settings_user_emails_desc'] = 'При выборе опции убедитесь, что все email пользователей индивидуальные! Создание пользователей с одинаковым email может привести к ошибкам';
+$string['settings_user_emails_desc'] = '';
 
 $string['use_examus'] = 'Используйте приложение "Экзамус", чтобы получить доступ к модулю';
 $string['settings'] = 'Настройки прокторинга "Экзамус"';
@@ -123,7 +123,7 @@ $string['scheduling_required'] = 'Обязательна запись в кал�
 $string['apply_filter'] = 'Применить фильтры';
 $string['allcourses'] = 'Все курсы';
 $string['allstatuses'] = 'Все статусы';
-$string['userquery'] = 'Email пользователя начинается с';
+$string['userquery'] = 'Username или Email пользователя начинается с';
 $string['fromdate'] = 'С:';
 $string['todate'] = 'По:';
 

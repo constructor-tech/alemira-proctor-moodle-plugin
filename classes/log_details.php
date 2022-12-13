@@ -177,6 +177,11 @@ class log_details {
         ]);
 
         $table->add_data([
+            get_string('username'),
+            $user->username
+        ]);
+
+        $table->add_data([
             get_string('user'),
             $user->firstname . " " . $user->lastname . "<br>" . $user->email
         ]);

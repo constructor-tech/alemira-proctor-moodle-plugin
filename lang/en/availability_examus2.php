@@ -42,8 +42,8 @@ $string['settings_account_name'] = 'Account Name';
 $string['settings_account_name_desc'] = '';
 $string['settings_account_id'] = 'Account ID';
 $string['settings_account_id_desc'] = '';
-$string['settings_user_emails'] = 'Send user emails to examus';
-$string['settings_user_emails_desc'] = 'Make sure that all user email are unique before turning this option on! Having multiple users with same email can cause issues!';
+$string['settings_user_emails'] = 'Send user emails to Examus';
+$string['settings_user_emails_desc'] = '';
 
 $string['use_examus'] = 'Use examus app to view this module';
 $string['settings'] = 'Examus settings';
@@ -124,7 +124,7 @@ $string['scheduling_required'] = 'A calendar entry is required';
 $string['apply_filter'] = 'Apply filter';
 $string['allcourses'] = 'All courses';
 $string['allstatuses'] = 'All statuses';
-$string['userquery'] = 'User Email starts with';
+$string['userquery'] = 'Username or Email starts with';
 $string['fromdate'] = 'From date:';
 $string['todate'] = 'To date:';
 

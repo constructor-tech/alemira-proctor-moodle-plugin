@@ -99,6 +99,7 @@ class log {
             'u.firstname u_firstname',
             'u.lastname u_lastname',
             'u.email u_email',
+            'u.username u_username',
             'u.id userid',
             'e.status status',
             'review_link',
@@ -135,6 +136,7 @@ class log {
             if (empty($value)) {
                 continue;
             }
+            $value = trim($value);
             switch ($key) {
                 case 'from':
                     $where[] = 'e.timemodified > :'.$key;
@@ -145,8 +147,10 @@ class log {
                     break;
 
                 case 'userquery':
-                    $params[$key] = $value.'%';
-                    $where[] = 'u.email LIKE :'.$key;
+                    $params[$key.'1'] = $value.'%';
+                    $params[$key.'2'] = $value.'%';
+
+                    $where[] = '(u.email LIKE :'.$key.'1 OR u.username LIKE :'.$key.'2)';
                     break;
 
                 default:
@@ -240,7 +244,9 @@ class log {
                     $row[] = '';
                 }
 
-                $row[] = $entry->u_firstname . " " . $entry->u_lastname . "<br>" . $entry->u_email;
+                $row[] = $entry->u_firstname . " " . $entry->u_lastname . "<br>"
+                       . $entry->u_username
+                       . ' (' . $entry->u_email . ')';
 
                 $course = get_course($entry->courseid);
                 $modinfo = get_fast_modinfo($course);
