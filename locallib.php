@@ -74,7 +74,7 @@ function avalibility_examus2_attempt_started_handler($event) {
         $DB->update_record('availability_examus2_entries', $entry);
 
         if ($entry->status == "started" && $entry->attemptid != $attempt->id) {
-            $entry = $condition->create_entry($USER->id, $cm);
+            $entry = common::create_entry($condition, $USER->id, $cm);
 
             if ($accesscode) {
                 // The user is coming from examus, we can't redirect.
