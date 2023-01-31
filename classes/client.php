@@ -44,7 +44,7 @@ class client {
         'id' => 'id',
         'it' => 'it',
         'kk' => 'kk',
-        'it' => 'lt',
+        'lt' => 'lt',
         'ms' => 'ms',
         'pt' => 'pt',
         'ro' => 'ro',
