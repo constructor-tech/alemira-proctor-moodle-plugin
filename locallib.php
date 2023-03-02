@@ -35,7 +35,7 @@ use availability_examus2\condition;
 function avalibility_examus2_attempt_started_handler($event) {
     global $DB, $SESSION, $PAGE, $USER;
 
-    $accesscode = isset($SESSION->accesscode) ? $SESSION->accesscode : null;
+    $accesscode = isset($SESSION->availability_examus2_accesscode) ? $SESSION->availability_examus2_accesscode : null;
 
     $attempt = $event->get_record_snapshot('quiz_attempts', $event->objectid);
 
@@ -120,9 +120,9 @@ function avalibility_examus2_attempt_submitted_handler($event) {
 
     $userid = $event->userid;
 
-    if (!empty($SESSION->accesscode)) {
-        $accesscode = $SESSION->accesscode;
-        unset($SESSION->accesscode);
+    if (!empty($SESSION->availability_examus2_accesscode)) {
+        $accesscode = $SESSION->availability_examus2_accesscode;
+        unset($SESSION->availability_examus2_accesscode);
     }
 
     $entries = $DB->get_records('availability_examus2_entries', [

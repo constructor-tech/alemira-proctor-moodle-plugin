@@ -112,7 +112,7 @@ $handlers['review'] = function($entry, $request) {
 };
 
 $handlers['schedule'] = function($entry, $request) {
-    global $DB, $SESSION;
+    global $DB;
     $event = $request->event;
 
     if ($event == 'scheduled') {

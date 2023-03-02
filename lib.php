@@ -61,7 +61,6 @@ function availability_examus2_before_standard_html_head() {
 }
 
 function availability_examus2_after_config() {
-    global $SESSION;
     $accesscode = optional_param('accesscode', null, PARAM_RAW);
 
     if (!empty($accesscode)) {
@@ -110,8 +109,11 @@ function availability_examus2_handle_proctoring_fader($attempt) {
 
     $entry = common::create_entry($condition, $USER->id, $cm);
 
-    if (!empty($SESSION->accesscode) && $entry->accesscode != $SESSION->accesscode) {
-        $SESSION->accesscode = null;
+    if (
+        !empty($SESSION->availability_examus2_accesscode) &&
+            $entry->accesscode != $SESSION->availability_examus2_accesscode
+    ) {
+        $SESSION->availability_examus2_accesscode = null;
         $SESSION->availibility_examus2_reset = true;
     }
 
@@ -156,7 +158,7 @@ function availability_examus2_handle_accesscode_param($accesscode) {
     // User is coming from examus, reset is done if it was requested before.
     unset($SESSION->availibility_examus2_reset);
 
-    $SESSION->accesscode = $accesscode;
+    $SESSION->availability_examus2_accesscode = $accesscode;
 
     // We know accesscode is passed in params.
     $entry = $DB->get_record('availability_examus2_entries', [
@@ -210,7 +212,7 @@ function availability_examus2_handle_start_attempt($course, $cm, $user){
         return;
     }
 
-    $accesscode = isset($SESSION->accesscode) ? $SESSION->accesscode : null;
+    $accesscode = isset($SESSION->availibility_examus2_accesscode) ? $SESSION->availibility_examus2_accesscode : null;
     $entry = null;
     $reset = false;
     if ($accesscode) {
@@ -233,7 +235,7 @@ function availability_examus2_handle_start_attempt($course, $cm, $user){
         }
 
         if ($reset) {
-            unset($SESSION->accesscode);
+            unset($SESSION->availability_examus2_accesscode);
             $SESSION->availibility_examus2_reset = true;
         }
 
@@ -246,7 +248,7 @@ function availability_examus2_handle_start_attempt($course, $cm, $user){
 
     // The attempt is already started, letting it open.
     if ($entry->status == 'started') {
-      return;
+        return;
     }
 
     $timebracket = common::get_timebracket_for_cm('quiz', $cminfo);
