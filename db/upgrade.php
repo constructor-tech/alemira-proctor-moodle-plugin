@@ -15,36 +15,36 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Availability plugin for integration with Examus proctoring system.
+ * Availability plugin for integration with Alemira proctoring system.
  *
- * @package    availability_examus2
+ * @package    availability_alemira
  * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 /**
- * availability examus upgrade
+ * availability alemira upgrade
  * @param string $oldversion Oldversion
  * @return bool
  */
-function xmldb_availability_examus2_upgrade($oldversion) {
+function xmldb_availability_alemira_upgrade($oldversion) {
     global $DB;
     $dbman = $DB->get_manager();
 
     if ($oldversion < 2022102101) {
         // Removing table that was used during earli stages of development and slipped into release.
-        $oldtable = new xmldb_table('availability_examus2_exams');
+        $oldtable = new xmldb_table('availability_alemira_exams');
         if ($dbman->table_exists($oldtable)) {
             $dbman->drop_table($oldtable);
         }
 
-        $table = new xmldb_table('availability_examus2_entries');
+        $table = new xmldb_table('availability_alemira_entries');
         $field = new xmldb_field('archiveurl', XMLDB_TYPE_TEXT);
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
 
-        upgrade_plugin_savepoint(true, 2022102101, 'availability', 'examus2');
+        upgrade_plugin_savepoint(true, 2022102101, 'availability', 'alemira');
     }
 
 

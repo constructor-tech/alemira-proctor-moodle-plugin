@@ -15,16 +15,16 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Availability plugin for integration with Examus proctoring system.
+ * Availability plugin for integration with Alemira proctoring system.
  *
- * @package    availability_examus
+ * @package    availability_alemira
  * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace availability_examus2;
+namespace availability_alemira;
 use \stdClass;
-use availability_examus2\condition;
+use availability_alemira\condition;
 
 /**
  * Collection of static methods, used throughout the code
@@ -39,7 +39,7 @@ class common {
     public static function most_recent_entry($entry) {
         global $DB;
 
-        $entries = $DB->get_records('availability_examus2_entries', [
+        $entries = $DB->get_records('availability_alemira_entries', [
             'userid' => $entry->userid,
             'courseid' => $entry->courseid,
             'cmid' => $entry->cmid,
@@ -61,7 +61,7 @@ class common {
 
         $courseid = $cm->course;
 
-        $entries = $DB->get_records('availability_examus2_entries', [
+        $entries = $DB->get_records('availability_alemira_entries', [
             'userid' => $userid,
             'courseid' => $courseid,
             'cmid' => $cm->id,
@@ -84,7 +84,7 @@ class common {
                     $entry->timemodified = time();
                     $entry->status = 'rescheduled';
 
-                    $DB->update_record('availability_examus2_entries', $entry);
+                    $DB->update_record('availability_alemira_entries', $entry);
                     $entry = common::reset_entry(['id' => $entry->id]);
                     return $entry;
                 }
@@ -111,7 +111,7 @@ class common {
         // Respect limited number of attempts
         if (is_null($allowedattempts) || $usedentries < $allowedattempts) {
             $entry = condition::make_entry($courseid, $cm->id, $userid);
-            $entry->id = $DB->insert_record('availability_examus2_entries', $entry);
+            $entry->id = $DB->insert_record('availability_alemira_entries', $entry);
 
             return $entry;
         } else {
@@ -133,17 +133,17 @@ class common {
     public static function reset_entry($conditions, $force = false) {
         global $DB;
 
-        $oldentry = $DB->get_record('availability_examus2_entries', $conditions);
+        $oldentry = $DB->get_record('availability_alemira_entries', $conditions);
 
         $notinited = $oldentry && $oldentry->status == 'new';
 
         if ($oldentry && !$notinited) {
             $oldentry->status = "force_reset";
-            $DB->update_record('availability_examus2_entries', $oldentry);
+            $DB->update_record('availability_alemira_entries', $oldentry);
         }
 
         if ($oldentry && (!$notinited || $force)) {
-            $entries = $DB->get_records('availability_examus2_entries', [
+            $entries = $DB->get_records('availability_alemira_entries', [
                 'userid' => $oldentry->userid,
                 'courseid' => $oldentry->courseid,
                 'cmid' => $oldentry->cmid,
@@ -154,7 +154,7 @@ class common {
                 if ($force) {
                     foreach ($entries as $old) {
                         $old->status = 'force_reset';
-                        $DB->update_record('availability_examus2_entries', $old);
+                        $DB->update_record('availability_alemira_entries', $old);
                     }
                 }
 
@@ -168,7 +168,7 @@ class common {
                 $entry->timecreated = $timenow;
                 $entry->timemodified = $timenow;
 
-                $entry->id = $DB->insert_record('availability_examus2_entries', $entry);
+                $entry->id = $DB->insert_record('availability_alemira_entries', $entry);
 
                 return $entry;
             } else {
@@ -196,7 +196,7 @@ class common {
             $condition['cmid'] = $cmid;
         }
 
-        $DB->delete_records('availability_examus2_entries', $condition);
+        $DB->delete_records('availability_alemira_entries', $condition);
     }
 
     /**

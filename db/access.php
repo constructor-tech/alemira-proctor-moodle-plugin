@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Availability plugin for integration with Examus proctoring system.
+ * Availability plugin for integration with Alemira proctoring system.
  *
- * @package    availability_examus2
+ * @package    availability_alemira
  * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -25,21 +25,21 @@
 defined('MOODLE_INTERNAL') || die();
 
 $capabilities = [
-    'availability/examus2:logaccess' => [
+    'availability/alemira:logaccess' => [
         'riskbitmask' => RISK_PERSONAL | RISK_CONFIG,
         'captype' => 'write',
         'contextlevel' => CONTEXT_SYSTEM,
         'archetypes' => []
     ],
 
-    'availability/examus2:logaccess_all' => [
+    'availability/alemira:logaccess_all' => [
         'riskbitmask' => RISK_PERSONAL | RISK_CONFIG,
         'captype' => 'write',
         'contextlevel' => CONTEXT_SYSTEM,
         'archetypes' => []
     ],
 
-    'availability/examus2:logaccess_course' => [
+    'availability/alemira:logaccess_course' => [
         'riskbitmask' => RISK_PERSONAL | RISK_CONFIG,
         'captype' => 'read',
         'contextlevel' => CONTEXT_COURSE,

@@ -1,5 +1,5 @@
 {
-    "name": "moodle-availability_examus2",
+    "name": "moodle-availability_alemira",
     "devDependencies": {
         "grunt": "^1.0.1",
         "grunt-contrib-less": "^1.4.1",

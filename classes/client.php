@@ -15,14 +15,14 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Availability plugin for integration with Examus proctoring system.
+ * Availability plugin for integration with Alemira proctoring system.
  *
- * @package    availability_examus2
+ * @package    availability_alemira
  * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace availability_examus2;
+namespace availability_alemira;
 
 /**
  * Client class
@@ -58,7 +58,7 @@ class client {
 
     protected $jwtsecret;
     protected $integrationname;
-    protected $examusurl;
+    protected $alemiraurl;
     protected $accountid;
     protected $accountname;
     protected $useremails;
@@ -66,22 +66,22 @@ class client {
 
     public function __construct($condition) {
         $this->condition = $condition;
-        $this->examusurl = get_config('availability_examus2', 'examus_url');
-        $this->integrationname = get_config('availability_examus2', 'integration_name');
-        $this->jwtsecret = get_config('availability_examus2', 'jwt_secret');
-        $this->accountid = get_config('availability_examus2', 'account_id');
-        $this->accountname = get_config('availability_examus2', 'account_name');
-        $this->useremails = get_config('availability_examus2', 'user_emails');
+        $this->alemiraurl = get_config('availability_alemira', 'alemira_url');
+        $this->integrationname = get_config('availability_alemira', 'integration_name');
+        $this->jwtsecret = get_config('availability_alemira', 'jwt_secret');
+        $this->accountid = get_config('availability_alemira', 'account_id');
+        $this->accountname = get_config('availability_alemira', 'account_name');
+        $this->useremails = get_config('availability_alemira', 'user_emails');
     }
 
     public function api_url($method) {
-        $baseurl = 'https://'.$this->examusurl.'/api/v2/integration/simple/'.$this->integrationname.'/';
+        $baseurl = 'https://'.$this->alemiraurl.'/api/v2/integration/simple/'.$this->integrationname.'/';
 
         return $baseurl.$method.'/';
     }
 
     public function form_url($method) {
-        $baseurl = 'https://'.$this->examusurl.'/integration/simple/'.$this->integrationname.'/';
+        $baseurl = 'https://'.$this->alemiraurl.'/integration/simple/'.$this->integrationname.'/';
 
         return $baseurl.$method.'/';
     }

@@ -15,13 +15,13 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Availability plugin for integration with Examus proctoring system.
+ * Availability plugin for integration with Alemira proctoring system.
  *
- * @package    availability_examus2
+ * @package    availability_alemira
  * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-namespace availability_examus2;
+namespace availability_alemira;
 
 /**
  * Holds global state to pass data from event handlers to other code.

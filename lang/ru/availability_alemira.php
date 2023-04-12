@@ -15,25 +15,25 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Availability plugin for integration with Examus proctoring system.
+ * Availability plugin for integration with Alemira proctoring system.
  *
- * @package    availability_examus2
+ * @package    availability_alemira
  * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['examus2:logaccess'] = 'Доступ к отчету Экзамус';
-$string['examus2:logaccess_course'] = 'Доступ к отчету Экзамус(определенный курс)';
-$string['examus2:logaccess_all'] = 'Доступ к отчету Экзамус(все курсы)';
+$string['alemira:logaccess'] = 'Доступ к отчету Alemira';
+$string['alemira:logaccess_course'] = 'Доступ к отчету Alemira(определенный курс)';
+$string['alemira:logaccess_all'] = 'Доступ к отчету Alemira(все курсы)';
 
-$string['description'] = 'Позволяет студентам использовать сервис прокторинга "Экзамус"';
-$string['pluginname'] = 'Прокторинг "Экзамус"';
-$string['title'] = 'Экзамус';
+$string['description'] = 'Позволяет студентам использовать сервис прокторинга "Alemira"';
+$string['pluginname'] = 'Прокторинг "Alemira"';
+$string['title'] = 'Alemira';
 
-$string['settings_examus_url'] = 'Examus URL';
-$string['settings_examus_url_desc'] = '';
+$string['settings_alemira_url'] = 'Alemira URL';
+$string['settings_alemira_url_desc'] = '';
 $string['settings_integration_name'] = 'Integration Name';
 $string['settings_integration_name_desc'] = '';
 $string['settings_jwt_secret'] = 'JWT Secret';
@@ -42,12 +42,12 @@ $string['settings_account_name'] = 'Account Name';
 $string['settings_account_name_desc'] = '';
 $string['settings_account_id'] = 'Account ID';
 $string['settings_account_id_desc'] = '';
-$string['settings_user_emails'] = 'Отправлять email пользователей в Examus';
+$string['settings_user_emails'] = 'Отправлять email пользователей в Alemira';
 $string['settings_user_emails_desc'] = '';
 
-$string['use_examus'] = 'Используйте приложение "Экзамус", чтобы получить доступ к модулю';
-$string['settings'] = 'Настройки прокторинга "Экзамус"';
-$string['log_section'] = 'Журнал прокторинга "Экзамус"';
+$string['use_alemira'] = 'Используйте приложение "Alemira", чтобы получить доступ к модулю';
+$string['settings'] = 'Настройки прокторинга "Alemira"';
+$string['log_section'] = 'Журнал прокторинга "Alemira"';
 $string['status'] = 'Статус';
 $string['module'] = 'Модуль';
 $string['new_entry'] = 'Новая запись';

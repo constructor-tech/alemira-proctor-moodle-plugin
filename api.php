@@ -15,22 +15,22 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Availability plugin for integration with Examus proctoring system.
+ * Availability plugin for integration with Alemira proctoring system.
  *
- * @package    availability_examus2
+ * @package    availability_alemira
  * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 /**
  * This file provides API interface in accordance to
- * Examus Simple Integration specification. It has not skip moodle's
+ * Alemira Simple Integration specification. It has not skip moodle's
  * standard auth flow.
  */
 // phpcs:disable moodle.Files.RequireLogin.Missing
 
-use availability_examus2\client;
-use availability_examus2\common;
+use availability_alemira\client;
+use availability_alemira\common;
 
 require_once('../../../config.php');
 
@@ -69,7 +69,7 @@ $request = json_decode($requestbody);
 
 $accesscode = $request->sessionId;
 
-$entry = $DB->get_record('availability_examus2_entries', ['accesscode' => $accesscode]);
+$entry = $DB->get_record('availability_alemira_entries', ['accesscode' => $accesscode]);
 
 $method = optional_param('method', '', PARAM_TEXT);
 
@@ -108,7 +108,7 @@ $handlers['review'] = function($entry, $request) {
     $entry->warnings = json_encode($request->warnings);
     $entry->warningstitles = json_encode($warningtitles);
 
-    $DB->update_record('availability_examus2_entries', $entry);
+    $DB->update_record('availability_alemira_entries', $entry);
 };
 
 $handlers['schedule'] = function($entry, $request) {
@@ -125,11 +125,11 @@ $handlers['schedule'] = function($entry, $request) {
 
         $entry->status = 'scheduled';
         $entry->timescheduled = common::parse_date($request->start);
-        $DB->update_record('availability_examus2_entries', $entry);
+        $DB->update_record('availability_alemira_entries', $entry);
     } else {
         $entry->status = 'canceled';
         $entry->timescheduled = null;
-        $DB->update_record('availability_examus2_entries', $entry);
+        $DB->update_record('availability_alemira_entries', $entry);
         common::reset_entry(['accesscode' => $accesscode], true);
     }
 

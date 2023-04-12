@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="availability/condition/examus2/db" VERSION="20161021" COMMENT="XMLDB file for Moodle availability/condition/examus2"
+<XMLDB PATH="availability/condition/alemira/db" VERSION="20161021" COMMENT="XMLDB file for Moodle availability/condition/alemira"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../../lib/xmldb/xmldb.xsd"
 >
   <TABLES>
-    <TABLE NAME="availability_examus2_entries" COMMENT="List of proctoring attempts">
+    <TABLE NAME="availability_alemira_entries" COMMENT="List of proctoring attempts">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>

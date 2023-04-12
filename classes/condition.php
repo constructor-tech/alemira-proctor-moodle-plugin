@@ -15,14 +15,14 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Availability plugin for integration with Examus proctoring system.
+ * Availability plugin for integration with Alemira proctoring system.
  *
- * @package    availability_examus2
+ * @package    availability_alemira
  * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace availability_examus2;
+namespace availability_alemira;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -32,10 +32,10 @@ use core_availability\info_module;
 use moodle_exception;
 use quiz;
 use stdClass;
-use availability_examus2\state;
+use availability_alemira\state;
 
 /**
- * Examus condition
+ * Alemira condition
  */
 class condition extends \core_availability\condition {
     /**
@@ -351,29 +351,29 @@ class condition extends \core_availability\condition {
     }
 
     /**
-     * has examus condition
+     * has alemira condition
      *
      * @param \cm_info $cm Cm
      * @return bool
      */
-    public static function has_examus_condition($cm) {
+    public static function has_alemira_condition($cm) {
         $econds = self::get_conditions($cm);
         return (bool) $econds;
     }
 
     /**
-     * get examus conditions
+     * get alemira conditions
      *
      * @param \cm_info $cm Cm
      * @return array
      */
-    public static function get_examus_condition($cm) {
+    public static function get_alemira_condition($cm) {
         $conds = self::get_conditions($cm);
         return $conds && isset($conds[0]) ? $conds[0] : null;
     }
 
     /**
-     * get examus conditions
+     * get alemira conditions
      *
      * @param \cm_info $cm Cm
      * @return array
@@ -382,7 +382,7 @@ class condition extends \core_availability\condition {
         $info = new info_module($cm);
         try {
             $tree = $info->get_availability_tree();
-            $tree = $tree->get_all_children('\\availability_examus2\\condition');
+            $tree = $tree->get_all_children('\\availability_alemira\\condition');
         } catch (moodle_exception $e) {
             return null;
         }
@@ -397,7 +397,7 @@ class condition extends \core_availability\condition {
      */
     public function save() {
         return (object) [
-            'type' => 'examus',
+            'type' => 'alemira',
             'duration' => (int) $this->duration,
             'mode' => (string) $this->mode,
             'scheduling_required' => (bool) $this->schedulingrequired,
@@ -442,7 +442,7 @@ class condition extends \core_availability\condition {
      * @return string
      */
     public function get_description($full, $not, \core_availability\info $info) {
-        return get_string('use_examus', 'availability_examus2');
+        return get_string('use_alemira', 'availability_alemira');
     }
 
     /**

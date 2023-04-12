@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Availability plugin for integration with Examus proctoring system.
+ * Availability plugin for integration with Alemira proctoring system.
  *
- * @package    availability_examus2
+ * @package    availability_alemira
  * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -28,36 +28,36 @@ if ($hassiteconfig) {
     $ADMIN->add(
         'reports',
          new admin_externalpage(
-             'availability_examus2_settings',
-             get_string('log_section', 'availability_examus2'),
-             $CFG->wwwroot . '/availability/condition/examus2/index.php',
-             'availability/examus2:logaccess'
+             'availability_alemira_settings',
+             get_string('log_section', 'availability_alemira'),
+             $CFG->wwwroot . '/availability/condition/alemira/index.php',
+             'availability/alemira:logaccess'
          )
     );
 
     if ($ADMIN->fulltree) {
-        $settings->add(new admin_setting_configtext('availability_examus2/examus_url',
-            new lang_string('settings_examus_url', 'availability_examus2'),
-            new lang_string('settings_examus_url_desc', 'availability_examus2'), '', PARAM_HOST));
+        $settings->add(new admin_setting_configtext('availability_alemira/alemira_url',
+            new lang_string('settings_alemira_url', 'availability_alemira'),
+            new lang_string('settings_alemira_url_desc', 'availability_alemira'), '', PARAM_HOST));
 
-        $settings->add(new admin_setting_configtext('availability_examus2/integration_name',
-            new lang_string('settings_integration_name', 'availability_examus2'),
-            new lang_string('settings_integration_name_desc', 'availability_examus2'), '', PARAM_TEXT));
+        $settings->add(new admin_setting_configtext('availability_alemira/integration_name',
+            new lang_string('settings_integration_name', 'availability_alemira'),
+            new lang_string('settings_integration_name_desc', 'availability_alemira'), '', PARAM_TEXT));
 
-        $settings->add(new admin_setting_configtext('availability_examus2/jwt_secret',
-            new lang_string('settings_jwt_secret', 'availability_examus2'),
-            new lang_string('settings_jwt_secret_desc', 'availability_examus2'), '', PARAM_TEXT));
+        $settings->add(new admin_setting_configtext('availability_alemira/jwt_secret',
+            new lang_string('settings_jwt_secret', 'availability_alemira'),
+            new lang_string('settings_jwt_secret_desc', 'availability_alemira'), '', PARAM_TEXT));
 
-        $settings->add(new admin_setting_configtext('availability_examus2/account_id',
-            new lang_string('settings_account_id', 'availability_examus2'),
-            new lang_string('settings_account_id_desc', 'availability_examus2'), '', PARAM_TEXT));
+        $settings->add(new admin_setting_configtext('availability_alemira/account_id',
+            new lang_string('settings_account_id', 'availability_alemira'),
+            new lang_string('settings_account_id_desc', 'availability_alemira'), '', PARAM_TEXT));
 
-        $settings->add(new admin_setting_configtext('availability_examus2/account_name',
-            new lang_string('settings_account_name', 'availability_examus2'),
-            new lang_string('settings_account_name_desc', 'availability_examus2'), '', PARAM_TEXT));
+        $settings->add(new admin_setting_configtext('availability_alemira/account_name',
+            new lang_string('settings_account_name', 'availability_alemira'),
+            new lang_string('settings_account_name_desc', 'availability_alemira'), '', PARAM_TEXT));
 
-        $settings->add(new admin_setting_configcheckbox('availability_examus2/user_emails',
-            new lang_string('settings_user_emails', 'availability_examus2'),
-            new lang_string('settings_user_emails_desc', 'availability_examus2'), 1));
+        $settings->add(new admin_setting_configcheckbox('availability_alemira/user_emails',
+            new lang_string('settings_user_emails', 'availability_alemira'),
+            new lang_string('settings_user_emails_desc', 'availability_alemira'), 1));
     }
 }

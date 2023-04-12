@@ -1,7 +1,7 @@
 {
-  "name": "moodle-availability_examus2-form",
+  "name": "moodle-availability_alemira-form",
   "builds": {
-    "moodle-availability_examus2-form": {
+    "moodle-availability_alemira-form": {
       "jsfiles": [
         "form.js"
       ]

@@ -1,26 +1,26 @@
-YUI.add('moodle-availability_examus2-form', function (Y, NAME) {
+YUI.add('moodle-availability_alemira-form', function (Y, NAME) {
 
 /**
  * JavaScript for form editing profile conditions.
  *
- * @module moodle-availability_examus2-form
+ * @module moodle-availability_alemira-form
  */
 /** @suppress checkVars */
-M.availability_examus2 = M.availability_examus2 || {};
+M.availability_alemira = M.availability_alemira || {};
 
-M.availability_examus2.form = Y.Object(M.core_availability.plugin);
+M.availability_alemira.form = Y.Object(M.core_availability.plugin);
 
-M.availability_examus2.form.rules = null;
+M.availability_alemira.form.rules = null;
 
-M.availability_examus2.form.initInner = function(rules, warnings, scoring) {
+M.availability_alemira.form.initInner = function(rules, warnings, scoring) {
     this.rules = rules;
     this.warnings = warnings;
     this.scoring = scoring;
 };
 
-M.availability_examus2.form.instId = 0;
+M.availability_alemira.form.instId = 0;
 
-M.availability_examus2.form.getNode = function(json) {
+M.availability_alemira.form.getNode = function(json) {
     var html, node, value;
 
     /**
@@ -28,7 +28,7 @@ M.availability_examus2.form.getNode = function(json) {
      * @returns {string} A string from translations.
      */
     function getString(identifier, module) {
-        module = module || 'availability_examus2';
+        module = module || 'availability_alemira';
         return M.util.get_string(identifier, module);
     }
 
@@ -36,7 +36,7 @@ M.availability_examus2.form.getNode = function(json) {
         var showmore = getString('showmore', 'core_form');
         var showless = getString('showless', 'core_form');
 
-        return '<a href="#" class="examus-moreless" data-more="' + showmore + '" data-less="' + showless + '">' +
+        return '<a href="#" class="alemira-moreless" data-more="' + showmore + '" data-less="' + showless + '">' +
             showmore +
             '</a><div class="hidden col-md-12">' + content + '</div>';
     }
@@ -97,9 +97,9 @@ M.availability_examus2.form.getNode = function(json) {
         }
     }
 
-    M.availability_examus2.form.instId += 1;
+    M.availability_alemira.form.instId += 1;
 
-    var id = 'examus' + M.availability_examus2.form.instId;
+    var id = 'alemira' + M.availability_alemira.form.instId;
     var durationId = id + '_duration';
     var modeId = id + '_mode';
     var schedulingRequiredId = id + '_schedulingRequired';
@@ -198,7 +198,7 @@ M.availability_examus2.form.getNode = function(json) {
         var skeyId = id + '_' + skey;
         var smin = this.scoring[skey].min;
         var smax = this.scoring[skey].max;
-        var scoringInputHTML = '<input type="number" class="examus-scoring-input" value=""' +
+        var scoringInputHTML = '<input type="number" class="alemira-scoring-input" value=""' +
             'step="0.01" ' +
             'name="' + skey + '"' +
             'id="scoring_' + skeyId + '"' +
@@ -239,11 +239,11 @@ M.availability_examus2.form.getNode = function(json) {
 
 
 
-    node = Y.Node.create('<span class="availibility_examus-tabs" style="position:relative"></span>');
+    node = Y.Node.create('<span class="availibility_alemira-tabs" style="position:relative"></span>');
 
     node.setHTML('<label><strong>' + getString('title') + '</strong></label><br><br>');
 
-    var tabButtons = Y.Node.create('<div style="position:absolute; top: 0; right: 0;" class="availibility_examus-tab-btns"></div>').appendTo(node);
+    var tabButtons = Y.Node.create('<div style="position:absolute; top: 0; right: 0;" class="availibility_alemira-tab-btns"></div>').appendTo(node);
     var tabButtonOne = Y.Node.create('<a href="#" class="btn btn-primary">1</a>').appendTo(tabButtons);
     var tabButtonTwo = Y.Node.create('<a href="#" class="btn btn-secondary">2</a>').appendTo(tabButtons);
 
@@ -352,7 +352,7 @@ M.availability_examus2.form.getNode = function(json) {
     json.scoring = json.scoring || {};
     for (var scoringKey in json.scoring) {
         if (!isNaN(json.scoring[scoringKey])) {
-            var sinput = node.one('.examus-scoring-input[name=' + scoringKey + ']');
+            var sinput = node.one('.alemira-scoring-input[name=' + scoringKey + ']');
             if(sinput) {
                 sinput.set('value', json.scoring[scoringKey]);
             }
@@ -392,7 +392,7 @@ M.availability_examus2.form.getNode = function(json) {
     node.delegate('click', function(e) {
         e.preventDefault();
         switchMoreLessState(e.target);
-    }, '.examus-moreless');
+    }, '.alemira-moreless');
 
 
     //setSchedulingState();
@@ -400,7 +400,7 @@ M.availability_examus2.form.getNode = function(json) {
     return node;
 };
 
-M.availability_examus2.form.fillValue = function(value, node) {
+M.availability_alemira.form.fillValue = function(value, node) {
     var rulesInputs, warningsInputs, scoringInputs, key;
     value.duration = node.one('input[name=duration]').get('value').trim();
     value.mode = node.one('select[name=mode]').get('value').trim();
@@ -441,7 +441,7 @@ M.availability_examus2.form.fillValue = function(value, node) {
     });
 
     value.scoring = {};
-    scoringInputs = node.all('.examus-scoring-input');
+    scoringInputs = node.all('.alemira-scoring-input');
     Y.each(scoringInputs, function(scoringInput) {
         key = scoringInput.get('name');
         var scoringValue = scoringInput.get('value').trim();
@@ -453,11 +453,11 @@ M.availability_examus2.form.fillValue = function(value, node) {
     });
 };
 
-M.availability_examus2.form.fillErrors = function(errors, node) {
+M.availability_alemira.form.fillErrors = function(errors, node) {
     var value = {};
     this.fillValue(value, node);
     if (value.duration === undefined || !(new RegExp('^\\d+$')).test(value.duration) || value.duration % 30 !== 0) {
-        errors.push('availability_examus2:error_setduration');
+        errors.push('availability_alemira:error_setduration');
     }
 };
 

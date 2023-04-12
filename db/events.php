@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Availability plugin for integration with Examus proctoring system.
+ * Availability plugin for integration with Alemira proctoring system.
  *
- * @package    availability_examus2
+ * @package    availability_alemira
  * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -27,44 +27,44 @@ defined('MOODLE_INTERNAL') || die();
 $observers = [
     [
         'eventname' => 'core\event\course_module_deleted',
-        'includefile' => '/availability/condition/examus2/locallib.php',
-        'callback' => 'avalibility_examus2_course_module_deleted',
+        'includefile' => '/availability/condition/alemira/locallib.php',
+        'callback' => 'avalibility_alemira_course_module_deleted',
         'internal' => false,
     ],
     [
         'eventname' => 'core\event\user_enrolment_deleted',
-        'callback' => 'avalibility_examus2_user_enrolment_deleted',
-        'includefile' => '/availability/condition/examus2/locallib.php',
+        'callback' => 'avalibility_alemira_user_enrolment_deleted',
+        'includefile' => '/availability/condition/alemira/locallib.php',
         'internal' => false,
     ],
     [
         'eventname' => 'mod_quiz\event\attempt_submitted',
-        'callback' => 'avalibility_examus2_attempt_submitted_handler',
-        'includefile' => '/availability/condition/examus2/locallib.php',
+        'callback' => 'avalibility_alemira_attempt_submitted_handler',
+        'includefile' => '/availability/condition/alemira/locallib.php',
         'internal' => false,
     ],
     [
         'eventname' => 'mod_quiz\event\attempt_started',
-        'callback' => 'avalibility_examus2_attempt_started_handler',
-        'includefile' => '/availability/condition/examus2/locallib.php',
+        'callback' => 'avalibility_alemira_attempt_started_handler',
+        'includefile' => '/availability/condition/alemira/locallib.php',
         'internal' => false,
     ],
     [
         'eventname' => 'mod_quiz\event\attempt_preview_started',
-        'callback' => 'avalibility_examus2_attempt_started_handler',
-        'includefile' => '/availability/condition/examus2/locallib.php',
+        'callback' => 'avalibility_alemira_attempt_started_handler',
+        'includefile' => '/availability/condition/alemira/locallib.php',
         'internal' => false,
     ],
     [
         'eventname' => 'mod_quiz\event\attempt_deleted',
-        'callback' => 'avalibility_examus2_attempt_deleted_handler',
-        'includefile' => '/availability/condition/examus2/locallib.php',
+        'callback' => 'avalibility_alemira_attempt_deleted_handler',
+        'includefile' => '/availability/condition/alemira/locallib.php',
         'internal' => false,
     ],
     [
         'eventname' => 'mod_quiz\event\attempt_viewed',
-        'callback' => 'avalibility_examus2_attempt_viewed_handler',
-        'includefile' => '/availability/condition/examus2/locallib.php',
+        'callback' => 'avalibility_alemira_attempt_viewed_handler',
+        'includefile' => '/availability/condition/alemira/locallib.php',
         'internal' => false,
     ],
 ];

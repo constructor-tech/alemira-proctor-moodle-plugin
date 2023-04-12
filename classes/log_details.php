@@ -15,14 +15,14 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Availability plugin for integration with Examus proctoring system.
+ * Availability plugin for integration with Alemira proctoring system.
  *
- * @package    availability_examus2
+ * @package    availability_alemira
  * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace availability_examus2;
+namespace availability_alemira;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -56,7 +56,7 @@ class log_details {
      */
     public function render() {
         global $DB;
-        $entry = $DB->get_record('availability_examus2_entries', ['id' => $this->id]);
+        $entry = $DB->get_record('availability_alemira_entries', ['id' => $this->id]);
         $user = $DB->get_record('user', ['id' => $entry->userid]);
 
         $course = $DB->get_record('course', ['id' => $entry->courseid]);
@@ -125,7 +125,7 @@ class log_details {
             $warnings[] = $warning;
         }
 
-        $table = new \flexible_table('availability_examus2_show');
+        $table = new \flexible_table('availability_alemira_show');
 
         $table->define_columns(['key', 'value']);
         $table->define_headers(['Key', 'Value']);
@@ -137,13 +137,13 @@ class log_details {
         $threshold = $entry->threshold ? json_decode($entry->threshold) : (object)['attention' => null, 'rejected' => null];
 
         if ($entry->review_link !== null) {
-            $reviewlink = "<a href='" . $entry->review_link . "'>" . get_string('log_report_link', 'availability_examus2') . "</a>";
+            $reviewlink = "<a href='" . $entry->review_link . "'>" . get_string('log_report_link', 'availability_alemira') . "</a>";
         } else {
             $reviewlink = null;
         }
 
         if ($entry->archiveurl !== null) {
-            $archivelink = "<a href='" . $entry->archiveurl . "'>" . get_string('log_archive_link', 'availability_examus2') . "</a>";
+            $archivelink = "<a href='" . $entry->archiveurl . "'>" . get_string('log_archive_link', 'availability_alemira') . "</a>";
         } else {
             $archivelink = null;
         }
@@ -154,7 +154,7 @@ class log_details {
                 $attempturl  = new \moodle_url('/mod/quiz/review.php', ['attempt' => $entry->attemptid]);
                 $attemptlink = '<a href="' . $attempturl . '">' . $entry->attemptid . '</a>';
             } else {
-                $attemptlink = $entry->attemptid . ' ('. get_string('log_attempt_missing', 'availability_examus2') . ')';
+                $attemptlink = $entry->attemptid . ' ('. get_string('log_attempt_missing', 'availability_alemira') . ')';
             }
         } else {
             $attemptlink = null;
@@ -167,12 +167,12 @@ class log_details {
         ]);
 
         $table->add_data([
-            get_string('date_modified', 'availability_examus2'),
+            get_string('date_modified', 'availability_alemira'),
             common::format_date($entry->timemodified)
         ]);
 
         $table->add_data([
-            get_string('time_scheduled', 'availability_examus2'),
+            get_string('time_scheduled', 'availability_alemira'),
             common::format_date($entry->timescheduled)
         ]);
 
@@ -192,51 +192,51 @@ class log_details {
         ]);
 
         $table->add_data([
-            get_string('module', 'availability_examus2'),
+            get_string('module', 'availability_alemira'),
             !empty($course) ? $cm->get_formatted_name() : null,
         ]);
 
         $table->add_data([
-            get_string('status', 'availability_examus2'),
+            get_string('status', 'availability_alemira'),
             $entry->status,
         ]);
 
         $table->add_data([
-            get_string('log_review', 'availability_examus2'),
+            get_string('log_review', 'availability_alemira'),
             implode(', ', array_filter([$reviewlink, $archivelink])),
         ]);
 
         $table->add_data([
-            get_string('log_attempt', 'availability_examus2'),
+            get_string('log_attempt', 'availability_alemira'),
             $attemptlink,
         ]);
 
         $table->add_data([
-            get_string('score', 'availability_examus2'),
+            get_string('score', 'availability_alemira'),
             $entry->score,
         ]);
 
         $table->add_data([
-            get_string('threshold_attention', 'availability_examus2'),
+            get_string('threshold_attention', 'availability_alemira'),
             $threshold->attention,
         ]);
 
         $table->add_data([
-            get_string('threshold_rejected', 'availability_examus2'),
+            get_string('threshold_rejected', 'availability_alemira'),
             $threshold->rejected,
         ]);
 
         $table->add_data([
-            get_string('session_start', 'availability_examus2'),
+            get_string('session_start', 'availability_alemira'),
             common::format_date($entry->sessionstart),
         ]);
         $table->add_data([
-            get_string('session_end', 'availability_examus2'),
+            get_string('session_end', 'availability_alemira'),
             common::format_date($entry->sessionend),
         ]);
 
         $table->add_data([
-            get_string('comment', 'availability_examus2'),
+            get_string('comment', 'availability_alemira'),
             $entry->comment,
         ]);
         $table->print_html();
@@ -246,16 +246,16 @@ class log_details {
         }
 
         echo "<hr>";
-        echo "<h2>".get_string('log_details_warnings', 'availability_examus2')."</h2>";
+        echo "<h2>".get_string('log_details_warnings', 'availability_alemira')."</h2>";
 
-        $table = new \flexible_table('availability_examus2_show');
+        $table = new \flexible_table('availability_alemira_show');
 
         $table->define_columns(['type', 'title', 'start', 'end']);
         $table->define_headers([
-            get_string('log_details_warning_type', 'availability_examus2'),
-            get_string('log_details_warning_title', 'availability_examus2'),
-            get_string('log_details_warning_start', 'availability_examus2'),
-            get_string('log_details_warning_end', 'availability_examus2'),
+            get_string('log_details_warning_type', 'availability_alemira'),
+            get_string('log_details_warning_title', 'availability_alemira'),
+            get_string('log_details_warning_start', 'availability_alemira'),
+            get_string('log_details_warning_end', 'availability_alemira'),
         ]);
         $table->sortable(false);
         $table->set_attribute('class', 'generaltable generalbox');
