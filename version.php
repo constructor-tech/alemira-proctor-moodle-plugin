@@ -25,7 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'availability_alemira';
-$plugin->version = 2023030101;
+$plugin->version = 2023041901;
 $plugin->release = 'v2.0';
 $plugin->requires = 2018111800;
 $plugin->maturity = MATURITY_STABLE;
