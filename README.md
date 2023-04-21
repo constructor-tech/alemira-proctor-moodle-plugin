@@ -1,7 +1,7 @@
 # ALEMIRA MOODLE PLUGIN
 
 ## Requirements
-Alemira plugin was tested with Moodle versions 3.6 to 4.0.
+Alemira plugin was tested with Moodle versions 3.8 to 4.1.
 
 ## Installation and integration
 
