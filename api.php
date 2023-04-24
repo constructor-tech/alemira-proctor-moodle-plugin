@@ -38,7 +38,7 @@ global $DB;
 
 if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
     $auth = $_SERVER['HTTP_AUTHORIZATION'];
-} elseif (isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
+} else if (isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
     $auth = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
 } else {
     $auth = null;

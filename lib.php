@@ -46,7 +46,7 @@ function availability_alemira_before_standard_html_head() {
 
     }
 
-    // If there is no active attempt, do nothing
+    // If there is no active attempt, do nothing.
     if (isset(state::$attempt['attempt_id'])) {
         $attemptid = state::$attempt['attempt_id'];
         $attempt = $DB->get_record('quiz_attempts', ['id' => $attemptid]);
@@ -184,19 +184,19 @@ function availability_alemira_handle_accesscode_param($accesscode) {
         $modinfo = get_fast_modinfo($entry->courseid);
         $cminfo = $modinfo->get_cm($entry->cmid);
 
-        // The entry is already finished or canceled, we need to reset it
+        // The entry is already finished or canceled, we need to reset it.
         if (!in_array($entry->status, ['new', 'scheduled', 'started'])) {
             $entry = common::create_entry($condition, $entry->userid, $cminfo);
             $SESSION->availibility_alemira_reset = true;
         }
     } else {
-        // If entry does not exist, we need to create a new one and redirect
+        // If entry does not exist, we need to create a new one and redirect.
         $SESSION->availibility_alemira_reset = true;
     }
 
 }
 
-function availability_alemira_handle_start_attempt($course, $cm, $user){
+function availability_alemira_handle_start_attempt($course, $cm, $user) {
     global $SESSION, $DB;
     $modinfo = get_fast_modinfo($course->id);
     $cminfo = $modinfo->get_cm($cm->id);
@@ -220,7 +220,7 @@ function availability_alemira_handle_start_attempt($course, $cm, $user){
             'accesscode' => $accesscode,
         ]);
 
-        // Entry is old
+        // Entry is old.
         if ($entry && !in_array($entry->status, ['new', 'scheduled', 'started'])) {
             $reset = true;
         }

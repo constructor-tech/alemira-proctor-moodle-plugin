@@ -47,6 +47,5 @@ function xmldb_availability_alemira_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2022102101, 'availability', 'alemira');
     }
 
-
     return true;
 }

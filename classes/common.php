@@ -85,7 +85,7 @@ class common {
                     $entry->status = 'rescheduled';
 
                     $DB->update_record('availability_alemira_entries', $entry);
-                    $entry = common::reset_entry(['id' => $entry->id]);
+                    $entry = self::reset_entry(['id' => $entry->id]);
                     return $entry;
                 }
 
@@ -101,14 +101,14 @@ class common {
         }
 
         $usedentries = 0;
-        foreach($entries as $entry){
+        foreach ($entries as $entry) {
             if (!in_array($entry->status, ['rescheduled', 'canceled', 'force_reset'])) {
                 $usedentries++;
             }
         }
 
         // Create new entry if not exists already.
-        // Respect limited number of attempts
+        // Respect limited number of attempts.
         if (is_null($allowedattempts) || $usedentries < $allowedattempts) {
             $entry = condition::make_entry($courseid, $cm->id, $userid);
             $entry->id = $DB->insert_record('availability_alemira_entries', $entry);

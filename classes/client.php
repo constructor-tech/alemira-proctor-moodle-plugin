@@ -253,7 +253,7 @@ class client {
         ];
     }
 
-    public function map_language($lang){
+    public function map_language($lang) {
         if (isset(self::LANGUAGE_MAP[$lang])) {
             return self::LANGUAGE_MAP[$lang];
         } else {

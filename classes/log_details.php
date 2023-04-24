@@ -137,13 +137,15 @@ class log_details {
         $threshold = $entry->threshold ? json_decode($entry->threshold) : (object)['attention' => null, 'rejected' => null];
 
         if ($entry->review_link !== null) {
-            $reviewlink = "<a href='" . $entry->review_link . "'>" . get_string('log_report_link', 'availability_alemira') . "</a>";
+            $reviewlink = "<a href='" . $entry->review_link . "'>"
+                . get_string('log_report_link', 'availability_alemira') . "</a>";
         } else {
             $reviewlink = null;
         }
 
         if ($entry->archiveurl !== null) {
-            $archivelink = "<a href='" . $entry->archiveurl . "'>" . get_string('log_archive_link', 'availability_alemira') . "</a>";
+            $archivelink = "<a href='" . $entry->archiveurl . "'>"
+                . get_string('log_archive_link', 'availability_alemira') . "</a>";
         } else {
             $archivelink = null;
         }
@@ -159,7 +161,6 @@ class log_details {
         } else {
             $attemptlink = null;
         }
-
 
         $table->add_data([
             'accesscode',

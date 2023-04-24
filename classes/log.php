@@ -268,7 +268,6 @@ class log {
                                     . "</a>";
                 }
 
-
                 $row[] = $course->fullname;
                 $row[] = $cm ? $cm->get_formatted_name() : '';
                 $row[] = $entry->status;
@@ -442,12 +441,12 @@ class log {
         if (!empty($this->course)) {
             $course = $this->course;
         }
-        if (!$course->startdate or ($course->startdate > $timenow)) {
+        if (!$course->startdate || ($course->startdate > $timenow)) {
             $course->startdate = $course->timecreated;
         }
 
         $numdates = 1;
-        while ($timemidnight > $course->startdate and $numdates < 365) {
+        while ($timemidnight > $course->startdate && $numdates < 365) {
             $timemidnight = $timemidnight - 86400;
             $timenow = $timenow - 86400;
             $dates["$timemidnight"] = userdate($timenow, $strftimedaydate);
