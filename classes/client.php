@@ -28,10 +28,15 @@ namespace availability_alemira;
  * Client class
  */
 class client {
+    /** @var string Date format string, default ISO8601 not accepted by API */
     const ISO8601U = "Y-m-d\TH:i:s.uO";
 
-    // Not used in map, because no reliable way to deduce from source lang.
-    // fr_CH, it_CH.
+    /**
+     * Maps moodle languages to proctoring languages
+     * Not used in map, because no reliable way to deduce from source lang:
+     * fr_CH, it_CH.
+     * @var array
+     */
     const LANGUAGE_MAP = [
         'ar' => 'ar',
         'de' => 'de',
@@ -56,14 +61,31 @@ class client {
         'zh' => 'zh-cn'
     ];
 
+    /** @var string Secret key for signing JWT token */
     protected $jwtsecret;
+
+    /** @var string Integration name provided by Alemira */
     protected $integrationname;
+
+    /** @var string API URL */
     protected $alemiraurl;
+
+    /** @var string Account id withing company */
     protected $accountid;
+
+    /** @var string Company name */
     protected $accountname;
+
+    /** @var bool Company name */
     protected $useremails;
+
+    /** @var \availability_alemira\condition Availibility condition */
     protected $condition;
 
+    /**
+     * Initializes variables form plugin config and availibility condition
+     * @param \availability_alemira\condition $condition Availibility condition
+     */
     public function __construct($condition) {
         $this->condition = $condition;
         $this->alemiraurl = get_config('availability_alemira', 'alemira_url');
@@ -74,18 +96,34 @@ class client {
         $this->useremails = get_config('availability_alemira', 'user_emails');
     }
 
+    /**
+     * Generates API URL for method
+     * @param string $method API method
+     * @return string
+     */
     public function api_url($method) {
         $baseurl = 'https://'.$this->alemiraurl.'/api/v2/integration/simple/'.$this->integrationname.'/';
 
         return $baseurl.$method.'/';
     }
 
+    /**
+     * Generates form URL for method
+     * @param string $method API method
+     * @return string
+     */
     public function form_url($method) {
         $baseurl = 'https://'.$this->alemiraurl.'/integration/simple/'.$this->integrationname.'/';
 
         return $baseurl.$method.'/';
     }
 
+    /**
+     * Generates form URL for `finish` method
+     * @param string $sessionid Proctoring session id
+     * @param string $redirecturl Redirect to this URL after finishing
+     * @return string
+     */
     public function get_finish_url($sessionid, $redirecturl) {
         $finishurl = $this->form_url('finish');
         $finishurl .= $sessionid;
@@ -94,6 +132,12 @@ class client {
         return $finishurl;
     }
 
+    /**
+     * Generates form data, action, method to a API-method and payload
+     * @param string $method API-method
+     * @param array $payload Payload to be send via form
+     * @return array
+     */
     public function get_form($method, $payload) {
         $key = $this->jwtsecret;
         $jwt = \Firebase\JWT\JWT::encode($payload, $key, 'HS256');
@@ -105,6 +149,11 @@ class client {
         ];
     }
 
+    /**
+     * Decodes JWT message
+     * @param string $message encoded JWT
+     * @return array
+     */
     public function decode($message) {
         // For versions of php-jwt >= 6.0.0
         // Moodle bundles lower version at time of writing this.
@@ -117,6 +166,12 @@ class client {
         }
     }
 
+    /**
+     * Sends API request
+     * @param string $method API-method
+     * @param string $array Request body
+     * @return array
+     */
     public function request($method, $body = []) {
         $key = $this->jwtsecret;
         $url = $this->api_url($method);
@@ -152,6 +207,12 @@ class client {
         }
     }
 
+    /**
+     * Format exam-related data for API
+     * @param stdClass $course Course object
+     * @param \cm_info $cm Cm
+     * @return array
+     */
     public function exam_data($course, $cm) {
         $conditiondata = $this->condition->to_json();
 
@@ -191,6 +252,11 @@ class client {
         return $data;
     }
 
+    /**
+     * Format biometry-related data for API
+     * @param stdClass $user User object
+     * @return array
+     */
     public function biometry_data($user) {
         global $PAGE;
         $userpicture = new \user_picture($user);
@@ -211,6 +277,12 @@ class client {
         ];
     }
 
+    /**
+     * Format user-related data for API
+     * @param stdClass $user User object
+     * @param string|null $moodlelang user's language according to moodle
+     * @return array
+     */
     public function user_data($user, $moodlelang = null) {
         $data = [
             'userId' => $user->username,
@@ -230,6 +302,12 @@ class client {
         return $data;
     }
 
+    /**
+     * Format session-related data for API
+     * @param string $sessionid Session Id
+     * @param string $url Session URL
+     * @return array
+     */
     public function attempt_data($sessionid, $url) {
         return [
             'sessionId' => $sessionid,
@@ -237,6 +315,11 @@ class client {
         ];
     }
 
+    /**
+     * Format time-related data for API
+     * @param array $timebracket start and end date
+     * @return array
+     */
     public function time_data($timebracket) {
         $dt = new \DateTime();
         $dt->setTimezone(new \DateTimeZone('+0000'));
@@ -253,6 +336,11 @@ class client {
         ];
     }
 
+    /**
+     * Converts moodle language to API language
+     * @param string $lang Moodle language
+     * @return string API language
+     */
     public function map_language($lang) {
         if (isset(self::LANGUAGE_MAP[$lang])) {
             return self::LANGUAGE_MAP[$lang];

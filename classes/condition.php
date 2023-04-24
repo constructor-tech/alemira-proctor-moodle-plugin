@@ -52,6 +52,7 @@ class condition extends \core_availability\condition {
         'biometryskipfail', 'biometryflow', 'biometrytheme',
     ];
 
+    /** @var array List of default values for visible warnings */
     const WARNINGS = [
         'warning_extra_user_in_frame' => true,
         'warning_substitution_user' => true,
@@ -63,6 +64,7 @@ class condition extends \core_availability\condition {
         'warning_phone' => true,
     ];
 
+    /** @var array List of default values for rules */
     const RULES = [
         'allow_to_use_websites' => false,
         'allow_to_use_books' => false,
@@ -76,7 +78,7 @@ class condition extends \core_availability\condition {
         'allow_wrong_gaze_direction' => false,
     ];
 
-    // Scoring params with minmax values.
+    /** @var array List of default values and limits for scoring */
     const SCORING = [
         'cheater_level' => ['min' => 0, 'max' => 100, 'default' => null],
         'extra_user' => ['min' => 0, 'max' => 10, 'default' => null],
@@ -142,8 +144,6 @@ class condition extends \core_availability\condition {
 
     /** @var string List of custom rules */
     public $customrules = null;
-
-    private static $cachedtrees = [];
 
     /**
      * Construct
@@ -267,6 +267,11 @@ class condition extends \core_availability\condition {
         $this->validate();
     }
 
+    /**
+     * Validates values of interal structtures, vlamps scoring values to min/max
+     *
+     * @return null
+     */
     public function validate() {
         $keys = array_keys(self::RULES);
         foreach ($this->rules as $key => $value) {
@@ -306,7 +311,7 @@ class condition extends \core_availability\condition {
 
     /**
      * Import from external communication
-     *
+     * @param array $stat Data array to be mapped to propeties
      * @return null
      */
     public function from_json($data) {
@@ -438,6 +443,7 @@ class condition extends \core_availability\condition {
      * get description
      *
      * @param string $full Full
+     * @param bool $not True if NOT is in force
      * @param \core_availability\info $info Info
      * @return string
      */

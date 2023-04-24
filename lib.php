@@ -60,6 +60,9 @@ function availability_alemira_before_standard_html_head() {
     }
 }
 
+/**
+ * Hooks as early as possible, we need to catch accesscode GET param from proctoring
+ **/
 function availability_alemira_after_config() {
     $accesscode = optional_param('accesscode', null, PARAM_RAW);
 
@@ -81,6 +84,10 @@ function availability_alemira_after_require_login() {
     }
 }
 
+/**
+ * Provides logict for proctoring fader, exist as soon a possible if
+ * no protection is reqired.
+ */
 function availability_alemira_handle_proctoring_fader($attempt) {
     global $DB, $USER, $PAGE, $SESSION;
 
@@ -152,6 +159,9 @@ function availability_alemira_handle_proctoring_fader($attempt) {
     }
 }
 
+/**
+ * If accesscode param is provider, find entry, handle it's state.
+ */
 function availability_alemira_handle_accesscode_param($accesscode) {
     global $SESSION, $DB;
 
@@ -196,6 +206,10 @@ function availability_alemira_handle_accesscode_param($accesscode) {
 
 }
 
+/**
+ * When attempt is started, see if we are in proctoring, reset old entries,
+ * redirect to proctoring if needed
+ */
 function availability_alemira_handle_start_attempt($course, $cm, $user) {
     global $SESSION, $DB;
     $modinfo = get_fast_modinfo($course->id);

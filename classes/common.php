@@ -32,7 +32,6 @@ use availability_alemira\condition;
 class common {
     /**
      * Finds most recent entry
-     * @todo Rework this function to be more readable
      * @param \stdClass $entry Entry
      * @return \stdClass|null entry or null
      */
