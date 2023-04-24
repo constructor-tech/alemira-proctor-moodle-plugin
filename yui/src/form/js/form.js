@@ -23,6 +23,7 @@ M.availability_alemira.form.getNode = function(json) {
 
     /**
      * @param {string} identifier A string identifier
+     * @param {string} module Module name
      * @returns {string} A string from translations.
      */
     function getString(identifier, module) {
@@ -30,7 +31,12 @@ M.availability_alemira.form.getNode = function(json) {
         return M.util.get_string(identifier, module);
     }
 
-    function moreLess(content){
+    /**
+     * @param {string} content Content to be wraped
+     * @param {string} module Module name
+     * @returns {string} Wraped content
+     */
+    function moreLess(content) {
         var showmore = getString('showmore', 'core_form');
         var showless = getString('showless', 'core_form');
 
@@ -39,7 +45,7 @@ M.availability_alemira.form.getNode = function(json) {
             '</a><div class="hidden col-md-12">' + content + '</div>';
     }
 
-    function switchMoreLessState(target){
+    function switchMoreLessState(target) {
       var next = target.next();
       var hidden = next.hasClass('hidden');
 
@@ -57,10 +63,10 @@ M.availability_alemira.form.getNode = function(json) {
         var fieldcols = fullwidth ? 10 : 7;
 
         return '<span class="availability-group form-group mb-2">' +
-            '<div class="col-md-'+labelcols+' col-form-label d-flex pb-0 pr-md-0">' +
+            '<div class="col-md-' + labelcols + ' col-form-label d-flex pb-0 pr-md-0">' +
             '  <label for="' + id + '">' + label + '</label>' +
             '</div>' +
-            '<div class="col-md-'+fieldcols+' form-inline align-items-start felement">' +
+            '<div class="col-md-' + fieldcols + ' form-inline align-items-start felement">' +
             content +
             '</div>' +
             '</span>';
@@ -77,8 +83,8 @@ M.availability_alemira.form.getNode = function(json) {
         setTimeout(callback, 0);
     }
 
-    function switchTab(tab){
-        if(tab == 1) {
+    function switchTab(tab) {
+        if (tab == 1) {
             tabButtonOne.addClass('btn-primary');
             tabButtonOne.removeClass('btn-secondary');
             tabButtonTwo.addClass('btn-secondary');
@@ -202,7 +208,7 @@ M.availability_alemira.form.getNode = function(json) {
             'id="scoring_' + skeyId + '"' +
             'min="' + smin + '" max="' + smax + '">';
 
-        scoringOptions += formGroup(skeyId, getString('scoring_'+skey), scoringInputHTML);
+        scoringOptions += formGroup(skeyId, getString('scoring_' + skey), scoringInputHTML);
     }
 
     var biometryOptions = '';
@@ -241,7 +247,10 @@ M.availability_alemira.form.getNode = function(json) {
 
     node.setHTML('<label><strong>' + getString('title') + '</strong></label><br><br>');
 
-    var tabButtons = Y.Node.create('<div style="position:absolute; top: 0; right: 0;" class="availibility_alemira-tab-btns"></div>').appendTo(node);
+    var tabButtonStyle = '';
+    var tabButtons = Y.Node.create(
+        '<div style="position:absolute; top: 0; right: 0;" class="availibility_alemira-tab-btns"></div>'
+    ).appendTo(node);
     var tabButtonOne = Y.Node.create('<a href="#" class="btn btn-primary">1</a>').appendTo(tabButtons);
     var tabButtonTwo = Y.Node.create('<a href="#" class="btn btn-secondary">2</a>').appendTo(tabButtons);
 
@@ -249,7 +258,7 @@ M.availability_alemira.form.getNode = function(json) {
     var tabTwo = Y.Node.create('<div class="tab_content hidden">' + htmlTwo + '</div>').appendTo(node);
 
 
-    if(json.creating){
+    if (json.creating) {
         json.mode = 'online';
         json.scheduling_required = true;
     }
@@ -332,7 +341,7 @@ M.availability_alemira.form.getNode = function(json) {
     for (var ruleKey in json.rules) {
         if (json.rules[ruleKey]) {
             var input = node.one('.rules input[name=' + ruleKey + ']');
-            if(input) {
+            if (input) {
                 input.set('checked', 'checked');
             }
         }
@@ -341,7 +350,7 @@ M.availability_alemira.form.getNode = function(json) {
     for (var warningKey in json.warnings) {
         if (json.warnings[warningKey]) {
             var winput = node.one('.warnings input[name=' + warningKey + ']');
-            if(winput) {
+            if (winput) {
                 winput.set('checked', 'checked');
             }
         }
@@ -351,7 +360,7 @@ M.availability_alemira.form.getNode = function(json) {
     for (var scoringKey in json.scoring) {
         if (!isNaN(json.scoring[scoringKey])) {
             var sinput = node.one('.alemira-scoring-input[name=' + scoringKey + ']');
-            if(sinput) {
+            if (sinput) {
                 sinput.set('value', json.scoring[scoringKey]);
             }
         }
@@ -368,22 +377,26 @@ M.availability_alemira.form.getNode = function(json) {
 
 
     node.delegate('valuechange', function() {
-        nextTick(function(){ M.core_availability.form.update(); });
+        nextTick(function() {
+            M.core_availability.form.update();
+        });
     }, 'input,textarea,select');
 
     node.delegate('click', function() {
-        nextTick(function(){ M.core_availability.form.update(); });
+        nextTick(function() {
+            M.core_availability.form.update();
+        });
     }, 'input[type=checkbox]');
 
     node.delegate('valuechange', function() {
         setSchedulingState();
     }, '#'+modeId);
 
-    tabButtonOne.on('click', function(e){
+    tabButtonOne.on('click', function(e) {
         e.preventDefault();
         switchTab(1);
     });
-    tabButtonTwo.on('click', function(e){
+    tabButtonTwo.on('click', function(e) {
         e.preventDefault();
         switchTab(2);
     });
@@ -391,9 +404,6 @@ M.availability_alemira.form.getNode = function(json) {
         e.preventDefault();
         switchMoreLessState(e.target);
     }, '.alemira-moreless');
-
-
-    //setSchedulingState();
 
     return node;
 };
