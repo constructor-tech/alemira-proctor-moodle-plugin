@@ -64,7 +64,7 @@ class frontend extends \core_availability\frontend {
     /**
      * get_javascript_init_params
      *
-     * @param int $course Course id
+     * @param \stdClass $course Course object
      * @param \cm_info $cm Cm
      * @param \section_info $section Section
      * @return array
@@ -84,7 +84,7 @@ class frontend extends \core_availability\frontend {
     /**
      * allow_add
      *
-     * @param int $course Course id
+     * @param \stdClass $course Course object
      * @param \cm_info $cm Cm
      * @param \section_info $section Section
      * @return bool
