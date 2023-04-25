@@ -15,14 +15,14 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Availability plugin for integration with Alemira proctoring system.
+ * Availability plugin for integration with Proctor by Constructor.
  *
- * @package    availability_alemira
+ * @package    availability_proctor
  * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace availability_alemira;
+namespace availability_proctor;
 use \html_writer;
 
 defined('MOODLE_INTERNAL') || die();
@@ -171,13 +171,13 @@ class log {
         $limitfrom = ($this->page * $this->perpage);
         $limitnum  = $this->perpage;
 
-        $query = 'SELECT '.implode(', ', $select).' FROM {availability_alemira_entries} e '
+        $query = 'SELECT '.implode(', ', $select).' FROM {availability_proctor_entries} e '
                . ' LEFT JOIN {user} u ON u.id=e.userid '
                . ' LEFT JOIN {quiz_attempts} a ON a.id=e.attemptid '
                . (count($where) ? ' WHERE '.implode(' AND ', $where) : '')
                . ' ORDER BY ' . ($orderby ? $orderby : 'id');
 
-        $querycount = 'SELECT count(e.id) as count FROM {availability_alemira_entries} e '
+        $querycount = 'SELECT count(e.id) as count FROM {availability_proctor_entries} e '
                     . ' LEFT JOIN {user} u ON u.id=e.userid '
                     . ' LEFT JOIN {quiz_attempts} a ON a.id=e.attemptid '
                     . (count($where) ? ' WHERE '.implode(' AND ', $where) : '');
@@ -194,7 +194,7 @@ class log {
      * Sets up \flexible_table instance
      */
     protected function setup_table() {
-        $table = new \flexible_table('availability_alemira_table');
+        $table = new \flexible_table('availability_proctor_table');
 
         $table->define_columns([
             'timefinish', 'timescheduled', 'u_email',
@@ -203,14 +203,14 @@ class log {
         ]);
 
         $table->define_headers([
-            get_string('time_finish', 'availability_alemira'),
-            get_string('time_scheduled', 'availability_alemira'),
+            get_string('time_finish', 'availability_proctor'),
+            get_string('time_scheduled', 'availability_proctor'),
             get_string('user'),
             get_string('course'),
-            get_string('module', 'availability_alemira'),
-            get_string('status', 'availability_alemira'),
-            get_string('log_review', 'availability_alemira'),
-            get_string('score', 'availability_alemira'),
+            get_string('module', 'availability_proctor'),
+            get_string('status', 'availability_proctor'),
+            get_string('log_review', 'availability_proctor'),
+            get_string('score', 'availability_proctor'),
             '',
             ''
         ]);
@@ -259,12 +259,12 @@ class log {
                 $reportlinks = [];
                 if ($entry->review_link !== null) {
                      $reportlinks[] = "<a href='" . $entry->review_link . "'>"
-                                    . get_string('log_report_link', 'availability_alemira')
+                                    . get_string('log_report_link', 'availability_proctor')
                                     . "</a>";
                 }
                 if ($entry->archiveurl !== null) {
                      $reportlinks[] = "<a href='" . $entry->archiveurl . "'>"
-                                    . get_string('log_archive_link', 'availability_alemira')
+                                    . get_string('log_archive_link', 'availability_proctor')
                                     . "</a>";
                 }
 
@@ -279,12 +279,12 @@ class log {
 
                 $row[] = $entry->score;
 
-                $detailsurl = new \moodle_url('/availability/condition/alemira/index.php', [
+                $detailsurl = new \moodle_url('/availability/condition/proctor/index.php', [
                     'id' => $entry->id,
                     'action' => 'show'
                 ]);
 
-                $row[] = '<a href="'.$detailsurl.'">'.get_string('details', 'availability_alemira').'</a>';
+                $row[] = '<a href="'.$detailsurl.'">'.get_string('details', 'availability_proctor').'</a>';
 
                 // Changed condition. Allow to reset all entries.
                 // Consequences unknown.
@@ -293,7 +293,7 @@ class log {
                         "<form action='index.php' method='post'>" .
                            "<input type='hidden' name='id' value='" . $entry->id . "'>" .
                            "<input type='hidden' name='action' value='renew'>" .
-                           "<input type='submit' value='" . get_string('new_entry', 'availability_alemira') . "'>".
+                           "<input type='submit' value='" . get_string('new_entry', 'availability_proctor') . "'>".
                         "</form>";
                 } else {
                     $row[] =
@@ -301,7 +301,7 @@ class log {
                            "<input type='hidden' name='id' value='" . $entry->id . "'>" .
                            "<input type='hidden' name='force' value='true'>" .
                            "<input type='hidden' name='action' value='renew'>" .
-                           "<input type='submit' value='" . get_string('new_entry_force', 'availability_alemira') . "'>".
+                           "<input type='submit' value='" . get_string('new_entry_force', 'availability_proctor') . "'>".
                         "</form>";
                 }
                 $table->add_data($row);
@@ -350,8 +350,8 @@ class log {
         if ($courserecords = $DB->get_records("course", null, "fullname", "id,shortname,fullname,category")) {
             foreach ($courserecords as $course) {
                 $coursecontext = \context_course::instance($course->id);
-                if (!has_capability('availability/alemira:logaccess_all', $sitecontext)) {
-                    if (!has_capability('availability/alemira:logaccess_course', $coursecontext)) {
+                if (!has_capability('availability/proctor:logaccess_all', $sitecontext)) {
+                    if (!has_capability('availability/proctor:logaccess_course', $coursecontext)) {
                         continue;
                     }
                 }
@@ -466,7 +466,7 @@ class log {
         $userquery = $this->filters['userquery'];
         $status = $this->filters['status'];
 
-        echo html_writer::start_tag('form', ['class' => 'alemiralogselecform', 'action' => $this->url, 'method' => 'get']);
+        echo html_writer::start_tag('form', ['class' => 'proctorlogselecform', 'action' => $this->url, 'method' => 'get']);
         echo html_writer::start_div();
 
         // Add course selector.
@@ -479,7 +479,7 @@ class log {
             $courses,
             "courseid",
             $courseid,
-            get_string('allcourses', 'availability_alemira'),
+            get_string('allcourses', 'availability_proctor'),
             ['style' => 'height: 2.5rem;margin-right: 0.5rem']
         );
 
@@ -488,7 +488,7 @@ class log {
         echo html_writer::empty_tag('input', [
             'name' => 'userquery',
             'value' => $userquery,
-            'placeholder' => get_string("userquery", 'availability_alemira'),
+            'placeholder' => get_string("userquery", 'availability_proctor'),
             'class' => 'form-control',
             'style' => implode(';', [
                 'width: auto',
@@ -506,7 +506,7 @@ class log {
             $statuses,
             "status",
             $status,
-            get_string('allstatuses', 'availability_alemira'),
+            get_string('allstatuses', 'availability_proctor'),
             ['style' => 'height: 2.5rem;margin-right: 0.5rem']
         );
 
@@ -525,7 +525,7 @@ class log {
         // From date.
         echo html_writer::start_div(null, ['class' => 'fdate_selector', 'style' => 'padding: 0 0 0.8rem;']);
 
-        echo html_writer::label(get_string('fromdate',  'availability_alemira'), '', false, ['style' => 'width: 12%;']);
+        echo html_writer::label(get_string('fromdate',  'availability_proctor'), '', false, ['style' => 'width: 12%;']);
 
         foreach ($dateformat as $key => $value) {
             $name = 'from['.$key.']';
@@ -550,7 +550,7 @@ class log {
         // To date.
         echo html_writer::start_div(null, ['class' => 'fdate_selector', 'style' => 'padding: 0 0 0.8rem;']);
 
-        echo html_writer::label(get_string('todate',  'availability_alemira'), '', false, ['style' => 'width: 12%;']);
+        echo html_writer::label(get_string('todate',  'availability_proctor'), '', false, ['style' => 'width: 12%;']);
 
         foreach ($dateformat as $key => $value) {
             $name = 'to['.$key.']';
@@ -574,7 +574,7 @@ class log {
 
         echo html_writer::empty_tag('input', [
             'type' => 'submit',
-            'value' => get_string('apply_filter', 'availability_alemira'),
+            'value' => get_string('apply_filter', 'availability_proctor'),
             'class' => 'btn btn-secondary'
         ]);
 

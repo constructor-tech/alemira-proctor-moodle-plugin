@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Availability plugin for integration with Alemira proctoring system.
+ * Availability plugin for integration with Proctor by Constructor.
  *
- * @package    availability_alemira
+ * @package    availability_proctor
  * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -35,17 +35,17 @@ defined('MOODLE_INTERNAL') || die();
       <div style="text-align: center">
           <form action="<?php echo $formdata['action'] ?>"
                 method="<?php echo $formdata['method'] ?>"
-                id="availability_alemira_redirect_form"
+                id="availability_proctor_redirect_form"
           >
               <?php if(isset($formdata['token'])): ?>
                   <input type="hidden" value="<?php echo $formdata['token'] ?>" name="token">
               <?php endif ?>
-              <button type="submit">Go to Alemira</button>
+              <button type="submit">Go to Proctor by Constructor</button>
           </form>
       </div>
       <script type="text/javascript">
           function redirect() {
-              document.getElementById('availability_alemira_redirect_form').submit();
+              document.getElementById('availability_proctor_redirect_form').submit();
           }
           try { redirect() } catch (e) { console.error(e) };
           setTimeout(redirect, 5000);

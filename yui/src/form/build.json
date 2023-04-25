@@ -1,7 +1,7 @@
 {
-  "name": "moodle-availability_alemira-form",
+  "name": "moodle-availability_proctor-form",
   "builds": {
-    "moodle-availability_alemira-form": {
+    "moodle-availability_proctor-form": {
       "jsfiles": [
         "form.js"
       ]

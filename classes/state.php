@@ -15,13 +15,13 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Availability plugin for integration with Alemira proctoring system.
+ * Availability plugin for integration with Proctor by Constructor.
  *
- * @package    availability_alemira
+ * @package    availability_proctor
  * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-namespace availability_alemira;
+namespace availability_proctor;
 
 /**
  * Holds global state to pass data from event handlers to other code.

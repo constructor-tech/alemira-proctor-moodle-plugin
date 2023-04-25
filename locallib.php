@@ -15,27 +15,27 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Availability plugin for integration with Alemira proctoring system.
+ * Availability plugin for integration with Proctor by Constructor.
  *
- * @package    availability_alemira
+ * @package    availability_proctor
  * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use availability_alemira\state;
-use availability_alemira\client;
-use availability_alemira\common;
-use availability_alemira\condition;
+use availability_proctor\state;
+use availability_proctor\client;
+use availability_proctor\common;
+use availability_proctor\condition;
 
 /**
  * When attempt is started, update entry accordingly
  *
  * @param stdClass $event Event
  */
-function avalibility_alemira_attempt_started_handler($event) {
+function avalibility_proctor_attempt_started_handler($event) {
     global $DB, $SESSION, $PAGE, $USER;
 
-    $accesscode = isset($SESSION->availability_alemira_accesscode) ? $SESSION->availability_alemira_accesscode : null;
+    $accesscode = isset($SESSION->availability_proctor_accesscode) ? $SESSION->availability_proctor_accesscode : null;
 
     $attempt = $event->get_record_snapshot('quiz_attempts', $event->objectid);
 
@@ -44,7 +44,7 @@ function avalibility_alemira_attempt_started_handler($event) {
     $cmid = $event->get_context()->instanceid;
     $cm = $modinfo->get_cm($cmid);
 
-    $condition = condition::get_alemira_condition($cm);
+    $condition = condition::get_proctor_condition($cm);
     if (!$condition || !$attempt) {
         return;
     }
@@ -57,9 +57,9 @@ function avalibility_alemira_attempt_started_handler($event) {
 
     $inhibitredirect = false;
     if ($accesscode) {
-        // If we have an access code here, we are coming from Alemira.
+        // If we have an access code here, we are coming from Proctor by Constructor.
         $inhibitredirect = true;
-        $entry = $DB->get_record('availability_alemira_entries', ['accesscode' => $accesscode]);
+        $entry = $DB->get_record('availability_proctor_entries', ['accesscode' => $accesscode]);
     }
 
     if (!empty($entry)) {
@@ -71,18 +71,18 @@ function avalibility_alemira_attempt_started_handler($event) {
             $entry->status = "started";
             $entry->timemodified = time();
         }
-        $DB->update_record('availability_alemira_entries', $entry);
+        $DB->update_record('availability_proctor_entries', $entry);
 
         if ($entry->status == "started" && $entry->attemptid != $attempt->id) {
             $entry = common::create_entry($condition, $USER->id, $cm);
 
             if ($accesscode) {
-                // The user is coming from alemira, we can't redirect.
+                // The user is coming from proctor, we can't redirect.
                 // We have to let user know that they need to restart manually.
                 $inhibitredirect = true;
-                $SESSION->availability_alemira_reset = true;
+                $SESSION->availability_proctor_reset = true;
             } else {
-                // The user is not coming from alemira.
+                // The user is not coming from proctor.
                 $inhibitredirect = false;
             }
         }
@@ -91,11 +91,11 @@ function avalibility_alemira_attempt_started_handler($event) {
         $entry->attemptid = $attempt->id;
         $entry->status = "started";
         $entry->timemodified = time();
-        $DB->update_record('availability_alemira_entries', $entry);
+        $DB->update_record('availability_proctor_entries', $entry);
 
         if ($accesscode) {
             $inhibitredirect = true;
-            $SESSION->availability_alemira_reset = true;
+            $SESSION->availability_proctor_reset = true;
         } else {
             $inhibitredirect = false;
         }
@@ -111,7 +111,7 @@ function avalibility_alemira_attempt_started_handler($event) {
  *
  * @param stdClass $event Event
  */
-function avalibility_alemira_attempt_submitted_handler($event) {
+function avalibility_proctor_attempt_submitted_handler($event) {
     global $DB, $SESSION;
     $cmid = $event->get_context()->instanceid;
     $attempt = $event->get_record_snapshot('quiz_attempts', $event->objectid);
@@ -120,12 +120,12 @@ function avalibility_alemira_attempt_submitted_handler($event) {
 
     $userid = $event->userid;
 
-    if (!empty($SESSION->availability_alemira_accesscode)) {
-        $accesscode = $SESSION->availability_alemira_accesscode;
-        unset($SESSION->availability_alemira_accesscode);
+    if (!empty($SESSION->availability_proctor_accesscode)) {
+        $accesscode = $SESSION->availability_proctor_accesscode;
+        unset($SESSION->availability_proctor_accesscode);
     }
 
-    $entries = $DB->get_records('availability_alemira_entries', [
+    $entries = $DB->get_records('availability_proctor_entries', [
         'userid' => $userid,
         'courseid' => $event->courseid,
         'cmid' => $cmid,
@@ -133,7 +133,7 @@ function avalibility_alemira_attempt_submitted_handler($event) {
     ], '-id');
 
     if (!empty($accesscode)) {
-        $entry = $DB->get_record('availability_alemira_entries', ['accesscode' => $accesscode]);
+        $entry = $DB->get_record('availability_proctor_entries', ['accesscode' => $accesscode]);
         if ($entry) {
             $entries[] = $entry;
         }
@@ -152,7 +152,7 @@ function avalibility_alemira_attempt_submitted_handler($event) {
         if (empty($entry->attemptid)) {
             $entry->attemptid = $attempt->id;
         }
-        $DB->update_record('availability_alemira_entries', $entry);
+        $DB->update_record('availability_proctor_entries', $entry);
     }
     $entry = reset($entries);
 
@@ -176,7 +176,7 @@ function avalibility_alemira_attempt_submitted_handler($event) {
 
             header('Location: ' . $newlocation);
             $formdata = ['action' => $newlocation, 'method' => 'GET'];
-            $pagetitle = "Redirecting to Alemira";
+            $pagetitle = "Redirecting to Proctor by Constructor";
             include(dirname(__FILE__).'/templates/redirect.php');
         }
     });
@@ -187,7 +187,7 @@ function avalibility_alemira_attempt_submitted_handler($event) {
  *
  * @param stdClass $event Event
  */
-function avalibility_alemira_attempt_deleted_handler($event) {
+function avalibility_proctor_attempt_deleted_handler($event) {
     $attempt = $event->get_record_snapshot('quiz_attempts', $event->objectid);
     $cm = get_coursemodule_from_id('quiz', $event->get_context()->instanceid, $event->courseid);
 
@@ -202,7 +202,7 @@ function avalibility_alemira_attempt_deleted_handler($event) {
  *
  * @param \core\event\user_enrolment_deleted $event Event
  */
-function avalibility_alemira_user_enrolment_deleted(\core\event\user_enrolment_deleted $event) {
+function avalibility_proctor_user_enrolment_deleted(\core\event\user_enrolment_deleted $event) {
     $userid = $event->relateduserid;
 
     common::delete_empty_entries($userid, $event->courseid);
@@ -213,10 +213,10 @@ function avalibility_alemira_user_enrolment_deleted(\core\event\user_enrolment_d
  *
  * @param \core\event\course_module_deleted $event Event
  */
-function avalibility_alemira_course_module_deleted(\core\event\course_module_deleted $event) {
+function avalibility_proctor_course_module_deleted(\core\event\course_module_deleted $event) {
     global $DB;
     $cmid = $event->contextinstanceid;
-    $DB->delete_records('availability_alemira', ['cmid' => $cmid]);
+    $DB->delete_records('availability_proctor', ['cmid' => $cmid]);
 }
 
 
@@ -225,7 +225,7 @@ function avalibility_alemira_course_module_deleted(\core\event\course_module_del
  *
  * @param \mod_quiz\event\attempt_viewed $event Event
  */
-function avalibility_alemira_attempt_viewed_handler($event) {
+function avalibility_proctor_attempt_viewed_handler($event) {
     $attempt = $event->get_record_snapshot('quiz_attempts', $event->objectid);
     $quiz = $event->get_record_snapshot('quiz', $attempt->quiz);
 

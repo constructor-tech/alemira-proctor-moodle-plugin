@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Availability plugin for integration with Alemira proctoring system.
+ * Availability plugin for integration with Proctor by Constructor.
  *
- * @package    availability_alemira
+ * @package    availability_proctor
  * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -28,36 +28,36 @@ if ($hassiteconfig) {
     $ADMIN->add(
         'reports',
          new admin_externalpage(
-             'availability_alemira_settings',
-             get_string('log_section', 'availability_alemira'),
-             $CFG->wwwroot . '/availability/condition/alemira/index.php',
-             'availability/alemira:logaccess'
+             'availability_proctor_settings',
+             get_string('log_section', 'availability_proctor'),
+             $CFG->wwwroot . '/availability/condition/proctor/index.php',
+             'availability/proctor:logaccess'
          )
     );
 
     if ($ADMIN->fulltree) {
-        $settings->add(new admin_setting_configtext('availability_alemira/alemira_url',
-            new lang_string('settings_alemira_url', 'availability_alemira'),
-            new lang_string('settings_alemira_url_desc', 'availability_alemira'), '', PARAM_HOST));
+        $settings->add(new admin_setting_configtext('availability_proctor/proctor_url',
+            new lang_string('settings_proctor_url', 'availability_proctor'),
+            new lang_string('settings_proctor_url_desc', 'availability_proctor'), '', PARAM_HOST));
 
-        $settings->add(new admin_setting_configtext('availability_alemira/integration_name',
-            new lang_string('settings_integration_name', 'availability_alemira'),
-            new lang_string('settings_integration_name_desc', 'availability_alemira'), '', PARAM_TEXT));
+        $settings->add(new admin_setting_configtext('availability_proctor/integration_name',
+            new lang_string('settings_integration_name', 'availability_proctor'),
+            new lang_string('settings_integration_name_desc', 'availability_proctor'), '', PARAM_TEXT));
 
-        $settings->add(new admin_setting_configtext('availability_alemira/jwt_secret',
-            new lang_string('settings_jwt_secret', 'availability_alemira'),
-            new lang_string('settings_jwt_secret_desc', 'availability_alemira'), '', PARAM_TEXT));
+        $settings->add(new admin_setting_configtext('availability_proctor/jwt_secret',
+            new lang_string('settings_jwt_secret', 'availability_proctor'),
+            new lang_string('settings_jwt_secret_desc', 'availability_proctor'), '', PARAM_TEXT));
 
-        $settings->add(new admin_setting_configtext('availability_alemira/account_id',
-            new lang_string('settings_account_id', 'availability_alemira'),
-            new lang_string('settings_account_id_desc', 'availability_alemira'), '', PARAM_TEXT));
+        $settings->add(new admin_setting_configtext('availability_proctor/account_id',
+            new lang_string('settings_account_id', 'availability_proctor'),
+            new lang_string('settings_account_id_desc', 'availability_proctor'), '', PARAM_TEXT));
 
-        $settings->add(new admin_setting_configtext('availability_alemira/account_name',
-            new lang_string('settings_account_name', 'availability_alemira'),
-            new lang_string('settings_account_name_desc', 'availability_alemira'), '', PARAM_TEXT));
+        $settings->add(new admin_setting_configtext('availability_proctor/account_name',
+            new lang_string('settings_account_name', 'availability_proctor'),
+            new lang_string('settings_account_name_desc', 'availability_proctor'), '', PARAM_TEXT));
 
-        $settings->add(new admin_setting_configcheckbox('availability_alemira/user_emails',
-            new lang_string('settings_user_emails', 'availability_alemira'),
-            new lang_string('settings_user_emails_desc', 'availability_alemira'), 1));
+        $settings->add(new admin_setting_configcheckbox('availability_proctor/user_emails',
+            new lang_string('settings_user_emails', 'availability_proctor'),
+            new lang_string('settings_user_emails_desc', 'availability_proctor'), 1));
     }
 }

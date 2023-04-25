@@ -59,6 +59,24 @@ def run(name='alemira', dry=False, verbose=False, force=False):
         }
         rename = True
 
+    if name == 'proctor':
+        code_patterns = {
+            'use_alemira': 'use_proctor',
+            'alemira_url': 'proctor_url',
+            'alemiraurl': 'proctorurl',
+            'ALEMIRA': 'PROCTOR',
+            'alemira': 'proctor',
+        }
+        text_patterns = {
+            'Alemira': 'Proctor by Constructor',
+            'alemira': 'proctor',
+            'Proctoring by ': '',
+            ' proctoring service': '',
+            ' proctoring system': '',
+            'прокторинга ': '',
+        }
+        rename = True
+
     files = []
     for filename in glob.iglob('**/*', recursive=True):
         if not filename.startswith(tuple(ignore_files)):
@@ -109,7 +127,7 @@ def run(name='alemira', dry=False, verbose=False, force=False):
 
     print(f'Creating archive {archive_name}')
     os.chdir('releases')
-    os.system(f'zip -r "{archive_name}" {name}')
+    os.system(f'zip -f -r "{archive_name}" {name}')
     print('Finished')
 
 

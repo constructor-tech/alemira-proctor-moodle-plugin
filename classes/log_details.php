@@ -15,14 +15,14 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Availability plugin for integration with Alemira proctoring system.
+ * Availability plugin for integration with Proctor by Constructor.
  *
- * @package    availability_alemira
+ * @package    availability_proctor
  * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace availability_alemira;
+namespace availability_proctor;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -56,7 +56,7 @@ class log_details {
      */
     public function render() {
         global $DB;
-        $entry = $DB->get_record('availability_alemira_entries', ['id' => $this->id]);
+        $entry = $DB->get_record('availability_proctor_entries', ['id' => $this->id]);
         $user = $DB->get_record('user', ['id' => $entry->userid]);
 
         $course = $DB->get_record('course', ['id' => $entry->courseid]);
@@ -125,7 +125,7 @@ class log_details {
             $warnings[] = $warning;
         }
 
-        $table = new \flexible_table('availability_alemira_show');
+        $table = new \flexible_table('availability_proctor_show');
 
         $table->define_columns(['key', 'value']);
         $table->define_headers(['Key', 'Value']);
@@ -138,14 +138,14 @@ class log_details {
 
         if ($entry->review_link !== null) {
             $reviewlink = "<a href='" . $entry->review_link . "'>"
-                . get_string('log_report_link', 'availability_alemira') . "</a>";
+                . get_string('log_report_link', 'availability_proctor') . "</a>";
         } else {
             $reviewlink = null;
         }
 
         if ($entry->archiveurl !== null) {
             $archivelink = "<a href='" . $entry->archiveurl . "'>"
-                . get_string('log_archive_link', 'availability_alemira') . "</a>";
+                . get_string('log_archive_link', 'availability_proctor') . "</a>";
         } else {
             $archivelink = null;
         }
@@ -156,7 +156,7 @@ class log_details {
                 $attempturl  = new \moodle_url('/mod/quiz/review.php', ['attempt' => $entry->attemptid]);
                 $attemptlink = '<a href="' . $attempturl . '">' . $entry->attemptid . '</a>';
             } else {
-                $attemptlink = $entry->attemptid . ' ('. get_string('log_attempt_missing', 'availability_alemira') . ')';
+                $attemptlink = $entry->attemptid . ' ('. get_string('log_attempt_missing', 'availability_proctor') . ')';
             }
         } else {
             $attemptlink = null;
@@ -168,12 +168,12 @@ class log_details {
         ]);
 
         $table->add_data([
-            get_string('date_modified', 'availability_alemira'),
+            get_string('date_modified', 'availability_proctor'),
             common::format_date($entry->timemodified)
         ]);
 
         $table->add_data([
-            get_string('time_scheduled', 'availability_alemira'),
+            get_string('time_scheduled', 'availability_proctor'),
             common::format_date($entry->timescheduled)
         ]);
 
@@ -193,51 +193,51 @@ class log_details {
         ]);
 
         $table->add_data([
-            get_string('module', 'availability_alemira'),
+            get_string('module', 'availability_proctor'),
             !empty($course) ? $cm->get_formatted_name() : null,
         ]);
 
         $table->add_data([
-            get_string('status', 'availability_alemira'),
+            get_string('status', 'availability_proctor'),
             $entry->status,
         ]);
 
         $table->add_data([
-            get_string('log_review', 'availability_alemira'),
+            get_string('log_review', 'availability_proctor'),
             implode(', ', array_filter([$reviewlink, $archivelink])),
         ]);
 
         $table->add_data([
-            get_string('log_attempt', 'availability_alemira'),
+            get_string('log_attempt', 'availability_proctor'),
             $attemptlink,
         ]);
 
         $table->add_data([
-            get_string('score', 'availability_alemira'),
+            get_string('score', 'availability_proctor'),
             $entry->score,
         ]);
 
         $table->add_data([
-            get_string('threshold_attention', 'availability_alemira'),
+            get_string('threshold_attention', 'availability_proctor'),
             $threshold->attention,
         ]);
 
         $table->add_data([
-            get_string('threshold_rejected', 'availability_alemira'),
+            get_string('threshold_rejected', 'availability_proctor'),
             $threshold->rejected,
         ]);
 
         $table->add_data([
-            get_string('session_start', 'availability_alemira'),
+            get_string('session_start', 'availability_proctor'),
             common::format_date($entry->sessionstart),
         ]);
         $table->add_data([
-            get_string('session_end', 'availability_alemira'),
+            get_string('session_end', 'availability_proctor'),
             common::format_date($entry->sessionend),
         ]);
 
         $table->add_data([
-            get_string('comment', 'availability_alemira'),
+            get_string('comment', 'availability_proctor'),
             $entry->comment,
         ]);
         $table->print_html();
@@ -247,16 +247,16 @@ class log_details {
         }
 
         echo "<hr>";
-        echo "<h2>".get_string('log_details_warnings', 'availability_alemira')."</h2>";
+        echo "<h2>".get_string('log_details_warnings', 'availability_proctor')."</h2>";
 
-        $table = new \flexible_table('availability_alemira_show');
+        $table = new \flexible_table('availability_proctor_show');
 
         $table->define_columns(['type', 'title', 'start', 'end']);
         $table->define_headers([
-            get_string('log_details_warning_type', 'availability_alemira'),
-            get_string('log_details_warning_title', 'availability_alemira'),
-            get_string('log_details_warning_start', 'availability_alemira'),
-            get_string('log_details_warning_end', 'availability_alemira'),
+            get_string('log_details_warning_type', 'availability_proctor'),
+            get_string('log_details_warning_title', 'availability_proctor'),
+            get_string('log_details_warning_start', 'availability_proctor'),
+            get_string('log_details_warning_end', 'availability_proctor'),
         ]);
         $table->sortable(false);
         $table->set_attribute('class', 'generaltable generalbox');

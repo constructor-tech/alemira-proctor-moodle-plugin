@@ -1,5 +1,5 @@
 {
-  "moodle-availability_alemira-form": {
+  "moodle-availability_proctor-form": {
     "requires": [
       "base",
       "node",

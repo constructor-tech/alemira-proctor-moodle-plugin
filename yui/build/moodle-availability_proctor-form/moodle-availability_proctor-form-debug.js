@@ -1,3 +1,5 @@
+YUI.add('moodle-availability_proctor-form', function (Y, NAME) {
+
 /**
  * JavaScript for form editing profile conditions.
  *
@@ -468,3 +470,6 @@ M.availability_proctor.form.fillErrors = function(errors, node) {
         errors.push('availability_proctor:error_setduration');
     }
 };
+
+
+}, '@VERSION@', {"requires": ["base", "node", "event", "moodle-core_availability-form"]});

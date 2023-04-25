@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Availability plugin for integration with Alemira proctoring system.
+ * Availability plugin for integration with Proctor by Constructor.
  *
- * @package    availability_alemira
+ * @package    availability_proctor
  * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -34,16 +34,16 @@ defined('MOODLE_INTERNAL') || die();
  *
  * When got a proper answer, then reveal the quiz content.
  *
- * We expect Alemira to work only on fresh browsers,
+ * We expect Proctor by Constructor to work only on fresh browsers,
  * so we use modern javascript here, without any regret or fear.
  * Even if some old browser breaks parsing or executing this,
  * no other scripts will be affected.
  */
 (function(){
 
-const strAwaitingProctoring = <?php echo json_encode(get_string('fader_awaiting_proctoring', 'availability_alemira')) ?>;
-const strInstructions = <?php echo json_encode(get_string('fader_instructions', 'availability_alemira')) ?>;
-const strReset = <?php echo json_encode(get_string('fader_reset', 'availability_alemira')) ?>;
+const strAwaitingProctoring = <?php echo json_encode(get_string('fader_awaiting_proctoring', 'availability_proctor')) ?>;
+const strInstructions = <?php echo json_encode(get_string('fader_instructions', 'availability_proctor')) ?>;
+const strReset = <?php echo json_encode(get_string('fader_reset', 'availability_proctor')) ?>;
 const faderHTML = strAwaitingProctoring + strInstructions;
 const formData = <?php echo json_encode(isset($formdata) ? $formdata : null); ?>;
 const noProtection = <?php echo $condition->noprotection ? 'true' : 'false' ?>;
@@ -98,7 +98,7 @@ const createFader = (html) => {
   return fader;
 };
 
-const redirectToAlemira = () => {
+const redirectToProctor by Constructor = () => {
   if (!formData) {
     return;
   }
@@ -125,7 +125,7 @@ window.addEventListener("DOMContentLoaded", () => {
     const fader = noProtection ? null : createFader(faderHTML);
 
     redirectTimeout = setTimeout(() => {
-         redirectToAlemira();
+         redirectToProctor by Constructor();
     }, 15000);
 
     proved.then(() => {

@@ -15,14 +15,14 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Availability plugin for integration with Alemira proctoring system.
+ * Availability plugin for integration with Proctor by Constructor.
  *
- * @package    availability_alemira
+ * @package    availability_proctor
  * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace availability_alemira;
+namespace availability_proctor;
 
 /**
  * Client class
@@ -64,11 +64,11 @@ class client {
     /** @var string Secret key for signing JWT token */
     protected $jwtsecret;
 
-    /** @var string Integration name provided by Alemira */
+    /** @var string Integration name provided by Proctor by Constructor */
     protected $integrationname;
 
     /** @var string API URL */
-    protected $alemiraurl;
+    protected $proctorurl;
 
     /** @var string Account id withing company */
     protected $accountid;
@@ -79,21 +79,21 @@ class client {
     /** @var bool Company name */
     protected $useremails;
 
-    /** @var \availability_alemira\condition Availibility condition */
+    /** @var \availability_proctor\condition Availibility condition */
     protected $condition;
 
     /**
      * Initializes variables form plugin config and availibility condition
-     * @param \availability_alemira\condition $condition Availibility condition
+     * @param \availability_proctor\condition $condition Availibility condition
      */
     public function __construct($condition) {
         $this->condition = $condition;
-        $this->alemiraurl = get_config('availability_alemira', 'alemira_url');
-        $this->integrationname = get_config('availability_alemira', 'integration_name');
-        $this->jwtsecret = get_config('availability_alemira', 'jwt_secret');
-        $this->accountid = get_config('availability_alemira', 'account_id');
-        $this->accountname = get_config('availability_alemira', 'account_name');
-        $this->useremails = get_config('availability_alemira', 'user_emails');
+        $this->proctorurl = get_config('availability_proctor', 'proctor_url');
+        $this->integrationname = get_config('availability_proctor', 'integration_name');
+        $this->jwtsecret = get_config('availability_proctor', 'jwt_secret');
+        $this->accountid = get_config('availability_proctor', 'account_id');
+        $this->accountname = get_config('availability_proctor', 'account_name');
+        $this->useremails = get_config('availability_proctor', 'user_emails');
     }
 
     /**
@@ -102,7 +102,7 @@ class client {
      * @return string
      */
     public function api_url($method) {
-        $baseurl = 'https://'.$this->alemiraurl.'/api/v2/integration/simple/'.$this->integrationname.'/';
+        $baseurl = 'https://'.$this->proctorurl.'/api/v2/integration/simple/'.$this->integrationname.'/';
 
         return $baseurl.$method.'/';
     }
@@ -113,7 +113,7 @@ class client {
      * @return string
      */
     public function form_url($method) {
-        $baseurl = 'https://'.$this->alemiraurl.'/integration/simple/'.$this->integrationname.'/';
+        $baseurl = 'https://'.$this->proctorurl.'/integration/simple/'.$this->integrationname.'/';
 
         return $baseurl.$method.'/';
     }

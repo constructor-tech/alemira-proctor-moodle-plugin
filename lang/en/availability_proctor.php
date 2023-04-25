@@ -15,25 +15,25 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Availability plugin for integration with Alemira proctoring system.
+ * Availability plugin for integration with Proctor by Constructor.
  *
- * @package    availability_alemira
+ * @package    availability_proctor
  * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['alemira:logaccess'] = 'Alemira log access';
-$string['alemira:logaccess_course'] = 'Alemira log access for course';
-$string['alemira:logaccess_all'] = 'Alemira log access for all courses';
+$string['proctor:logaccess'] = 'Proctor by Constructor log access';
+$string['proctor:logaccess_course'] = 'Proctor by Constructor log access for course';
+$string['proctor:logaccess_all'] = 'Proctor by Constructor log access for all courses';
 
-$string['description'] = 'Allows students to use Alemira proctoring service';
-$string['pluginname'] = 'Proctoring by Alemira';
-$string['title'] = 'Alemira';
+$string['description'] = 'Allows students to use Proctor by Constructor';
+$string['pluginname'] = 'Proctor by Constructor';
+$string['title'] = 'Proctor by Constructor';
 
-$string['settings_alemira_url'] = 'Alemira URL';
-$string['settings_alemira_url_desc'] = '';
+$string['settings_proctor_url'] = 'Proctor by Constructor URL';
+$string['settings_proctor_url_desc'] = '';
 $string['settings_integration_name'] = 'Integration Name';
 $string['settings_integration_name_desc'] = '';
 $string['settings_jwt_secret'] = 'JWT Secret';
@@ -42,12 +42,12 @@ $string['settings_account_name'] = 'Account Name';
 $string['settings_account_name_desc'] = '';
 $string['settings_account_id'] = 'Account ID';
 $string['settings_account_id_desc'] = '';
-$string['settings_user_emails'] = 'Send user emails to Alemira';
+$string['settings_user_emails'] = 'Send user emails to Proctor by Constructor';
 $string['settings_user_emails_desc'] = '';
 
-$string['use_alemira'] = 'Use alemira app to view this module';
-$string['settings'] = 'Alemira settings';
-$string['log_section'] = 'Alemira log';
+$string['use_proctor'] = 'Use proctor app to view this module';
+$string['settings'] = 'Proctor by Constructor settings';
+$string['log_section'] = 'Proctor by Constructor log';
 $string['status'] = 'Status';
 $string['module'] = 'Module';
 $string['new_entry'] = 'New entry';
@@ -77,7 +77,7 @@ $string['face_identification'] = 'Face';
 $string['skip_identification'] = 'Skip';
 
 $string['is_trial'] = 'Trial exam';
-$string['noprotection'] = 'No protection against starting outside Alemira APP';
+$string['noprotection'] = 'No protection against starting outside Proctor by Constructor APP';
 $string['auxiliary_camera'] = 'Auxiliary camera (mobile) ';
 $string['enable_ldb'] = 'Require locked down browser';
 
@@ -139,7 +139,7 @@ $string['comment'] = 'Comment';
 $string['details'] = 'Details';
 
 // Fader screen.
-$string['fader_awaiting_proctoring'] = 'Alemira proctoring starts...';
+$string['fader_awaiting_proctoring'] = 'Proctor by Constructor proctoring starts...';
 $string['fader_instructions'] = '<p>please wait</p>';
 $string['fader_reset'] = 'Session was reset, you need to restart the exam';
 

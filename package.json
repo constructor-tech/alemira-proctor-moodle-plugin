@@ -1,5 +1,5 @@
 {
-    "name": "moodle-availability_alemira",
+    "name": "moodle-availability_proctor",
     "devDependencies": {
         "grunt": "^1.0.1",
         "grunt-contrib-less": "^1.4.1",
