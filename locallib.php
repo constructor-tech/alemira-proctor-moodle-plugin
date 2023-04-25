@@ -132,10 +132,11 @@ function avalibility_alemira_attempt_submitted_handler($event) {
         'status' => "started"
     ], '-id');
 
-    if (isset($accesscode)) {
+    if (!empty($accesscode)) {
         $entry = $DB->get_record('availability_alemira_entries', ['accesscode' => $accesscode]);
-
-        $entries[] = $entry;
+        if ($entry) {
+            $entries[] = $entry;
+        }
     } else {
         return;
     }
