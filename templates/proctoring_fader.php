@@ -98,7 +98,7 @@ const createFader = (html) => {
   return fader;
 };
 
-const redirectToProctor by Constructor = () => {
+const redirectToProctor = () => {
   if (!formData) {
     return;
   }
@@ -125,7 +125,7 @@ window.addEventListener("DOMContentLoaded", () => {
     const fader = noProtection ? null : createFader(faderHTML);
 
     redirectTimeout = setTimeout(() => {
-         redirectToProctor by Constructor();
+         redirectToProctor();
     }, 15000);
 
     proved.then(() => {
