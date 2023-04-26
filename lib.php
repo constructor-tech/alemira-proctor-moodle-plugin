@@ -226,7 +226,7 @@ function availability_proctor_handle_start_attempt($course, $cm, $user) {
         return;
     }
 
-    $accesscode = isset($SESSION->availibility_proctor_accesscode) ? $SESSION->availibility_proctor_accesscode : null;
+    $accesscode = isset($SESSION->availability_proctor_accesscode) ? $SESSION->availability_proctor_accesscode : null;
     $entry = null;
     $reset = false;
     if ($accesscode) {
