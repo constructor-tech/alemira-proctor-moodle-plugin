@@ -21,7 +21,27 @@ M.availability_proctor.form.initInner = function(rules, warnings, scoring) {
 M.availability_proctor.form.instId = 0;
 
 M.availability_proctor.form.getNode = function(json) {
+    M.availability_proctor.form.instId += 1;
     var html, node, value;
+
+    var id = 'proctor' + M.availability_proctor.form.instId;
+    var durationId = id + '_duration';
+    var modeId = id + '_mode';
+    var schedulingRequiredId = id + '_schedulingRequired';
+    var autoReschedulingId = id + '_autoRescheduling';
+    var isTrialId = id + '_isTrial';
+    var identificationId = id + '_identification';
+    var customRulesId = id + '_customRules';
+    var noProtectionId = id + '_noProtection';
+    var auxiliaryCameraId = id + '_auxCamera';
+    var enableLdbId = id + '_ldb';
+    var biometryEnabledId = id + '_biometryEnabled';
+    var biometrySkipfailId = id + '_biometrySkipfail';
+    var biometryFlowId = id + '_biometryFlow';
+    var biometryThemeId = id + '_biometryTheme';
+    var userAgreementId = id + 'userAgreement';
+
+    var tabButtonOne, tabButtonTwo, tabOne, tabTwo;
 
     /**
      * @param {string} identifier A string identifier
@@ -102,25 +122,6 @@ M.availability_proctor.form.getNode = function(json) {
             tabTwo.removeClass('hidden');
         }
     }
-
-    M.availability_proctor.form.instId += 1;
-
-    var id = 'proctor' + M.availability_proctor.form.instId;
-    var durationId = id + '_duration';
-    var modeId = id + '_mode';
-    var schedulingRequiredId = id + '_schedulingRequired';
-    var autoReschedulingId = id + '_autoRescheduling';
-    var isTrialId = id + '_isTrial';
-    var identificationId = id + '_identification';
-    var customRulesId = id + '_customRules';
-    var noProtectionId = id + '_noProtection';
-    var auxiliaryCameraId = id + '_auxCamera';
-    var enableLdbId = id + '_ldb';
-    var biometryEnabledId = id + '_biometryEnabled';
-    var biometrySkipfailId = id + '_biometrySkipfail';
-    var biometryFlowId = id + '_biometryFlow';
-    var biometryThemeId = id + '_biometryTheme';
-    var userAgreementId = id + 'userAgreement';
 
     html = formGroup(durationId, getString('duration'),
         '<input type="text" name="duration" id="' + durationId + '" class="form-control">'
@@ -245,19 +246,18 @@ M.availability_proctor.form.getNode = function(json) {
 
 
 
-    node = Y.Node.create('<span class="availibility_proctor-tabs" style="position:relative"></span>');
+    node = Y.Node.create('<span class="availability_proctor-tabs" style="position:relative"></span>');
 
     node.setHTML('<label><strong>' + getString('title') + '</strong></label><br><br>');
 
-    var tabButtonStyle = '';
     var tabButtons = Y.Node.create(
-        '<div style="position:absolute; top: 0; right: 0;" class="availibility_proctor-tab-btns"></div>'
+        '<div style="position:absolute; top: 0; right: 0;" class="availability_proctor-tab-btns"></div>'
     ).appendTo(node);
-    var tabButtonOne = Y.Node.create('<a href="#" class="btn btn-primary">1</a>').appendTo(tabButtons);
-    var tabButtonTwo = Y.Node.create('<a href="#" class="btn btn-secondary">2</a>').appendTo(tabButtons);
+    tabButtonOne = Y.Node.create('<a href="#" class="btn btn-primary">1</a>').appendTo(tabButtons);
+    tabButtonTwo = Y.Node.create('<a href="#" class="btn btn-secondary">2</a>').appendTo(tabButtons);
 
-    var tabOne = Y.Node.create('<div class="tab_content">' + html + '</div>').appendTo(node);
-    var tabTwo = Y.Node.create('<div class="tab_content hidden">' + htmlTwo + '</div>').appendTo(node);
+    tabOne = Y.Node.create('<div class="tab_content">' + html + '</div>').appendTo(node);
+    tabTwo = Y.Node.create('<div class="tab_content hidden">' + htmlTwo + '</div>').appendTo(node);
 
 
     if (json.creating) {
@@ -335,8 +335,8 @@ M.availability_proctor.form.getNode = function(json) {
     } else {
         var warningRows = json.warnings;
         json.warnings = this.warnings;
-        for(var wkey in warningRows) {
-            json.warnings[wkey] = warningRows[wkey];
+        for(var wrkey in warningRows) {
+            json.warnings[wrkey] = warningRows[wrkey];
         }
     }
 
