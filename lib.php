@@ -64,7 +64,7 @@ function availability_proctor_before_standard_html_head() {
  * Hooks as early as possible, we need to catch accesscode GET param from proctoring
  **/
 function availability_proctor_after_config() {
-    $accesscode = optional_param('accesscode', null, PARAM_RAW);
+    $accesscode = optional_param('proctor_accesscode', null, PARAM_RAW);
 
     if (!empty($accesscode)) {
         availability_proctor_handle_accesscode_param($accesscode);
@@ -134,7 +134,7 @@ function availability_proctor_handle_proctoring_fader($attempt) {
 
     $timedata = $client->time_data($timebracket);
     $pageurl = $PAGE->url;
-    $pageurl->param('accesscode', $entry->accesscode);
+    $pageurl->param('proctor_accesscode', $entry->accesscode);
     $attemptdata = $client->attempt_data($entry->accesscode, $pageurl->out(false));
 
     $data = array_merge($data, $userdata, $timedata, $attemptdata, $biometrydata);
