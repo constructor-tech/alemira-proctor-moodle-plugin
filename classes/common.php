@@ -50,7 +50,7 @@ class common {
 
     /**
      * create entry if not exist
-     *
+     * @param condition $condition condition
      * @param integer $userid User id
      * @param integer $cm Cm id
      * @return stdClass
@@ -220,6 +220,12 @@ class common {
         }
     }
 
+    /**
+     * Get timebracket for cm of type
+     * @param string $type Type of cm
+     * @param \stdClass $cm Course-module
+     * @return array start and end time for cm
+     */
     public static function get_timebracket_for_cm($type, $cm) {
         $timebrackets = self::get_timebrackets_for_cms($type, [$cm]);
         $timebracket = reset($timebrackets);
@@ -236,6 +242,12 @@ class common {
         return $timebracket;
     }
 
+    /**
+     * Get timebracket for array of CMs of type
+     * @param string $type Type of CM
+     * @param array $cms List of CMs
+     * @return array Two-dimentional array of start and end time for CMs
+     */
     public static function get_timebrackets_for_cms($type, $cms) {
         global $DB;
         $ids = [];
@@ -278,6 +290,8 @@ class common {
 
     /**
      * Parses date string in ISO8601 ignoring fractions of a second
+     * @param string $date Date-string with or without fractions
+     * @return int timestamp
      **/
     public static function parse_date($date) {
         if (!empty($date)) {

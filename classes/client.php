@@ -169,7 +169,7 @@ class client {
     /**
      * Sends API request
      * @param string $method API-method
-     * @param string $array Request body
+     * @param array $body Request body
      * @return array
      */
     public function request($method, $body = []) {

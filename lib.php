@@ -87,6 +87,7 @@ function availability_proctor_after_require_login() {
 /**
  * Provides logict for proctoring fader, exist as soon a possible if
  * no protection is reqired.
+ * @param \stdClass $attempt Attempt
  */
 function availability_proctor_handle_proctoring_fader($attempt) {
     global $DB, $USER, $PAGE, $SESSION;
@@ -209,6 +210,9 @@ function availability_proctor_handle_accesscode_param($accesscode) {
 /**
  * When attempt is started, see if we are in proctoring, reset old entries,
  * redirect to proctoring if needed
+ * @param \stdClass $course course
+ * @param \stdClass $cm cm
+ * @param \stdClass $user user
  */
 function availability_proctor_handle_start_attempt($course, $cm, $user) {
     global $SESSION, $DB;

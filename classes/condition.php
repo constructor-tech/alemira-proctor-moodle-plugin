@@ -311,7 +311,7 @@ class condition extends \core_availability\condition {
 
     /**
      * Import from external communication
-     * @param array $stat Data array to be mapped to propeties
+     * @param array $data Data array to be mapped to propeties
      * @return null
      */
     public function from_json($data) {
