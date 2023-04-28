@@ -273,7 +273,7 @@ function availability_proctor_handle_start_attempt($course, $cm, $user) {
 
     $location = new \moodle_url('/mod/quiz/view.php', [
         'id' => $cminfo->id,
-        'accesscode' => $entry->accesscode,
+        'proctor_accesscode' => $entry->accesscode,
     ]);
 
     $lang = current_language();
