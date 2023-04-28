@@ -79,12 +79,12 @@ class client {
     /** @var bool Company name */
     protected $useremails;
 
-    /** @var \availability_proctor\condition Availibility condition */
+    /** @var \availability_proctor\condition Availability condition */
     protected $condition;
 
     /**
-     * Initializes variables form plugin config and availibility condition
-     * @param \availability_proctor\condition $condition Availibility condition
+     * Initializes variables form plugin config and availability condition
+     * @param \availability_proctor\condition $condition Availability condition
      */
     public function __construct($condition) {
         $this->condition = $condition;

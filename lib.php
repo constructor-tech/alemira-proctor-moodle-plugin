@@ -121,7 +121,7 @@ function availability_proctor_handle_proctoring_fader($attempt) {
             $entry->accesscode != $SESSION->availability_proctor_accesscode
     ) {
         $SESSION->availability_proctor_accesscode = null;
-        $SESSION->availibility_proctor_reset = true;
+        $SESSION->availability_proctor_reset = true;
     }
 
     $timebracket = common::get_timebracket_for_cm('quiz', $cm);
@@ -149,7 +149,7 @@ function availability_proctor_handle_proctoring_fader($attempt) {
     if ($entryisactive || $attemptinprogess) {
         // We have to pass formdata in any case because exam can be opened outside iframe.
         $formdata = $client->get_form('start', $data);
-        $entryreset = isset($SESSION->availibility_proctor_reset) && $SESSION->availibility_proctor_reset;
+        $entryreset = isset($SESSION->availability_proctor_reset) && $SESSION->availability_proctor_reset;
 
         // Our entry is active, we are showing user a fader.
         ob_start();
@@ -166,7 +166,7 @@ function availability_proctor_handle_accesscode_param($accesscode) {
     global $SESSION, $DB;
 
     // User is coming from proctor, reset is done if it was requested before.
-    unset($SESSION->availibility_proctor_reset);
+    unset($SESSION->availability_proctor_reset);
 
     $SESSION->availability_proctor_accesscode = $accesscode;
 
@@ -188,7 +188,7 @@ function availability_proctor_handle_accesscode_param($accesscode) {
         $newentry = common::most_recent_entry($entry);
         if ($newentry && $newentry->id != $entry->id) {
             $entry = $newentry;
-            $SESSION->availibility_proctor_reset = true;
+            $SESSION->availability_proctor_reset = true;
         }
 
         $modinfo = get_fast_modinfo($entry->courseid);
@@ -197,11 +197,11 @@ function availability_proctor_handle_accesscode_param($accesscode) {
         // The entry is already finished or canceled, we need to reset it.
         if (!in_array($entry->status, ['new', 'scheduled', 'started'])) {
             $entry = common::create_entry($condition, $entry->userid, $cminfo);
-            $SESSION->availibility_proctor_reset = true;
+            $SESSION->availability_proctor_reset = true;
         }
     } else {
         // If entry does not exist, we need to create a new one and redirect.
-        $SESSION->availibility_proctor_reset = true;
+        $SESSION->availability_proctor_reset = true;
     }
 
 }
@@ -250,7 +250,7 @@ function availability_proctor_handle_start_attempt($course, $cm, $user) {
 
         if ($reset) {
             unset($SESSION->availability_proctor_accesscode);
-            $SESSION->availibility_proctor_reset = true;
+            $SESSION->availability_proctor_reset = true;
         }
 
         // We don't want to redirect at this stage.

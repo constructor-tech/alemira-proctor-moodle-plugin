@@ -243,13 +243,13 @@ M.availability_proctor.form.getNode = function(json) {
 
 
 
-    node = Y.Node.create('<span class="availibility_proctor-tabs" style="position:relative"></span>');
+    node = Y.Node.create('<span class="availability_proctor-tabs" style="position:relative"></span>');
 
     node.setHTML('<label><strong>' + getString('title') + '</strong></label><br><br>');
 
     var tabButtonStyle = '';
     var tabButtons = Y.Node.create(
-        '<div style="position:absolute; top: 0; right: 0;" class="availibility_proctor-tab-btns"></div>'
+        '<div style="position:absolute; top: 0; right: 0;" class="availability_proctor-tab-btns"></div>'
     ).appendTo(node);
     var tabButtonOne = Y.Node.create('<a href="#" class="btn btn-primary">1</a>').appendTo(tabButtons);
     var tabButtonTwo = Y.Node.create('<a href="#" class="btn btn-secondary">2</a>').appendTo(tabButtons);
