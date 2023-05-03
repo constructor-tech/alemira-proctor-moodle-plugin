@@ -31,21 +31,5 @@ function xmldb_availability_proctor_upgrade($oldversion) {
     global $DB;
     $dbman = $DB->get_manager();
 
-    if ($oldversion < 2022102101) {
-        // Removing table that was used during earli stages of development and slipped into release.
-        $oldtable = new xmldb_table('availability_proctor_exams');
-        if ($dbman->table_exists($oldtable)) {
-            $dbman->drop_table($oldtable);
-        }
-
-        $table = new xmldb_table('availability_proctor_entries');
-        $field = new xmldb_field('archiveurl', XMLDB_TYPE_TEXT);
-        if (!$dbman->field_exists($table, $field)) {
-            $dbman->add_field($table, $field);
-        }
-
-        upgrade_plugin_savepoint(true, 2022102101, 'availability', 'proctor');
-    }
-
     return true;
 }

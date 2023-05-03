@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="availability/condition/proctor/db" VERSION="20161021" COMMENT="XMLDB file for Moodle availability/condition/proctor"
+<XMLDB PATH="availability/condition/proctor/db" VERSION="20230503" COMMENT="XMLDB file for Moodle availability/condition/proctor"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../../lib/xmldb/xmldb.xsd"
 >
