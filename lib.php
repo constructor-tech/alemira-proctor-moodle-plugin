@@ -162,6 +162,7 @@ function availability_proctor_handle_proctoring_fader($attempt) {
 
 /**
  * If accesscode param is provider, find entry, handle it's state.
+ * @param string $accesscode Accesscode/SessionId value
  */
 function availability_proctor_handle_accesscode_param($accesscode) {
     global $SESSION, $DB;
