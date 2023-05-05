@@ -75,11 +75,20 @@ function availability_proctor_after_config() {
  * This hook is used for exams that require scheduling.
  **/
 function availability_proctor_after_require_login() {
-    global $USER, $cm, $course;
+    global $USER, $DB;
 
     // User is trying to start an attempt, redirect to proctor if it is not started.
     $scriptname = isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'] : null;
     if ($scriptname == '/mod/quiz/startattempt.php') {
+        $cmid = required_param('cmid', PARAM_INT); // Course module id
+
+        if (!$cm = get_coursemodule_from_id('quiz', $cmid)) {
+            throw new \moodle_exception('invalidcoursemodule');
+        }
+        if (!$course = $DB->get_record('course', ['id' => $cm->course])) {
+            throw new \moodle_exception("coursemisconf");
+        }
+
         availability_proctor_handle_start_attempt($course, $cm, $USER);
     }
 }
