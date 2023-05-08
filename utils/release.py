@@ -40,28 +40,26 @@ def run(name='proctor', dry=False, verbose=False, force=False):
     version = get_version()
     archive_name = f'{name}-{version}.zip'
 
-    old_name = 'alemira'
+    old_name = 'proctor'
     code_patterns = {}
     text_patterns = {}
     rename = False
 
     if name == 'examus2':
         code_patterns = {
-            'use_alemira': 'use_examus',
-            'alemira_url': 'examus_url',
-            'alemiraurl': 'examusurl',
-            'ALEMIRA': 'EXAMUS2',
-            'alemira': 'examus2',
+            'use_proctor': 'use_examus2',
+            'proctor_url': 'examus_url',
+            'proctorurl': 'examusurl',
+            'PROCTOR': 'EXAMUS2',
+            'proctor': 'examus2',
+            'examus2ing': 'proctoring',
         }
         text_patterns = {
-            'Alemira': 'Examus',
-            'alemira': 'Examus',
+            'Proctor': 'Examus',
+            'Proctor': 'Examus',
+            ' by Constructor': '',
         }
         rename = True
-
-    if name == 'alemira':
-        exit;
-        #rename = True
 
     files = []
     for filename in glob.iglob('**/*', recursive=True):
