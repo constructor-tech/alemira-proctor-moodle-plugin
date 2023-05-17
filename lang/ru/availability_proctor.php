@@ -126,7 +126,7 @@ $string['status_accepted'] = 'Не нарушитель';
 $string['status_rejected'] = 'Нарушитель';
 $string['status_force_reset'] = 'Попытка сброшена';
 $string['status_finished'] = 'Завершено, ожидается статус';
-$string['status_scheduled'] = 'Запланирована';
+$string['status_scheduled'] = 'Запланировано';
 
 $string['scheduling_required'] = 'Обязательна запись в календаре';
 $string['apply_filter'] = 'Применить фильтры';
