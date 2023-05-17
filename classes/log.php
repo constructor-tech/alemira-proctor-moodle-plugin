@@ -270,7 +270,7 @@ class log {
 
                 $row[] = $course->fullname;
                 $row[] = $cm ? $cm->get_formatted_name() : '';
-                $row[] = $entry->status;
+                $row[] = get_string('status_' . $entry->status, 'availability_proctor');
                 $row[] = implode(',&nbsp;', $reportlinks);
 
                 $scheduled = $entry->status == 'scheduled' && $entry->timescheduled;
@@ -284,7 +284,7 @@ class log {
                     'action' => 'show'
                 ]);
 
-                $row[] = '<a href="'.$detailsurl.'">'.get_string('details', 'availability_proctor').'</a>';
+                $row[] = '<a href="' . $detailsurl . '">' . get_string('details', 'availability_proctor') . '</a>';
 
                 // Changed condition. Allow to reset all entries.
                 // Consequences unknown.
@@ -374,15 +374,14 @@ class log {
      * @return array list of courses.
      */
     public function get_status_list() {
-        $statuses = [
-            'started' => 'Started',
-            'not inited' => 'Not inited',
-            'rules violation' => 'Rules Violation',
-            'clean' => 'Clean',
-            'suspicious' => 'Suspicious',
-        ];
+        $statuses = ['new', 'started', 'unknown', 'accepted', 'rejected', 'force_reset', 'finished', 'scheduled'];
+        $statuslist = [];
 
-        return $statuses;
+        foreach ($statuses as $status) {
+            $statuslist[$status] = get_string('status_' . $status, 'availability_proctor');
+        }
+
+        return $statuslist;
     }
 
     /**

@@ -199,7 +199,7 @@ class log_details {
 
         $table->add_data([
             get_string('status', 'availability_proctor'),
-            $entry->status,
+            get_string('status_' . $entry->status, 'availability_proctor'),
         ]);
 
         $table->add_data([

@@ -119,6 +119,15 @@ $string['scoring_forbidden_device'] = 'Запрещенное оборудова
 $string['scoring_voice'] = 'Звуки голосов в трансляции';
 $string['scoring_phone'] = 'Использование телефона';
 
+$string['status_new'] = 'Попытка не начата';
+$string['status_started'] = 'Попытка начата';
+$string['status_unknown'] = 'Не проверено';
+$string['status_accepted'] = 'Не нарушитель';
+$string['status_rejected'] = 'Нарушитель';
+$string['status_force_reset'] = 'Попытка сброшена';
+$string['status_finished'] = 'Завершено, ожидается статус';
+$string['status_scheduled'] = 'Запланирована';
+
 $string['scheduling_required'] = 'Обязательна запись в календаре';
 $string['apply_filter'] = 'Применить фильтры';
 $string['allcourses'] = 'Все курсы';

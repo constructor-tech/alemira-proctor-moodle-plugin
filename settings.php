@@ -35,6 +35,8 @@ if ($hassiteconfig) {
          )
     );
 
+    $settings = new admin_settingpage('manageavailabilityproctor', new lang_string('settings', 'availability_proctor'));
+
     if ($ADMIN->fulltree) {
         $settings->add(new admin_setting_configtext('availability_proctor/proctor_url',
             new lang_string('settings_proctor_url', 'availability_proctor'),

@@ -120,6 +120,15 @@ $string['scoring_forbidden_device'] = 'Forbidden hardware';
 $string['scoring_voice'] = 'Microphone voice is detected';
 $string['scoring_phone'] = 'A phone is used';
 
+$string['status_new'] = 'New';
+$string['status_started'] = 'Started';
+$string['status_unknown'] = 'Unknown';
+$string['status_accepted'] = 'Accepted';
+$string['status_rejected'] = 'Rejected';
+$string['status_force_reset'] = 'Force reset';
+$string['status_finished'] = 'Finished';
+$string['status_scheduled'] = 'Scheduled';
+
 $string['scheduling_required'] = 'A calendar entry is required';
 $string['apply_filter'] = 'Apply filter';
 $string['allcourses'] = 'All courses';
