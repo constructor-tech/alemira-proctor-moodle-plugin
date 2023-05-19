@@ -32,6 +32,8 @@ $string['description'] = 'Позволяет студентам использо
 $string['pluginname'] = 'Прокторинг "Proctor by Constructor"';
 $string['title'] = 'Proctor by Constructor';
 
+$string['error_no_entry_found'] = 'No exam entry found by accesscode';
+
 $string['settings_proctor_url'] = 'Proctor by Constructor URL';
 $string['settings_proctor_url_desc'] = '';
 $string['settings_integration_name'] = 'Integration Name';
@@ -44,6 +46,8 @@ $string['settings_account_id'] = 'Account ID';
 $string['settings_account_id_desc'] = '';
 $string['settings_user_emails'] = 'Отправлять email пользователей в Proctor by Constructor';
 $string['settings_user_emails_desc'] = '';
+$string['settings_seamless_auth'] = 'Автоматическая авторизация пользователя';
+$string['settings_seamless_auth_desc'] = 'Активация данной опции означает что прокторинг будет хранить авторизационный токен';
 
 $string['use_proctor'] = 'Используйте приложение "Proctor by Constructor", чтобы получить доступ к модулю';
 $string['settings'] = 'Настройки "Proctor by Constructor"';

@@ -61,17 +61,6 @@ function availability_proctor_before_standard_html_head() {
 }
 
 /**
- * Hooks as early as possible, we need to catch accesscode GET param from proctoring
- **/
-function availability_proctor_after_config() {
-    $accesscode = optional_param('proctor_accesscode', null, PARAM_RAW);
-
-    if (!empty($accesscode)) {
-        availability_proctor_handle_accesscode_param($accesscode);
-    }
-}
-
-/**
  * This hook is used for exams that require scheduling.
  **/
 function availability_proctor_after_require_login() {
@@ -170,54 +159,6 @@ function availability_proctor_handle_proctoring_fader($attempt) {
 }
 
 /**
- * If accesscode param is provider, find entry, handle it's state.
- * @param string $accesscode Accesscode/SessionId value
- */
-function availability_proctor_handle_accesscode_param($accesscode) {
-    global $SESSION, $DB;
-
-    // User is coming from proctor, reset is done if it was requested before.
-    unset($SESSION->availability_proctor_reset);
-
-    $SESSION->availability_proctor_accesscode = $accesscode;
-
-    // We know accesscode is passed in params.
-    $entry = $DB->get_record('availability_proctor_entries', [
-        'accesscode' => $accesscode,
-    ]);
-
-    // If entry exists, we need to check if we have a newer one.
-    if ($entry) {
-        $modinfo = get_fast_modinfo($entry->courseid);
-        $cminfo = $modinfo->get_cm($entry->cmid);
-
-        $condition = condition::get_proctor_condition($cminfo);
-        if (!$condition) {
-            return;
-        }
-
-        $newentry = common::most_recent_entry($entry);
-        if ($newentry && $newentry->id != $entry->id) {
-            $entry = $newentry;
-            $SESSION->availability_proctor_reset = true;
-        }
-
-        $modinfo = get_fast_modinfo($entry->courseid);
-        $cminfo = $modinfo->get_cm($entry->cmid);
-
-        // The entry is already finished or canceled, we need to reset it.
-        if (!in_array($entry->status, ['new', 'scheduled', 'started'])) {
-            $entry = common::create_entry($condition, $entry->userid, $cminfo);
-            $SESSION->availability_proctor_reset = true;
-        }
-    } else {
-        // If entry does not exist, we need to create a new one and redirect.
-        $SESSION->availability_proctor_reset = true;
-    }
-
-}
-
-/**
  * When attempt is started, see if we are in proctoring, reset old entries,
  * redirect to proctoring if needed
  * @param \stdClass $course course
@@ -281,10 +222,17 @@ function availability_proctor_handle_start_attempt($course, $cm, $user) {
 
     $timebracket = common::get_timebracket_for_cm('quiz', $cminfo);
 
-    $location = new \moodle_url('/mod/quiz/view.php', [
-        'id' => $cminfo->id,
-        'proctor_accesscode' => $entry->accesscode,
-    ]);
+    $urlparams = ['proctor_accesscode' => $entry->accesscode];
+
+    if(get_config('availability_proctor', 'seamless_auth')) {
+        // Token is valid for 3 month.
+        // We want timeframe log enough for user to pass exam, but clean the db at some point.
+        $tokenvaliduntil = time() + (3 * 60 * 60 * 24);
+        $urlparams['token'] = get_user_key('availability_proctor', $user->id, null, false, $tokenvaliduntil);
+    }
+
+    $location = new \moodle_url('/availability/condition/proctor/entry.php', $urlparams);
+
 
     $lang = current_language();
 

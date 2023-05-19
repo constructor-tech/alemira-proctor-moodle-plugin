@@ -32,6 +32,8 @@ $string['description'] = 'Allows students to use Proctor by Constructor';
 $string['pluginname'] = 'Proctor by Constructor';
 $string['title'] = 'Proctor by Constructor';
 
+$string['error_no_entry_found'] = 'No exam entry found by accesscode';
+
 $string['settings_proctor_url'] = 'Proctor by Constructor URL';
 $string['settings_proctor_url_desc'] = '';
 $string['settings_integration_name'] = 'Integration Name';
@@ -44,6 +46,8 @@ $string['settings_account_id'] = 'Account ID';
 $string['settings_account_id_desc'] = '';
 $string['settings_user_emails'] = 'Send user emails to Proctor by Constructor';
 $string['settings_user_emails_desc'] = '';
+$string['settings_seamless_auth'] = 'Seemless authorization';
+$string['settings_seamless_auth_desc'] = 'Proctoring will store authorization token for users';
 
 $string['use_proctor'] = 'Use proctor app to view this module';
 $string['settings'] = 'Proctor by Constructor settings';

@@ -61,5 +61,10 @@ if ($hassiteconfig) {
         $settings->add(new admin_setting_configcheckbox('availability_proctor/user_emails',
             new lang_string('settings_user_emails', 'availability_proctor'),
             new lang_string('settings_user_emails_desc', 'availability_proctor'), 1));
+
+        $settings->add(new admin_setting_configcheckbox('availability_proctor/seamless_auth',
+            new lang_string('settings_seamless_auth', 'availability_proctor'),
+            new lang_string('settings_seamless_auth_desc', 'availability_proctor'), 1));
+
     }
 }
