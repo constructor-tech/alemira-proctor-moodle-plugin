@@ -39,9 +39,7 @@ if ($seamlessauth && $token) {
 
     core_user::require_active_user($user, true, true);
 
-    // Emulate normal session.
-    enrol_check_plugins($user);
-    \core\session\manager::set_user($user);
+    complete_user_login($user);
 }
 
 availability_proctor_handle_accesscode_param($accesscode);
