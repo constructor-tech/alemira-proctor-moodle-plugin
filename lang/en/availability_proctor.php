@@ -24,9 +24,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['proctor:logaccess'] = 'Proctor by Constructor log access';
-$string['proctor:logaccess_course'] = 'Proctor by Constructor log access for course';
-$string['proctor:logaccess_all'] = 'Proctor by Constructor log access for all courses';
+$string['proctor:logaccess'] = 'Proctor log access';
+$string['proctor:logaccess_course'] = 'Proctor log access for course';
+$string['proctor:logaccess_all'] = 'Proctor log access for all courses';
 
 $string['description'] = 'Allows students to use Proctor by Constructor';
 $string['pluginname'] = 'Proctor by Constructor';

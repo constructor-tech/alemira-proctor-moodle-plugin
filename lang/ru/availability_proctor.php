@@ -24,9 +24,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['proctor:logaccess'] = 'Доступ к отчету Proctor by Constructor';
-$string['proctor:logaccess_course'] = 'Доступ к отчету Proctor by Constructor(определенный курс)';
-$string['proctor:logaccess_all'] = 'Доступ к отчету Proctor by Constructor(все курсы)';
+$string['proctor:logaccess'] = 'Доступ к отчету Proctor';
+$string['proctor:logaccess_course'] = 'Доступ к отчету Proctor (определенный курс)';
+$string['proctor:logaccess_all'] = 'Доступ к отчету Proctor (все курсы)';
 
 $string['description'] = 'Позволяет студентам использовать сервис "Proctor by Constructor"';
 $string['pluginname'] = 'Прокторинг "Proctor by Constructor"';
@@ -51,7 +51,7 @@ $string['settings_seamless_auth_desc'] = 'Активация данной опц
 
 $string['use_proctor'] = 'Используйте приложение "Proctor by Constructor", чтобы получить доступ к модулю';
 $string['settings'] = 'Настройки "Proctor by Constructor"';
-$string['log_section'] = 'Журнал "Proctor by Constructor"';
+$string['log_section'] = 'Журнал Proctor';
 $string['status'] = 'Статус';
 $string['module'] = 'Модуль';
 $string['new_entry'] = 'Новая запись';

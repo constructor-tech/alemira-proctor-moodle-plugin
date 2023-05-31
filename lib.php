@@ -36,16 +36,6 @@ use availability_proctor\common;
 function availability_proctor_before_standard_html_head() {
     global $DB, $USER;
 
-    $context = context_system::instance();
-
-    if (has_capability('availability/proctor:logaccess', $context)) {
-        $title = get_string('log_section', 'availability_proctor');
-        $url = new \moodle_url('/availability/condition/proctor/index.php');
-        $icon = new \pix_icon('i/log', '');
-        $node = navigation_node::create($title, $url, navigation_node::TYPE_CUSTOM, null, null, $icon);
-
-    }
-
     // If there is no active attempt, do nothing.
     if (isset(state::$attempt['attempt_id'])) {
         $attemptid = state::$attempt['attempt_id'];
@@ -255,4 +245,26 @@ function availability_proctor_handle_start_attempt($course, $cm, $user) {
 
     include(dirname(__FILE__).'/templates/redirect.php');
     die();
+}
+
+/**
+ * Hooks into head rendering. Adds menu item
+ */
+function availability_proctor_before_http_headers(){
+    global $PAGE;
+
+    $context = context_system::instance();
+
+    if (has_capability('availability/proctor:logaccess', $context)) {
+        $title = get_string('log_section', 'availability_proctor');
+        $url = new \moodle_url('/availability/condition/proctor/index.php');
+        $icon = new \pix_icon('i/log', '');
+        $node = navigation_node::create($title, $url, navigation_node::NODETYPE_LEAF, null, null, $icon);
+        if (isset($PAGE->primarynav)) {
+            $PAGE->primarynav->add_node($node);
+        } else {
+            $PAGE->flatnav->add($node);
+
+        }
+    }
 }
