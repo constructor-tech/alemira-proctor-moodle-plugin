@@ -216,7 +216,7 @@ function avalibility_proctor_user_enrolment_deleted(\core\event\user_enrolment_d
 function avalibility_proctor_course_module_deleted(\core\event\course_module_deleted $event) {
     global $DB;
     $cmid = $event->contextinstanceid;
-    $DB->delete_records('availability_proctor', ['cmid' => $cmid]);
+    $DB->delete_records('availability_proctor_entries', ['cmid' => $cmid]);
 }
 
 
