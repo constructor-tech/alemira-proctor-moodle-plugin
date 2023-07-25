@@ -59,7 +59,7 @@ function availability_proctor_after_require_login() {
     // User is trying to start an attempt, redirect to proctor if it is not started.
     $scriptname = isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'] : null;
     if ($scriptname == '/mod/quiz/startattempt.php') {
-        $cmid = required_param('cmid', PARAM_INT); // Course module id
+        $cmid = required_param('cmid', PARAM_INT); // Course module id.
 
         if (!$cm = get_coursemodule_from_id('quiz', $cmid)) {
             throw new \moodle_exception('invalidcoursemodule');
@@ -214,7 +214,7 @@ function availability_proctor_handle_start_attempt($course, $cm, $user) {
 
     $urlparams = ['proctor_accesscode' => $entry->accesscode];
 
-    if(get_config('availability_proctor', 'seamless_auth')) {
+    if (get_config('availability_proctor', 'seamless_auth')) {
         // Token is valid for 3 month.
         // We want timeframe log enough for user to pass exam, but clean the db at some point.
         $tokenvaliduntil = time() + (3 * 60 * 60 * 24);
@@ -222,7 +222,6 @@ function availability_proctor_handle_start_attempt($course, $cm, $user) {
     }
 
     $location = new \moodle_url('/availability/condition/proctor/entry.php', $urlparams);
-
 
     $lang = current_language();
 
@@ -247,24 +246,3 @@ function availability_proctor_handle_start_attempt($course, $cm, $user) {
     die();
 }
 
-/**
- * Hooks into head rendering. Adds menu item
- */
-function availability_proctor_before_http_headers(){
-    global $PAGE;
-
-    $context = context_system::instance();
-
-    if (has_capability('availability/proctor:logaccess', $context)) {
-        $title = get_string('log_section', 'availability_proctor');
-        $url = new \moodle_url('/availability/condition/proctor/index.php');
-        $icon = new \pix_icon('i/log', '');
-        $node = navigation_node::create($title, $url, navigation_node::NODETYPE_LEAF, null, null, $icon);
-        if (isset($PAGE->primarynav)) {
-            $PAGE->primarynav->add_node($node);
-        } else {
-            $PAGE->flatnav->add($node);
-
-        }
-    }
-}
