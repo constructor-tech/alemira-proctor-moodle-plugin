@@ -38,11 +38,6 @@ use availability_proctor\state;
  * Proctor by Constructor condition
  */
 class condition extends \core_availability\condition {
-    /**
-     * @var integer Time for entry to expire
-     */
-    const EXPIRATION_SLACK = 15 * 60;
-
     /** @var array List of (de-)serializable properties */
     const PROPS = [
         'duration', 'mode', 'schedulingrequired', 'autorescheduling',

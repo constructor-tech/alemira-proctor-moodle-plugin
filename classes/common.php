@@ -31,6 +31,11 @@ use availability_proctor\condition;
  */
 class common {
     /**
+     * @var integer Time for entry to expire
+     */
+    const EXPIRATION_SLACK = 15 * 60;
+
+    /**
      * Finds most recent entry
      * @param \stdClass $entry Entry
      * @return \stdClass|null entry or null
