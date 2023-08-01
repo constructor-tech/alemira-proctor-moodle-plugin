@@ -72,27 +72,21 @@ class common {
         ], 'id');
 
         foreach ($entries as $entry) {
-            if (in_array($entry->status, ['started', 'scheduled', 'new'])) {
+            if (in_array($entry->status, ['started', 'new'])) {
                 return $entry;
             }
-        }
 
-        foreach ($entries as $entry) {
-            if ($condition->autorescheduling) {
-                // Was schduled and not completed.
-                $scheduled = !$entry->attemptid && $entry->status == 'scheduled';
-                // Consider expired, giving 15 minutes slack.
-                $expired = time() > $entry->timescheduled + self::EXPIRATION_SLACK;
+            if ($entry->status == 'scheduled') {
+                if ($condition->autorescheduling) {
+                    if (time() > $entry->timescheduled + self::EXPIRATION_SLACK) {
+                        $entry->timemodified = time();
+                        $entry->status = 'rescheduled';
 
-                if ($scheduled && $expired) {
-                    $entry->timemodified = time();
-                    $entry->status = 'rescheduled';
-
-                    $DB->update_record('availability_proctor_entries', $entry);
-                    $entry = self::reset_entry(['id' => $entry->id]);
-                    return $entry;
+                        $DB->update_record('availability_proctor_entries', $entry);
+                        $entry = self::reset_entry(['id' => $entry->id]);
+                    }
                 }
-
+                return $entry;
             }
         }
 
