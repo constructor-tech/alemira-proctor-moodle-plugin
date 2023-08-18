@@ -22,9 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use availability_proctor\condition;
 use availability_proctor\state;
-use availability_proctor\common;
+use availability_proctor\utils;
 
 /**
  * Hooks into head rendering. Adds proctoring fader/shade and accompanying javascript
@@ -43,7 +42,7 @@ function availability_proctor_before_standard_html_head() {
         if (!$attempt || $attempt->state != \quiz_attempt::IN_PROGRESS) {
             return '';
         } else {
-            return availability_proctor_handle_proctoring_fader($attempt);
+            return utils::handle_proctoring_fader($attempt);
         }
     } else {
         return '';
@@ -68,181 +67,6 @@ function availability_proctor_after_require_login() {
             throw new \moodle_exception("coursemisconf");
         }
 
-        availability_proctor_handle_start_attempt($course, $cm, $USER);
+        utils::handle_start_attempt($course, $cm, $USER);
     }
 }
-
-/**
- * Provides logict for proctoring fader, exist as soon a possible if
- * no protection is reqired.
- * @param \stdClass $attempt Attempt
- */
-function availability_proctor_handle_proctoring_fader($attempt) {
-    global $DB, $USER, $PAGE, $SESSION;
-
-    $cmid = state::$attempt['cm_id'];
-    $courseid = state::$attempt['course_id'];
-
-    $modinfo = get_fast_modinfo($courseid);
-    $cm = $modinfo->get_cm($cmid);
-    $course = $cm->get_course();
-
-    $condition = condition::get_proctor_condition($cm);
-
-    if (!$condition) {
-        return '';
-    }
-
-    if ($condition->noprotection) {
-        return '';
-    }
-
-    // We want to let previews to happen without proctoring.
-    $quizobj = \quiz::create($cm->instance, $USER->id);
-    if ($quizobj->is_preview_user()) {
-        return '';
-    }
-
-    $entry = common::create_entry($condition, $USER->id, $cm);
-
-    if (
-        !empty($SESSION->availability_proctor_accesscode) &&
-            $entry->accesscode != $SESSION->availability_proctor_accesscode
-    ) {
-        $SESSION->availability_proctor_accesscode = null;
-        $SESSION->availability_proctor_reset = true;
-    }
-
-    $timebracket = common::get_timebracket_for_cm('quiz', $cm);
-    $lang = current_language();
-
-    $client = new \availability_proctor\client($condition);
-    $data = $client->exam_data($course, $cm);
-    $userdata = $client->user_data($USER, $lang);
-    $biometrydata = $client->biometry_data($USER);
-
-    $timedata = $client->time_data($timebracket);
-    $pageurl = $PAGE->url;
-    $pageurl->param('proctor_accesscode', $entry->accesscode);
-    $attemptdata = $client->attempt_data($entry->accesscode, $pageurl->out(false));
-
-    $data = array_merge($data, $userdata, $timedata, $attemptdata, $biometrydata);
-
-    if ($condition->schedulingrequired && empty($entry->timescheduled)) {
-        $data['schedule'] = true;
-    }
-
-    $entryisactive = in_array($entry->status, ['started', 'scheduled', 'new']);
-    $attemptinprogess = $attempt && $attempt->state == \quiz_attempt::IN_PROGRESS;
-
-    if ($entryisactive || $attemptinprogess) {
-        // We have to pass formdata in any case because exam can be opened outside iframe.
-        $formdata = $client->get_form('start', $data);
-        $entryreset = isset($SESSION->availability_proctor_reset) && $SESSION->availability_proctor_reset;
-
-        // Our entry is active, we are showing user a fader.
-        ob_start();
-        include(dirname(__FILE__).'/templates/proctoring_fader.php');
-        $output = ob_get_clean();
-        return $output;
-    }
-}
-
-/**
- * When attempt is started, see if we are in proctoring, reset old entries,
- * redirect to proctoring if needed
- * @param \stdClass $course course
- * @param \stdClass $cm cm
- * @param \stdClass $user user
- */
-function availability_proctor_handle_start_attempt($course, $cm, $user) {
-    global $SESSION, $DB;
-    $modinfo = get_fast_modinfo($course->id);
-    $cminfo = $modinfo->get_cm($cm->id);
-
-    $condition = condition::get_proctor_condition($cminfo);
-    if (!$condition) {
-        return;
-    }
-
-    // We want to let previews to happen without proctoring.
-    $quizobj = \quiz::create($cminfo->instance, $user->id);
-    if ($quizobj->is_preview_user()) {
-        return;
-    }
-
-    $accesscode = isset($SESSION->availability_proctor_accesscode) ? $SESSION->availability_proctor_accesscode : null;
-    $entry = null;
-    $reset = false;
-    if ($accesscode) {
-        $entry = $DB->get_record('availability_proctor_entries', [
-            'accesscode' => $accesscode,
-        ]);
-
-        // Entry is old.
-        if ($entry && !in_array($entry->status, ['new', 'scheduled', 'started'])) {
-            $reset = true;
-        }
-
-        // Entry belongs to other cm.
-        if ($entry && $entry->cmid != $cminfo->id) {
-            $reset = true;
-        }
-
-        if (!$entry) {
-            $reset = true;
-        }
-
-        if ($reset) {
-            unset($SESSION->availability_proctor_accesscode);
-            $SESSION->availability_proctor_reset = true;
-        }
-
-        // We don't want to redirect at this stage.
-        // Because its possible that the user is working through Web-app.
-        return;
-    } else {
-        $entry = common::create_entry($condition, $user->id, $cminfo);
-    }
-
-    // The attempt is already started, letting it open.
-    if ($entry->status == 'started') {
-        return;
-    }
-
-    $timebracket = common::get_timebracket_for_cm('quiz', $cminfo);
-
-    $urlparams = ['proctor_accesscode' => $entry->accesscode];
-
-    if (get_config('availability_proctor', 'seamless_auth')) {
-        // Token is valid for 3 month.
-        // We want timeframe log enough for user to pass exam, but clean the db at some point.
-        $tokenvaliduntil = time() + (3 * 60 * 60 * 24);
-        $urlparams['token'] = get_user_key('availability_proctor', $user->id, null, false, $tokenvaliduntil);
-    }
-
-    $location = new \moodle_url('/availability/condition/proctor/entry.php', $urlparams);
-
-    $lang = current_language();
-
-    $client = new \availability_proctor\client($condition);
-    $data = $client->exam_data($course, $cminfo);
-    $userdata = $client->user_data($user, $lang);
-    $biometrydata = $client->biometry_data($user);
-    $timedata = $client->time_data($timebracket);
-    $attemptdata = $client->attempt_data($entry->accesscode, $location->out(false));
-
-    $data = array_merge($data, $userdata, $timedata, $attemptdata, $biometrydata);
-
-    if ($condition->schedulingrequired) {
-        $data['schedule'] = true;
-    }
-
-    $formdata = $client->get_form('start', $data);
-
-    $pagetitle = "Redirecting to Proctor by Constructor";
-
-    include(dirname(__FILE__).'/templates/redirect.php');
-    die();
-}
-
