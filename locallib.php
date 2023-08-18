@@ -156,30 +156,10 @@ function avalibility_proctor_attempt_submitted_handler($event) {
     }
     $entry = reset($entries);
 
-    core_shutdown_manager::register_function(function() use ($entry) {
-        $headers = headers_list();
-        header_remove('location');
+    $redirecturl = new moodle_url('/mod/quiz/review.php', ['attempt' => $attempt->id, 'cmid' => $cmid]);
 
-        $location = null;
-        foreach ($headers as $header) {
-            preg_match('/^location\s*:\s*(.*)$/is', $header, $matches);
-            if (!empty($matches[1])) {
-                $location = $matches[1];
-            }
-        }
-
-        if ($location) {
-            ob_end_clean();
-
-            $client = new client(null);
-            $newlocation = $client->get_finish_url($entry->accesscode, $location);
-
-            header('Location: ' . $newlocation);
-            $formdata = ['action' => $newlocation, 'method' => 'GET'];
-            $pagetitle = "Redirecting to Proctor by Constructor";
-            include(dirname(__FILE__).'/templates/redirect.php');
-        }
-    });
+    $client = new client();
+    $client->finish_session($entry->accesscode, $redirecturl->out(false));
 }
 
 /**

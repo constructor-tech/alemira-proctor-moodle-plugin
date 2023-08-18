@@ -86,7 +86,7 @@ class client {
      * Initializes variables form plugin config and availability condition
      * @param \availability_proctor\condition $condition Availability condition
      */
-    public function __construct($condition) {
+    public function __construct($condition=null) {
         $this->condition = $condition;
         $this->proctorurl = get_config('availability_proctor', 'proctor_url');
         $this->integrationname = get_config('availability_proctor', 'integration_name');
@@ -99,12 +99,24 @@ class client {
     /**
      * Generates API URL for method
      * @param string $method API method
+     * @param string $sessionid Session ID
+     * @param string $sessionmethod Mession method
      * @return string
      */
-    public function api_url($method) {
-        $baseurl = 'https://'.$this->proctorurl.'/api/v2/integration/simple/'.$this->integrationname.'/';
+    public function api_url($method, $sessionid=null, $sessionmethod=null) {
+        $url = 'https://'.$this->proctorurl.'/api/v2/integration/simple/'.$this->integrationname.'/';
 
-        return $baseurl.$method.'/';
+        $url .= $method.'/';
+
+        if (!empty($sessionid)) {
+            $url .= $sessionid.'/';
+
+            if (!empty($sessionmethod)) {
+                $url .= $sessionmethod.'/';
+            }
+        }
+
+        return $url;
     }
 
     /**
@@ -119,17 +131,15 @@ class client {
     }
 
     /**
-     * Generates form URL for `finish` method
+     * Sends `finish` request to api
      * @param string $sessionid Proctoring session id
      * @param string $redirecturl Redirect to this URL after finishing
      * @return string
      */
-    public function get_finish_url($sessionid, $redirecturl) {
-        $finishurl = $this->form_url('finish');
-        $finishurl .= $sessionid;
-        $finishurl .= '/?redirectUrl='.urlencode($redirecturl);
-
-        return $finishurl;
+    public function finish_session($sessionid, $redirecturl) {
+        return $this->request('sessions', $sessionid, 'finish', [
+            'sessionFinishUrl' => $redirecturl,
+        ]);
     }
 
     /**
@@ -169,39 +179,43 @@ class client {
     /**
      * Sends API request
      * @param string $method API-method
+     * @param string $sessionid Session ID
+     * @param string $sessionmethod Mession method
      * @param array $body Request body
      * @return array
      */
-    public function request($method, $body = []) {
+    public function request($method, $sessionid = null, $sessionmethod = null, $body = []) {
         $key = $this->jwtsecret;
-        $url = $this->api_url($method);
+        $url = $this->api_url($method, $sessionid, $sessionmethod);
         $payload = ['exp' => time() + 30];
         $jwt = \Firebase\JWT\JWT::encode($payload, $key, 'HS256');
 
+        $jsondata = json_encode($body);
         $headers = [
             'Content-Type: application/json',
-            'Authorization: JWT ' . $jwt
+            'Content-Length: ' . strlen($jsondata),
+            'Accept: application/json',
+            'Authorization: JWT ' . $jwt,
         ];
 
-        $ch = curl_init($url);
+        $curl = new \curl();
+        $curl->setHeader($headers);
 
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($body));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $result = $curl->post($url, $jsondata, [
+            'RETURNTRANSFER' => 1,
+            'HEADER' => 0,
+        ]);
 
-        $result = curl_exec($ch);
-        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $code = $curl->get_errno();
+        $info = $curl->get_info();
+        $httpcode = isset($info['http_code']) ? $info['http_code'] : 0;
 
-        if ($result === false) {
-            echo 'Curl Error: ' . curl_error($ch) . "\n";
-            return;
+        if ($code != 0) {
+            throw new \invalid_response_exception('Curl Error: ' . $result);
         }
 
-        if ($code < 200 || $code >= 300) {
-            echo "Non-200 code";
-            var_dump($result);
-            return;
+        if ($httpcode < 200 || $httpcode >= 300) {
+            throw new \invalid_response_exception('Non 200 HTTP code: ' . $httpcode . ' Body:' . $result);
         } else {
             return json_decode($result);
         }

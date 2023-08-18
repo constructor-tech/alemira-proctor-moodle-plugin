@@ -111,7 +111,7 @@ $handlers['review'] = function($entry, $request) {
     $DB->update_record('availability_proctor_entries', $entry);
 };
 
-$handlers['schedule'] = function($entry, $request) {
+$handlers['schedule'] = function($entry, $request) use ($accesscode) {
     global $DB;
     $event = $request->event;
 
