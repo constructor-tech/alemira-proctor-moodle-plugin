@@ -85,6 +85,9 @@ $string['skip_identification'] = 'Пропустить';
 $string['is_trial'] = 'Пробный экзамен';
 $string['auxiliary_camera'] = 'Дополнительная камера (смартфон)';
 $string['enable_ldb'] = 'Использовать защищенный браузер';
+$string['allowmultipledisplays'] = 'Разрешить использвание второго монитора';
+$string['allowvirtualenvironment'] = 'Разрешить использовать виртуальные машины';
+$string['checkidphotoquality'] = 'Проверять качетво фото паспорта';
 
 $string['rules'] = 'Правила';
 $string['custom_rules'] = "Нестандартные правила";

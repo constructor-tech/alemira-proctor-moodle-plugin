@@ -41,10 +41,11 @@ class condition extends \core_availability\condition {
     /** @var array List of (de-)serializable properties */
     const PROPS = [
         'duration', 'mode', 'schedulingrequired', 'autorescheduling',
-        'istrial', 'rules', 'identification',
-        'useragreementurl', 'auxiliarycamera', 'customrules',
-        'scoring', 'warnings', 'ldb', 'biometryenabled',
-        'biometryskipfail', 'biometryflow', 'biometrytheme',
+        'istrial', 'identification', 'useragreementurl',
+        'auxiliarycamera', 'ldb', 'allowmultipledisplays', 'allowvirtualenvironment',
+        'checkidphotoquality',
+        'scoring', 'warnings', 'rules', 'customrules',
+        'biometryenabled', 'biometryskipfail', 'biometryflow', 'biometrytheme',
     ];
 
     /** @var array List of default values for visible warnings */
@@ -86,6 +87,19 @@ class condition extends \core_availability\condition {
         'phone' => ['min' => 0, 'max' => 10, 'default' => null],
     ];
 
+    /** @var array List of default values for boolean exam properties */
+    const BOOL_DEFAULTS = [
+        'autorescheduling' => false,
+        'istrial' => false,
+        'ldb' => false,
+        'auxiliarycamera' => false,
+        'allowmultipledisplays' => false,
+        'allowvirtualenvironment' => false,
+        'checkidphotoquality' => false,
+        'biometryenabled' => false,
+        'biometryskipfail' => false,
+    ];
+
     /** @var int Default exam duration */
     public $duration = 60;
 
@@ -116,8 +130,17 @@ class condition extends \core_availability\condition {
     /** @var string User agreement URL */
     public $useragreementurl = null;
 
-    /** @var string Auxiliary camera enabled */
+    /** @var bool Auxiliary camera enabled */
     public $auxiliarycamera = false;
+
+    /** @var bool Allow to use multiple displays */
+    public $allowmultipledisplays = false;
+
+    /** @var bool Allow to use virtual machines */
+    public $allowvirtualenvironment = false;
+
+    /** @var bool Check the quality of ID photo */
+    public $checkidphotoquality = false;
 
     /** @var string Lockdown browser */
     public $ldb = false;
@@ -154,14 +177,6 @@ class condition extends \core_availability\condition {
 
         if (!empty($structure->mode)) {
             $this->mode = $structure->mode;
-
-            // Old data conversion. Not needed for users who started with V2.
-            if ($this->mode == 'olympics') {
-                $this->mode = 'offline';
-            }
-            if ($this->mode == 'normal') {
-                $this->mode = 'online';
-            }
         }
 
         if (isset($structure->scheduling_required) && $structure->scheduling_required !== null) {
@@ -170,9 +185,12 @@ class condition extends \core_availability\condition {
             $manualmodes = ['online', 'identification'];
             $this->schedulingrequired = in_array($this->mode, $manualmodes);
         }
-
-        if (!empty($structure->auto_rescheduling)) {
+        if (!isset($structure->auto_rescheduling)) {
             $this->autorescheduling = $structure->auto_rescheduling;
+        }
+
+        foreach (self::BOOL_DEFAULTS as $key => $default) {
+            $this->$key = isset($structure->$key) ? $structure->$key : $default;
         }
 
         if (!empty($structure->warnings)) {
@@ -204,50 +222,16 @@ class condition extends \core_availability\condition {
             $this->identification = $structure->identification;
         }
 
-        if (isset($structure->istrial)) {
-            $this->istrial = $structure->istrial;
-        } else {
-            $this->istrial = false;
-        }
-
         if (!empty($structure->useragreementurl)) {
             $this->useragreementurl = $structure->useragreementurl;
         }
 
-        if (isset($structure->auxiliarycamera)) {
-            $this->auxiliarycamera = $structure->auxiliarycamera;
-        } else {
-            $this->auxiliarycamera = false;
-        }
-
-        if (isset($structure->ldb)) {
-            $this->ldb = $structure->ldb;
-        } else {
-            $this->ldb = false;
-        }
-
-        if (isset($structure->biometryenabled)) {
-            $this->biometryenabled = $structure->biometryenabled;
-        } else {
-            $this->biometryenabled = false;
-        }
-
-        if (isset($structure->biometryskipfail)) {
-            $this->biometryskipfail = $structure->biometryskipfail;
-        } else {
-            $this->biometryskipfail = false;
-        }
-
-        if (isset($structure->biometryflow)) {
+        if (!empty($structure->biometryflow)) {
             $this->biometryflow = $structure->biometryflow;
-        } else {
-            $this->biometryflow = null;
         }
 
-        if (isset($structure->biometrytheme)) {
+        if (!empty($structure->biometrytheme)) {
             $this->biometrytheme = $structure->biometrytheme;
-        } else {
-            $this->biometrytheme = null;
         }
 
         $this->validate();

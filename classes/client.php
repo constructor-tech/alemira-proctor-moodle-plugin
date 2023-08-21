@@ -257,6 +257,9 @@ class client {
             'scoreConfig' => $scoring,
             'visibleWarnings' => $conditiondata['warnings'],
             'ldb' => $conditiondata['ldb'],
+            'allowMultipleDisplays' => $conditiondata['allowmultipledisplays'],
+            'allowVirtualEnvironment' => $conditiondata['allowvirtualenvironment'],
+            'checkIdPhotoQuality' => $conditiondata['checkidphotoquality'],
             'rules' => array_merge(
                 (array)$conditiondata['rules'],
                 ['custom_rules' => $customrules]

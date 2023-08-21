@@ -85,6 +85,9 @@ $string['skip_identification'] = 'Skip';
 $string['is_trial'] = 'Trial exam';
 $string['auxiliary_camera'] = 'Auxiliary camera (mobile) ';
 $string['enable_ldb'] = 'Require locked down browser';
+$string['allowmultipledisplays'] = 'Allow to use multiple displays';
+$string['allowvirtualenvironment'] = 'Allow to use virtual machines';
+$string['checkidphotoquality'] = 'Check the quality of ID photo';
 
 $string['rules'] = "Rules";
 $string['custom_rules'] = "Custom rules";

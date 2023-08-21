@@ -46,6 +46,7 @@ class frontend extends \core_availability\frontend {
             'passport_identification', 'skip_identification', 'enable_ldb',
             'is_trial', 'custom_rules', 'user_agreement_url',
             'auxiliary_camera', 'visible_warnings', 'scoring_params_header',
+            'allowmultipledisplays', 'allowvirtualenvironment', 'checkidphotoquality',
             'biometry_header', 'biometry_enabled', 'biometry_skipfail', 'biometry_flow',
             'biometry_theme',
         ];
