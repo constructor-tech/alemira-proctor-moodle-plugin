@@ -49,7 +49,9 @@ $string['settings_user_emails_desc'] = '';
 $string['settings_seamless_auth'] = 'Seemless authorization';
 $string['settings_seamless_auth_desc'] = 'Proctoring will store authorization token for users';
 
-$string['use_proctor'] = 'Use proctor app to view this module';
+$string['description_proctor'] = 'You will be redirected to Proctor by Constructor';
+$string['description_no_webservices'] = 'Can not be accessed via Moodle mobile app';
+
 $string['settings'] = 'Proctor by Constructor settings';
 $string['log_section'] = 'Proctor by Constructor log';
 $string['status'] = 'Status';

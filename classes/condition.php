@@ -415,38 +415,6 @@ class condition extends \core_availability\condition {
     }
 
     /**
-     * is available
-     *
-     * @param bool $not Not
-     * @param \core_availability\info $info Info
-     * @param string $grabthelot grabthelot
-     * @param int $userid User id
-     * @return bool
-     */
-    public function is_available($not,
-            \core_availability\info $info, $grabthelot, $userid) {
-
-        $allow = true;
-
-        if ($not) {
-            $allow = !$allow;
-        }
-        return $allow;
-    }
-
-    /**
-     * get description
-     *
-     * @param string $full Full
-     * @param bool $not True if NOT is in force
-     * @param \core_availability\info $info Info
-     * @return string
-     */
-    public function get_description($full, $not, \core_availability\info $info) {
-        return get_string('use_proctor', 'availability_proctor');
-    }
-
-    /**
      * Initialize new entry, ready to write to DB
      * @param integer $courseid
      * @param integer $cmid
@@ -468,13 +436,49 @@ class condition extends \core_availability\condition {
     }
 
     /**
+     * is available
+     *
+     * @param bool $not Not
+     * @param \core_availability\info $info Info
+     * @param string $grabthelot grabthelot
+     * @param int $userid User id
+     * @return bool
+     */
+    public function is_available($not,
+            \core_availability\info $info, $grabthelot, $userid) {
+
+        $allow = !WS_SERVER;
+
+        if ($not) {
+            $allow = !$allow;
+        }
+        return $allow;
+    }
+
+    /**
+     * get description
+     *
+     * @param string $full Full
+     * @param bool $not True if NOT is in force
+     * @param \core_availability\info $info Info
+     * @return string
+     */
+    public function get_description($full, $not, \core_availability\info $info) {
+        if (WS_SERVER) {
+            return get_string('description_no_webservices', 'availability_proctor');
+        } else {
+            return get_string('description_proctor', 'availability_proctor');
+        }
+    }
+
+    /**
      * Get debug string
      * Implements abstract method `core_availability\condition::get_debug_string`
      *
      * @return string
      */
     protected function get_debug_string() {
-        return 'YES';
+        return '#proctoring ' . $this->mode;
     }
 
 }
