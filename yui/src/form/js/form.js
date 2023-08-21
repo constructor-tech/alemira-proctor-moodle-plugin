@@ -30,7 +30,6 @@ M.availability_proctor.form.getNode = function(json) {
     var isTrialId = id + '_isTrial';
     var identificationId = id + '_identification';
     var customRulesId = id + '_customRules';
-    var noProtectionId = id + '_noProtection';
     var auxiliaryCameraId = id + '_auxCamera';
     var enableLdbId = id + '_ldb';
     var biometryEnabledId = id + '_biometryEnabled';
@@ -158,11 +157,6 @@ M.availability_proctor.form.getNode = function(json) {
         '<label for="' + isTrialId + '">' + getString('enable') + '</label> '
     );
 
-    html += formGroup(noProtectionId, getString('noprotection'),
-        '<input type="checkbox" name="noprotection" id="' + noProtectionId + '" value="1">&nbsp;' +
-        '<label for="' + noProtectionId + '">' + getString('enable') + '</label> '
-    );
-
     html += formGroup(auxiliaryCameraId, getString('auxiliary_camera'),
         '<input type="checkbox" name="auxiliarycamera" id="' + auxiliaryCameraId + '" value="1">&nbsp;' +
         '<label for="' + auxiliaryCameraId + '">' + getString('enable') + '</label> '
@@ -280,16 +274,10 @@ M.availability_proctor.form.getNode = function(json) {
         node.one('#' + autoReschedulingId).set('checked', value);
     }
 
-    if (json.noprotection !== undefined) {
-        value = json.noprotection ? 'checked' : null;
-        node.one('#' + noProtectionId).set('checked', value);
-    }
-
     if (json.istrial !== undefined) {
         value = json.istrial ? 'checked' : null;
         node.one('#' + isTrialId).set('checked', value);
     }
-
 
     if (json.auxiliarycamera !== undefined) {
         value = json.auxiliarycamera ? 'checked' : null;
@@ -417,7 +405,6 @@ M.availability_proctor.form.fillValue = function(value, node) {
     value.scheduling_required = node.one('input[name=scheduling_required]').get('checked');
     value.istrial = node.one('input[name=istrial]').get('checked');
     value.customrules = node.one('textarea[name=customrules]').get('value').trim();
-    value.noprotection = node.one('input[name=noprotection]').get('checked');
     value.useragreementurl = node.one('input[name=useragreementurl]').get('value').trim();
     value.auxiliarycamera = node.one('input[name=auxiliarycamera]').get('checked');
     value.ldb = node.one('input[name=ldb]').get('checked');

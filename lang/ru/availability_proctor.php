@@ -83,7 +83,6 @@ $string['face_identification'] = 'Лицо';
 $string['skip_identification'] = 'Пропустить';
 
 $string['is_trial'] = 'Пробный экзамен';
-$string['noprotection'] = 'Отключить защиту от сдачи без прокторинга';
 $string['auxiliary_camera'] = 'Дополнительная камера (смартфон)';
 $string['enable_ldb'] = 'Использовать защищенный браузер';
 

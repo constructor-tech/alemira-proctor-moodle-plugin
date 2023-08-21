@@ -49,10 +49,6 @@ class utils {
             return '';
         }
 
-        if ($condition->noprotection) {
-            return '';
-        }
-
         // We want to let previews to happen without proctoring.
         $quizobj = \quiz::create($cm->instance, $USER->id);
         if ($quizobj->is_preview_user()) {

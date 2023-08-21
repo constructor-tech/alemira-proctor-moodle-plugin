@@ -41,7 +41,7 @@ class condition extends \core_availability\condition {
     /** @var array List of (de-)serializable properties */
     const PROPS = [
         'duration', 'mode', 'schedulingrequired', 'autorescheduling',
-        'istrial', 'rules', 'identification', 'noprotection',
+        'istrial', 'rules', 'identification',
         'useragreementurl', 'auxiliarycamera', 'customrules',
         'scoring', 'warnings', 'ldb', 'biometryenabled',
         'biometryskipfail', 'biometryflow', 'biometrytheme',
@@ -112,9 +112,6 @@ class condition extends \core_availability\condition {
 
     /** @var string identification method **/
     public $identification;
-
-    /** @var bool No protection (shade) */
-    public $noprotection = false;
 
     /** @var string User agreement URL */
     public $useragreementurl = null;
@@ -215,12 +212,6 @@ class condition extends \core_availability\condition {
 
         if (!empty($structure->useragreementurl)) {
             $this->useragreementurl = $structure->useragreementurl;
-        }
-
-        if (isset($structure->noprotection)) {
-            $this->noprotection = $structure->noprotection;
-        } else {
-            $this->noprotection = false;
         }
 
         if (isset($structure->auxiliarycamera)) {
@@ -407,7 +398,6 @@ class condition extends \core_availability\condition {
             'scoring' => (array) $this->scoring,
             'istrial' => (bool) $this->istrial,
             'identification' => $this->identification,
-            'noprotection' => (bool) $this->noprotection,
             'useragreementurl' => $this->useragreementurl,
             'auxiliarycamera' => (bool) $this->auxiliarycamera,
             'customrules' => $this->customrules,
