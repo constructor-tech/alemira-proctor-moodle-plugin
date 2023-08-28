@@ -30,8 +30,10 @@ M.availability_proctor.form.getNode = function(json) {
     var isTrialId = id + '_isTrial';
     var identificationId = id + '_identification';
     var customRulesId = id + '_customRules';
-    var noProtectionId = id + '_noProtection';
     var auxiliaryCameraId = id + '_auxCamera';
+    var allowmultipledisplaysId = id + '_allowmultipledisplays';
+    var allowvirtualenvironmentId = id + '_allowvirtualenvironment';
+    var checkidphotoqualityId = id + '_checkidphotoquality';
     var enableLdbId = id + '_ldb';
     var biometryEnabledId = id + '_biometryEnabled';
     var biometrySkipfailId = id + '_biometrySkipfail';
@@ -158,11 +160,6 @@ M.availability_proctor.form.getNode = function(json) {
         '<label for="' + isTrialId + '">' + getString('enable') + '</label> '
     );
 
-    html += formGroup(noProtectionId, getString('noprotection'),
-        '<input type="checkbox" name="noprotection" id="' + noProtectionId + '" value="1">&nbsp;' +
-        '<label for="' + noProtectionId + '">' + getString('enable') + '</label> '
-    );
-
     html += formGroup(auxiliaryCameraId, getString('auxiliary_camera'),
         '<input type="checkbox" name="auxiliarycamera" id="' + auxiliaryCameraId + '" value="1">&nbsp;' +
         '<label for="' + auxiliaryCameraId + '">' + getString('enable') + '</label> '
@@ -171,6 +168,21 @@ M.availability_proctor.form.getNode = function(json) {
     html += formGroup(enableLdbId, getString('enable_ldb'),
         '<input type="checkbox" name="ldb" id="' + enableLdbId + '" value="1">&nbsp;' +
         '<label for="' + enableLdbId + '">' + getString('enable') + '</label> '
+    );
+
+    html += formGroup(allowmultipledisplaysId, getString('allowmultipledisplays'),
+        '<input type="checkbox" name="allowmultipledisplays" id="' + allowmultipledisplaysId + '" value="1">&nbsp;' +
+        '<label for="' + allowmultipledisplaysId + '">' + getString('enable') + '</label> '
+    );
+
+    html += formGroup(allowvirtualenvironmentId, getString('allowvirtualenvironment'),
+        '<input type="checkbox" name="allowvirtualenvironment" id="' + allowvirtualenvironmentId + '" value="1">&nbsp;' +
+        '<label for="' + allowvirtualenvironmentId + '">' + getString('enable') + '</label> '
+    );
+
+    html += formGroup(checkidphotoqualityId, getString('checkidphotoquality'),
+        '<input type="checkbox" name="checkidphotoquality" id="' + checkidphotoqualityId + '" value="1">&nbsp;' +
+        '<label for="' + checkidphotoqualityId + '">' + getString('enable') + '</label> '
     );
 
     html += formGroup(userAgreementId, getString('user_agreement_url'),
@@ -276,13 +288,7 @@ M.availability_proctor.form.getNode = function(json) {
     }
 
     if (json.auto_rescheduling !== undefined) {
-        value = json.auto_rescheduling ? 'checked' : null;
-        node.one('#' + autoReschedulingId).set('checked', value);
-    }
-
-    if (json.noprotection !== undefined) {
-        value = json.noprotection ? 'checked' : null;
-        node.one('#' + noProtectionId).set('checked', value);
+        node.one('#' + autoReschedulingId).set('checked', json.auto_rescheduling ? 'checked' : null);
     }
 
     if (json.istrial !== undefined) {
@@ -290,34 +296,36 @@ M.availability_proctor.form.getNode = function(json) {
         node.one('#' + isTrialId).set('checked', value);
     }
 
-
     if (json.auxiliarycamera !== undefined) {
-        value = json.auxiliarycamera ? 'checked' : null;
-        node.one('#' + auxiliaryCameraId).set('checked', value);
+        node.one('#' + auxiliaryCameraId).set('checked', json.auxiliarycamera ? 'checked' : null);
     }
 
     if (json.ldb !== undefined) {
-        value = json.ldb ? 'checked' : null;
-        node.one('#' + enableLdbId).set('checked', value);
+        node.one('#' + enableLdbId).set('checked', json.ldb ? 'checked' : null);
     }
 
     if (json.scheduling_required !== undefined) {
-        value = json.scheduling_required ? 'checked' : null;
-        node.one('#' + schedulingRequiredId).set('checked', value);
+        node.one('#' + schedulingRequiredId).set('checked', json.scheduling_required ? 'checked' : null);
     }
 
-    if (json.rules === undefined) {
-        json.rules = this.rules;
+    if (json.allowmultipledisplays !== undefined) {
+        node.one('#' + allowmultipledisplaysId).set('checked', json.allowmultipledisplays ? 'checked' : null);
+    }
+
+    if (json.allowvirtualenvironment !== undefined) {
+        node.one('#' + allowvirtualenvironmentId).set('checked', json.allowvirtualenvironment ? 'checked' : null);
+    }
+
+    if (json.checkidphotoquality !== undefined) {
+        node.one('#' + checkidphotoqualityId).set('checked', json.checkidphotoquality ? 'checked' : null);
     }
 
     if (json.biometryenabled !== undefined) {
-        value = json.biometryenabled ? 'checked' : null;
-        node.one('#' + biometryEnabledId).set('checked', value);
+        node.one('#' + biometryEnabledId).set('checked', json.biometryenabled ? 'checked' : null);
     }
 
     if (json.biometryskipfail !== undefined) {
-        value = json.biometryskipfail ? 'checked' : null;
-        node.one('#' + biometrySkipfailId).set('checked', value);
+        node.one('#' + biometrySkipfailId).set('checked', json.biometryskipfail ? 'checked' : null);
     }
 
     if (json.biometryflow !== undefined) {
@@ -326,6 +334,10 @@ M.availability_proctor.form.getNode = function(json) {
 
     if (json.biometrytheme !== undefined) {
         node.one('#' + biometryThemeId).set('value', json.biometrytheme);
+    }
+
+    if (json.rules === undefined) {
+        json.rules = this.rules;
     }
 
     if (json.warnings === undefined) {
@@ -417,10 +429,13 @@ M.availability_proctor.form.fillValue = function(value, node) {
     value.scheduling_required = node.one('input[name=scheduling_required]').get('checked');
     value.istrial = node.one('input[name=istrial]').get('checked');
     value.customrules = node.one('textarea[name=customrules]').get('value').trim();
-    value.noprotection = node.one('input[name=noprotection]').get('checked');
     value.useragreementurl = node.one('input[name=useragreementurl]').get('value').trim();
     value.auxiliarycamera = node.one('input[name=auxiliarycamera]').get('checked');
     value.ldb = node.one('input[name=ldb]').get('checked');
+    value.allowmultipledisplays = node.one('input[name=allowmultipledisplays]').get('checked');
+    value.allowvirtualenvironment = node.one('input[name=allowvirtualenvironment]').get('checked');
+    value.checkidphotoquality = node.one('input[name=checkidphotoquality]').get('checked');
+
     value.biometryenabled = node.one('input[name=biometryenabled]').get('checked');
     value.biometryskipfail = node.one('input[name=biometryskipfail]').get('checked');
     value.biometryflow = node.one('input[name=biometryflow]').get('value').trim();

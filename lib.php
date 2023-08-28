@@ -70,3 +70,24 @@ function availability_proctor_after_require_login() {
         utils::handle_start_attempt($course, $cm, $USER);
     }
 }
+
+/**
+ * Extend homepage navigation
+ * @param navigation_node $parentnode The navigation node to extend
+ * @param stdClass $course The course to object for the report
+ * @param context_course $context Cource context
+ **/
+function availability_proctor_extend_navigation_frontpage(
+    navigation_node $parentnode,
+    stdClass $course,
+    context_course $context
+) {
+    if (has_capability('availability/proctor:logaccess', $context)) {
+        $title = get_string('log_section', 'availability_proctor');
+        $url = new \moodle_url('/availability/condition/proctor/index.php');
+        $icon = new \pix_icon('i/log', '');
+        $node = navigation_node::create($title, $url, navigation_node::TYPE_SETTING, null, null, $icon);
+
+        $parentnode->add_node($node);
+    }
+}

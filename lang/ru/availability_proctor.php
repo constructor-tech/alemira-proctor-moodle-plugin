@@ -49,7 +49,9 @@ $string['settings_user_emails_desc'] = '';
 $string['settings_seamless_auth'] = 'Автоматическая авторизация пользователя';
 $string['settings_seamless_auth_desc'] = 'Активация данной опции означает что прокторинг будет хранить авторизационный токен';
 
-$string['use_proctor'] = 'Используйте приложение "Proctor by Constructor", чтобы получить доступ к модулю';
+$string['description_proctor'] = 'Вы будете перенаправлены на Proctor by Constructor';
+$string['description_no_webservices'] = 'Недоступно через мобильное приложение Moodle';
+
 $string['settings'] = 'Настройки "Proctor by Constructor"';
 $string['log_section'] = 'Журнал Proctor';
 $string['status'] = 'Статус';
@@ -81,9 +83,11 @@ $string['face_identification'] = 'Лицо';
 $string['skip_identification'] = 'Пропустить';
 
 $string['is_trial'] = 'Пробный экзамен';
-$string['noprotection'] = 'Отключить защиту от сдачи без прокторинга';
 $string['auxiliary_camera'] = 'Дополнительная камера (смартфон)';
 $string['enable_ldb'] = 'Использовать защищенный браузер';
+$string['allowmultipledisplays'] = 'Разрешить использвание второго монитора';
+$string['allowvirtualenvironment'] = 'Разрешить использовать виртуальные машины';
+$string['checkidphotoquality'] = 'Проверять качетво фото паспорта';
 
 $string['rules'] = 'Правила';
 $string['custom_rules'] = "Нестандартные правила";

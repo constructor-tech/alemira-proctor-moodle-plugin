@@ -46,7 +46,6 @@ const strInstructions = <?php echo json_encode(get_string('fader_instructions', 
 const strReset = <?php echo json_encode(get_string('fader_reset', 'availability_proctor')) ?>;
 const faderHTML = strAwaitingProctoring + strInstructions;
 const formData = <?php echo json_encode(isset($formdata) ? $formdata : null); ?>;
-const noProtection = <?php echo $condition->noprotection ? 'true' : 'false' ?>;
 const reset = <?php echo $entryreset ? 'true' : 'false' ?>;
 
 const TAG = 'proctoring fader';
@@ -122,7 +121,7 @@ const redirectToProctor = () => {
 const proved = waitForProof();
 
 window.addEventListener("DOMContentLoaded", () => {
-    const fader = noProtection ? null : createFader(faderHTML);
+    const fader = createFader(faderHTML);
 
     redirectTimeout = setTimeout(() => {
          redirectToProctor();
@@ -130,15 +129,9 @@ window.addEventListener("DOMContentLoaded", () => {
 
     proved.then(() => {
         if (reset) {
-            if (fader) {
-                fader.innerHTML = strReset;
-            } else {
-                createFader(strReset);
-            }
+            fader.innerHTML = strReset;
         } else {
-            if (fader) {
-                fader.remove();
-            }
+            fader.remove();
         }
         clearTimeout(redirectTimeout)
     });
