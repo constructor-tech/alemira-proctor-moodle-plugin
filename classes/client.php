@@ -243,7 +243,6 @@ class client {
         $data = [
             'accountId' => $this->accountid,
             'accountName' => $this->accountname,
-
             'examId' => $cm->id,
             'examName' => $cm->name,
             'courseName' => $course->fullname,
@@ -260,6 +259,7 @@ class client {
             'allowMultipleDisplays' => $conditiondata['allowmultipledisplays'],
             'allowVirtualEnvironment' => $conditiondata['allowvirtualenvironment'],
             'checkIdPhotoQuality' => $conditiondata['checkidphotoquality'],
+            'webCameraMainView' => $conditiondata['webcameramainview'],
             'rules' => array_merge(
                 (array)$conditiondata['rules'],
                 ['custom_rules' => $customrules]

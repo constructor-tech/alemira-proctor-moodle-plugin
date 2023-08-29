@@ -43,7 +43,7 @@ class condition extends \core_availability\condition {
         'duration', 'mode', 'schedulingrequired', 'autorescheduling',
         'istrial', 'identification', 'useragreementurl',
         'auxiliarycamera', 'ldb', 'allowmultipledisplays', 'allowvirtualenvironment',
-        'checkidphotoquality',
+        'checkidphotoquality', 'webcameramainview',
         'scoring', 'warnings', 'rules', 'customrules',
         'biometryenabled', 'biometryskipfail', 'biometryflow', 'biometrytheme',
     ];
@@ -100,11 +100,14 @@ class condition extends \core_availability\condition {
         'biometryskipfail' => false,
     ];
 
-    /** @var int Default exam duration */
+    /** @var int Exam duration */
     public $duration = 60;
 
-    /** @var string Default exam mode */
+    /** @var string Proctoring mode */
     public $mode = 'online';
+
+    /** @var string Main camera */
+    public $webcameramainview = 'front';
 
     /** @var string Default calendar mode */
     public $schedulingrequired = true;
@@ -177,6 +180,10 @@ class condition extends \core_availability\condition {
 
         if (!empty($structure->mode)) {
             $this->mode = $structure->mode;
+        }
+
+        if (!empty($structure->webcameramainview)) {
+            $this->webcameramainview = $structure->webcameramainview;
         }
 
         if (isset($structure->scheduling_required) && $structure->scheduling_required !== null) {

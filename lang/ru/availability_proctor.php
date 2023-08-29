@@ -82,6 +82,10 @@ $string['passport_identification'] = 'Паспорт';
 $string['face_identification'] = 'Лицо';
 $string['skip_identification'] = 'Пропустить';
 
+$string['web_camera_main_view'] = 'Положение основной камеры';
+$string['web_camera_main_view_front'] = 'Фронтальная';
+$string['web_camera_main_view_side'] = 'Боковая';
+
 $string['is_trial'] = 'Пробный экзамен';
 $string['auxiliary_camera'] = 'Дополнительная камера (смартфон)';
 $string['enable_ldb'] = 'Использовать защищенный браузер';

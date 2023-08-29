@@ -39,7 +39,9 @@ M.availability_proctor.form.getNode = function(json) {
     var biometrySkipfailId = id + '_biometrySkipfail';
     var biometryFlowId = id + '_biometryFlow';
     var biometryThemeId = id + '_biometryTheme';
-    var userAgreementId = id + 'userAgreement';
+    var userAgreementId = id + '_userAgreement';
+    var webCameraMainViewId = id + '_webCameraMainView';
+
 
     var tabButtonOne, tabButtonTwo, tabOne, tabTwo;
 
@@ -142,6 +144,13 @@ M.availability_proctor.form.getNode = function(json) {
         '  <option value="face">' + getString('face_identification') + '</option>' +
         '  <option value="face_and_passport">' + getString('face_passport_identification') + '</option>' +
         '  <option value="skip">' + getString('skip_identification') + '</option>' +
+        '</select>'
+    );
+
+    html += formGroup(webCameraMainViewId, getString('web_camera_main_view'),
+        '<select name="webcameramainview" id="' + webCameraMainViewId + '" class="custom-select">' +
+        '  <option value="front">' + getString('web_camera_main_view_front') + '</option>' +
+        '  <option value="side">' + getString('web_camera_main_view_side') + '</option>' +
         '</select>'
     );
 
@@ -287,6 +296,10 @@ M.availability_proctor.form.getNode = function(json) {
         node.one('select[name=identification] option[value=' + json.identification + ']').set('selected', 'selected');
     }
 
+    if (json.webcameramainview !== undefined) {
+        node.one('select[name=webcameramainview] option[value=' + json.webcameramainview + ']').set('selected', 'selected');
+    }
+
     if (json.auto_rescheduling !== undefined) {
         node.one('#' + autoReschedulingId).set('checked', json.auto_rescheduling ? 'checked' : null);
     }
@@ -425,6 +438,7 @@ M.availability_proctor.form.fillValue = function(value, node) {
     value.duration = node.one('input[name=duration]').get('value').trim();
     value.mode = node.one('select[name=mode]').get('value').trim();
     value.identification = node.one('select[name=identification]').get('value').trim();
+    value.webcameramainview = node.one('select[name=webcameramainview]').get('value').trim();
     value.auto_rescheduling = node.one('input[name=auto_rescheduling]').get('checked');
     value.scheduling_required = node.one('input[name=scheduling_required]').get('checked');
     value.istrial = node.one('input[name=istrial]').get('checked');
