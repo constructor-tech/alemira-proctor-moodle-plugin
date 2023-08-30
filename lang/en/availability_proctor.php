@@ -82,6 +82,10 @@ $string['passport_identification'] = 'Passport';
 $string['face_identification'] = 'Face';
 $string['skip_identification'] = 'Skip';
 
+$string['web_camera_main_view'] = 'Main webcam view';
+$string['web_camera_main_view_front'] = 'Front';
+$string['web_camera_main_view_side'] = 'Side';
+
 $string['is_trial'] = 'Trial exam';
 $string['auxiliary_camera'] = 'Auxiliary camera (mobile) ';
 $string['enable_ldb'] = 'Require locked down browser';
