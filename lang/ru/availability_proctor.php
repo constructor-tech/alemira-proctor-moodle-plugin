@@ -89,9 +89,9 @@ $string['web_camera_main_view_side'] = 'Боковая';
 $string['is_trial'] = 'Пробный экзамен';
 $string['auxiliary_camera'] = 'Дополнительная камера (смартфон)';
 $string['enable_ldb'] = 'Использовать защищенный браузер';
-$string['allowmultipledisplays'] = 'Разрешить использвание второго монитора';
+$string['allowmultipledisplays'] = 'Разрешить использование второго монитора';
 $string['allowvirtualenvironment'] = 'Разрешить использовать виртуальные машины';
-$string['checkidphotoquality'] = 'Проверять качетво фото паспорта';
+$string['checkidphotoquality'] = 'Проверять качество фото паспорта';
 
 $string['rules'] = 'Правила';
 $string['custom_rules'] = "Нестандартные правила";
@@ -149,8 +149,8 @@ $string['fromdate'] = 'С:';
 $string['todate'] = 'По:';
 
 $string['score'] = 'Скоринг';
-$string['threshold_rejected'] = 'Порог подозрительности';
-$string['threshold_rejected'] = 'Порог отлонения';
+$string['threshold_attention'] = 'Порог подозрительности';
+$string['threshold_rejected'] = 'Порог отклонения';
 $string['session_start'] = 'Начало сессии';
 $string['session_end'] = 'Окончание сессии';
 $string['warnings'] = 'Нарушения';
