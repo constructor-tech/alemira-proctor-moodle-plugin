@@ -33,6 +33,8 @@ $string['pluginname'] = 'Proctor by Constructor';
 $string['title'] = 'Proctor by Constructor';
 
 $string['error_no_entry_found'] = 'No exam entry found by accesscode';
+$string['error_not_in_range'] = 'This value should be between %d and %d';
+$string['error_setduration'] = 'Duration must be a multiple of 30';
 
 $string['settings_proctor_url'] = 'Proctor by Constructor URL';
 $string['settings_proctor_url_desc'] = '';
@@ -52,13 +54,12 @@ $string['settings_seamless_auth_desc'] = 'Proctoring will store authorization to
 $string['description_proctor'] = 'You will be redirected to Proctor by Constructor';
 $string['description_no_webservices'] = 'Can not be accessed via Moodle mobile app';
 
-$string['settings'] = 'Proctor by Constructor settings';
+$string['settings'] = 'Integration settings';
 $string['log_section'] = 'Proctor by Constructor log';
 $string['status'] = 'Status';
 $string['module'] = 'Module';
 $string['new_entry'] = 'New entry';
 $string['new_entry_force'] = 'New entry';
-$string['error_setduration'] = 'Duration must be a multiple of 30';
 $string['duration'] = 'Duration in minutes (a multiple of 30)';
 $string['log_review'] = 'Review';
 $string['log_archive_link'] = 'Video';
@@ -163,6 +164,10 @@ $string['details'] = 'Details';
 $string['fader_awaiting_proctoring'] = 'Proctor by Constructor proctoring starts...';
 $string['fader_instructions'] = '<p>please wait</p>';
 $string['fader_reset'] = 'Session was reset, you need to restart the exam';
+
+// Dafault settings
+$string['defaults'] = 'Default proctoring settings';
+$string['defaults_proctoring_settings'] = 'Proctoring settings';
 
 $string['log_details_warnings'] = 'Warnings';
 $string['log_details_warning_type'] = 'Type';

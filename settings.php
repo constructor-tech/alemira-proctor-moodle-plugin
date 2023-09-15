@@ -25,44 +25,58 @@
 defined('MOODLE_INTERNAL') || die();
 
 if ($hassiteconfig) {
-    $ADMIN->add(
-        'reports',
-         new admin_externalpage(
-             'availability_proctor_settings',
-             get_string('log_section', 'availability_proctor'),
-             $CFG->wwwroot . '/availability/condition/proctor/index.php',
-             'availability/proctor:logaccess'
-         )
+    $settings = null;
+    $pluginsettings = new admin_settingpage('manageavailabilityproctor', new lang_string('settings', 'availability_proctor'));
+
+    $logpage = new admin_externalpage(
+        'availability_proctor_log',
+        get_string('log_section', 'availability_proctor'),
+        $CFG->wwwroot . '/availability/condition/proctor/index.php',
+        'availability/proctor:logaccess'
     );
 
-    $settings = new admin_settingpage('manageavailabilityproctor', new lang_string('settings', 'availability_proctor'));
+    $defaultspage = new admin_externalpage(
+        'availability_proctor_defaults',
+        get_string('defaults', 'availability_proctor'),
+        $CFG->wwwroot . '/availability/condition/proctor/defaults.php',
+        'availability/proctor:logaccess'
+    );
+
+    $category = new admin_category('availability_proctor_admin', new lang_string('pluginname', 'availability_proctor'));
+
+    $ADMIN->add('availabilitysettings', $category);
+    $ADMIN->add('reports', $logpage);
+    $ADMIN->add('availability_proctor_admin', $defaultspage);
+    $ADMIN->add('availability_proctor_admin', $pluginsettings);
+
+    //$ADMIN->add('availability_proctor_admin', $logpage);
 
     if ($ADMIN->fulltree) {
-        $settings->add(new admin_setting_configtext('availability_proctor/proctor_url',
+        $pluginsettings->add(new admin_setting_configtext('availability_proctor/proctor_url',
             new lang_string('settings_proctor_url', 'availability_proctor'),
             new lang_string('settings_proctor_url_desc', 'availability_proctor'), '', PARAM_HOST));
 
-        $settings->add(new admin_setting_configtext('availability_proctor/integration_name',
+        $pluginsettings->add(new admin_setting_configtext('availability_proctor/integration_name',
             new lang_string('settings_integration_name', 'availability_proctor'),
             new lang_string('settings_integration_name_desc', 'availability_proctor'), '', PARAM_TEXT));
 
-        $settings->add(new admin_setting_configtext('availability_proctor/jwt_secret',
+        $pluginsettings->add(new admin_setting_configtext('availability_proctor/jwt_secret',
             new lang_string('settings_jwt_secret', 'availability_proctor'),
             new lang_string('settings_jwt_secret_desc', 'availability_proctor'), '', PARAM_TEXT));
 
-        $settings->add(new admin_setting_configtext('availability_proctor/account_id',
+        $pluginsettings->add(new admin_setting_configtext('availability_proctor/account_id',
             new lang_string('settings_account_id', 'availability_proctor'),
             new lang_string('settings_account_id_desc', 'availability_proctor'), '', PARAM_TEXT));
 
-        $settings->add(new admin_setting_configtext('availability_proctor/account_name',
+        $pluginsettings->add(new admin_setting_configtext('availability_proctor/account_name',
             new lang_string('settings_account_name', 'availability_proctor'),
             new lang_string('settings_account_name_desc', 'availability_proctor'), '', PARAM_TEXT));
 
-        $settings->add(new admin_setting_configcheckbox('availability_proctor/user_emails',
+        $pluginsettings->add(new admin_setting_configcheckbox('availability_proctor/user_emails',
             new lang_string('settings_user_emails', 'availability_proctor'),
             new lang_string('settings_user_emails_desc', 'availability_proctor'), 1));
 
-        $settings->add(new admin_setting_configcheckbox('availability_proctor/seamless_auth',
+        $pluginsettings->add(new admin_setting_configcheckbox('availability_proctor/seamless_auth',
             new lang_string('settings_seamless_auth', 'availability_proctor'),
             new lang_string('settings_seamless_auth_desc', 'availability_proctor'), 1));
 

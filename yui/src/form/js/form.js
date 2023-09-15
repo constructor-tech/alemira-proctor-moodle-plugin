@@ -10,10 +10,11 @@ M.availability_proctor.form = Y.Object(M.core_availability.plugin);
 
 M.availability_proctor.form.rules = null;
 
-M.availability_proctor.form.initInner = function(rules, warnings, scoring) {
+M.availability_proctor.form.initInner = function(rules, warnings, scoring, defaults) {
     this.rules = rules;
     this.warnings = warnings;
     this.scoring = scoring;
+    this.defaults = defaults;
 };
 
 M.availability_proctor.form.instId = 0;
@@ -124,6 +125,11 @@ M.availability_proctor.form.getNode = function(json) {
             tabTwo.removeClass('hidden');
         }
     }
+
+    // html += formGroup(useDefaultsId, getString('usedefaults'),
+    //     '<input type="checkbox" name="usedefaults" id="' + useDefaultsId + '" value="1">&nbsp;' +
+    //     '<label for="' + useDefaultsId + '">' + getString('enable') + '</label> '
+    // );
 
     html = formGroup(durationId, getString('duration'),
         '<input type="text" name="duration" id="' + durationId + '" class="form-control">'
@@ -264,7 +270,6 @@ M.availability_proctor.form.getNode = function(json) {
                  true);
 
 
-
     node = Y.Node.create('<span class="availability_proctor-tabs" style="position:relative"></span>');
 
     node.setHTML('<label><strong>' + getString('title') + '</strong></label><br><br>');
@@ -279,9 +284,41 @@ M.availability_proctor.form.getNode = function(json) {
     tabTwo = Y.Node.create('<div class="tab_content hidden">' + htmlTwo + '</div>').appendTo(node);
 
 
+    if (json.rules === undefined) {
+        json.rules = this.rules;
+    }
+
+    if (json.warnings === undefined) {
+        json.warnings = this.warnings;
+    }
+
+    json.scoring = json.scoring || {};
+
     if (json.creating) {
-        json.mode = 'online';
-        json.scheduling_required = true;
+        for (var dkey in this.defaults) {
+            var dvalue = this.defaults[dkey];
+            if (dkey == 'scoring') {
+                for (var dskey in dvalue) {
+                    json.scoring[dskey] = dvalue[dskey] ? parseFloat(dvalue[dskey]) : null;
+                }
+            } else if (dkey == 'rules') {
+                for (var drkey in dvalue) {
+                    json.rules[drkey] = dvalue[drkey];
+                }
+            } else if (dkey == 'warnings') {
+                for (var dwkey in dvalue) {
+                    json.warnings[dwkey] = dvalue[dwkey] ? true : false;
+                }
+            } else {
+                json[dkey] = dvalue;
+
+            }
+        }
+
+        if (!json.mode) {
+            json.mode = 'online';
+            json.scheduling_required = true;
+        }
     }
 
     if (json.duration !== undefined) {
@@ -296,7 +333,7 @@ M.availability_proctor.form.getNode = function(json) {
         node.one('select[name=identification] option[value=' + json.identification + ']').set('selected', 'selected');
     }
 
-    if (json.webcameramainview !== undefined) {
+    if (json.webcameramainview) {
         node.one('select[name=webcameramainview] option[value=' + json.webcameramainview + ']').set('selected', 'selected');
     }
 
@@ -349,17 +386,18 @@ M.availability_proctor.form.getNode = function(json) {
         node.one('#' + biometryThemeId).set('value', json.biometrytheme);
     }
 
-    if (json.rules === undefined) {
-        json.rules = this.rules;
+    // Setting hardcoded defaults when no user-defined exist.
+    for (var wrkey in this.warnings) {
+        if (json.warnings[wrkey] === undefined) {
+            json.warnings[wrkey] = this.warnings[wrkey];
+        }
     }
-
-    if (json.warnings === undefined) {
-        json.warnings = this.warnings;
-    } else {
-        var warningRows = json.warnings;
-        json.warnings = this.warnings;
-        for(var wrkey in warningRows) {
-            json.warnings[wrkey] = warningRows[wrkey];
+    for (var warningKey in json.warnings) {
+        if (json.warnings[warningKey]) {
+            var winput = node.one('.warnings input[name=' + warningKey + ']');
+            if (winput) {
+                winput.set('checked', 'checked');
+            }
         }
     }
 
@@ -372,16 +410,6 @@ M.availability_proctor.form.getNode = function(json) {
         }
     }
 
-    for (var warningKey in json.warnings) {
-        if (json.warnings[warningKey]) {
-            var winput = node.one('.warnings input[name=' + warningKey + ']');
-            if (winput) {
-                winput.set('checked', 'checked');
-            }
-        }
-    }
-
-    json.scoring = json.scoring || {};
     for (var scoringKey in json.scoring) {
         if (!isNaN(json.scoring[scoringKey])) {
             var sinput = node.one('.proctor-scoring-input[name=' + scoringKey + ']');
@@ -391,7 +419,6 @@ M.availability_proctor.form.getNode = function(json) {
         }
     }
 
-
     if (json.customrules !== undefined) {
         node.one('#' + customRulesId).set('value', json.customrules);
     }
@@ -399,7 +426,6 @@ M.availability_proctor.form.getNode = function(json) {
     if (json.useragreementurl !== undefined) {
         node.one('#' + userAgreementId).set('value', json.useragreementurl);
     }
-
 
     node.delegate('valuechange', function() {
         nextTick(function() {

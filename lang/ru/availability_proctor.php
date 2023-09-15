@@ -33,6 +33,8 @@ $string['pluginname'] = 'Прокторинг "Proctor by Constructor"';
 $string['title'] = 'Proctor by Constructor';
 
 $string['error_no_entry_found'] = 'No exam entry found by accesscode';
+$string['error_not_in_range'] = 'Значение должно быть в диапазоне от %d до %d';
+$string['error_setduration'] = 'Длительность в минутах должна быть кратна 30 (30, 60, 90)';
 
 $string['settings_proctor_url'] = 'Proctor by Constructor URL';
 $string['settings_proctor_url_desc'] = '';
@@ -52,13 +54,12 @@ $string['settings_seamless_auth_desc'] = 'Активация данной опц
 $string['description_proctor'] = 'Вы будете перенаправлены на Proctor by Constructor';
 $string['description_no_webservices'] = 'Недоступно через мобильное приложение Moodle';
 
-$string['settings'] = 'Настройки "Proctor by Constructor"';
+$string['settings'] = 'Настройки интеграции';
 $string['log_section'] = 'Журнал Proctor';
 $string['status'] = 'Статус';
 $string['module'] = 'Модуль';
 $string['new_entry'] = 'Новая запись';
 $string['new_entry_force'] = 'Новая запись';
-$string['error_setduration'] = 'Длительность в минутах должна быть кратна 30 (30, 60, 90)';
 $string['duration'] = 'Длительность в минутах, кратная 30';
 $string['log_review'] = 'Результат';
 $string['log_archive_link'] = 'Архив';
@@ -106,6 +107,7 @@ $string['biometry_theme'] = 'Тема';
 
 $string['time_scheduled'] = 'Время записи в календаре';
 $string['time_finish'] = 'Время попытки';
+
 $string['auto_rescheduling'] = 'Автоматический сброс при пропуске экзамена';
 $string['enable'] = 'Включить';
 
@@ -163,6 +165,10 @@ $string['fader_awaiting_proctoring'] = 'Запуск прокторинга…';
 $string['fader_instructions'] = '<p>Пожалуйста, ожидайте</p>';
 $string['fader_reset'] = 'Перезагрузите страницу, чтобы продолжить тестирование';
 
+// Dafault settings
+$string['defaults'] = 'Настройки по-умолчанию';
+$string['defaults_proctoring_settings'] = 'Настройки прокторинга';
+
 $string['log_details_warnings'] = 'Нарушения';
 $string['log_details_warning_type'] = 'Тип';
 $string['log_details_warning_title'] = 'Описание';
@@ -170,6 +176,7 @@ $string['log_details_warning_start'] = 'Начало';
 $string['log_details_warning_end'] = 'Конец';
 
 $string['visible_warnings'] = 'Видимые пользователю уведомления';
+
 $string['warning_extra_user_in_frame'] = 'Наличие еще одного человека в кадре';
 $string['warning_substitution_user'] = 'Подмена тестируемого';
 $string['warning_no_user_in_frame'] = 'Отсутствие тестируемого';

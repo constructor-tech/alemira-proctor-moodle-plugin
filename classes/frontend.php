@@ -77,10 +77,9 @@ class frontend extends \core_availability\frontend {
         $rules = condition::RULES;
         $warnings = condition::WARNINGS;
         $scoring = condition::SCORING;
+        $defaults = common::get_default_proctoring_settings();
 
-        $courseid = $course->id;
-
-        return [$rules, $warnings, $scoring];
+        return [$rules, $warnings, $scoring, $defaults];
     }
 
     /**
