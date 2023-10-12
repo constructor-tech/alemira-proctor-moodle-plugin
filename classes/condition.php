@@ -434,7 +434,15 @@ class condition extends \core_availability\condition {
      */
     public function user_in_proctored_groups($userid) {
         global $DB;
-        if (empty($this->groups)) {
+        $groups = $this->groups;
+        if (empty($groups)) {
+            return true;
+        }
+
+        // Validate that groups are still there.
+        [$insql, $inparams] = $DB-> get_in_or_equal($groups);
+        $groups = $DB->get_fieldset_select('groups', 'id', 'id ' . $insql, $inparams);
+        if (empty($groups)) {
             return true;
         }
 
