@@ -55,6 +55,10 @@ function avalibility_proctor_attempt_started_handler($event) {
         return;
     }
 
+    if(!$condition->user_in_proctored_groups($USER->id)) {
+        return;
+    }
+
     $inhibitredirect = false;
     if ($accesscode) {
         // If we have an access code here, we are coming from Proctor by Constructor.
@@ -144,6 +148,11 @@ function avalibility_proctor_attempt_submitted_handler($event) {
     // We want to let previews to happen without proctoring.
     $quizobj = \quiz::create($cm->instance, $userid);
     if ($quizobj->is_preview_user()) {
+        return;
+    }
+
+    if (!$condition->user_in_proctored_groups($userid)) {
+        die();
         return;
     }
 

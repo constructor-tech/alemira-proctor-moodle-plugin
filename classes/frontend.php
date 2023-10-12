@@ -44,7 +44,7 @@ class frontend extends \core_availability\frontend {
             'auto_rescheduling', 'enable', 'scheduling_required',
             'identification', 'face_passport_identification', 'face_identification',
             'passport_identification', 'skip_identification', 'enable_ldb',
-            'is_trial', 'custom_rules', 'user_agreement_url',
+            'is_trial', 'custom_rules', 'user_agreement_url', 'select_groups',
             'web_camera_main_view', 'web_camera_main_view_front', 'web_camera_main_view_side',
             'auxiliary_camera', 'visible_warnings', 'scoring_params_header',
             'allowmultipledisplays', 'allowvirtualenvironment', 'checkidphotoquality',
@@ -77,9 +77,21 @@ class frontend extends \core_availability\frontend {
         $rules = condition::RULES;
         $warnings = condition::WARNINGS;
         $scoring = condition::SCORING;
+
         $defaults = common::get_default_proctoring_settings();
 
-        return [$rules, $warnings, $scoring, $defaults];
+        $groupdefaults = [];
+        if(isset($defaults->groups)) {
+            $groupdefaults = (array)$defaults->groups;
+            $coursekey = (int)$course->id;
+            $groupdefaults = isset($groupdefaults[$coursekey]) ? $groupdefaults[$coursekey] : [];
+            $groupdefaults = array_keys((array)$groupdefaults);
+        }
+        $defaults->groups = $groupdefaults;;
+
+        $groups = $DB->get_records('groups', ['courseid' => $course->id], 'name', 'id,name');
+
+        return [$rules, $warnings, $scoring, $defaults, $groups];
     }
 
     /**

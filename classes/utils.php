@@ -55,6 +55,10 @@ class utils {
             return '';
         }
 
+        if (!$condition->user_in_proctored_groups($USER->id)) {
+            return '';
+        }
+
         $entry = common::create_entry($condition, $USER->id, $cm);
 
         if (
@@ -120,6 +124,10 @@ class utils {
         // We want to let previews to happen without proctoring.
         $quizobj = \quiz::create($cminfo->instance, $user->id);
         if ($quizobj->is_preview_user()) {
+            return;
+        }
+
+        if (!$condition->user_in_proctored_groups($user->id)) {
             return;
         }
 

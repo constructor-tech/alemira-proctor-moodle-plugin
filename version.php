@@ -25,7 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'availability_proctor';
-$plugin->version = 2023091501;
+$plugin->version = 2023100901;
 $plugin->release = 'v2.0';
 $plugin->requires = 2018111800;
 $plugin->maturity = MATURITY_STABLE;

@@ -10,11 +10,12 @@ M.availability_proctor.form = Y.Object(M.core_availability.plugin);
 
 M.availability_proctor.form.rules = null;
 
-M.availability_proctor.form.initInner = function(rules, warnings, scoring, defaults) {
+M.availability_proctor.form.initInner = function(rules, warnings, scoring, defaults, groups) {
     this.rules = rules;
     this.warnings = warnings;
     this.scoring = scoring;
     this.defaults = defaults;
+    this.groups = groups;
 };
 
 M.availability_proctor.form.instId = 0;
@@ -126,11 +127,6 @@ M.availability_proctor.form.getNode = function(json) {
         }
     }
 
-    // html += formGroup(useDefaultsId, getString('usedefaults'),
-    //     '<input type="checkbox" name="usedefaults" id="' + useDefaultsId + '" value="1">&nbsp;' +
-    //     '<label for="' + useDefaultsId + '">' + getString('enable') + '</label> '
-    // );
-
     html = formGroup(durationId, getString('duration'),
         '<input type="text" name="duration" id="' + durationId + '" class="form-control">'
     );
@@ -215,8 +211,19 @@ M.availability_proctor.form.getNode = function(json) {
         ruleOptions += '<br><input type="checkbox" name="' + key + '" id="' + keyId + '" value="' + key + '" >&nbsp;';
         ruleOptions += '<label for="' + keyId + '" style="white-space: break-spaces">' + getString(key) + '</label>';
     }
-
     html += formGroup(null, getString('rules'), '<div class="rules" style="white-space:nowrap">' + ruleOptions + '</div>');
+
+    var groupOptions = '';
+    for (var i in this.groups) {
+        var group = this.groups[i];
+        groupOptions += '<br>'
+            + '<label>'
+            + '<input value=' + group.id + ' type="checkbox" name="proctoring-groups[' + group.id + ']">'
+            + '&nbsp;' + group.name
+            + '</label>';
+    }
+    html += formGroup(null, getString('select_groups'), '<div class="groups">' + groupOptions + '</div>');
+
 
     var warningOptions = '';
     for (var wkey in this.warnings) {
@@ -309,6 +316,8 @@ M.availability_proctor.form.getNode = function(json) {
                 for (var dwkey in dvalue) {
                     json.warnings[dwkey] = dvalue[dwkey] ? true : false;
                 }
+            } else if (dkey == 'groups') {
+                json.groups = dvalue;
             } else {
                 json[dkey] = dvalue;
 
@@ -410,6 +419,18 @@ M.availability_proctor.form.getNode = function(json) {
         }
     }
 
+    var selectedGroups = (json.groups instanceof Array) ? json.groups : [];
+    selectedGroups = selectedGroups.map(function(gid){ return parseInt(gid); });
+    for (var gi in this.groups) {
+        var selectedGroup = this.groups[gi];
+        var checked = selectedGroups.indexOf(parseInt(selectedGroup.id)) > -1;
+        var groupKey = 'proctoring-groups[' + selectedGroup.id + ']';
+        var ginput = node.one('.groups input[name="' + groupKey + '"]');
+        if(ginput && checked) {
+            ginput.set('checked', 'checked');
+        }
+    }
+
     for (var scoringKey in json.scoring) {
         if (!isNaN(json.scoring[scoringKey])) {
             var sinput = node.one('.proctor-scoring-input[name=' + scoringKey + ']');
@@ -460,7 +481,7 @@ M.availability_proctor.form.getNode = function(json) {
 };
 
 M.availability_proctor.form.fillValue = function(value, node) {
-    var rulesInputs, warningsInputs, scoringInputs, key;
+    var rulesInputs, warningsInputs, scoringInputs, groupsInputs, key;
     value.duration = node.one('input[name=duration]').get('value').trim();
     value.mode = node.one('select[name=mode]').get('value').trim();
     value.identification = node.one('select[name=identification]').get('value').trim();
@@ -512,6 +533,15 @@ M.availability_proctor.form.fillValue = function(value, node) {
             value.scoring[key] = parseFloat(scoringValue);
         } else {
             value.scoring[key] = null;
+        }
+    });
+
+    value.groups = [];
+    groupsInputs = node.all('.groups input');
+    Y.each(groupsInputs, function(groupInput) {
+        var id = groupInput.get('value');
+        if (groupInput.get('checked') === true) {
+            value.groups.push(id);
         }
     });
 };
