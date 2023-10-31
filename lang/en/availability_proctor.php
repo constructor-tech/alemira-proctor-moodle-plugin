@@ -87,6 +87,8 @@ $string['web_camera_main_view'] = 'Main webcam view';
 $string['web_camera_main_view_front'] = 'Front';
 $string['web_camera_main_view_side'] = 'Side';
 
+$string['select_groups'] = 'Use proctoring only for selected groups';
+
 $string['is_trial'] = 'Trial exam';
 $string['auxiliary_camera'] = 'Auxiliary camera (mobile) ';
 $string['enable_ldb'] = 'Require locked down browser';

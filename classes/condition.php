@@ -44,7 +44,7 @@ class condition extends \core_availability\condition {
         'istrial', 'identification', 'useragreementurl',
         'auxiliarycamera', 'ldb', 'allowmultipledisplays', 'allowvirtualenvironment',
         'checkidphotoquality', 'webcameramainview',
-        'scoring', 'warnings', 'rules', 'customrules',
+        'scoring', 'warnings', 'rules', 'customrules', 'groups',
         'biometryenabled', 'biometryskipfail', 'biometryflow', 'biometrytheme',
     ];
 
@@ -163,6 +163,9 @@ class condition extends \core_availability\condition {
     /** @var string List of custom rules */
     public $customrules = null;
 
+    /** @var array Apply condition to specified groups */
+    public $groups = [];
+
     /**
      * Construct
      *
@@ -239,6 +242,10 @@ class condition extends \core_availability\condition {
 
         if (!empty($structure->biometrytheme)) {
             $this->biometrytheme = $structure->biometrytheme;
+        }
+
+        if (!empty($structure->groups)) {
+            $this->groups = $structure->groups;
         }
 
         $this->validate();
@@ -417,6 +424,41 @@ class condition extends \core_availability\condition {
     }
 
     /**
+     * Check if condition is limiteted to groups, and is user is part
+     * of these groups.
+     * There is possibility to make this method private and move it
+     * to has_examus_condition, or maybe something else.
+     *
+     * @param \cm_info $cm Cm
+     * @params int $userid userid
+     */
+    public function user_in_proctored_groups($userid) {
+        global $DB;
+        $groups = $this->groups;
+        if (empty($groups)) {
+            return true;
+        }
+
+        // Validate that groups are still there.
+        [$insql, $inparams] = $DB-> get_in_or_equal($groups);
+        $groups = $DB->get_fieldset_select('groups', 'id', 'id ' . $insql, $inparams);
+        if (empty($groups)) {
+            return true;
+        }
+
+        $user = $DB->get_record('user', ['id' => $userid]);
+        $usergroups = $DB->get_records('groups_members', ['userid' => $user->id], null, 'groupid');
+
+        foreach ($usergroups as $usergroup) {
+            if (in_array($usergroup->groupid, $this->groups)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * is available
      *
      * @param bool $not Not
@@ -428,7 +470,11 @@ class condition extends \core_availability\condition {
     public function is_available($not,
             \core_availability\info $info, $grabthelot, $userid) {
 
-        $allow = !WS_SERVER;
+        if ($this->user_in_proctored_groups($userid)) {
+            $allow = !WS_SERVER;
+        } else {
+            $allow = true;
+        }
 
         if ($not) {
             $allow = !$allow;

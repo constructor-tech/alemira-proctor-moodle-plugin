@@ -40,15 +40,14 @@ $PAGE->set_title(get_string('defaults', 'availability_proctor'));
 $PAGE->requires->js_call_amd('availability_proctor/admin', 'init');
 
 $PAGE->navbar->includesettingsbase = true;
-//$PAGE->navbar->add(get_string('defaults', 'availability_proctor'), new moodle_url($url));
+
 $PAGE->set_pagelayout('admin');
 admin_externalpage_setup('availability_proctor_defaults', '', []);
 
 $form = new \availability_proctor\defaults_form();
 
 if ($form->is_cancelled()) {
-    redirect(new moodle_url('/question/type/opaque/engines.php'));
-
+    redirect(new moodle_url($url));
 } else {
     $data = $form->get_data();
     if ($data) {

@@ -29,8 +29,21 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/formslib.php');
 
 class defaults_form extends \moodleform {
+    protected function get_group_options() {
+        global $DB;
+        $courses = get_courses();
+        $options = [];
+        foreach ($courses as $course) {
+            $groups = $DB->get_records('groups', ['courseid' => $course->id], 'name', 'id,name');
+            if (empty($groups)) {
+                continue;
+            }
+            $options[$course->id] = ['name' => $course->fullname, 'options' => $groups];
+        }
+        return $options;
+    }
+
     protected function definition() {
-        common::set_default_proctoring_settings(null);
         $mform = $this->_form;
 
         $mform->addElement('header', 'proctoring_settings', get_string('defaults_proctoring_settings', 'availability_proctor'));
@@ -110,7 +123,7 @@ class defaults_form extends \moodleform {
             $mform->setDefault('scoring['.$key.']', $field['default']);
         }
 
-        $mform->addElement('header', 'proctoring_rules', get_string('biometry_header', 'availability_proctor'));
+        $mform->addElement('header', 'biometry_header', get_string('biometry_header', 'availability_proctor'));
 
         $mform->addElement('advcheckbox', 'biometryenabled', get_string('biometry_enabled', 'availability_proctor'));
         $mform->setType('advcheckbox', PARAM_BOOL);
@@ -120,6 +133,21 @@ class defaults_form extends \moodleform {
         $mform->setType('biometryflow', PARAM_TEXT);
         $mform->addElement('text', 'biometrytheme', get_string('biometry_theme', 'availability_proctor'));
         $mform->setType('biometrytheme', PARAM_TEXT);
+
+        $mform->addElement('header', 'proctored_groups', get_string('select_groups', 'availability_proctor'));
+        $coursegroups = $this->get_group_options();
+
+        foreach ($coursegroups as $courseid => $value) {
+            $coursename = $value['name'];
+            $options = $value['options'];
+            $elements = [];
+            foreach($options as $groupid => $group) {
+                $fieldname = 'groups['.$courseid.']['.$group->id.']';
+                $elements[] = $mform->createElement('checkbox', $fieldname, $group->name);
+                $elements[] = $mform->createElement('html', '<br>');
+            }
+            $mform->addGroup($elements, 'availablefromgroup', $coursename, ' ', false);
+        }
 
         $this->add_action_buttons();
 
