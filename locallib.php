@@ -119,10 +119,11 @@ function avalibility_proctor_attempt_submitted_handler($event) {
     global $DB, $SESSION;
     $cmid = $event->get_context()->instanceid;
     $attempt = $event->get_record_snapshot('quiz_attempts', $event->objectid);
-
-    $cm = get_coursemodule_from_id('quiz', $cmid);
-
     $userid = $event->userid;
+
+    $course = get_course($event->courseid);
+    $modinfo = get_fast_modinfo($course->id, $userid);
+    $cm = $modinfo->get_cm($cmid);
 
     if (!empty($SESSION->availability_proctor_accesscode)) {
         $accesscode = $SESSION->availability_proctor_accesscode;
@@ -151,8 +152,8 @@ function avalibility_proctor_attempt_submitted_handler($event) {
         return;
     }
 
-    if (!$condition->user_in_proctored_groups($userid)) {
-        die();
+    $condition = condition::get_proctor_condition($cm);
+    if (!$condition || !$condition->user_in_proctored_groups($userid)) {
         return;
     }
 
