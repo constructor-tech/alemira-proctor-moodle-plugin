@@ -87,6 +87,11 @@ $string['web_camera_main_view'] = 'Положение основной каме�
 $string['web_camera_main_view_front'] = 'Фронтальная';
 $string['web_camera_main_view_side'] = 'Боковая';
 
+$string['calculator'] = 'калькулятор';
+$string['calculator_off'] = 'Выключен';
+$string['calculator_simple'] = 'Простой';
+$string['calculator_scientific'] = 'Научный';
+
 $string['select_groups'] = 'Использовать прокторинг только для выбраных групп';
 
 $string['is_trial'] = 'Пробный экзамен';

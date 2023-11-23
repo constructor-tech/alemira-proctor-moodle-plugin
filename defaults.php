@@ -63,6 +63,9 @@ if ($form->is_cancelled()) {
         if (empty($data->webcameramainview)) {
             $data->webcameramainview = null;
         }
+        if (empty($data->calculator)) {
+            $data->calculator = null;
+        }
 
         \availability_proctor\common::set_default_proctoring_settings($data);
     } else {

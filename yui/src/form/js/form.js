@@ -43,7 +43,7 @@ M.availability_proctor.form.getNode = function(json) {
     var biometryThemeId = id + '_biometryTheme';
     var userAgreementId = id + '_userAgreement';
     var webCameraMainViewId = id + '_webCameraMainView';
-
+    var calculatorId = id + '_calculator';
 
     var tabButtonOne, tabButtonTwo, tabOne, tabTwo;
 
@@ -202,6 +202,14 @@ M.availability_proctor.form.getNode = function(json) {
 
     html += formGroup(customRulesId, getString('custom_rules'),
         '<textarea name="customrules" id="' + customRulesId + '" style="width: 100%" class="form-control"></textarea>'
+    );
+
+    html += formGroup(calculatorId, getString('calculator'),
+        '<select name="calculator" id="' + identificationId + '" class="custom-select">' +
+        '  <option value="off">' + getString('calculator_off') + '</option>' +
+        '  <option value="simple">' + getString('calculator_simple') + '</option>' +
+        '  <option value="scientific">' + getString('calculator_scientific') + '</option>' +
+        '</select>'
     );
 
 
@@ -395,6 +403,10 @@ M.availability_proctor.form.getNode = function(json) {
         node.one('#' + biometryThemeId).set('value', json.biometrytheme);
     }
 
+    if (json.calculator !== undefined) {
+        node.one('select[name=calculator] option[value=' + json.calculator + ']').set('selected', 'selected');
+    }
+
     // Setting hardcoded defaults when no user-defined exist.
     for (var wrkey in this.warnings) {
         if (json.warnings[wrkey] === undefined) {
@@ -496,6 +508,7 @@ M.availability_proctor.form.fillValue = function(value, node) {
     value.allowmultipledisplays = node.one('input[name=allowmultipledisplays]').get('checked');
     value.allowvirtualenvironment = node.one('input[name=allowvirtualenvironment]').get('checked');
     value.checkidphotoquality = node.one('input[name=checkidphotoquality]').get('checked');
+    value.calculator = node.one('select[name=calculator]').get('value').trim();
 
     value.biometryenabled = node.one('input[name=biometryenabled]').get('checked');
     value.biometryskipfail = node.one('input[name=biometryskipfail]').get('checked');

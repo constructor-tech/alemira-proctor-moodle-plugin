@@ -48,6 +48,7 @@ class frontend extends \core_availability\frontend {
             'web_camera_main_view', 'web_camera_main_view_front', 'web_camera_main_view_side',
             'auxiliary_camera', 'visible_warnings', 'scoring_params_header',
             'allowmultipledisplays', 'allowvirtualenvironment', 'checkidphotoquality',
+            'calculator', 'calculator_off', 'calculator_simple', 'calculator_scientific',
             'biometry_header', 'biometry_enabled', 'biometry_skipfail', 'biometry_flow',
             'biometry_theme',
         ];
