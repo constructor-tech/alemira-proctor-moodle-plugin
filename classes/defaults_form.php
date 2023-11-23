@@ -98,6 +98,12 @@ class defaults_form extends \moodleform {
         $mform->addElement('url', 'useragreementurl', get_string('user_agreement_url', 'availability_proctor'));
         $mform->setType('useragreementurl', PARAM_URL);
 
+        $mform->addElement('select', 'calculator', get_string('calculator', 'availability_proctor'), [
+            'off' => get_string('calculator_off', 'availability_proctor'),
+            'simple' => get_string('calculator_simple', 'availability_proctor'),
+            'scientific' => get_string('calculator_scientific', 'availability_proctor'),
+        ]);
+
         $mform->addElement('header', 'proctoring_rules', get_string('rules', 'availability_proctor'));
 
         foreach (condition::RULES as $key => $value) {
