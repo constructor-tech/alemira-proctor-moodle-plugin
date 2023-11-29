@@ -28,15 +28,15 @@ $string['proctor:logaccess'] = 'Proctor log access';
 $string['proctor:logaccess_course'] = 'Proctor log access for course';
 $string['proctor:logaccess_all'] = 'Proctor log access for all courses';
 
-$string['description'] = 'Allows students to use Proctor by Constructor';
-$string['pluginname'] = 'Proctor by Constructor';
-$string['title'] = 'Proctor by Constructor';
+$string['description'] = 'Allows students to use Constructor Proctor';
+$string['pluginname'] = 'Constructor Proctor';
+$string['title'] = 'Constructor Proctor';
 
 $string['error_no_entry_found'] = 'No exam entry found by accesscode';
 $string['error_not_in_range'] = 'This value should be between %d and %d';
 $string['error_setduration'] = 'Duration must be a multiple of 30';
 
-$string['settings_proctor_url'] = 'Proctor by Constructor URL';
+$string['settings_proctor_url'] = 'Constructor Proctor URL';
 $string['settings_proctor_url_desc'] = '';
 $string['settings_integration_name'] = 'Integration Name';
 $string['settings_integration_name_desc'] = '';
@@ -46,21 +46,21 @@ $string['settings_account_name'] = 'Account Name';
 $string['settings_account_name_desc'] = '';
 $string['settings_account_id'] = 'Account ID';
 $string['settings_account_id_desc'] = '';
-$string['settings_user_emails'] = 'Send user emails to Proctor by Constructor';
+$string['settings_user_emails'] = 'Send user emails to Constructor Proctor';
 $string['settings_user_emails_desc'] = '';
 $string['settings_seamless_auth'] = 'Seemless authorization';
 $string['settings_seamless_auth_desc'] = 'Proctoring will store authorization token for users';
 
-$string['description_proctor'] = 'You will be redirected to Proctor by Constructor';
+$string['description_proctor'] = 'You will be redirected to Constructor Proctor';
 $string['description_no_webservices'] = 'Can not be accessed via Moodle mobile app';
 
 $string['settings'] = 'Integration settings';
-$string['log_section'] = 'Proctor by Constructor log';
+$string['log_section'] = 'Constructor Proctor log';
 $string['status'] = 'Status';
 $string['module'] = 'Module';
 $string['new_entry'] = 'New entry';
 $string['new_entry_force'] = 'New entry';
-$string['duration'] = 'Duration in minutes (a multiple of 30)';
+$string['duration'] = 'Exam duration (in minutes)';
 $string['log_review'] = 'Review';
 $string['log_archive_link'] = 'Video';
 $string['log_report_link'] = 'Report';
@@ -72,41 +72,41 @@ $string['entry_exist'] = 'New entry already exist';
 $string['date_modified'] = 'Date of last change';
 
 $string['proctoring_mode'] = 'Proctoring mode';
-$string['online_mode'] = 'Real-time proctoring';
-$string['offline_mode'] = 'Post-review';
-$string['auto_mode'] = 'Fully automated';
-$string['identification_mode'] = 'Live identification';
+$string['online_mode'] = 'Live review';
+$string['offline_mode'] = 'Post-exam review';
+$string['auto_mode'] = 'AI review';
+$string['identification_mode'] = 'Live identity verification';
 
-$string['identification'] = 'Identification mode';
-$string['face_passport_identification'] = 'Face & Passport';
-$string['passport_identification'] = 'Passport';
+$string['identification'] = 'Identity verification mode';
+$string['face_passport_identification'] = 'Face and Passport/ID';
+$string['passport_identification'] = 'Passport/ID';
 $string['face_identification'] = 'Face';
-$string['skip_identification'] = 'Skip';
+$string['skip_identification'] = 'None (Skip verification)';
 
-$string['web_camera_main_view'] = 'Main webcam view';
-$string['web_camera_main_view_front'] = 'Front';
-$string['web_camera_main_view_side'] = 'Side';
+$string['web_camera_main_view'] = 'Main camera positioning';
+$string['web_camera_main_view_front'] = 'Front view';
+$string['web_camera_main_view_side'] = 'Side view';
 
 $string['calculator'] = 'Calculator';
 $string['calculator_off'] = 'Off';
 $string['calculator_simple'] = 'Simple';
 $string['calculator_scientific'] = 'Scientific';
 
-$string['select_groups'] = 'Use proctoring only for selected groups';
+$string['select_groups'] = 'Enable proctoring for selected groups';
 
-$string['is_trial'] = 'Trial exam';
-$string['auxiliary_camera'] = 'Auxiliary camera (mobile) ';
-$string['enable_ldb'] = 'Require locked down browser';
-$string['allowmultipledisplays'] = 'Allow to use multiple displays';
-$string['allowvirtualenvironment'] = 'Allow to use virtual machines';
-$string['checkidphotoquality'] = 'Check the quality of ID photo';
+$string['is_trial'] = 'Demo exam mode';
+$string['auxiliary_camera'] = 'Secondary camera';
+$string['enable_ldb'] = 'Require Secure Browser';
+$string['allowmultipledisplays'] = 'Allow multiple displays';
+$string['allowvirtualenvironment'] = 'Virtual machine accesss';
+$string['checkidphotoquality'] = 'Assess ID photo quality';
 
-$string['rules'] = "Rules";
-$string['custom_rules'] = "Custom rules";
+$string['rules'] = "Allow during exam";
+$string['custom_rules'] = "Custom exam rules";
 
-$string['user_agreement_url'] = "User agreement URL";
+$string['user_agreement_url'] = "Terms and conditions URL";
 
-$string['biometry_header'] = 'Biometric identification settings';
+$string['biometry_header'] = 'Biometric identification';
 $string['biometry_enabled'] = 'Enable biometric identification';
 $string['biometry_skipfail'] = 'Allow user to continue on failure of identification';
 $string['biometry_flow'] = 'Verification flow name';
@@ -115,30 +115,30 @@ $string['biometry_theme'] = 'Theme';
 $string['time_scheduled'] = 'Scheduled';
 $string['time_finish'] = 'Attempt finished at';
 
-$string['auto_rescheduling'] = 'Automatic reset for missed exams';
+$string['auto_rescheduling'] = 'Automatic rescheduling';
 $string['enable'] = 'Enable';
 
-$string['allow_to_use_websites'] = 'Allow to use websites';
-$string['allow_to_use_books'] = 'Allow to use books';
-$string['allow_to_use_paper'] = 'Allow to use paper';
-$string['allow_to_use_messengers'] = 'Allow to use messengers';
-$string['allow_to_use_calculator'] = 'Allow to use calculator';
-$string['allow_to_use_excel'] = 'Allow to use excel';
-$string['allow_to_use_human_assistant'] = 'Allow to use human assistant';
-$string['allow_absence_in_frame'] = 'Allow absence in frame';
-$string['allow_voices'] = 'Allow voices';
-$string['allow_wrong_gaze_direction'] = 'Allow wrong gaze direction';
+$string['allow_to_use_websites'] = 'Browsing the internet';
+$string['allow_to_use_books'] = 'Using books or reference materials';
+$string['allow_to_use_paper'] = 'Taking notes on paper';
+$string['allow_to_use_messengers'] = 'Using messengers';
+$string['allow_to_use_calculator'] = 'Using calculator';
+$string['allow_to_use_excel'] = 'Using Microsoft Excel';
+$string['allow_to_use_human_assistant'] = 'Using other person’s help';
+$string['allow_absence_in_frame'] = 'Leaving webcam frame';
+$string['allow_voices'] = 'Talking';
+$string['allow_wrong_gaze_direction'] = 'Prolonged looking away from screen';
 
 $string['scoring_params_header'] = 'Scoring params';
-$string['scoring_cheater_level'] = 'Cheater threshold';
-$string['scoring_extra_user'] = 'An extra person in frame';
-$string['scoring_user_replaced'] = 'The student is replaced';
-$string['scoring_absent_user'] = 'The student is absent';
-$string['scoring_look_away'] = 'Wrong gaze direction';
-$string['scoring_active_window_changed'] = 'The active window is changed';
+$string['scoring_cheater_level'] = 'Сheat threshold';
+$string['scoring_extra_user'] = 'Multiple persons in frame';
+$string['scoring_user_replaced'] = 'Test taker substituted';
+$string['scoring_absent_user'] = 'Test taker is absent';
+$string['scoring_look_away'] = 'Prolonged looking away from screen';
+$string['scoring_active_window_changed'] = 'Active window is changed';
 $string['scoring_forbidden_device'] = 'Forbidden hardware';
-$string['scoring_voice'] = 'Microphone voice is detected';
-$string['scoring_phone'] = 'A phone is used';
+$string['scoring_voice'] = 'Voice detected';
+$string['scoring_phone'] = 'Phone is used';
 
 $string['status_new'] = 'New';
 $string['status_started'] = 'Started';
@@ -149,7 +149,7 @@ $string['status_force_reset'] = 'Force reset';
 $string['status_finished'] = 'Finished';
 $string['status_scheduled'] = 'Scheduled';
 
-$string['scheduling_required'] = 'A calendar entry is required';
+$string['scheduling_required'] = 'Calendar booking required';
 $string['apply_filter'] = 'Apply filter';
 $string['allcourses'] = 'All courses';
 $string['allstatuses'] = 'All statuses';
@@ -157,7 +157,7 @@ $string['userquery'] = 'Username or Email starts with';
 $string['fromdate'] = 'From date:';
 $string['todate'] = 'To date:';
 
-$string['score'] = 'Score';
+$string['score'] = 'Cheating score modifier';
 $string['threshold_attention'] = 'Threshold: Attention';
 $string['threshold_rejected'] = 'Threshold: Rejection';
 $string['session_start'] = 'Session start';
@@ -168,7 +168,7 @@ $string['comment'] = 'Comment';
 $string['details'] = 'Details';
 
 // Fader screen.
-$string['fader_awaiting_proctoring'] = 'Proctor by Constructor proctoring starts...';
+$string['fader_awaiting_proctoring'] = 'Constructor Proctor proctoring starts...';
 $string['fader_instructions'] = '<p>please wait</p>';
 $string['fader_reset'] = 'Session was reset, you need to restart the exam';
 
@@ -182,18 +182,18 @@ $string['log_details_warning_title'] = 'Description';
 $string['log_details_warning_start'] = 'Start';
 $string['log_details_warning_end'] = 'End';
 
-$string['visible_warnings'] = 'Visible warnings';
+$string['visible_warnings'] = 'AI alert visibility';
 
-$string['warning_extra_user_in_frame'] = 'An extra person in frame';
-$string['warning_substitution_user'] = 'The student is replaced';
-$string['warning_no_user_in_frame'] = 'The student is absent';
-$string['warning_avert_eyes'] = 'Wrong gaze direction';
+$string['warning_extra_user_in_frame'] = 'Multiple persons in frame';
+$string['warning_substitution_user'] = 'Test taker substituted';
+$string['warning_no_user_in_frame'] = 'Test taker is absent';
+$string['warning_avert_eyes'] = 'Prolonged looking away from screen';
 $string['warning_timeout'] = 'Timeout, no connection';
-$string['warning_change_active_window_on_computer'] = 'The active window is changed';
+$string['warning_change_active_window_on_computer'] = 'Active window is changed';
 $string['warning_talk'] = 'Human voice in audiostream';
 $string['warning_forbidden_software'] = 'Forbidden sites/software';
 $string['warning_forbidden_device'] = 'Forbidden hardware';
-$string['warning_voice_detected'] = 'Microphone voice is detected';
+$string['warning_voice_detected'] = 'Voice detected';
 $string['warning_extra_display'] = 'Extra display is detected';
 $string['warning_books'] = 'Books/notes are used';
 $string['warning_cheater'] = 'Cheater';
