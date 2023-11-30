@@ -46,11 +46,13 @@ class frontend extends \core_availability\frontend {
             'passport_identification', 'skip_identification', 'enable_ldb',
             'is_trial', 'custom_rules', 'user_agreement_url', 'select_groups',
             'web_camera_main_view', 'web_camera_main_view_front', 'web_camera_main_view_side',
-            'auxiliary_camera', 'visible_warnings', 'scoring_params_header',
+            'visible_warnings', 'scoring_params_header',
             'allowmultipledisplays', 'allowvirtualenvironment', 'checkidphotoquality',
             'calculator', 'calculator_off', 'calculator_simple', 'calculator_scientific',
             'biometry_header', 'biometry_enabled', 'biometry_skipfail', 'biometry_flow',
             'biometry_theme',
+            'auxiliary_camera', 'auxiliary_camera_mode', 'auxiliary_camera_mode_photo',
+            'auxiliary_camera_mode_video',
         ];
 
         foreach (condition::WARNINGS as $key => $value) {

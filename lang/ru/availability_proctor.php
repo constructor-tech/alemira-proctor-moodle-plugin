@@ -95,7 +95,12 @@ $string['calculator_scientific'] = 'Научный';
 $string['select_groups'] = 'Использовать прокторинг только для выбраных групп';
 
 $string['is_trial'] = 'Пробный экзамен';
-$string['auxiliary_camera'] = 'Дополнительная камера (смартфон)';
+
+$string['auxiliary_camera'] = 'Вторая камера (смартфон)';
+$string['auxiliary_camera_mode'] = 'Режим второй камеры';
+$string['auxiliary_camera_mode_photo'] = 'Фото';
+$string['auxiliary_camera_mode_video'] = 'Видео';
+
 $string['enable_ldb'] = 'Использовать защищенный браузер';
 $string['allowmultipledisplays'] = 'Разрешить использование второго монитора';
 $string['allowvirtualenvironment'] = 'Разрешить использовать виртуальные машины';

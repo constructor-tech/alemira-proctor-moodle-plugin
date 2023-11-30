@@ -35,6 +35,7 @@ M.availability_proctor.form.getNode = function(json) {
     var identificationId = id + '_identification';
     var customRulesId = id + '_customRules';
     var auxiliaryCameraId = id + '_auxCamera';
+    var auxiliaryCameraModeId = id + '_auxCameraMode';
     var allowmultipledisplaysId = id + '_allowmultipledisplays';
     var allowvirtualenvironmentId = id + '_allowvirtualenvironment';
     var checkidphotoqualityId = id + '_checkidphotoquality';
@@ -105,6 +106,14 @@ M.availability_proctor.form.getNode = function(json) {
         var mode = node.one('select[name=mode]').get('value').trim();
         var checked = manualmodes.indexOf(mode) >= 0;
         node.one('#' + schedulingRequiredId).set('checked', checked);
+    }
+
+    function setAuxCameraModeState() {
+        var videomodes = ['offline', 'auto'];
+        var mode = node.one('select[name=mode]').get('value').trim();
+        var allowvideo = videomodes.indexOf(mode) >= 0;
+        node.one('#' + auxiliaryCameraModeId).set('disabled', !allowvideo);
+        node.one('select[name=auxiliarycameramode] option[value=photo]').set('selected', 'selected');
     }
 
     function nextTick(callback) {
@@ -178,6 +187,13 @@ M.availability_proctor.form.getNode = function(json) {
         '<label for="' + auxiliaryCameraId + '">' + getString('enable') + '</label> '
     );
 
+    html += formGroup(auxiliaryCameraModeId, getString('auxiliary_camera_mode'),
+        '<select name="auxiliarycameramode" id="' + auxiliaryCameraModeId + '" class="custom-select">' +
+        '  <option value="photo">' + getString('auxiliary_camera_mode_photo') + '</option>' +
+        '  <option value="video">' + getString('auxiliary_camera_mode_video') + '</option>' +
+        '</select>'
+    );
+
     html += formGroup(enableLdbId, getString('enable_ldb'),
         '<input type="checkbox" name="ldb" id="' + enableLdbId + '" value="1">&nbsp;' +
         '<label for="' + enableLdbId + '">' + getString('enable') + '</label> '
@@ -207,7 +223,7 @@ M.availability_proctor.form.getNode = function(json) {
     );
 
     html += formGroup(calculatorId, getString('calculator'),
-        '<select name="calculator" id="' + identificationId + '" class="custom-select">' +
+        '<select name="calculator" id="' + calculatorId + '" class="custom-select">' +
         '  <option value="off">' + getString('calculator_off') + '</option>' +
         '  <option value="simple">' + getString('calculator_simple') + '</option>' +
         '  <option value="scientific">' + getString('calculator_scientific') + '</option>' +
@@ -347,6 +363,9 @@ M.availability_proctor.form.getNode = function(json) {
     if (json.mode !== undefined) {
         node.one('select[name=mode] option[value=' + json.mode + ']').set('selected', 'selected');
     }
+    if (['offline', 'auto'].indexOf(json.mode) == -1) {
+        json.auxiliarycameramode = 'photo';
+    }
 
     if (json.identification !== undefined) {
         node.one('select[name=identification] option[value=' + json.identification + ']').set('selected', 'selected');
@@ -367,6 +386,10 @@ M.availability_proctor.form.getNode = function(json) {
 
     if (json.auxiliarycamera !== undefined) {
         node.one('#' + auxiliaryCameraId).set('checked', json.auxiliarycamera ? 'checked' : null);
+    }
+
+    if (json.auxiliarycameramode) {
+        node.one('select[name=auxiliarycameramode] option[value=' + json.auxiliarycameramode + ']').set('selected', 'selected');
     }
 
     if (json.ldb !== undefined) {
@@ -476,6 +499,7 @@ M.availability_proctor.form.getNode = function(json) {
 
     node.delegate('valuechange', function() {
         setSchedulingState();
+        setAuxCameraModeState();
     }, '#'+modeId);
 
     tabButtonOne.on('click', function(e) {
@@ -506,6 +530,7 @@ M.availability_proctor.form.fillValue = function(value, node) {
     value.customrules = node.one('textarea[name=customrules]').get('value').trim();
     value.useragreementurl = node.one('input[name=useragreementurl]').get('value').trim();
     value.auxiliarycamera = node.one('input[name=auxiliarycamera]').get('checked');
+    value.auxiliarycameramode = node.one('select[name=auxiliarycameramode]').get('value').trim();
     value.ldb = node.one('input[name=ldb]').get('checked');
     value.allowmultipledisplays = node.one('input[name=allowmultipledisplays]').get('checked');
     value.allowvirtualenvironment = node.one('input[name=allowvirtualenvironment]').get('checked');

@@ -42,11 +42,11 @@ class condition extends \core_availability\condition {
     const PROPS = [
         'duration', 'mode', 'schedulingrequired', 'autorescheduling',
         'istrial', 'identification', 'useragreementurl',
-        'auxiliarycamera', 'ldb', 'allowmultipledisplays', 'allowvirtualenvironment',
+        'ldb', 'allowmultipledisplays', 'allowvirtualenvironment',
         'checkidphotoquality', 'webcameramainview',
         'scoring', 'warnings', 'rules', 'customrules', 'groups',
         'biometryenabled', 'biometryskipfail', 'biometryflow', 'biometrytheme',
-        'calculator'
+        'calculator', 'auxiliarycamera', 'auxiliarycameramode',
     ];
 
     /** @var array List of default values for visible warnings */
@@ -104,6 +104,9 @@ class condition extends \core_availability\condition {
     const CALCULATOR_OPTIONS = [
         'off', 'scientific', 'simple',
     ];
+    const AUX_CAMERA_MODES = [
+        'photo', 'video',
+    ];
 
     /** @var int Exam duration */
     public $duration = 60;
@@ -140,6 +143,9 @@ class condition extends \core_availability\condition {
 
     /** @var bool Auxiliary camera enabled */
     public $auxiliarycamera = false;
+
+    /** @var string Auxiliary camera mode */
+    public $auxiliarycameramode = 'photo';
 
     /** @var bool Allow to use multiple displays */
     public $allowmultipledisplays = false;
@@ -258,6 +264,10 @@ class condition extends \core_availability\condition {
 
         if (!empty($structure->groups)) {
             $this->groups = $structure->groups;
+        }
+
+        if (!empty($structure->auxiliarycameramode)) {
+            $this->auxiliarycameramode = $structure->auxiliarycameramode;
         }
 
         $this->validate();
@@ -414,6 +424,7 @@ class condition extends \core_availability\condition {
             'identification' => $this->identification,
             'useragreementurl' => $this->useragreementurl,
             'auxiliarycamera' => (bool) $this->auxiliarycamera,
+            'auxiliarycameramode' => (string) $this->auxiliarycameramode,
             'customrules' => $this->customrules,
             'calculator' => $this->calculator,
         ];

@@ -95,7 +95,12 @@ $string['calculator_scientific'] = 'Scientific';
 $string['select_groups'] = 'Enable proctoring for selected groups';
 
 $string['is_trial'] = 'Demo exam mode';
+
 $string['auxiliary_camera'] = 'Secondary camera';
+$string['auxiliary_camera_mode'] = 'Secondary camera mode';
+$string['auxiliary_camera_mode_photo'] = 'Photo';
+$string['auxiliary_camera_mode_video'] = 'Video';
+
 $string['enable_ldb'] = 'Require Secure Browser';
 $string['allowmultipledisplays'] = 'Allow multiple displays';
 $string['allowvirtualenvironment'] = 'Virtual machine accesss';
