@@ -513,6 +513,8 @@ M.availability_proctor.form.getNode = function(json) {
         switchMoreLessState(e.target);
     }, '.proctor-moreless');
 
+    setAuxCameraModeState();
+
     return node;
 };
 
