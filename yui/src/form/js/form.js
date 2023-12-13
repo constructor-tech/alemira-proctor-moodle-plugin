@@ -111,7 +111,9 @@ M.availability_proctor.form.getNode = function(json) {
         var mode = node.one('select[name=mode]').get('value').trim();
         var allowvideo = videomodes.indexOf(mode) >= 0;
         node.one('#' + auxiliaryCameraModeId).set('disabled', !allowvideo);
-        node.one('select[name=auxiliarycameramode] option[value=photo]').set('selected', 'selected');
+        if (!allowvideo) {
+            node.one('select[name=auxiliarycameramode] option[value=photo]').set('selected', 'selected');
+        }
     }
 
     function nextTick(callback) {
