@@ -93,7 +93,7 @@ class log {
         global $DB;
         $select = [
             'e.id id',
-            'e.timemodified timemodified',
+            'e.timecreated timecreated',
             'a.timefinish timefinish',
             'timescheduled',
             'u.firstname u_firstname',
@@ -139,11 +139,11 @@ class log {
             $value = trim($value);
             switch ($key) {
                 case 'from':
-                    $where[] = 'e.timemodified > :'.$key;
+                    $where[] = 'e.timecreated > :'.$key;
                     break;
 
                 case 'to':
-                    $where[] = 'e.timemodified <= :'.$key;
+                    $where[] = 'e.timecreated <= :'.$key;
                     break;
 
                 case 'userquery':
