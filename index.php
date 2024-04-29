@@ -58,7 +58,7 @@ if ($action == 'index') {
     echo $OUTPUT->heading(get_string('pluginname', 'availability_proctor'));
     $filters = [
         'courseid'     => optional_param('courseid', null, PARAM_INT),
-        'timecreated'  => optional_param('timecreated', null, PARAM_INT),
+        'timefinish'   => optional_param('timefinish', null, PARAM_INT),
         'moduleid'     => optional_param('moduleid', null, PARAM_INT),
         'userquery'    => optional_param('userquery', null, PARAM_TEXT),
         'status'       => optional_param('status', null, PARAM_TEXT),
