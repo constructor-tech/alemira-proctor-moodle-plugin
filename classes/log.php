@@ -139,11 +139,11 @@ class log {
             $value = trim($value);
             switch ($key) {
                 case 'from':
-                    $where[] = 'a.timefinish > :'.$key;
+                    $where[] = '(a.timefinish > :'.$key.' OR a.timefinish IS NULL)';
                     break;
 
                 case 'to':
-                    $where[] = 'a.timefinish <= :'.$key;
+                    $where[] = '(a.timefinish <= :'.$key.' OR a.timefinish IS NULL)';
                     break;
 
                 case 'userquery':

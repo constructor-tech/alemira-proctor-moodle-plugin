@@ -169,7 +169,7 @@ class observers {
         }
         $entry = reset($entries);
 
-        $redirecturl = new moodle_url('/mod/quiz/review.php', ['attempt' => $attempt->id, 'cmid' => $cmid]);
+        $redirecturl = new \moodle_url('/mod/quiz/review.php', ['attempt' => $attempt->id, 'cmid' => $cmid]);
 
         $client = new client();
         $client->finish_session($entry->accesscode, $redirecturl->out(false));
