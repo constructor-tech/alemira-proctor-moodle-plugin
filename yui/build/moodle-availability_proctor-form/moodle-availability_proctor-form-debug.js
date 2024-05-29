@@ -91,7 +91,7 @@ M.availability_proctor.form.getNode = function(json) {
         var labelcols = fullwidth ? 10 : 5;
         var fieldcols = fullwidth ? 10 : 7;
 
-        return '<span class="availability-group form-group mb-2">' +
+        return '<span class="availability-group form-group mb-2 d-flex">' +
             '<div class="col-md-' + labelcols + ' col-form-label d-flex pb-0 pr-md-0">' +
             '  <label for="' + id + '">' + label + '</label>' +
             '</div>' +
@@ -106,16 +106,6 @@ M.availability_proctor.form.getNode = function(json) {
         var mode = node.one('select[name=mode]').get('value').trim();
         var checked = manualmodes.indexOf(mode) >= 0;
         node.one('#' + schedulingRequiredId).set('checked', checked);
-    }
-
-    function setAuxCameraModeState() {
-        var videomodes = ['offline', 'auto'];
-        var mode = node.one('select[name=mode]').get('value').trim();
-        var allowvideo = videomodes.indexOf(mode) >= 0;
-        node.one('#' + auxiliaryCameraModeId).set('disabled', !allowvideo);
-        if (!allowvideo) {
-            node.one('select[name=auxiliarycameramode] option[value=photo]').set('selected', 'selected');
-        }
     }
 
     function nextTick(callback) {
@@ -352,6 +342,10 @@ M.availability_proctor.form.getNode = function(json) {
             }
         }
 
+        if (!json.auxiliarycameramode) {
+            json.auxiliarycameramode = 'video';
+        }
+
         if (!json.mode) {
             json.mode = 'online';
             json.scheduling_required = true;
@@ -364,9 +358,6 @@ M.availability_proctor.form.getNode = function(json) {
 
     if (json.mode !== undefined) {
         node.one('select[name=mode] option[value=' + json.mode + ']').set('selected', 'selected');
-    }
-    if (['offline', 'auto'].indexOf(json.mode) == -1) {
-        json.auxiliarycameramode = 'photo';
     }
 
     if (json.identification !== undefined) {
@@ -501,7 +492,6 @@ M.availability_proctor.form.getNode = function(json) {
 
     node.delegate('valuechange', function() {
         setSchedulingState();
-        setAuxCameraModeState();
     }, '#'+modeId);
 
     tabButtonOne.on('click', function(e) {
@@ -516,8 +506,6 @@ M.availability_proctor.form.getNode = function(json) {
         e.preventDefault();
         switchMoreLessState(e.target);
     }, '.proctor-moreless');
-
-    setAuxCameraModeState();
 
     return node;
 };

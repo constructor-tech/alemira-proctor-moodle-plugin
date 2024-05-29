@@ -145,7 +145,7 @@ class condition extends \core_availability\condition {
     public $auxiliarycamera = false;
 
     /** @var string Auxiliary camera mode */
-    public $auxiliarycameramode = 'photo';
+    public $auxiliarycameramode = 'video';
 
     /** @var bool Allow to use multiple displays */
     public $allowmultipledisplays = false;
