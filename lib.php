@@ -24,6 +24,7 @@
 
 use availability_proctor\state;
 use availability_proctor\utils;
+use availability_proctor\hooks;
 
 /**
  * Hooks into head rendering. Adds proctoring fader/shade and accompanying javascript
@@ -33,20 +34,7 @@ use availability_proctor\utils;
  * @return string
  */
 function availability_proctor_before_standard_html_head() {
-    global $DB, $USER;
-
-    // If there is no active attempt, do nothing.
-    if (isset(state::$attempt['attempt_id'])) {
-        $attemptid = state::$attempt['attempt_id'];
-        $attempt = $DB->get_record('quiz_attempts', ['id' => $attemptid]);
-        if (!$attempt || $attempt->state != \quiz_attempt::IN_PROGRESS) {
-            return '';
-        } else {
-            return utils::handle_proctoring_fader($attempt);
-        }
-    } else {
-        return '';
-    }
+    return hooks::before_standard_head_html_generation();
 }
 
 /**

@@ -18,14 +18,16 @@
  * Availability plugin for integration with Proctor by Constructor.
  *
  * @package    availability_proctor
- * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
+ * @copyright  2019-2024 Maksim Burnin <maksim.burnin@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'availability_proctor';
-$plugin->version = 2024110601;
-$plugin->release = 'v2.0';
-$plugin->requires = 2018111800;
-$plugin->maturity = MATURITY_STABLE;
+$callbacks = [
+    [
+        'hook' => \core\hook\output\before_standard_head_html_generation::class,
+        'callback' => 'availability_proctor\hooks::before_standard_head_html_generation',
+        'priority' => 0,
+    ],
+];
