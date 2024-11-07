@@ -88,7 +88,6 @@ class defaults_form extends \moodleform {
             'video' => get_string('auxiliary_camera_mode_video', 'availability_proctor'),
         ]);
 
-
         $mform->addElement('advcheckbox', 'ldb', get_string('enable_ldb',  'availability_proctor'));
         $mform->setType('ldb', PARAM_BOOL);
 
@@ -153,7 +152,7 @@ class defaults_form extends \moodleform {
             $coursename = $value['name'];
             $options = $value['options'];
             $elements = [];
-            foreach($options as $groupid => $group) {
+            foreach ($options as $groupid => $group) {
                 $fieldname = 'groups['.$courseid.']['.$group->id.']';
                 $elements[] = $mform->createElement('checkbox', $fieldname, $group->name);
                 $elements[] = $mform->createElement('html', '<br>');
@@ -171,15 +170,15 @@ class defaults_form extends \moodleform {
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
 
-        if(!empty($data['duration']) && $data['duration'] % 30 != 0) {
+        if (!empty($data['duration']) && $data['duration'] % 30 != 0) {
             $errors['duration'] = get_string('error_setduration', 'availability_proctor');
         }
 
         foreach (condition::SCORING as $key => $field) {
-            if(!empty($data['scoring'][$key])) {
+            if (!empty($data['scoring'][$key])) {
                 $value = $data['scoring'][$key];
 
-                if($value > $field['max'] || $value < $field['min']) {
+                if ($value > $field['max'] || $value < $field['min']) {
                     $error = get_string('error_not_in_range', 'availability_proctor');
                     $errors['scoring[' . $key . ']'] = sprintf($error, $field['min'], $field['max']);
                 }

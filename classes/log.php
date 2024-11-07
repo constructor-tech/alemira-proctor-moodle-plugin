@@ -23,7 +23,7 @@
  */
 
 namespace availability_proctor;
-use \html_writer;
+use html_writer;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -39,17 +39,17 @@ class log {
     protected $entries = [];
 
     /**
-     * @var integer Total count of entries
+     * @var int Total count of entries
      */
     protected $entriescount = null;
 
     /**
-     * @var integer
+     * @var int
      */
     protected $perpage = 30;
 
     /**
-     * @var integer
+     * @var int
      */
     protected $page = 0;
 
@@ -212,7 +212,7 @@ class log {
             get_string('log_review', 'availability_proctor'),
             get_string('score', 'availability_proctor'),
             '',
-            ''
+            '',
         ]);
 
         $table->define_baseurl($this->url);
@@ -281,7 +281,7 @@ class log {
 
                 $detailsurl = new \moodle_url('/availability/condition/proctor/index.php', [
                     'id' => $entry->id,
-                    'action' => 'show'
+                    'action' => 'show',
                 ]);
 
                 $row[] = '<a href="' . $detailsurl . '">' . get_string('details', 'availability_proctor') . '</a>';
@@ -402,7 +402,7 @@ class log {
         $courseusers = get_enrolled_users($context, '', null, 'u.id, ' . get_all_user_name_fields(true, 'u'),
                 null, $limitfrom, $limitnum);
 
-        $users = array();
+        $users = [];
         if ($courseusers) {
             foreach ($courseusers as $courseuser) {
                 $users[$courseuser->id] = fullname($courseuser, has_capability('moodle/site:viewfullnames', $context));
@@ -433,7 +433,7 @@ class log {
         $timemidnight = usergetmidnight($timenow);
 
         // Put today up the top of the list.
-        $dates = array("$timemidnight" => get_string("today").", ".userdate($timenow, $strftimedate) );
+        $dates = ["$timemidnight" => get_string("today").", ".userdate($timenow, $strftimedate)];
 
         // If course is empty, get it from frontpage.
         $course = $SITE;
@@ -496,8 +496,8 @@ class log {
                 'vertical-align: middle',
                 'font-size:inherit',
                 'height: 2.5rem',
-                'margin-right: 0.5rem'
-            ])
+                'margin-right: 0.5rem',
+            ]),
         ]);
 
         // Add status selector.
@@ -506,7 +506,7 @@ class log {
             "status",
             $status,
             get_string('allstatuses', 'availability_proctor'),
-            ['style' => 'height: 2.5rem;margin-right: 0.5rem']
+            ['style' => 'height: 2.5rem;margin-right: 0.5rem'],
         );
 
         // Add date selector.
@@ -539,7 +539,7 @@ class log {
                 'href' => '#',
                 'title' => get_string('calendar', 'calendar'),
                 'class' => 'visibleifjs',
-                'name' => 'from[calendar]'
+                'name' => 'from[calendar]',
             ]);
             echo $OUTPUT->pix_icon('i/calendar', get_string('calendar', 'calendar') , 'moodle');
             echo html_writer::end_tag('a');
@@ -564,7 +564,7 @@ class log {
                 'href' => '#',
                 'title' => get_string('calendar', 'calendar'),
                 'class' => 'visibleifjs',
-                'name' => 'to[calendar]'
+                'name' => 'to[calendar]',
             ]);
             echo $OUTPUT->pix_icon('i/calendar', get_string('calendar', 'calendar') , 'moodle');
             echo html_writer::end_tag('a');
@@ -574,7 +574,7 @@ class log {
         echo html_writer::empty_tag('input', [
             'type' => 'submit',
             'value' => get_string('apply_filter', 'availability_proctor'),
-            'class' => 'btn btn-secondary'
+            'class' => 'btn btn-secondary',
         ]);
 
         echo html_writer::end_div();

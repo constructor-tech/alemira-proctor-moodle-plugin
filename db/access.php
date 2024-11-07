@@ -29,14 +29,14 @@ $capabilities = [
         'riskbitmask' => RISK_PERSONAL | RISK_CONFIG,
         'captype' => 'write',
         'contextlevel' => CONTEXT_SYSTEM,
-        'archetypes' => []
+        'archetypes' => [],
     ],
 
     'availability/proctor:logaccess_all' => [
         'riskbitmask' => RISK_PERSONAL | RISK_CONFIG,
         'captype' => 'write',
         'contextlevel' => CONTEXT_SYSTEM,
-        'archetypes' => []
+        'archetypes' => [],
     ],
 
     'availability/proctor:logaccess_course' => [
@@ -46,7 +46,7 @@ $capabilities = [
         'archetypes' => [
             'teacher' => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW,
-        ]
+        ],
     ],
 
 ];

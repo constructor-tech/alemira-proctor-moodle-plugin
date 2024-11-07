@@ -33,7 +33,7 @@ require_once($CFG->libdir . '/tablelib.php');
  */
 class log_details {
     /**
-     * @var integer Entry id
+     * @var int Entry id
      */
     protected $id = null;
 
@@ -44,7 +44,7 @@ class log_details {
 
     /**
      * Constructor
-     * @param integer $id Entry id
+     * @param int $id Entry id
      * @param string $url
      */
     public function __construct($id, $url) {
@@ -164,27 +164,27 @@ class log_details {
 
         $table->add_data([
             'accesscode',
-            $entry->accesscode
+            $entry->accesscode,
         ]);
 
         $table->add_data([
             get_string('date_modified', 'availability_proctor'),
-            common::format_date($entry->timemodified)
+            common::format_date($entry->timemodified),
         ]);
 
         $table->add_data([
             get_string('time_scheduled', 'availability_proctor'),
-            common::format_date($entry->timescheduled)
+            common::format_date($entry->timescheduled),
         ]);
 
         $table->add_data([
             get_string('username'),
-            $user->username
+            $user->username,
         ]);
 
         $table->add_data([
             get_string('user'),
-            $user->firstname . " " . $user->lastname . "<br>" . $user->email
+            $user->firstname . " " . $user->lastname . "<br>" . $user->email,
         ]);
 
         $table->add_data([
@@ -268,7 +268,7 @@ class log_details {
                 (isset($warning['type']) ? $warning['type'] : ''),
                 (isset($warning['title']) ? $warning['title'] : ''),
                 (isset($warning['start']) ? common::format_date($warning['start']) : ''),
-                (isset($warning['end']) ? common::format_date($warning['end']) : '')
+                (isset($warning['end']) ? common::format_date($warning['end']) : ''),
             ]);
         }
 

@@ -58,7 +58,7 @@ class observers {
             return;
         }
 
-        if(!$condition->user_in_proctored_groups($USER->id)) {
+        if (!$condition->user_in_proctored_groups($USER->id)) {
             return;
         }
 
@@ -137,7 +137,7 @@ class observers {
             'userid' => $userid,
             'courseid' => $event->courseid,
             'cmid' => $cmid,
-            'status' => "started"
+            'status' => "started",
         ], '-id');
 
         if (!empty($accesscode)) {
@@ -186,7 +186,7 @@ class observers {
 
         common::reset_entry([
             'cmid' => $cm->id,
-            'attemptid' => $attempt->id
+            'attemptid' => $attempt->id,
         ]);
     }
 

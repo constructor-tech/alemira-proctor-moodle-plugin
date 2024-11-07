@@ -84,7 +84,7 @@ class frontend extends \core_availability\frontend {
         $defaults = common::get_default_proctoring_settings();
 
         $groupdefaults = [];
-        if(isset($defaults->groups)) {
+        if (isset($defaults->groups)) {
             $groupdefaults = (array)$defaults->groups;
             $coursekey = (int)$course->id;
             $groupdefaults = isset($groupdefaults[$coursekey]) ? $groupdefaults[$coursekey] : [];

@@ -23,7 +23,7 @@
  */
 
 namespace availability_proctor;
-use \stdClass;
+use stdClass;
 use availability_proctor\condition;
 
 /**
@@ -47,7 +47,7 @@ class common {
             'userid' => $entry->userid,
             'courseid' => $entry->courseid,
             'cmid' => $entry->cmid,
-            'status' => 'new'
+            'status' => 'new',
         ], '-timecreated');
         $entry = reset($entries);
         return $entry;
@@ -145,7 +145,7 @@ class common {
                 'userid' => $oldentry->userid,
                 'courseid' => $oldentry->courseid,
                 'cmid' => $oldentry->cmid,
-                'status' => 'new'
+                'status' => 'new',
             ]);
 
             if (count($entries) == 0 || $force) {
@@ -187,7 +187,7 @@ class common {
         $condition = [
             'userid' => $userid,
             'courseid' => $courseid,
-            'status' => 'new'
+            'status' => 'new',
         ];
 
         if (!empty($cmid)) {
@@ -301,13 +301,23 @@ class common {
 
     }
 
+    /**
+     * Gets default proctoring settings from config
+     *
+     * @return stdClass
+     **/
     public static function get_default_proctoring_settings() {
         $json = get_config('availability_proctor', 'default_proctoring_settings');
         $json = empty($json) ? '{}' : $json;
         return json_decode($json);
     }
 
-    public static function set_default_proctoring_settings($data){
+    /**
+     * Set default proctoring settings from config
+     *
+     * @return void
+     **/
+    public static function set_default_proctoring_settings($data) {
         $json = json_encode($data);
         set_config('default_proctoring_settings', $json, 'availability_proctor');
     }

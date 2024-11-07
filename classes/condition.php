@@ -101,9 +101,12 @@ class condition extends \core_availability\condition {
         'biometryskipfail' => false,
     ];
 
+    /** @var array List of possible calculator options */
     const CALCULATOR_OPTIONS = [
         'off', 'scientific', 'simple',
     ];
+
+    /** @var array List of possible aux camera options */
     const AUX_CAMERA_MODES = [
         'photo', 'video',
     ];
@@ -313,7 +316,7 @@ class condition extends \core_availability\condition {
             }
         }
 
-        if (!in_array($this->calculator, self::CALCULATOR_OPTIONS)){
+        if (!in_array($this->calculator, self::CALCULATOR_OPTIONS)) {
             $this->calculator = 'off';
         }
 
@@ -458,7 +461,7 @@ class condition extends \core_availability\condition {
      * to has_examus_condition, or maybe something else.
      *
      * @param \cm_info $cm Cm
-     * @params int $userid userid
+     * @return int $userid userid
      */
     public function user_in_proctored_groups($userid) {
         global $DB;
@@ -468,7 +471,7 @@ class condition extends \core_availability\condition {
         }
 
         // Validate that groups are still there.
-        [$insql, $inparams] = $DB-> get_in_or_equal($groups);
+        [$insql, $inparams] = $DB->get_in_or_equal($groups);
         $groups = $DB->get_fieldset_select('groups', 'id', 'id ' . $insql, $inparams);
         if (empty($groups)) {
             return true;

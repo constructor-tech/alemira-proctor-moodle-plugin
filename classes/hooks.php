@@ -38,7 +38,7 @@ class hooks {
      *                                                                     be used.
      * @return string|void The legacy implementation will return a string, the hook implementation will return nothing.
      */
-    public static function before_standard_head_html_generation($hook = null){
+    public static function before_standard_head_html_generation($hook = null) {
         global $DB, $USER;
 
         $html = '';

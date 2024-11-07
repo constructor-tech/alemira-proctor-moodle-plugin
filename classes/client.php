@@ -58,7 +58,7 @@ class client {
         'tr' => 'tr',
         'vi' => 'vi',
         'zh_cn' => 'zh-cn',
-        'zh' => 'zh-cn'
+        'zh' => 'zh-cn',
     ];
 
     /** @var string Secret key for signing JWT token */
