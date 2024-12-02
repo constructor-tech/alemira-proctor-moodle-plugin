@@ -37,7 +37,8 @@ M.availability_proctor.form.getNode = function(json) {
     var allowmultipledisplaysId = id + '_allowmultipledisplays';
     var allowvirtualenvironmentId = id + '_allowvirtualenvironment';
     var checkidphotoqualityId = id + '_checkidphotoquality';
-    var enableSecurebrowserId = id + '_securebrowser';
+    var enableSecureBrowserId = id + '_secureBrowser';
+    var secureBrowserLevelId = id + '_secureBrowserLevel';
     var biometryEnabledId = id + '_biometryEnabled';
     var biometrySkipfailId = id + '_biometrySkipfail';
     var biometryFlowId = id + '_biometryFlow';
@@ -184,9 +185,17 @@ M.availability_proctor.form.getNode = function(json) {
         '</select>'
     );
 
-    html += formGroup(enableSecurebrowserId, getString('enable_securebrowser'),
-        '<input type="checkbox" name="securebrowser" id="' + enableSecurebrowserId + '" value="1">&nbsp;' +
-        '<label for="' + enableSecurebrowserId + '">' + getString('enable') + '</label> '
+    html += formGroup(enableSecureBrowserId, getString('enable_securebrowser'),
+        '<input type="checkbox" name="securebrowser" id="' + enableSecureBrowserId + '" value="1">&nbsp;' +
+        '<label for="' + enableSecureBrowserId + '">' + getString('enable') + '</label> '
+    );
+
+    html += formGroup(secureBrowserLevelId, getString('secure_browser_level'),
+        '<select name="securebrowserlevel" id="' + secureBrowserLevelId + '" class="custom-select">' +
+        '  <option value="basic">' + getString('secure_browser_level_basic') + '</option>' +
+        '  <option value="medium">' + getString('secure_browser_level_medium') + '</option>' +
+        '  <option value="high">' + getString('secure_browser_level_high') + '</option>' +
+        '</select>'
     );
 
     html += formGroup(allowmultipledisplaysId, getString('allowmultipledisplays'),
@@ -383,8 +392,8 @@ M.availability_proctor.form.getNode = function(json) {
         node.one('select[name=auxiliarycameramode] option[value=' + json.auxiliarycameramode + ']').set('selected', 'selected');
     }
 
-    if (json.ldb !== undefined) {
-        node.one('#' + enableLdbId).set('checked', json.ldb ? 'checked' : null);
+    if (json.securebrowser !== undefined) {
+        node.one('#' + enableSecureBrowserId).set('checked', json.securebrowser ? 'checked' : null);
     }
 
     if (json.scheduling_required !== undefined) {
@@ -421,6 +430,10 @@ M.availability_proctor.form.getNode = function(json) {
 
     if (json.calculator !== undefined) {
         node.one('select[name=calculator] option[value=' + json.calculator + ']').set('selected', 'selected');
+    }
+
+    if (json.securebrowserlevel !== undefined) {
+        node.one('select[name=securebrowserlevel] option[value=' + json.securebrowserlevel + ']').set('selected', 'selected');
     }
 
     // Setting hardcoded defaults when no user-defined exist.
@@ -522,6 +535,7 @@ M.availability_proctor.form.fillValue = function(value, node) {
     value.auxiliarycamera = node.one('input[name=auxiliarycamera]').get('checked');
     value.auxiliarycameramode = node.one('select[name=auxiliarycameramode]').get('value').trim();
     value.securebrowser = node.one('input[name=securebrowser]').get('checked');
+    value.securebrowserlevel = node.one('select[name=securebrowserlevel]').get('value').trim();
     value.allowmultipledisplays = node.one('input[name=allowmultipledisplays]').get('checked');
     value.allowvirtualenvironment = node.one('input[name=allowvirtualenvironment]').get('checked');
     value.checkidphotoquality = node.one('input[name=checkidphotoquality]').get('checked');

@@ -88,8 +88,14 @@ class defaults_form extends \moodleform {
             'video' => get_string('auxiliary_camera_mode_video', 'availability_proctor'),
         ]);
 
-        $mform->addElement('advcheckbox', 'securebrowser', get_string('enable_ldb',  'availability_proctor'));
+        $mform->addElement('advcheckbox', 'securebrowser', get_string('enable_secure_browser',  'availability_proctor'));
         $mform->setType('securebrowser', PARAM_BOOL);
+        $mform->addElement('select', 'securebrowserlevel', get_string('secure_browser_level', 'availability_proctor'), [
+            '' => '',
+            'basic' => get_string('secure_browser_level_basic', 'availability_proctor'),
+            'medium' => get_string('secure_browser_level_medium', 'availability_proctor'),
+            'high' => get_string('secure_browser_level_high', 'availability_proctor'),
+        ]);
 
         $mform->addElement('advcheckbox', 'allowmultipledisplays', get_string('allowmultipledisplays',  'availability_proctor'));
         $mform->setType('allowmultipledisplays', PARAM_BOOL);

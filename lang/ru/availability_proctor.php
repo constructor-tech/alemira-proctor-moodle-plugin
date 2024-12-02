@@ -101,7 +101,12 @@ $string['auxiliary_camera_mode'] = 'Режим второй камеры';
 $string['auxiliary_camera_mode_photo'] = 'Фото';
 $string['auxiliary_camera_mode_video'] = 'Видео';
 
-$string['enable_securebrowser'] = 'Использовать защищенный браузер';
+$string['enable_secure_browser'] = 'Использовать защищенный браузер';
+$string['secure_browser_level'] = 'Режим защищенного браузера';
+$string['secure_browser_level_basic'] = 'Базовый';
+$string['secure_browser_level_medium'] = 'Средний';
+$string['secure_browser_level_high'] = 'Высокий';
+
 $string['allowmultipledisplays'] = 'Разрешить использование второго монитора';
 $string['allowvirtualenvironment'] = 'Разрешить использовать виртуальные машины';
 $string['checkidphotoquality'] = 'Проверять качество фото паспорта';

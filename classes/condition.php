@@ -42,7 +42,8 @@ class condition extends \core_availability\condition {
     const PROPS = [
         'duration', 'mode', 'schedulingrequired', 'autorescheduling',
         'istrial', 'identification', 'useragreementurl',
-        'securebrowser', 'allowmultipledisplays', 'allowvirtualenvironment',
+        'securebrowser', 'securebrowserlevel',
+        'allowmultipledisplays', 'allowvirtualenvironment',
         'checkidphotoquality', 'webcameramainview',
         'scoring', 'warnings', 'rules', 'customrules', 'groups',
         'biometryenabled', 'biometryskipfail', 'biometryflow', 'biometrytheme',
@@ -164,8 +165,11 @@ class condition extends \core_availability\condition {
     /** @var bool Check the quality of ID photo */
     public $checkidphotoquality = false;
 
-    /** @var string Lockdown browser */
+    /** @var bool Secure browser enabled */
     public $securebrowser = false;
+
+    /** @var string Secure browser level of security */
+    public $securebrowserlevel = 'basic';
 
     /** @var calculator */
     public $calculator = 'off';
@@ -205,6 +209,10 @@ class condition extends \core_availability\condition {
 
         if (!empty($structure->mode)) {
             $this->mode = $structure->mode;
+        }
+
+        if (!empty($structure->securebrowserlevel)) {
+            $this->securebrowserlevel = $structure->securebrowserlevel;
         }
 
         if (!empty($structure->webcameramainview)) {
@@ -282,7 +290,7 @@ class condition extends \core_availability\condition {
     }
 
     /**
-     * Validates values of interal structtures, vlamps scoring values to min/max
+     * Validates values of interal structures, clamps scoring values to min/max
      *
      * @return null
      */
@@ -435,6 +443,8 @@ class condition extends \core_availability\condition {
             'auxiliarycameramode' => (string) $this->auxiliarycameramode,
             'customrules' => $this->customrules,
             'calculator' => $this->calculator,
+            'securebrowser' => $this->securebrowser,
+            'securebrowserlevel' => $this->securebrowserlevel,
         ];
     }
 
