@@ -42,7 +42,7 @@ class condition extends \core_availability\condition {
     const PROPS = [
         'duration', 'mode', 'schedulingrequired', 'autorescheduling',
         'istrial', 'identification', 'useragreementurl',
-        'ldb', 'allowmultipledisplays', 'allowvirtualenvironment',
+        'securebrowser', 'allowmultipledisplays', 'allowvirtualenvironment',
         'checkidphotoquality', 'webcameramainview',
         'scoring', 'warnings', 'rules', 'customrules', 'groups',
         'biometryenabled', 'biometryskipfail', 'biometryflow', 'biometrytheme',
@@ -92,7 +92,7 @@ class condition extends \core_availability\condition {
     const BOOL_DEFAULTS = [
         'autorescheduling' => false,
         'istrial' => false,
-        'ldb' => false,
+        'securebrowser' => false,
         'auxiliarycamera' => false,
         'allowmultipledisplays' => false,
         'allowvirtualenvironment' => false,
@@ -109,6 +109,11 @@ class condition extends \core_availability\condition {
     /** @var array List of possible aux camera options */
     const AUX_CAMERA_MODES = [
         'photo', 'video',
+    ];
+
+    /** @var array List of possible aux camera options */
+    const SECURE_BROWSER_LEVELS = [
+        'basic', 'medium', 'high'
     ];
 
     /** @var int Exam duration */
@@ -160,7 +165,7 @@ class condition extends \core_availability\condition {
     public $checkidphotoquality = false;
 
     /** @var string Lockdown browser */
-    public $ldb = false;
+    public $securebrowser = false;
 
     /** @var calculator */
     public $calculator = 'off';

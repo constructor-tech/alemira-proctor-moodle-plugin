@@ -101,7 +101,7 @@ $string['auxiliary_camera_mode'] = 'Режим второй камеры';
 $string['auxiliary_camera_mode_photo'] = 'Фото';
 $string['auxiliary_camera_mode_video'] = 'Видео';
 
-$string['enable_ldb'] = 'Использовать защищенный браузер';
+$string['enable_securebrowser'] = 'Использовать защищенный браузер';
 $string['allowmultipledisplays'] = 'Разрешить использование второго монитора';
 $string['allowvirtualenvironment'] = 'Разрешить использовать виртуальные машины';
 $string['checkidphotoquality'] = 'Проверять качество фото паспорта';

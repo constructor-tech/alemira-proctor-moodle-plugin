@@ -256,7 +256,7 @@ class client {
             'auxiliaryCameraMode' => $conditiondata['auxiliarycameramode'],
             'scoreConfig' => $scoring,
             'visibleWarnings' => $conditiondata['warnings'],
-            'ldb' => $conditiondata['ldb'],
+            'securebrowser' => $conditiondata['securebrowser'],
             'allowMultipleDisplays' => $conditiondata['allowmultipledisplays'],
             'allowVirtualEnvironment' => $conditiondata['allowvirtualenvironment'],
             'checkIdPhotoQuality' => $conditiondata['checkidphotoquality'],

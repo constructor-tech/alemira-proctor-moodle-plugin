@@ -37,7 +37,7 @@ M.availability_proctor.form.getNode = function(json) {
     var allowmultipledisplaysId = id + '_allowmultipledisplays';
     var allowvirtualenvironmentId = id + '_allowvirtualenvironment';
     var checkidphotoqualityId = id + '_checkidphotoquality';
-    var enableLdbId = id + '_ldb';
+    var enableSecurebrowserId = id + '_securebrowser';
     var biometryEnabledId = id + '_biometryEnabled';
     var biometrySkipfailId = id + '_biometrySkipfail';
     var biometryFlowId = id + '_biometryFlow';
@@ -184,9 +184,9 @@ M.availability_proctor.form.getNode = function(json) {
         '</select>'
     );
 
-    html += formGroup(enableLdbId, getString('enable_ldb'),
-        '<input type="checkbox" name="ldb" id="' + enableLdbId + '" value="1">&nbsp;' +
-        '<label for="' + enableLdbId + '">' + getString('enable') + '</label> '
+    html += formGroup(enableSecurebrowserId, getString('enable_securebrowser'),
+        '<input type="checkbox" name="securebrowser" id="' + enableSecurebrowserId + '" value="1">&nbsp;' +
+        '<label for="' + enableSecurebrowserId + '">' + getString('enable') + '</label> '
     );
 
     html += formGroup(allowmultipledisplaysId, getString('allowmultipledisplays'),
@@ -232,7 +232,7 @@ M.availability_proctor.form.getNode = function(json) {
     var groupOptions = '';
     for (var i in this.groups) {
         var group = this.groups[i];
-        groupOptions += '<br>'
+        groupOptions += //'<br>'
             + '<label>'
             + '<input value=' + group.id + ' type="checkbox" name="proctoring-groups[' + group.id + ']">'
             + '&nbsp;' + group.name
@@ -521,7 +521,7 @@ M.availability_proctor.form.fillValue = function(value, node) {
     value.useragreementurl = node.one('input[name=useragreementurl]').get('value').trim();
     value.auxiliarycamera = node.one('input[name=auxiliarycamera]').get('checked');
     value.auxiliarycameramode = node.one('select[name=auxiliarycameramode]').get('value').trim();
-    value.ldb = node.one('input[name=ldb]').get('checked');
+    value.securebrowser = node.one('input[name=securebrowser]').get('checked');
     value.allowmultipledisplays = node.one('input[name=allowmultipledisplays]').get('checked');
     value.allowvirtualenvironment = node.one('input[name=allowvirtualenvironment]').get('checked');
     value.checkidphotoquality = node.one('input[name=checkidphotoquality]').get('checked');

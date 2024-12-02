@@ -101,7 +101,7 @@ $string['auxiliary_camera_mode'] = 'Secondary camera mode';
 $string['auxiliary_camera_mode_photo'] = 'Photo';
 $string['auxiliary_camera_mode_video'] = 'Video';
 
-$string['enable_ldb'] = 'Require Secure Browser';
+$string['enable_securebrowser'] = 'Require Secure Browser';
 $string['allowmultipledisplays'] = 'Allow multiple displays';
 $string['allowvirtualenvironment'] = 'Virtual machine accesss';
 $string['checkidphotoquality'] = 'Assess ID photo quality';
