@@ -145,7 +145,7 @@ class defaults_form extends \moodleform {
         $mform->addElement('header', 'biometry_header', get_string('biometry_header', 'availability_proctor'));
 
         $mform->addElement('advcheckbox', 'biometryenabled', get_string('biometry_enabled', 'availability_proctor'));
-        $mform->setType('advcheckbox', PARAM_BOOL);
+        $mform->setType('biometryenabled', PARAM_BOOL);
         $mform->addElement('advcheckbox', 'biometryskipfail', get_string('biometry_skipfail', 'availability_proctor'));
         $mform->setType('biometryskipfail', PARAM_BOOL);
         $mform->addElement('text', 'biometryflow', get_string('biometry_flow', 'availability_proctor'));
