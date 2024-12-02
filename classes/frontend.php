@@ -54,6 +54,7 @@ class frontend extends \core_availability\frontend {
             'biometry_theme',
             'auxiliary_camera', 'auxiliary_camera_mode', 'auxiliary_camera_mode_photo',
             'auxiliary_camera_mode_video',
+            'allowed_processes', 'forbidden_processes',
         ];
 
         foreach (condition::WARNINGS as $key => $value) {

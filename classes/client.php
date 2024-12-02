@@ -263,6 +263,8 @@ class client {
             'checkIdPhotoQuality' => $conditiondata['checkidphotoquality'],
             'webCameraMainView' => $conditiondata['webcameramainview'],
             'calculator' => $conditiondata['calculator'],
+            'desktopAppForbiddenProcesses' => $conditiondata['forbiddenprocesses'],
+            'desktopAppAllowedProcesses' => $conditiondata['allowedprocesses'],
             'rules' => array_merge(
                 (array)$conditiondata['rules'],
                 ['custom_rules' => $customrules]

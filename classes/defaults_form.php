@@ -96,6 +96,8 @@ class defaults_form extends \moodleform {
             'medium' => get_string('secure_browser_level_medium', 'availability_proctor'),
             'high' => get_string('secure_browser_level_high', 'availability_proctor'),
         ]);
+        $mform->addElement('textarea', 'allowedprocesses', get_string('allowed_processes', 'availability_proctor'));
+        $mform->addElement('textarea', 'forbiddenprocesses', get_string('forbidden_processes', 'availability_proctor'));
 
         $mform->addElement('advcheckbox', 'allowmultipledisplays', get_string('allowmultipledisplays',  'availability_proctor'));
         $mform->setType('allowmultipledisplays', PARAM_BOOL);

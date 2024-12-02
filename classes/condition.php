@@ -48,6 +48,7 @@ class condition extends \core_availability\condition {
         'scoring', 'warnings', 'rules', 'customrules', 'groups',
         'biometryenabled', 'biometryskipfail', 'biometryflow', 'biometrytheme',
         'calculator', 'auxiliarycamera', 'auxiliarycameramode',
+        'forbiddenprocesses', 'allowedprocesses',
     ];
 
     /** @var array List of default values for visible warnings */

@@ -106,6 +106,8 @@ $string['secure_browser_level'] = 'Secure Browser level';
 $string['secure_browser_level_basic'] = 'Basic';
 $string['secure_browser_level_medium'] = 'Medium';
 $string['secure_browser_level_high'] = 'High';
+$string['allowed_processes'] = 'Allowed processes';
+$string['forbidden_processes'] = 'Forbidden processes';
 
 $string['allowmultipledisplays'] = 'Allow multiple displays';
 $string['allowvirtualenvironment'] = 'Virtual machine accesss';

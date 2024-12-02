@@ -46,6 +46,8 @@ M.availability_proctor.form.getNode = function(json) {
     var userAgreementId = id + '_userAgreement';
     var webCameraMainViewId = id + '_webCameraMainView';
     var calculatorId = id + '_calculator';
+    var allowedProcessesId = id + '_allowedProcesses';
+    var forbiddenProcessesId = id + '_forbiddenProcesses';
 
     var tabButtonOne, tabButtonTwo, tabOne, tabTwo;
 
@@ -185,7 +187,7 @@ M.availability_proctor.form.getNode = function(json) {
         '</select>'
     );
 
-    html += formGroup(enableSecureBrowserId, getString('enable_securebrowser'),
+    html += formGroup(enableSecureBrowserId, getString('enable_secure_browser'),
         '<input type="checkbox" name="securebrowser" id="' + enableSecureBrowserId + '" value="1">&nbsp;' +
         '<label for="' + enableSecureBrowserId + '">' + getString('enable') + '</label> '
     );
@@ -233,7 +235,7 @@ M.availability_proctor.form.getNode = function(json) {
     var ruleOptions = '';
     for (var key in this.rules) {
         var keyId = id + '_' + key;
-        ruleOptions += '<br><input type="checkbox" name="' + key + '" id="' + keyId + '" value="' + key + '" >&nbsp;';
+        ruleOptions += '<input type="checkbox" name="' + key + '" id="' + keyId + '" value="' + key + '" >&nbsp;';
         ruleOptions += '<label for="' + keyId + '" style="white-space: break-spaces">' + getString(key) + '</label>';
     }
     html += formGroup(null, getString('rules'), '<div class="rules" style="white-space:nowrap">' + ruleOptions + '</div>');
@@ -247,8 +249,17 @@ M.availability_proctor.form.getNode = function(json) {
             + '&nbsp;' + group.name
             + '</label>';
     }
-    html += formGroup(null, getString('select_groups'), '<div class="groups">' + groupOptions + '</div>');
+    if (groupOptions && groupOptions.length) {
+        html += formGroup(null, getString('select_groups'), '<div class="groups">' + groupOptions + '</div>');
+    }
 
+    html += formGroup(forbiddenProcessesId, getString('forbidden_processes'),
+        '<textarea name="forbiddenprocesses" id="' + forbiddenProcessesId + '" style="width: 100%" class="form-control"></textarea>'
+    );
+
+    html += formGroup(allowedProcessesId, getString('allowed_processes'),
+        '<textarea name="allowedprocesses" id="' + allowedProcessesId + '" style="width: 100%" class="form-control"></textarea>'
+    );
 
     var warningOptions = '';
     for (var wkey in this.warnings) {
@@ -489,6 +500,14 @@ M.availability_proctor.form.getNode = function(json) {
         node.one('#' + userAgreementId).set('value', json.useragreementurl);
     }
 
+    if (json.forbiddenprocesses !== undefined) {
+        node.one('#' + forbiddenProcessesId).set('value', json.forbiddenprocesses);
+    }
+
+    if (json.allowedprocesses !== undefined) {
+        node.one('#' + allowedProcessesId).set('value', json.allowedprocesses);
+    }
+
     node.delegate('valuechange', function() {
         nextTick(function() {
             M.core_availability.form.update();
@@ -540,6 +559,8 @@ M.availability_proctor.form.fillValue = function(value, node) {
     value.allowvirtualenvironment = node.one('input[name=allowvirtualenvironment]').get('checked');
     value.checkidphotoquality = node.one('input[name=checkidphotoquality]').get('checked');
     value.calculator = node.one('select[name=calculator]').get('value').trim();
+    value.allowedprocesses = node.one('textarea[name=allowedprocesses]').get('value').trim();
+    value.forbiddenprocesses = node.one('textarea[name=forbiddenprocesses]').get('value').trim();
 
     value.biometryenabled = node.one('input[name=biometryenabled]').get('checked');
     value.biometryskipfail = node.one('input[name=biometryskipfail]').get('checked');
