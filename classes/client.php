@@ -187,7 +187,7 @@ class client {
     public function request($method, $sessionid = null, $sessionmethod = null, $body = []) {
         $key = $this->jwtsecret;
         $url = $this->api_url($method, $sessionid, $sessionmethod);
-        $payload = ['exp' => time() + 30];
+        $payload = ['exp' => time() + (5 * 60)];
         $jwt = \Firebase\JWT\JWT::encode($payload, $key, 'HS256');
 
         $jsondata = json_encode($body);
