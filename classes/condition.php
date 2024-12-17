@@ -190,6 +190,12 @@ class condition extends \core_availability\condition {
     /** @var string List of custom rules */
     public $customrules = null;
 
+    /** @var array List of allowed processes */
+    public $allowedprocesses = null;
+
+    /** @var array List of forbidden processes */
+    public $forbiddenprocesses = null;
+
     /** @var array Apply condition to specified groups */
     public $groups = [];
 
@@ -287,6 +293,14 @@ class condition extends \core_availability\condition {
             $this->auxiliarycameramode = $structure->auxiliarycameramode;
         }
 
+        if (!empty($structure->allowedprocesses)) {
+            $this->allowedprocesses = $structure->allowedprocesses;
+        }
+
+        if (!empty($structure->forbiddenprocesses)) {
+            $this->forbiddenprocesses = $structure->forbiddenprocesses;
+        }
+
         $this->validate();
     }
 
@@ -379,6 +393,18 @@ class condition extends \core_availability\condition {
             $result['rules'] = [];
         }
 
+        $allowedprocesses = $result['allowedprocesses'];
+        $allowedprocesses = is_string($allowedprocesses) ? trim($allowedprocesses) : '';
+        $allowedprocesses = preg_split('/\R+/', $allowedprocesses);
+        $allowedprocesses = array_filter($allowedprocesses);
+        $result['allowedprocesses'] = empty($allowedprocesses) ? null : $allowedprocesses;
+
+        $forbiddenprocesses = $result['forbiddenprocesses'];
+        $forbiddenprocesses = is_string($forbiddenprocesses) ? trim($forbiddenprocesses) : '';
+        $forbiddenprocesses = preg_split('/\R+/', $forbiddenprocesses);
+        $forbiddenprocesses = array_filter($forbiddenprocesses);
+        $result['forbiddenprocesses'] = empty($forbiddenprocesses) ? null : $forbiddenprocesses;
+
         return $result;
     }
 
@@ -446,6 +472,8 @@ class condition extends \core_availability\condition {
             'calculator' => $this->calculator,
             'securebrowser' => $this->securebrowser,
             'securebrowserlevel' => $this->securebrowserlevel,
+            'allowedprocesses' => $this->allowedprocesses,
+            'forbiddenprocesses' => $this->forbiddenprocesses,
         ];
     }
 

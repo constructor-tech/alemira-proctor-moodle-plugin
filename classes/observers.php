@@ -28,6 +28,7 @@ use availability_proctor\state;
 use availability_proctor\client;
 use availability_proctor\common;
 use availability_proctor\condition;
+use availability_proctor\utils;
 
 class observers {
     /**
@@ -150,7 +151,7 @@ class observers {
         }
 
         // We want to let previews to happen without proctoring.
-        $quizobj = \quiz::create($cm->instance, $userid);
+        $quizobj = utils::quiz_settings_classname()::create($cm->instance, $userid);
         if ($quizobj->is_preview_user()) {
             return;
         }

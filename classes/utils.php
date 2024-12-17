@@ -28,6 +28,10 @@ namespace availability_proctor;
  * Utils class
  */
 class utils {
+    public static function quiz_settings_classname(){
+        return class_exists('\mod_quiz\quiz_settings') ? '\mod_quiz\quiz_settings' : 'quiz';
+    }
+
     /**
      * Provides logict for proctoring fader, exist as soon a possible if
      * no protection is reqired.
@@ -50,7 +54,7 @@ class utils {
         }
 
         // We want to let previews to happen without proctoring.
-        $quizobj = \quiz::create($cm->instance, $USER->id);
+        $quizobj = static::quiz_settings_classname()::create($cm->instance, $USER->id);
         if ($quizobj->is_preview_user()) {
             return '';
         }
@@ -122,7 +126,7 @@ class utils {
         }
 
         // We want to let previews to happen without proctoring.
-        $quizobj = \quiz::create($cminfo->instance, $user->id);
+        $quizobj = static::quiz_settings_classname()::create($cminfo->instance, $user->id);
         if ($quizobj->is_preview_user()) {
             return;
         }
