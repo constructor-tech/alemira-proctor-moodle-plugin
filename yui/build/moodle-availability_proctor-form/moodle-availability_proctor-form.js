@@ -133,6 +133,8 @@ M.availability_proctor.form.getNode = function(json) {
         }
     }
 
+    var optionStyle = 'white-space: break-spaces; display:flex; align-items: baseline; justify-content: flex-start;';
+
     html = formGroup(durationId, getString('duration'),
         '<input type="text" name="duration" id="' + durationId + '" class="form-control">'
     );
@@ -203,18 +205,21 @@ M.availability_proctor.form.getNode = function(json) {
     );
 
     html += formGroup(allowmultipledisplaysId, getString('allowmultipledisplays'),
+        '<label for="' + allowmultipledisplaysId + '">' +
         '<input type="checkbox" name="allowmultipledisplays" id="' + allowmultipledisplaysId + '" value="1">&nbsp;' +
-        '<label for="' + allowmultipledisplaysId + '">' + getString('enable') + '</label> '
+        getString('enable') + '</label> '
     );
 
     html += formGroup(allowvirtualenvironmentId, getString('allowvirtualenvironment'),
+        '<label for="' + allowvirtualenvironmentId + '">' +
         '<input type="checkbox" name="allowvirtualenvironment" id="' + allowvirtualenvironmentId + '" value="1">&nbsp;' +
-        '<label for="' + allowvirtualenvironmentId + '">' + getString('enable') + '</label> '
+         getString('enable') + '</label> '
     );
 
     html += formGroup(checkidphotoqualityId, getString('checkidphotoquality'),
+        '<label for="' + checkidphotoqualityId + '">' +
         '<input type="checkbox" name="checkidphotoquality" id="' + checkidphotoqualityId + '" value="1">&nbsp;' +
-        '<label for="' + checkidphotoqualityId + '">' + getString('enable') + '</label> '
+         getString('enable') + '</label> '
     );
 
     html += formGroup(userAgreementId, getString('user_agreement_url'),
@@ -237,17 +242,18 @@ M.availability_proctor.form.getNode = function(json) {
     var ruleOptions = '';
     for (var key in this.rules) {
         var keyId = id + '_' + key;
-        ruleOptions += '<input type="checkbox" name="' + key + '" id="' + keyId + '" value="' + key + '" >&nbsp;';
-        ruleOptions += '<label for="' + keyId + '" style="white-space: break-spaces">' + getString(key) + '</label>';
+        ruleOptions += '<label for="' + keyId + '" style="' + optionStyle + '">'
+            + '<input type="checkbox" name="' + key + '" id="' + keyId + '" value="' + key + '" >&nbsp;'
+            + getString(key)
+            + '</label>';
     }
     html += formGroup(null, getString('rules'), '<div class="rules" style="white-space:nowrap">' + ruleOptions + '</div>');
 
     var groupOptions = '';
     for (var i in this.groups) {
         var group = this.groups[i];
-        groupOptions += //'<br>'
-            + '<label>'
-            + '<input value=' + group.id + ' type="checkbox" name="proctoring-groups[' + group.id + ']">'
+        groupOptions += '<label  style="' + optionStyle + '">'
+            + '<input value="' + group.id + '" type="checkbox" name="proctoring-groups[' + group.id + ']">'
             + '&nbsp;' + group.name
             + '</label>';
     }
@@ -256,18 +262,24 @@ M.availability_proctor.form.getNode = function(json) {
     }
 
     html += formGroup(forbiddenProcessesId, getString('forbidden_processes'),
-        '<textarea name="forbiddenprocesses" id="' + forbiddenProcessesId + '" style="width: 100%" class="form-control"></textarea>'
+        '<textarea name="forbiddenprocesses" id="' + forbiddenProcessesId + '" style="width: 100%" class="form-control">' +
+        '</textarea>' +
+        '<div class="text-muted">' + getString('processes_list_hint') + '</div>'
     );
 
     html += formGroup(allowedProcessesId, getString('allowed_processes'),
-        '<textarea name="allowedprocesses" id="' + allowedProcessesId + '" style="width: 100%" class="form-control"></textarea>'
+        '<textarea name="allowedprocesses" id="' + allowedProcessesId + '" style="width: 100%" class="form-control">' +
+        '</textarea>' +
+        '<div class="text-muted">' + getString('processes_list_hint') + '</div>'
     );
 
     var warningOptions = '';
     for (var wkey in this.warnings) {
         var wkeyId = id + '_' + wkey;
-        warningOptions += '<input type="checkbox" name="' + wkey + '" id="' + wkeyId + '" value="' + wkey + '" >&nbsp;';
-        warningOptions += '<label for="' + wkeyId + '" style="white-space: break-spaces">' + getString(wkey) + '</label><br>';
+        warningOptions += '<label for="' + wkeyId + '" style="' + optionStyle + '">'
+            + '<input type="checkbox" name="' + wkey + '" id="' + wkeyId + '" value="' + wkey + '" >&nbsp;'
+            + getString(wkey)
+            + '</label>';
     }
 
     var scoringOptions = '';
