@@ -457,7 +457,7 @@ M.availability_proctor.form.getNode = function(json) {
         node.one('select[name=calculator] option[value=' + json.calculator + ']').set('selected', 'selected');
     }
 
-    if (json.securebrowserlevel !== undefined) {
+    if (json.securebrowserlevel !== undefined && json.securebrowserlevel.length > 0) {
         node.one('select[name=securebrowserlevel] option[value=' + json.securebrowserlevel + ']').set('selected', 'selected');
     }
 
