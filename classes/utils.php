@@ -73,7 +73,7 @@ class utils {
             $SESSION->availability_proctor_reset = true;
         }
 
-        $timebracket = common::get_timebracket_for_cm('quiz', $cm);
+        $timebracket = common::get_timebracket_for_cm('quiz', $cm, $USER->id);
         $lang = current_language();
 
         $client = new client($condition);
@@ -174,7 +174,7 @@ class utils {
             return;
         }
 
-        $timebracket = common::get_timebracket_for_cm('quiz', $cminfo);
+        $timebracket = common::get_timebracket_for_cm('quiz', $cminfo, $user->id);
 
         $urlparams = ['proctor_accesscode' => $entry->accesscode];
 

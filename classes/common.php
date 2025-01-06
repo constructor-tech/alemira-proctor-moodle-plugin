@@ -225,10 +225,33 @@ class common {
      * @param \stdClass $cm Course-module
      * @return array start and end time for cm
      */
-    public static function get_timebracket_for_cm($type, $cm) {
-        $timebrackets = self::get_timebrackets_for_cms($type, [$cm]);
-        $timebracket = reset($timebrackets);
-        $timebracket = $timebracket ? $timebracket : [];
+    public static function get_timebracket_for_cm($type, $cm, $userid) {
+        global $DB;
+        $id = $cm->instance;
+
+        $timebracket = [];
+        switch ($type) {
+            case 'quiz':
+                $quiz = $DB->get_record('quiz', [ 'id' => $id ]);
+                quiz_update_effective_access($quiz, $userid);
+                $start = $quiz->timeopen;
+                $end = $quiz->timeclose;
+
+                $timebracket = [ 'start' => $start, 'end' => $end ];
+                break;
+
+            case 'assign':
+                $context = \context_module::instance($cm->id);
+                $assign = new \assign($context, $cm, null);
+                $assign->update_effective_access($userid);
+                $instance = $assign->get_instance($userid);
+
+                $start = $instance->allowsubmissionsfromdate;
+                $end = $instance->duedate;
+
+                $timebracket = [ 'start' => $start, 'end' => $end ];
+                break;
+        }
 
         // Fill the void.
         if (empty($timebracket['start'])) {
@@ -239,52 +262,6 @@ class common {
         }
 
         return $timebracket;
-    }
-
-    /**
-     * Get timebracket for array of CMs of type
-     * @param string $type Type of CM
-     * @param array $cms List of CMs
-     * @return array Two-dimentional array of start and end time for CMs
-     */
-    public static function get_timebrackets_for_cms($type, $cms) {
-        global $DB;
-        $ids = [];
-        $results = [];
-        foreach ($cms as $cm) {
-            $ids[] = $cm->instance;
-        }
-        switch ($type) {
-            case 'quiz':
-                $quizes = $DB->get_records_list('quiz', 'id', $ids);
-                foreach ($quizes as $quiz) {
-                    $start = $quiz->timeopen;
-                    $end = $quiz->timeclose;
-
-                    if ($start == 0 || $end == 0) {
-                        continue;
-                    }
-
-                    $results[$quiz->id] = [ 'start' => $start, 'end' => $end ];
-                }
-                break;
-
-            case 'assign':
-                $assigns = $DB->get_records_list('assign', 'id', $ids);
-                foreach ($assigns as $assign) {
-                    $start = $assign->allowsubmissionsfromdate;
-                    $end = $assign->duedate;
-
-                    if ($start == 0 || $end == 0) {
-                        continue;
-                    }
-
-                    $results[$assign->id] = [ 'start' => $start, 'end' => $end ];
-                }
-                break;
-        }
-
-        return $results;
     }
 
     /**
