@@ -96,7 +96,7 @@ class frontend extends \core_availability\frontend {
             $groupdefaults = isset($groupdefaults[$coursekey]) ? $groupdefaults[$coursekey] : [];
             $groupdefaults = array_keys((array)$groupdefaults);
         }
-        $defaults->groups = $groupdefaults;;
+        $defaults->groups = $groupdefaults;
 
         $groups = $DB->get_records('groups', ['courseid' => $course->id], 'name', 'id,name');
 

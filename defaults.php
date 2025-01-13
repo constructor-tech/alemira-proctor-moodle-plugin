@@ -57,8 +57,8 @@ if ($form->is_cancelled()) {
         if (empty($data->mode)) {
             $data->mode = null;
         }
-        if (empty($data->identification_mode)) {
-            $data->identification_mode = null;
+        if (empty($data->identification)) {
+            $data->identification = null;
         }
         if (empty($data->webcameramainview)) {
             $data->webcameramainview = null;

@@ -60,7 +60,7 @@ class defaults_form extends \moodleform {
             'identification' => get_string('identification_mode', 'availability_proctor'),
         ]);
 
-        $mform->addElement('select', 'identification_mode', get_string('identification', 'availability_proctor'), [
+        $mform->addElement('select', 'identification', get_string('identification', 'availability_proctor'), [
             '' => '',
             'face_and_passport' => get_string('face_passport_identification', 'availability_proctor'),
             'passport' => get_string('passport_identification', 'availability_proctor'),

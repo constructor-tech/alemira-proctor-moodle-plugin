@@ -393,7 +393,7 @@ M.availability_proctor.form.getNode = function(json) {
         node.one('select[name=mode] option[value=' + json.mode + ']').set('selected', 'selected');
     }
 
-    if (json.identification !== undefined) {
+    if (json.identification) {
         node.one('select[name=identification] option[value=' + json.identification + ']').set('selected', 'selected');
     }
 
@@ -458,7 +458,7 @@ M.availability_proctor.form.getNode = function(json) {
         node.one('select[name=calculator] option[value=' + json.calculator + ']').set('selected', 'selected');
     }
 
-    if (json.securebrowserlevel !== undefined && json.securebrowserlevel.length > 0) {
+    if (json.securebrowserlevel) {
         node.one('select[name=securebrowserlevel] option[value=' + json.securebrowserlevel + ']').set('selected', 'selected');
     }
 
