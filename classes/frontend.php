@@ -35,6 +35,10 @@ class frontend extends \core_availability\frontend {
      * @return array
      */
     protected function get_javascript_strings() {
+        global $PAGE;
+        $PAGE->requires->string_for_js('showmore', 'core_form');
+        $PAGE->requires->string_for_js('showless', 'core_form');
+
         $strings = [
             'title', 'error_setduration', 'duration', 'proctoring_mode', 'online_mode',
             'rules', 'offline_mode', 'identification_mode', 'auto_mode', 'allow_to_use_websites',

@@ -89,14 +89,15 @@ M.availability_proctor.form.getNode = function(json) {
     }
 
     function formGroup(id, label, content, fullwidth) {
-        var labelcols = fullwidth ? 10 : 5;
-        var fieldcols = fullwidth ? 10 : 7;
+        var labelcols = fullwidth ? 12 : 5;
+        var fieldcols = fullwidth ? 12 : 7;
+        var flexdir = fullwidth ? 'flex-column' : 'flex-row';
 
-        return '<span class="availability-group form-group mb-2 d-flex">' +
-            '<div class="col-md-' + labelcols + ' col-form-label d-flex pb-0 pr-md-0">' +
+        return '<span class="availability-group form-group mb-2 d-flex ' + flexdir + '">' +
+            '<div class="col-md-' + labelcols + ' col-form-label d-flex pb-0 pl-md-0">' +
             '  <label for="' + id + '">' + label + '</label>' +
             '</div>' +
-            '<div class="col-md-' + fieldcols + ' form-inline align-items-start felement">' +
+            '<div class="col-md-' + fieldcols + ' form-inline align-items-start felement pl-md-0">' +
             content +
             '</div>' +
             '</span>';
