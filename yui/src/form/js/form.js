@@ -202,7 +202,7 @@ M.availability_proctor.form.getNode = function(json) {
         '  <option value="high">' + getString('secure_browser_level_high') + '</option>' +
         '</select>'
     );
-
+    
     html += formGroup(allowmultipledisplaysId, getString('allowmultipledisplays'),
         '<label for="' + allowmultipledisplaysId + '">' +
         '<input type="checkbox" name="allowmultipledisplays" id="' + allowmultipledisplaysId + '" value="1">&nbsp;' +
