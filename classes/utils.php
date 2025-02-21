@@ -32,6 +32,10 @@ class utils {
         return class_exists('\mod_quiz\quiz_settings') ? '\mod_quiz\quiz_settings' : 'quiz';
     }
 
+    public static function quiz_attempt_classname(){
+        return class_exists('\mod_quiz\quiz_attempt') ? '\mod_quiz\quiz_attempt' : 'quiz_attempt';
+    }
+
     /**
      * Provides logict for proctoring fader, exist as soon a possible if
      * no protection is reqired.
@@ -93,7 +97,7 @@ class utils {
         }
 
         $entryisactive = in_array($entry->status, ['started', 'scheduled', 'new']);
-        $attemptinprogess = $attempt && $attempt->state == \quiz_attempt::IN_PROGRESS;
+        $attemptinprogess = $attempt && $attempt->state == utils::quiz_attempt_classname()::IN_PROGRESS;
 
         if ($entryisactive || $attemptinprogess) {
             // We have to pass formdata in any case because exam can be opened outside iframe.

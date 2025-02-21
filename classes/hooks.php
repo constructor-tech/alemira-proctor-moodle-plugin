@@ -47,7 +47,7 @@ class hooks {
         if (isset(state::$attempt['attempt_id'])) {
             $attemptid = state::$attempt['attempt_id'];
             $attempt = $DB->get_record('quiz_attempts', ['id' => $attemptid]);
-            if (!$attempt || $attempt->state != \quiz_attempt::IN_PROGRESS) {
+            if (!$attempt || $attempt->state != utils::quiz_attempt_classname()::IN_PROGRESS) {
                 $html = '';
             } else {
                 $html = utils::handle_proctoring_fader($attempt);
