@@ -139,18 +139,20 @@ class log {
             $value = trim($value);
             switch ($key) {
                 case 'from':
-                    $where[] = '(a.timefinish > :'.$key.' OR a.timefinish IS NULL)';
+                    $where[] = '(a.timefinish > :'.$key.' OR a.timefinish IS NULL OR a.timefinish = 0)';
                     break;
 
                 case 'to':
-                    $where[] = '(a.timefinish <= :'.$key.' OR a.timefinish IS NULL)';
+                    $where[] = '(a.timefinish <= :'.$key.' OR a.timefinish IS NULL OR a.timefinish = 0)';
                     break;
 
                 case 'userquery':
-                    $params[$key.'1'] = $value.'%';
-                    $params[$key.'2'] = $value.'%';
+                    $params[$key.'1'] = $DB->sql_like_escape($value).'%';
+                    $params[$key.'2'] = $DB->sql_like_escape($value).'%';
 
-                    $where[] = '(u.email LIKE :'.$key.'1 OR u.username LIKE :'.$key.'2)';
+                    $email_like = $DB->sql_like("u.email", ':'.$key.'1');
+                    $username_like = $DB->sql_like("u.username", ':'.$key.'2');
+                    $where[] = "(" . $email_like . " OR " . $username_like . ")";
                     break;
 
                 default:
