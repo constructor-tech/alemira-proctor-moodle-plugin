@@ -60,7 +60,7 @@ class defaults_form extends \moodleform {
             'identification' => get_string('identification_mode', 'availability_proctor'),
         ]);
 
-        $mform->addElement('select', 'identification_mode', get_string('identification', 'availability_proctor'), [
+        $mform->addElement('select', 'identification', get_string('identification', 'availability_proctor'), [
             '' => '',
             'face_and_passport' => get_string('face_passport_identification', 'availability_proctor'),
             'passport' => get_string('passport_identification', 'availability_proctor'),
@@ -88,9 +88,16 @@ class defaults_form extends \moodleform {
             'video' => get_string('auxiliary_camera_mode_video', 'availability_proctor'),
         ]);
 
-
-        $mform->addElement('advcheckbox', 'ldb', get_string('enable_ldb',  'availability_proctor'));
-        $mform->setType('ldb', PARAM_BOOL);
+        $mform->addElement('advcheckbox', 'securebrowser', get_string('enable_secure_browser',  'availability_proctor'));
+        $mform->setType('securebrowser', PARAM_BOOL);
+        $mform->addElement('select', 'securebrowserlevel', get_string('secure_browser_level', 'availability_proctor'), [
+            '' => '',
+            'basic' => get_string('secure_browser_level_basic', 'availability_proctor'),
+            'medium' => get_string('secure_browser_level_medium', 'availability_proctor'),
+            'high' => get_string('secure_browser_level_high', 'availability_proctor'),
+        ]);
+        $mform->addElement('textarea', 'allowedprocesses', get_string('allowed_processes', 'availability_proctor'));
+        $mform->addElement('textarea', 'forbiddenprocesses', get_string('forbidden_processes', 'availability_proctor'));
 
         $mform->addElement('advcheckbox', 'allowmultipledisplays', get_string('allowmultipledisplays',  'availability_proctor'));
         $mform->setType('allowmultipledisplays', PARAM_BOOL);
@@ -138,7 +145,7 @@ class defaults_form extends \moodleform {
         $mform->addElement('header', 'biometry_header', get_string('biometry_header', 'availability_proctor'));
 
         $mform->addElement('advcheckbox', 'biometryenabled', get_string('biometry_enabled', 'availability_proctor'));
-        $mform->setType('advcheckbox', PARAM_BOOL);
+        $mform->setType('biometryenabled', PARAM_BOOL);
         $mform->addElement('advcheckbox', 'biometryskipfail', get_string('biometry_skipfail', 'availability_proctor'));
         $mform->setType('biometryskipfail', PARAM_BOOL);
         $mform->addElement('text', 'biometryflow', get_string('biometry_flow', 'availability_proctor'));
@@ -153,7 +160,7 @@ class defaults_form extends \moodleform {
             $coursename = $value['name'];
             $options = $value['options'];
             $elements = [];
-            foreach($options as $groupid => $group) {
+            foreach ($options as $groupid => $group) {
                 $fieldname = 'groups['.$courseid.']['.$group->id.']';
                 $elements[] = $mform->createElement('checkbox', $fieldname, $group->name);
                 $elements[] = $mform->createElement('html', '<br>');
@@ -171,15 +178,15 @@ class defaults_form extends \moodleform {
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
 
-        if(!empty($data['duration']) && $data['duration'] % 30 != 0) {
+        if (!empty($data['duration']) && $data['duration'] % 30 != 0) {
             $errors['duration'] = get_string('error_setduration', 'availability_proctor');
         }
 
         foreach (condition::SCORING as $key => $field) {
-            if(!empty($data['scoring'][$key])) {
+            if (!empty($data['scoring'][$key])) {
                 $value = $data['scoring'][$key];
 
-                if($value > $field['max'] || $value < $field['min']) {
+                if ($value > $field['max'] || $value < $field['min']) {
                     $error = get_string('error_not_in_range', 'availability_proctor');
                     $errors['scoring[' . $key . ']'] = sprintf($error, $field['min'], $field['max']);
                 }

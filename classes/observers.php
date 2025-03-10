@@ -28,6 +28,7 @@ use availability_proctor\state;
 use availability_proctor\client;
 use availability_proctor\common;
 use availability_proctor\condition;
+use availability_proctor\utils;
 
 class observers {
     /**
@@ -53,12 +54,12 @@ class observers {
         }
 
         // We want to let previews to happen without proctoring.
-        $quizobj = \quiz::create($cm->instance, $USER->id);
+        $quizobj = utils::quiz_settings_classname()::create($cm->instance, $USER->id);
         if ($quizobj->is_preview_user()) {
             return;
         }
 
-        if(!$condition->user_in_proctored_groups($USER->id)) {
+        if (!$condition->user_in_proctored_groups($USER->id)) {
             return;
         }
 
@@ -137,7 +138,7 @@ class observers {
             'userid' => $userid,
             'courseid' => $event->courseid,
             'cmid' => $cmid,
-            'status' => "started"
+            'status' => "started",
         ], '-id');
 
         if (!empty($accesscode)) {
@@ -150,7 +151,7 @@ class observers {
         }
 
         // We want to let previews to happen without proctoring.
-        $quizobj = \quiz::create($cm->instance, $userid);
+        $quizobj = utils::quiz_settings_classname()::create($cm->instance, $userid);
         if ($quizobj->is_preview_user()) {
             return;
         }
@@ -186,7 +187,7 @@ class observers {
 
         common::reset_entry([
             'cmid' => $cm->id,
-            'attemptid' => $attempt->id
+            'attemptid' => $attempt->id,
         ]);
     }
 

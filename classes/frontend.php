@@ -35,6 +35,10 @@ class frontend extends \core_availability\frontend {
      * @return array
      */
     protected function get_javascript_strings() {
+        global $PAGE;
+        $PAGE->requires->string_for_js('showmore', 'core_form');
+        $PAGE->requires->string_for_js('showless', 'core_form');
+
         $strings = [
             'title', 'error_setduration', 'duration', 'proctoring_mode', 'online_mode',
             'rules', 'offline_mode', 'identification_mode', 'auto_mode', 'allow_to_use_websites',
@@ -43,16 +47,18 @@ class frontend extends \core_availability\frontend {
             'allow_absence_in_frame', 'allow_voices', 'allow_wrong_gaze_direction',
             'auto_rescheduling', 'enable', 'scheduling_required',
             'identification', 'face_passport_identification', 'face_identification',
-            'passport_identification', 'skip_identification', 'enable_ldb',
+            'passport_identification', 'skip_identification', 'enable_secure_browser',
             'is_trial', 'custom_rules', 'user_agreement_url', 'select_groups',
             'web_camera_main_view', 'web_camera_main_view_front', 'web_camera_main_view_side',
-            'visible_warnings', 'scoring_params_header',
+            'visible_warnings', 'scoring_params_header', 'secure_browser_level',
+            'secure_browser_level_basic', 'secure_browser_level_medium', 'secure_browser_level_high',
             'allowmultipledisplays', 'allowvirtualenvironment', 'checkidphotoquality',
             'calculator', 'calculator_off', 'calculator_simple', 'calculator_scientific',
             'biometry_header', 'biometry_enabled', 'biometry_skipfail', 'biometry_flow',
             'biometry_theme',
             'auxiliary_camera', 'auxiliary_camera_mode', 'auxiliary_camera_mode_photo',
             'auxiliary_camera_mode_video',
+            'allowed_processes', 'forbidden_processes', 'processes_list_hint',
         ];
 
         foreach (condition::WARNINGS as $key => $value) {
@@ -84,13 +90,13 @@ class frontend extends \core_availability\frontend {
         $defaults = common::get_default_proctoring_settings();
 
         $groupdefaults = [];
-        if(isset($defaults->groups)) {
+        if (isset($defaults->groups)) {
             $groupdefaults = (array)$defaults->groups;
             $coursekey = (int)$course->id;
             $groupdefaults = isset($groupdefaults[$coursekey]) ? $groupdefaults[$coursekey] : [];
             $groupdefaults = array_keys((array)$groupdefaults);
         }
-        $defaults->groups = $groupdefaults;;
+        $defaults->groups = $groupdefaults;
 
         $groups = $DB->get_records('groups', ['courseid' => $course->id], 'name', 'id,name');
 

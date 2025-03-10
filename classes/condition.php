@@ -42,11 +42,13 @@ class condition extends \core_availability\condition {
     const PROPS = [
         'duration', 'mode', 'schedulingrequired', 'autorescheduling',
         'istrial', 'identification', 'useragreementurl',
-        'ldb', 'allowmultipledisplays', 'allowvirtualenvironment',
+        'securebrowser', 'securebrowserlevel',
+        'allowmultipledisplays', 'allowvirtualenvironment',
         'checkidphotoquality', 'webcameramainview',
         'scoring', 'warnings', 'rules', 'customrules', 'groups',
         'biometryenabled', 'biometryskipfail', 'biometryflow', 'biometrytheme',
         'calculator', 'auxiliarycamera', 'auxiliarycameramode',
+        'forbiddenprocesses', 'allowedprocesses',
     ];
 
     /** @var array List of default values for visible warnings */
@@ -92,7 +94,7 @@ class condition extends \core_availability\condition {
     const BOOL_DEFAULTS = [
         'autorescheduling' => false,
         'istrial' => false,
-        'ldb' => false,
+        'securebrowser' => false,
         'auxiliarycamera' => false,
         'allowmultipledisplays' => false,
         'allowvirtualenvironment' => false,
@@ -101,11 +103,19 @@ class condition extends \core_availability\condition {
         'biometryskipfail' => false,
     ];
 
+    /** @var array List of possible calculator options */
     const CALCULATOR_OPTIONS = [
         'off', 'scientific', 'simple',
     ];
+
+    /** @var array List of possible aux camera options */
     const AUX_CAMERA_MODES = [
         'photo', 'video',
+    ];
+
+    /** @var array List of possible aux camera options */
+    const SECURE_BROWSER_LEVELS = [
+        'basic', 'medium', 'high'
     ];
 
     /** @var int Exam duration */
@@ -156,8 +166,11 @@ class condition extends \core_availability\condition {
     /** @var bool Check the quality of ID photo */
     public $checkidphotoquality = false;
 
-    /** @var string Lockdown browser */
-    public $ldb = false;
+    /** @var bool Secure browser enabled */
+    public $securebrowser = false;
+
+    /** @var string Secure browser level of security */
+    public $securebrowserlevel = 'basic';
 
     /** @var calculator */
     public $calculator = 'off';
@@ -176,6 +189,12 @@ class condition extends \core_availability\condition {
 
     /** @var string List of custom rules */
     public $customrules = null;
+
+    /** @var array List of allowed processes */
+    public $allowedprocesses = null;
+
+    /** @var array List of forbidden processes */
+    public $forbiddenprocesses = null;
 
     /** @var array Apply condition to specified groups */
     public $groups = [];
@@ -197,6 +216,10 @@ class condition extends \core_availability\condition {
 
         if (!empty($structure->mode)) {
             $this->mode = $structure->mode;
+        }
+
+        if (!empty($structure->securebrowserlevel)) {
+            $this->securebrowserlevel = $structure->securebrowserlevel;
         }
 
         if (!empty($structure->webcameramainview)) {
@@ -270,11 +293,19 @@ class condition extends \core_availability\condition {
             $this->auxiliarycameramode = $structure->auxiliarycameramode;
         }
 
+        if (!empty($structure->allowedprocesses)) {
+            $this->allowedprocesses = $structure->allowedprocesses;
+        }
+
+        if (!empty($structure->forbiddenprocesses)) {
+            $this->forbiddenprocesses = $structure->forbiddenprocesses;
+        }
+
         $this->validate();
     }
 
     /**
-     * Validates values of interal structtures, vlamps scoring values to min/max
+     * Validates values of interal structures, clamps scoring values to min/max
      *
      * @return null
      */
@@ -313,7 +344,7 @@ class condition extends \core_availability\condition {
             }
         }
 
-        if (!in_array($this->calculator, self::CALCULATOR_OPTIONS)){
+        if (!in_array($this->calculator, self::CALCULATOR_OPTIONS)) {
             $this->calculator = 'off';
         }
 
@@ -361,6 +392,18 @@ class condition extends \core_availability\condition {
         if (empty($result['rules'])) {
             $result['rules'] = [];
         }
+
+        $allowedprocesses = $result['allowedprocesses'];
+        $allowedprocesses = is_string($allowedprocesses) ? trim($allowedprocesses) : '';
+        $allowedprocesses = preg_split('/\R+/', $allowedprocesses);
+        $allowedprocesses = array_filter($allowedprocesses);
+        $result['allowedprocesses'] = empty($allowedprocesses) ? null : $allowedprocesses;
+
+        $forbiddenprocesses = $result['forbiddenprocesses'];
+        $forbiddenprocesses = is_string($forbiddenprocesses) ? trim($forbiddenprocesses) : '';
+        $forbiddenprocesses = preg_split('/\R+/', $forbiddenprocesses);
+        $forbiddenprocesses = array_filter($forbiddenprocesses);
+        $result['forbiddenprocesses'] = empty($forbiddenprocesses) ? null : $forbiddenprocesses;
 
         return $result;
     }
@@ -427,6 +470,10 @@ class condition extends \core_availability\condition {
             'auxiliarycameramode' => (string) $this->auxiliarycameramode,
             'customrules' => $this->customrules,
             'calculator' => $this->calculator,
+            'securebrowser' => $this->securebrowser,
+            'securebrowserlevel' => $this->securebrowserlevel,
+            'allowedprocesses' => $this->allowedprocesses,
+            'forbiddenprocesses' => $this->forbiddenprocesses,
         ];
     }
 
@@ -458,7 +505,7 @@ class condition extends \core_availability\condition {
      * to has_examus_condition, or maybe something else.
      *
      * @param \cm_info $cm Cm
-     * @params int $userid userid
+     * @return int $userid userid
      */
     public function user_in_proctored_groups($userid) {
         global $DB;
@@ -468,7 +515,7 @@ class condition extends \core_availability\condition {
         }
 
         // Validate that groups are still there.
-        [$insql, $inparams] = $DB-> get_in_or_equal($groups);
+        [$insql, $inparams] = $DB->get_in_or_equal($groups);
         $groups = $DB->get_fieldset_select('groups', 'id', 'id ' . $insql, $inparams);
         if (empty($groups)) {
             return true;

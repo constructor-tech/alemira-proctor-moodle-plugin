@@ -18,35 +18,16 @@
  * Availability plugin for integration with Proctor by Constructor.
  *
  * @package    availability_proctor
- * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
+ * @copyright  2019-2024 Maksim Burnin <maksim.burnin@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$capabilities = [
-    'availability/proctor:logaccess' => [
-        'riskbitmask' => RISK_PERSONAL | RISK_CONFIG,
-        'captype' => 'write',
-        'contextlevel' => CONTEXT_SYSTEM,
-        'archetypes' => [],
+$callbacks = [
+    [
+        'hook' => \core\hook\output\before_standard_head_html_generation::class,
+        'callback' => 'availability_proctor\hooks::before_standard_head_html_generation',
+        'priority' => 0,
     ],
-
-    'availability/proctor:logaccess_all' => [
-        'riskbitmask' => RISK_PERSONAL | RISK_CONFIG,
-        'captype' => 'write',
-        'contextlevel' => CONTEXT_SYSTEM,
-        'archetypes' => [],
-    ],
-
-    'availability/proctor:logaccess_course' => [
-        'riskbitmask' => RISK_PERSONAL | RISK_CONFIG,
-        'captype' => 'read',
-        'contextlevel' => CONTEXT_COURSE,
-        'archetypes' => [
-            'teacher' => CAP_ALLOW,
-            'editingteacher' => CAP_ALLOW,
-        ],
-    ],
-
 ];

@@ -58,7 +58,7 @@ class client {
         'tr' => 'tr',
         'vi' => 'vi',
         'zh_cn' => 'zh-cn',
-        'zh' => 'zh-cn'
+        'zh' => 'zh-cn',
     ];
 
     /** @var string Secret key for signing JWT token */
@@ -187,7 +187,7 @@ class client {
     public function request($method, $sessionid = null, $sessionmethod = null, $body = []) {
         $key = $this->jwtsecret;
         $url = $this->api_url($method, $sessionid, $sessionmethod);
-        $payload = ['exp' => time() + 30];
+        $payload = ['exp' => time() + (5 * 60)];
         $jwt = \Firebase\JWT\JWT::encode($payload, $key, 'HS256');
 
         $jsondata = json_encode($body);
@@ -256,12 +256,15 @@ class client {
             'auxiliaryCameraMode' => $conditiondata['auxiliarycameramode'],
             'scoreConfig' => $scoring,
             'visibleWarnings' => $conditiondata['warnings'],
-            'ldb' => $conditiondata['ldb'],
+            'secureBrowser' => $conditiondata['securebrowser'],
+            'secureBrowserLevel' => $conditiondata['securebrowserlevel'],
             'allowMultipleDisplays' => $conditiondata['allowmultipledisplays'],
             'allowVirtualEnvironment' => $conditiondata['allowvirtualenvironment'],
             'checkIdPhotoQuality' => $conditiondata['checkidphotoquality'],
             'webCameraMainView' => $conditiondata['webcameramainview'],
             'calculator' => $conditiondata['calculator'],
+            'desktopAppForbiddenProcesses' => $conditiondata['forbiddenprocesses'],
+            'desktopAppAllowedProcesses' => $conditiondata['allowedprocesses'],
             'rules' => array_merge(
                 (array)$conditiondata['rules'],
                 ['custom_rules' => $customrules]

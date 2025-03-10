@@ -28,6 +28,14 @@ namespace availability_proctor;
  * Utils class
  */
 class utils {
+    public static function quiz_settings_classname(){
+        return class_exists('\mod_quiz\quiz_settings') ? '\mod_quiz\quiz_settings' : 'quiz';
+    }
+
+    public static function quiz_attempt_classname(){
+        return class_exists('\mod_quiz\quiz_attempt') ? '\mod_quiz\quiz_attempt' : 'quiz_attempt';
+    }
+
     /**
      * Provides logict for proctoring fader, exist as soon a possible if
      * no protection is reqired.
@@ -50,7 +58,7 @@ class utils {
         }
 
         // We want to let previews to happen without proctoring.
-        $quizobj = \quiz::create($cm->instance, $USER->id);
+        $quizobj = static::quiz_settings_classname()::create($cm->instance, $USER->id);
         if ($quizobj->is_preview_user()) {
             return '';
         }
@@ -69,7 +77,7 @@ class utils {
             $SESSION->availability_proctor_reset = true;
         }
 
-        $timebracket = common::get_timebracket_for_cm('quiz', $cm);
+        $timebracket = common::get_timebracket_for_cm('quiz', $cm, $USER->id);
         $lang = current_language();
 
         $client = new client($condition);
@@ -89,7 +97,7 @@ class utils {
         }
 
         $entryisactive = in_array($entry->status, ['started', 'scheduled', 'new']);
-        $attemptinprogess = $attempt && $attempt->state == \quiz_attempt::IN_PROGRESS;
+        $attemptinprogess = $attempt && $attempt->state == utils::quiz_attempt_classname()::IN_PROGRESS;
 
         if ($entryisactive || $attemptinprogess) {
             // We have to pass formdata in any case because exam can be opened outside iframe.
@@ -122,7 +130,7 @@ class utils {
         }
 
         // We want to let previews to happen without proctoring.
-        $quizobj = \quiz::create($cminfo->instance, $user->id);
+        $quizobj = static::quiz_settings_classname()::create($cminfo->instance, $user->id);
         if ($quizobj->is_preview_user()) {
             return;
         }
@@ -170,7 +178,7 @@ class utils {
             return;
         }
 
-        $timebracket = common::get_timebracket_for_cm('quiz', $cminfo);
+        $timebracket = common::get_timebracket_for_cm('quiz', $cminfo, $user->id);
 
         $urlparams = ['proctor_accesscode' => $entry->accesscode];
 

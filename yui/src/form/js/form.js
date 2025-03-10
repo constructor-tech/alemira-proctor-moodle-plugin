@@ -37,7 +37,8 @@ M.availability_proctor.form.getNode = function(json) {
     var allowmultipledisplaysId = id + '_allowmultipledisplays';
     var allowvirtualenvironmentId = id + '_allowvirtualenvironment';
     var checkidphotoqualityId = id + '_checkidphotoquality';
-    var enableLdbId = id + '_ldb';
+    var enableSecureBrowserId = id + '_secureBrowser';
+    var secureBrowserLevelId = id + '_secureBrowserLevel';
     var biometryEnabledId = id + '_biometryEnabled';
     var biometrySkipfailId = id + '_biometrySkipfail';
     var biometryFlowId = id + '_biometryFlow';
@@ -45,6 +46,8 @@ M.availability_proctor.form.getNode = function(json) {
     var userAgreementId = id + '_userAgreement';
     var webCameraMainViewId = id + '_webCameraMainView';
     var calculatorId = id + '_calculator';
+    var allowedProcessesId = id + '_allowedProcesses';
+    var forbiddenProcessesId = id + '_forbiddenProcesses';
 
     var tabButtonOne, tabButtonTwo, tabOne, tabTwo;
 
@@ -86,14 +89,15 @@ M.availability_proctor.form.getNode = function(json) {
     }
 
     function formGroup(id, label, content, fullwidth) {
-        var labelcols = fullwidth ? 10 : 5;
-        var fieldcols = fullwidth ? 10 : 7;
+        var labelcols = fullwidth ? 12 : 5;
+        var fieldcols = fullwidth ? 12 : 7;
+        var flexdir = fullwidth ? 'flex-column' : 'flex-row';
 
-        return '<span class="availability-group form-group mb-2 d-flex">' +
-            '<div class="col-md-' + labelcols + ' col-form-label d-flex pb-0 pr-md-0">' +
+        return '<span class="availability-group form-group mb-2 d-flex ' + flexdir + '">' +
+            '<div class="col-md-' + labelcols + ' col-form-label d-flex pb-0 pl-md-0">' +
             '  <label for="' + id + '">' + label + '</label>' +
             '</div>' +
-            '<div class="col-md-' + fieldcols + ' form-inline align-items-start felement">' +
+            '<div class="col-md-' + fieldcols + ' form-inline align-items-start felement pl-md-0">' +
             content +
             '</div>' +
             '</span>';
@@ -127,6 +131,8 @@ M.availability_proctor.form.getNode = function(json) {
             tabTwo.removeClass('hidden');
         }
     }
+
+    var optionStyle = 'white-space: break-spaces; display:flex; align-items: baseline; justify-content: flex-start;';
 
     html = formGroup(durationId, getString('duration'),
         '<input type="text" name="duration" id="' + durationId + '" class="form-control">'
@@ -184,24 +190,35 @@ M.availability_proctor.form.getNode = function(json) {
         '</select>'
     );
 
-    html += formGroup(enableLdbId, getString('enable_ldb'),
-        '<input type="checkbox" name="ldb" id="' + enableLdbId + '" value="1">&nbsp;' +
-        '<label for="' + enableLdbId + '">' + getString('enable') + '</label> '
+    html += formGroup(enableSecureBrowserId, getString('enable_secure_browser'),
+        '<input type="checkbox" name="securebrowser" id="' + enableSecureBrowserId + '" value="1">&nbsp;' +
+        '<label for="' + enableSecureBrowserId + '">' + getString('enable') + '</label> '
     );
 
+    html += formGroup(secureBrowserLevelId, getString('secure_browser_level'),
+        '<select name="securebrowserlevel" id="' + secureBrowserLevelId + '" class="custom-select">' +
+        '  <option value="basic">' + getString('secure_browser_level_basic') + '</option>' +
+        '  <option value="medium">' + getString('secure_browser_level_medium') + '</option>' +
+        '  <option value="high">' + getString('secure_browser_level_high') + '</option>' +
+        '</select>'
+    );
+    
     html += formGroup(allowmultipledisplaysId, getString('allowmultipledisplays'),
+        '<label for="' + allowmultipledisplaysId + '">' +
         '<input type="checkbox" name="allowmultipledisplays" id="' + allowmultipledisplaysId + '" value="1">&nbsp;' +
-        '<label for="' + allowmultipledisplaysId + '">' + getString('enable') + '</label> '
+        getString('enable') + '</label> '
     );
 
     html += formGroup(allowvirtualenvironmentId, getString('allowvirtualenvironment'),
+        '<label for="' + allowvirtualenvironmentId + '">' +
         '<input type="checkbox" name="allowvirtualenvironment" id="' + allowvirtualenvironmentId + '" value="1">&nbsp;' +
-        '<label for="' + allowvirtualenvironmentId + '">' + getString('enable') + '</label> '
+         getString('enable') + '</label> '
     );
 
     html += formGroup(checkidphotoqualityId, getString('checkidphotoquality'),
+        '<label for="' + checkidphotoqualityId + '">' +
         '<input type="checkbox" name="checkidphotoquality" id="' + checkidphotoqualityId + '" value="1">&nbsp;' +
-        '<label for="' + checkidphotoqualityId + '">' + getString('enable') + '</label> '
+         getString('enable') + '</label> '
     );
 
     html += formGroup(userAgreementId, getString('user_agreement_url'),
@@ -224,28 +241,44 @@ M.availability_proctor.form.getNode = function(json) {
     var ruleOptions = '';
     for (var key in this.rules) {
         var keyId = id + '_' + key;
-        ruleOptions += '<br><input type="checkbox" name="' + key + '" id="' + keyId + '" value="' + key + '" >&nbsp;';
-        ruleOptions += '<label for="' + keyId + '" style="white-space: break-spaces">' + getString(key) + '</label>';
+        ruleOptions += '<label for="' + keyId + '" style="' + optionStyle + '">'
+            + '<input type="checkbox" name="' + key + '" id="' + keyId + '" value="' + key + '" >&nbsp;'
+            + getString(key)
+            + '</label>';
     }
     html += formGroup(null, getString('rules'), '<div class="rules" style="white-space:nowrap">' + ruleOptions + '</div>');
 
     var groupOptions = '';
     for (var i in this.groups) {
         var group = this.groups[i];
-        groupOptions += '<br>'
-            + '<label>'
-            + '<input value=' + group.id + ' type="checkbox" name="proctoring-groups[' + group.id + ']">'
+        groupOptions += '<label  style="' + optionStyle + '">'
+            + '<input value="' + group.id + '" type="checkbox" name="proctoring-groups[' + group.id + ']">'
             + '&nbsp;' + group.name
             + '</label>';
     }
-    html += formGroup(null, getString('select_groups'), '<div class="groups">' + groupOptions + '</div>');
+    if (groupOptions && groupOptions.length) {
+        html += formGroup(null, getString('select_groups'), '<div class="groups">' + groupOptions + '</div>');
+    }
 
+    html += formGroup(forbiddenProcessesId, getString('forbidden_processes'),
+        '<textarea name="forbiddenprocesses" id="' + forbiddenProcessesId + '" style="width: 100%" class="form-control">' +
+        '</textarea>' +
+        '<div class="text-muted">' + getString('processes_list_hint') + '</div>'
+    );
+
+    html += formGroup(allowedProcessesId, getString('allowed_processes'),
+        '<textarea name="allowedprocesses" id="' + allowedProcessesId + '" style="width: 100%" class="form-control">' +
+        '</textarea>' +
+        '<div class="text-muted">' + getString('processes_list_hint') + '</div>'
+    );
 
     var warningOptions = '';
     for (var wkey in this.warnings) {
         var wkeyId = id + '_' + wkey;
-        warningOptions += '<input type="checkbox" name="' + wkey + '" id="' + wkeyId + '" value="' + wkey + '" >&nbsp;';
-        warningOptions += '<label for="' + wkeyId + '" style="white-space: break-spaces">' + getString(wkey) + '</label><br>';
+        warningOptions += '<label for="' + wkeyId + '" style="' + optionStyle + '">'
+            + '<input type="checkbox" name="' + wkey + '" id="' + wkeyId + '" value="' + wkey + '" >&nbsp;'
+            + getString(wkey)
+            + '</label>';
     }
 
     var scoringOptions = '';
@@ -358,7 +391,7 @@ M.availability_proctor.form.getNode = function(json) {
         node.one('select[name=mode] option[value=' + json.mode + ']').set('selected', 'selected');
     }
 
-    if (json.identification !== undefined) {
+    if (json.identification) {
         node.one('select[name=identification] option[value=' + json.identification + ']').set('selected', 'selected');
     }
 
@@ -383,8 +416,8 @@ M.availability_proctor.form.getNode = function(json) {
         node.one('select[name=auxiliarycameramode] option[value=' + json.auxiliarycameramode + ']').set('selected', 'selected');
     }
 
-    if (json.ldb !== undefined) {
-        node.one('#' + enableLdbId).set('checked', json.ldb ? 'checked' : null);
+    if (json.securebrowser !== undefined) {
+        node.one('#' + enableSecureBrowserId).set('checked', json.securebrowser ? 'checked' : null);
     }
 
     if (json.scheduling_required !== undefined) {
@@ -421,6 +454,10 @@ M.availability_proctor.form.getNode = function(json) {
 
     if (json.calculator !== undefined) {
         node.one('select[name=calculator] option[value=' + json.calculator + ']').set('selected', 'selected');
+    }
+
+    if (json.securebrowserlevel) {
+        node.one('select[name=securebrowserlevel] option[value=' + json.securebrowserlevel + ']').set('selected', 'selected');
     }
 
     // Setting hardcoded defaults when no user-defined exist.
@@ -476,6 +513,14 @@ M.availability_proctor.form.getNode = function(json) {
         node.one('#' + userAgreementId).set('value', json.useragreementurl);
     }
 
+    if (json.forbiddenprocesses !== undefined) {
+        node.one('#' + forbiddenProcessesId).set('value', json.forbiddenprocesses);
+    }
+
+    if (json.allowedprocesses !== undefined) {
+        node.one('#' + allowedProcessesId).set('value', json.allowedprocesses);
+    }
+
     node.delegate('valuechange', function() {
         nextTick(function() {
             M.core_availability.form.update();
@@ -521,11 +566,14 @@ M.availability_proctor.form.fillValue = function(value, node) {
     value.useragreementurl = node.one('input[name=useragreementurl]').get('value').trim();
     value.auxiliarycamera = node.one('input[name=auxiliarycamera]').get('checked');
     value.auxiliarycameramode = node.one('select[name=auxiliarycameramode]').get('value').trim();
-    value.ldb = node.one('input[name=ldb]').get('checked');
+    value.securebrowser = node.one('input[name=securebrowser]').get('checked');
+    value.securebrowserlevel = node.one('select[name=securebrowserlevel]').get('value').trim();
     value.allowmultipledisplays = node.one('input[name=allowmultipledisplays]').get('checked');
     value.allowvirtualenvironment = node.one('input[name=allowvirtualenvironment]').get('checked');
     value.checkidphotoquality = node.one('input[name=checkidphotoquality]').get('checked');
     value.calculator = node.one('select[name=calculator]').get('value').trim();
+    value.allowedprocesses = node.one('textarea[name=allowedprocesses]').get('value').trim();
+    value.forbiddenprocesses = node.one('textarea[name=forbiddenprocesses]').get('value').trim();
 
     value.biometryenabled = node.one('input[name=biometryenabled]').get('checked');
     value.biometryskipfail = node.one('input[name=biometryskipfail]').get('checked');
