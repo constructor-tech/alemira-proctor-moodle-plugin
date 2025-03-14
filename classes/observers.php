@@ -65,7 +65,7 @@ class observers {
 
         $inhibitredirect = false;
         if ($accesscode) {
-            // If we have an access code here, we are coming from Proctor by Constructor.
+            // If we have an access code here, we are coming from Proctor.
             $inhibitredirect = true;
             $entry = $DB->get_record('availability_proctor_entries', ['accesscode' => $accesscode]);
         }

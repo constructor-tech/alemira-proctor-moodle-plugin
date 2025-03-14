@@ -219,7 +219,7 @@ class utils {
      * @param string $accesscode Accesscode/SessionId value
      */
     public static function handle_accesscode_param($accesscode) {
-        global $SESSION, $DB;
+        global $SESSION, $DB, $CFG;
 
         // User is coming from proctor, reset is done if it was requested before.
         unset($SESSION->availability_proctor_reset);
@@ -261,7 +261,12 @@ class utils {
         }
 
         if ($entry) {
-            $quizurl = new \moodle_url('/mod/quiz/view.php', ['id' => $cminfo->id]);
+            if (isset($CFG->availability_proctor_quiz_start_url) && is_callable($CFG->availability_proctor_quiz_start_url)) {
+                $urlfunction = $CFG->availability_proctor_quiz_start_url;
+                $quizurl = $urlfunction($entry->courseid, $cminfo->id);
+            } else {
+                $quizurl = new \moodle_url('/mod/quiz/view.php', ['id' => $cminfo->id]);
+            }
             redirect($quizurl);
             exit;
         } else {
