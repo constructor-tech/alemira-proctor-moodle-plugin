@@ -12,12 +12,13 @@ M.availability_proctor.form = Y.Object(M.core_availability.plugin);
 
 M.availability_proctor.form.rules = null;
 
-M.availability_proctor.form.initInner = function(rules, warnings, scoring, defaults, groups) {
+M.availability_proctor.form.initInner = function(rules, warnings, scoring, streamsPresetOptions, defaults, groups) {
     this.rules = rules;
     this.warnings = warnings;
     this.scoring = scoring;
     this.defaults = defaults;
     this.groups = groups;
+    this.streamsPresetOptions = streamsPresetOptions;
 };
 
 M.availability_proctor.form.instId = 0;
@@ -48,6 +49,7 @@ M.availability_proctor.form.getNode = function(json) {
     var userAgreementId = id + '_userAgreement';
     var webCameraMainViewId = id + '_webCameraMainView';
     var calculatorId = id + '_calculator';
+    var streamsPresetId = id + '_streamsPreset';
     var allowedProcessesId = id + '_allowedProcesses';
     var forbiddenProcessesId = id + '_forbiddenProcesses';
 
@@ -204,7 +206,7 @@ M.availability_proctor.form.getNode = function(json) {
         '  <option value="high">' + getString('secure_browser_level_high') + '</option>' +
         '</select>'
     );
-
+    
     html += formGroup(allowmultipledisplaysId, getString('allowmultipledisplays'),
         '<label for="' + allowmultipledisplaysId + '">' +
         '<input type="checkbox" name="allowmultipledisplays" id="' + allowmultipledisplaysId + '" value="1">&nbsp;' +
@@ -239,6 +241,14 @@ M.availability_proctor.form.getNode = function(json) {
         '</select>'
     );
 
+    var streamsPresetOptions = '';
+    for (var spi in this.streamsPresetOptions) {
+        var spkey = this.streamsPresetOptions[spi];
+        streamsPresetOptions += '<option value="' + spkey + '">' + getString('streamspreset_' + spkey) + '</option>';
+    }
+    html += formGroup(streamsPresetId, getString('streamspreset'),
+        '<select name="streamspreset" id="' + streamsPresetId + '" class="custom-select">' + streamsPresetOptions + '</select>'
+    );
 
     var ruleOptions = '';
     for (var key in this.rules) {
@@ -458,6 +468,10 @@ M.availability_proctor.form.getNode = function(json) {
         node.one('select[name=calculator] option[value=' + json.calculator + ']').set('selected', 'selected');
     }
 
+    if (json.streamspreset !== undefined) {
+        node.one('select[name=streamspreset] option[value=' + json.streamspreset + ']').set('selected', 'selected');
+    }
+
     if (json.securebrowserlevel) {
         node.one('select[name=securebrowserlevel] option[value=' + json.securebrowserlevel + ']').set('selected', 'selected');
     }
@@ -574,6 +588,7 @@ M.availability_proctor.form.fillValue = function(value, node) {
     value.allowvirtualenvironment = node.one('input[name=allowvirtualenvironment]').get('checked');
     value.checkidphotoquality = node.one('input[name=checkidphotoquality]').get('checked');
     value.calculator = node.one('select[name=calculator]').get('value').trim();
+    value.streamspreset = node.one('select[name=streamspreset]').get('value').trim();
     value.allowedprocesses = node.one('textarea[name=allowedprocesses]').get('value').trim();
     value.forbiddenprocesses = node.one('textarea[name=forbiddenprocesses]').get('value').trim();
 

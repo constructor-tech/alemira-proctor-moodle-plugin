@@ -53,7 +53,7 @@ class frontend extends \core_availability\frontend {
             'visible_warnings', 'scoring_params_header', 'secure_browser_level',
             'secure_browser_level_basic', 'secure_browser_level_medium', 'secure_browser_level_high',
             'allowmultipledisplays', 'allowvirtualenvironment', 'checkidphotoquality',
-            'calculator', 'calculator_off', 'calculator_simple', 'calculator_scientific',
+            'calculator', 'streamspreset',
             'biometry_header', 'biometry_enabled', 'biometry_skipfail', 'biometry_flow',
             'biometry_theme',
             'auxiliary_camera', 'auxiliary_camera_mode', 'auxiliary_camera_mode_photo',
@@ -67,6 +67,14 @@ class frontend extends \core_availability\frontend {
 
         foreach (condition::SCORING as $key => $value) {
             $strings[] = 'scoring_'.$key;
+        }
+
+        foreach (condition::STREAMS_PRESET_OPTIONS as $key) {
+            $strings[] = 'streamspreset_'.$key;
+        }
+
+        foreach (condition::CALCULATOR_OPTIONS as $key) {
+            $strings[] = 'calculator_'.$key;
         }
 
         return $strings;
@@ -83,9 +91,6 @@ class frontend extends \core_availability\frontend {
     protected function get_javascript_init_params($course, \cm_info $cm = null,
             \section_info $section = null) {
         global $DB;
-        $rules = condition::RULES;
-        $warnings = condition::WARNINGS;
-        $scoring = condition::SCORING;
 
         $defaults = common::get_default_proctoring_settings();
 
@@ -100,7 +105,14 @@ class frontend extends \core_availability\frontend {
 
         $groups = $DB->get_records('groups', ['courseid' => $course->id], 'name', 'id,name');
 
-        return [$rules, $warnings, $scoring, $defaults, $groups];
+        return [
+            condition::RULES,
+            condition::WARNINGS,
+            condition::SCORING,
+            condition::STREAMS_PRESET_OPTIONS,
+            $defaults,
+            $groups,
+        ];
     }
 
     /**

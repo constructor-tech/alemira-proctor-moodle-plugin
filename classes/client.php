@@ -265,6 +265,7 @@ class client {
             'calculator' => $conditiondata['calculator'],
             'desktopAppForbiddenProcesses' => $conditiondata['forbiddenprocesses'],
             'desktopAppAllowedProcesses' => $conditiondata['allowedprocesses'],
+            'streamsPreset' => $conditiondata['streamspreset'],
             'rules' => array_merge(
                 (array)$conditiondata['rules'],
                 ['custom_rules' => $customrules]
