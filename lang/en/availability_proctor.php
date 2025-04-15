@@ -120,6 +120,7 @@ $string['processes_list_hint'] = 'One process name per line';
 $string['allowmultipledisplays'] = 'Allow multiple displays';
 $string['allowvirtualenvironment'] = 'Virtual machine accesss';
 $string['checkidphotoquality'] = 'Assess ID photo quality';
+$string['sendmanualwarningstolearner'] = 'Send manual warnings to learner';
 
 $string['rules'] = "Allow during exam";
 $string['custom_rules'] = "Custom exam rules";

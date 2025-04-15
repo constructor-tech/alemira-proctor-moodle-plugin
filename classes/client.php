@@ -266,6 +266,7 @@ class client {
             'desktopAppForbiddenProcesses' => $conditiondata['forbiddenprocesses'],
             'desktopAppAllowedProcesses' => $conditiondata['allowedprocesses'],
             'streamsPreset' => $conditiondata['streamspreset'],
+            'sendManualWarningsToLearner' => $conditiondata['sendmanualwarningstolearner'],
             'rules' => array_merge(
                 (array)$conditiondata['rules'],
                 ['custom_rules' => $customrules]

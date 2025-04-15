@@ -50,6 +50,7 @@ M.availability_proctor.form.getNode = function(json) {
     var streamsPresetId = id + '_streamsPreset';
     var allowedProcessesId = id + '_allowedProcesses';
     var forbiddenProcessesId = id + '_forbiddenProcesses';
+    var sendManualWarningsToLearnerId = id + '_sendManualWarningsToLearner';
 
     var tabButtonOne, tabButtonTwo, tabOne, tabTwo;
 
@@ -222,6 +223,12 @@ M.availability_proctor.form.getNode = function(json) {
         '<input type="checkbox" name="checkidphotoquality" id="' + checkidphotoqualityId + '" value="1">&nbsp;' +
          getString('enable') + '</label> '
     );
+
+    html += formGroup(sendManualWarningsToLearnerId, getString('sendmanualwarningstolearner'),
+        '<label for="' + sendManualWarningsToLearnerId + '">' +
+        '<input type="checkbox" name="sendmanualwarningstolearner" id="' + sendManualWarningsToLearnerId + '" value="1">&nbsp;' +
+         getString('enable') + '</label> '
+    );  
 
     html += formGroup(userAgreementId, getString('user_agreement_url'),
         '<input name="useragreementurl" id="' + userAgreementId + '" class="form-control" value="" />'
@@ -446,6 +453,10 @@ M.availability_proctor.form.getNode = function(json) {
         node.one('#' + checkidphotoqualityId).set('checked', json.checkidphotoquality ? 'checked' : null);
     }
 
+    if (json.sendmanualwarningstolearner !== undefined) {
+        node.one('#' + sendManualWarningsToLearnerId).set('checked', json.sendmanualwarningstolearner ? 'checked' : null);
+    }
+
     if (json.biometryenabled !== undefined) {
         node.one('#' + biometryEnabledId).set('checked', json.biometryenabled ? 'checked' : null);
     }
@@ -584,6 +595,7 @@ M.availability_proctor.form.fillValue = function(value, node) {
     value.securebrowserlevel = node.one('select[name=securebrowserlevel]').get('value').trim();
     value.allowmultipledisplays = node.one('input[name=allowmultipledisplays]').get('checked');
     value.allowvirtualenvironment = node.one('input[name=allowvirtualenvironment]').get('checked');
+    value.sendmanualwarningstolearner = node.one('input[name=sendmanualwarningstolearner]').get('checked');
     value.checkidphotoquality = node.one('input[name=checkidphotoquality]').get('checked');
     value.calculator = node.one('select[name=calculator]').get('value').trim();
     value.streamspreset = node.one('select[name=streamspreset]').get('value').trim();

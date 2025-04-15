@@ -123,6 +123,10 @@ class defaults_form extends \moodleform {
         }
         $mform->addElement('select', 'streamspreset', get_string('streamspreset', 'availability_proctor'), $streamspresetoptions);
 
+        $mform->addElement('advcheckbox', 'sendmanualwarningstolearner', get_string('sendmanualwarningstolearner',  'availability_proctor'));
+        $mform->setType('sendmanualwarningstolearner', PARAM_BOOL);
+
+
         $mform->addElement('header', 'proctoring_rules', get_string('rules', 'availability_proctor'));
 
         foreach (condition::RULES as $key => $value) {

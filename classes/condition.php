@@ -49,6 +49,7 @@ class condition extends \core_availability\condition {
         'biometryenabled', 'biometryskipfail', 'biometryflow', 'biometrytheme',
         'calculator', 'auxiliarycamera', 'auxiliarycameramode',
         'forbiddenprocesses', 'allowedprocesses', 'streamspreset',
+        'sendmanualwarningstolearner',
     ];
 
     /** @var array List of default values for visible warnings */
@@ -101,6 +102,7 @@ class condition extends \core_availability\condition {
         'checkidphotoquality' => false,
         'biometryenabled' => false,
         'biometryskipfail' => false,
+        'sendmanualwarningstolearner' => true,
     ];
 
     /** @var array List of possible calculator options */
@@ -206,6 +208,9 @@ class condition extends \core_availability\condition {
 
     /** @var string Stream settings preset */
     public $streamspreset = null;
+
+    /** @var bool Biometric identification skips failures */
+    public $sendmanualwarningstolearner = true;
 
     /**
      * Construct
@@ -488,6 +493,8 @@ class condition extends \core_availability\condition {
             'securebrowserlevel' => $this->securebrowserlevel,
             'allowedprocesses' => $this->allowedprocesses,
             'forbiddenprocesses' => $this->forbiddenprocesses,
+            'streamspreset' => $this->streamspreset,
+            'sendmanualwarningstolearner' => (bool) $this->sendmanualwarningstolearner,
         ];
     }
 

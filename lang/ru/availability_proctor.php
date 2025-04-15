@@ -87,7 +87,7 @@ $string['web_camera_main_view'] = 'Положение основной каме�
 $string['web_camera_main_view_front'] = 'Фронтальная';
 $string['web_camera_main_view_side'] = 'Боковая';
 
-$string['calculator'] = 'калькулятор';
+$string['calculator'] = 'Калькулятор';
 $string['calculator_off'] = 'Выключен';
 $string['calculator_simple'] = 'Простой';
 $string['calculator_scientific'] = 'Научный';
@@ -120,6 +120,7 @@ $string['processes_list_hint'] = 'По одному процессу на стр
 $string['allowmultipledisplays'] = 'Разрешить использование второго монитора';
 $string['allowvirtualenvironment'] = 'Разрешить использовать виртуальные машины';
 $string['checkidphotoquality'] = 'Проверять качество фото паспорта';
+$string['sendmanualwarningstolearner'] = 'Уведомлять пользователя о нарушениях, найденных проктором';
 
 $string['rules'] = 'Правила';
 $string['custom_rules'] = "Нестандартные правила";
