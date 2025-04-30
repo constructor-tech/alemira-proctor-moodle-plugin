@@ -367,6 +367,10 @@ M.availability_proctor.form.getNode = function(json) {
 
     json.scoring = json.scoring || {};
 
+    if (json.sendmanualwarningstolearner === undefined) {
+        json.sendmanualwarningstolearner = true;
+    }
+
     if (json.creating) {
         for (var dkey in this.defaults) {
             var dvalue = this.defaults[dkey];

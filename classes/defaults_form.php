@@ -125,6 +125,7 @@ class defaults_form extends \moodleform {
 
         $mform->addElement('advcheckbox', 'sendmanualwarningstolearner', get_string('sendmanualwarningstolearner',  'availability_proctor'));
         $mform->setType('sendmanualwarningstolearner', PARAM_BOOL);
+        $mform->setDefault('sendmanualwarningstolearner', true);
 
 
         $mform->addElement('header', 'proctoring_rules', get_string('rules', 'availability_proctor'));
