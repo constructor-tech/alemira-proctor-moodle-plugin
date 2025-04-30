@@ -87,10 +87,17 @@ $string['web_camera_main_view'] = 'Положение основной каме�
 $string['web_camera_main_view_front'] = 'Фронтальная';
 $string['web_camera_main_view_side'] = 'Боковая';
 
-$string['calculator'] = 'калькулятор';
+$string['calculator'] = 'Калькулятор';
 $string['calculator_off'] = 'Выключен';
 $string['calculator_simple'] = 'Простой';
 $string['calculator_scientific'] = 'Научный';
+
+$string['streamspreset'] = 'Настройки потоков';
+$string['streamspreset_default'] = 'По умолчанию';
+$string['streamspreset_no_video'] = 'Без видео';
+$string['streamspreset_no_ai_detection'] = 'Без AI';
+$string['streamspreset_auxcam_and_desktop'] = 'Дополнительная камера и десктоп';
+$string['streamspreset_auxcam_only'] = 'Только дополнительная камера';
 
 $string['select_groups'] = 'Использовать прокторинг только для выбраных групп';
 
@@ -113,6 +120,7 @@ $string['processes_list_hint'] = 'По одному процессу на стр
 $string['allowmultipledisplays'] = 'Разрешить использование второго монитора';
 $string['allowvirtualenvironment'] = 'Разрешить использовать виртуальные машины';
 $string['checkidphotoquality'] = 'Проверять качество фото паспорта';
+$string['sendmanualwarningstolearner'] = 'Уведомлять пользователя о нарушениях, найденных проктором';
 
 $string['rules'] = 'Правила';
 $string['custom_rules'] = "Нестандартные правила";
