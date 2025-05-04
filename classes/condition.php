@@ -48,7 +48,8 @@ class condition extends \core_availability\condition {
         'scoring', 'warnings', 'rules', 'customrules', 'groups',
         'biometryenabled', 'biometryskipfail', 'biometryflow', 'biometrytheme',
         'calculator', 'auxiliarycamera', 'auxiliarycameramode',
-        'forbiddenprocesses', 'allowedprocesses',
+        'forbiddenprocesses', 'allowedprocesses', 'streamspreset',
+        'sendmanualwarningstolearner',
     ];
 
     /** @var array List of default values for visible warnings */
@@ -101,11 +102,17 @@ class condition extends \core_availability\condition {
         'checkidphotoquality' => false,
         'biometryenabled' => false,
         'biometryskipfail' => false,
+        'sendmanualwarningstolearner' => true,
     ];
 
     /** @var array List of possible calculator options */
     const CALCULATOR_OPTIONS = [
         'off', 'scientific', 'simple',
+    ];
+
+    /** @var array List of possible streamsPreset options */
+    const STREAMS_PRESET_OPTIONS = [
+        'default', 'no_video', 'no_ai_detection', /* 'auxcam_and_desktop', 'auxcam_only' */
     ];
 
     /** @var array List of possible aux camera options */
@@ -198,6 +205,12 @@ class condition extends \core_availability\condition {
 
     /** @var array Apply condition to specified groups */
     public $groups = [];
+
+    /** @var string Stream settings preset */
+    public $streamspreset = null;
+
+    /** @var bool Biometric identification skips failures */
+    public $sendmanualwarningstolearner = true;
 
     /**
      * Construct
@@ -301,6 +314,10 @@ class condition extends \core_availability\condition {
             $this->forbiddenprocesses = $structure->forbiddenprocesses;
         }
 
+        if (!empty($structure->streamspreset)) {
+            $this->streamspreset = $structure->streamspreset;
+        }
+
         $this->validate();
     }
 
@@ -347,7 +364,9 @@ class condition extends \core_availability\condition {
         if (!in_array($this->calculator, self::CALCULATOR_OPTIONS)) {
             $this->calculator = 'off';
         }
-
+        if (!in_array($this->streamspreset, self::STREAMS_PRESET_OPTIONS)) {
+            $this->streamspreset = 'default';
+        }
     }
 
     /**
@@ -474,6 +493,8 @@ class condition extends \core_availability\condition {
             'securebrowserlevel' => $this->securebrowserlevel,
             'allowedprocesses' => $this->allowedprocesses,
             'forbiddenprocesses' => $this->forbiddenprocesses,
+            'streamspreset' => $this->streamspreset,
+            'sendmanualwarningstolearner' => (bool) $this->sendmanualwarningstolearner,
         ];
     }
 

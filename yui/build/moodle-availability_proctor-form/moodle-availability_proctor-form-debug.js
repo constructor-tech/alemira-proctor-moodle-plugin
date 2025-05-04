@@ -12,12 +12,13 @@ M.availability_proctor.form = Y.Object(M.core_availability.plugin);
 
 M.availability_proctor.form.rules = null;
 
-M.availability_proctor.form.initInner = function(rules, warnings, scoring, defaults, groups) {
+M.availability_proctor.form.initInner = function(rules, warnings, scoring, streamsPresetOptions, defaults, groups) {
     this.rules = rules;
     this.warnings = warnings;
     this.scoring = scoring;
     this.defaults = defaults;
     this.groups = groups;
+    this.streamsPresetOptions = streamsPresetOptions;
 };
 
 M.availability_proctor.form.instId = 0;
@@ -48,8 +49,10 @@ M.availability_proctor.form.getNode = function(json) {
     var userAgreementId = id + '_userAgreement';
     var webCameraMainViewId = id + '_webCameraMainView';
     var calculatorId = id + '_calculator';
+    var streamsPresetId = id + '_streamsPreset';
     var allowedProcessesId = id + '_allowedProcesses';
     var forbiddenProcessesId = id + '_forbiddenProcesses';
+    var sendManualWarningsToLearnerId = id + '_sendManualWarningsToLearner';
 
     var tabButtonOne, tabButtonTwo, tabOne, tabTwo;
 
@@ -204,7 +207,7 @@ M.availability_proctor.form.getNode = function(json) {
         '  <option value="high">' + getString('secure_browser_level_high') + '</option>' +
         '</select>'
     );
-
+    
     html += formGroup(allowmultipledisplaysId, getString('allowmultipledisplays'),
         '<label for="' + allowmultipledisplaysId + '">' +
         '<input type="checkbox" name="allowmultipledisplays" id="' + allowmultipledisplaysId + '" value="1">&nbsp;' +
@@ -223,6 +226,12 @@ M.availability_proctor.form.getNode = function(json) {
          getString('enable') + '</label> '
     );
 
+    html += formGroup(sendManualWarningsToLearnerId, getString('sendmanualwarningstolearner'),
+        '<label for="' + sendManualWarningsToLearnerId + '">' +
+        '<input type="checkbox" name="sendmanualwarningstolearner" id="' + sendManualWarningsToLearnerId + '" value="1">&nbsp;' +
+         getString('enable') + '</label> '
+    );  
+
     html += formGroup(userAgreementId, getString('user_agreement_url'),
         '<input name="useragreementurl" id="' + userAgreementId + '" class="form-control" value="" />'
     );
@@ -239,6 +248,14 @@ M.availability_proctor.form.getNode = function(json) {
         '</select>'
     );
 
+    var streamsPresetOptions = '';
+    for (var spi in this.streamsPresetOptions) {
+        var spkey = this.streamsPresetOptions[spi];
+        streamsPresetOptions += '<option value="' + spkey + '">' + getString('streamspreset_' + spkey) + '</option>';
+    }
+    html += formGroup(streamsPresetId, getString('streamspreset'),
+        '<select name="streamspreset" id="' + streamsPresetId + '" class="custom-select">' + streamsPresetOptions + '</select>'
+    );
 
     var ruleOptions = '';
     for (var key in this.rules) {
@@ -352,6 +369,10 @@ M.availability_proctor.form.getNode = function(json) {
 
     json.scoring = json.scoring || {};
 
+    if (json.sendmanualwarningstolearner === undefined) {
+        json.sendmanualwarningstolearner = true;
+    }
+
     if (json.creating) {
         for (var dkey in this.defaults) {
             var dvalue = this.defaults[dkey];
@@ -438,6 +459,10 @@ M.availability_proctor.form.getNode = function(json) {
         node.one('#' + checkidphotoqualityId).set('checked', json.checkidphotoquality ? 'checked' : null);
     }
 
+    if (json.sendmanualwarningstolearner !== undefined) {
+        node.one('#' + sendManualWarningsToLearnerId).set('checked', json.sendmanualwarningstolearner ? 'checked' : null);
+    }
+
     if (json.biometryenabled !== undefined) {
         node.one('#' + biometryEnabledId).set('checked', json.biometryenabled ? 'checked' : null);
     }
@@ -456,6 +481,10 @@ M.availability_proctor.form.getNode = function(json) {
 
     if (json.calculator !== undefined) {
         node.one('select[name=calculator] option[value=' + json.calculator + ']').set('selected', 'selected');
+    }
+
+    if (json.streamspreset !== undefined) {
+        node.one('select[name=streamspreset] option[value=' + json.streamspreset + ']').set('selected', 'selected');
     }
 
     if (json.securebrowserlevel) {
@@ -572,8 +601,10 @@ M.availability_proctor.form.fillValue = function(value, node) {
     value.securebrowserlevel = node.one('select[name=securebrowserlevel]').get('value').trim();
     value.allowmultipledisplays = node.one('input[name=allowmultipledisplays]').get('checked');
     value.allowvirtualenvironment = node.one('input[name=allowvirtualenvironment]').get('checked');
+    value.sendmanualwarningstolearner = node.one('input[name=sendmanualwarningstolearner]').get('checked');
     value.checkidphotoquality = node.one('input[name=checkidphotoquality]').get('checked');
     value.calculator = node.one('select[name=calculator]').get('value').trim();
+    value.streamspreset = node.one('select[name=streamspreset]').get('value').trim();
     value.allowedprocesses = node.one('textarea[name=allowedprocesses]').get('value').trim();
     value.forbiddenprocesses = node.one('textarea[name=forbiddenprocesses]').get('value').trim();
 

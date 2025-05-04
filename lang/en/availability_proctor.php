@@ -92,6 +92,13 @@ $string['calculator_off'] = 'Off';
 $string['calculator_simple'] = 'Simple';
 $string['calculator_scientific'] = 'Scientific';
 
+$string['streamspreset'] = 'Streams preset';
+$string['streamspreset_default'] = 'Default';
+$string['streamspreset_no_video'] = 'No video';
+$string['streamspreset_no_ai_detection'] = 'No AI detection';
+$string['streamspreset_auxcam_and_desktop'] = 'Aux camera and desktop';
+$string['streamspreset_auxcam_only'] = 'Aux camera only';
+
 $string['select_groups'] = 'Enable proctoring for selected groups';
 
 $string['is_trial'] = 'Demo exam mode';
@@ -113,6 +120,7 @@ $string['processes_list_hint'] = 'One process name per line';
 $string['allowmultipledisplays'] = 'Allow multiple displays';
 $string['allowvirtualenvironment'] = 'Virtual machine accesss';
 $string['checkidphotoquality'] = 'Assess ID photo quality';
+$string['sendmanualwarningstolearner'] = 'Send manual warnings to learner';
 
 $string['rules'] = "Allow during exam";
 $string['custom_rules'] = "Custom exam rules";
