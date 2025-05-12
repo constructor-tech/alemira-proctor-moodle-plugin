@@ -24,6 +24,8 @@
 
 namespace availability_proctor;
 
+use stdClass;
+
 /**
  * Client class
  */
@@ -79,12 +81,12 @@ class client {
     /** @var bool Company name */
     protected $useremails;
 
-    /** @var \availability_proctor\condition Availability condition */
+    /** @var condition Availability condition */
     protected $condition;
 
     /**
      * Initializes variables form plugin config and availability condition
-     * @param \availability_proctor\condition $condition Availability condition
+     * @param condition $condition Availability condition
      */
     public function __construct($condition=null) {
         $this->condition = $condition;
@@ -100,7 +102,7 @@ class client {
      * Generates API URL for method
      * @param string $method API method
      * @param string $sessionid Session ID
-     * @param string $sessionmethod Mession method
+     * @param string $sessionmethod Session method
      * @return string
      */
     public function api_url($method, $sessionid=null, $sessionmethod=null) {
@@ -134,7 +136,7 @@ class client {
      * Sends `finish` request to api
      * @param string $sessionid Proctoring session id
      * @param string $redirecturl Redirect to this URL after finishing
-     * @return string
+     * @return array
      */
     public function finish_session($sessionid, $redirecturl) {
         return $this->request('sessions', $sessionid, 'finish', [
@@ -162,7 +164,7 @@ class client {
     /**
      * Decodes JWT message
      * @param string $message encoded JWT
-     * @return array
+     * @return stdClass
      */
     public function decode($message) {
         // For versions of php-jwt >= 6.0.0
@@ -180,7 +182,7 @@ class client {
      * Sends API request
      * @param string $method API-method
      * @param string $sessionid Session ID
-     * @param string $sessionmethod Mession method
+     * @param string $sessionmethod Session method
      * @param array $body Request body
      * @return array
      */
@@ -267,6 +269,7 @@ class client {
             'desktopAppAllowedProcesses' => $conditiondata['allowedprocesses'],
             'streamsPreset' => $conditiondata['streamspreset'],
             'sendManualWarningsToLearner' => $conditiondata['sendmanualwarningstolearner'],
+            'allowRoomScanAuxCamera' => $conditiondata['allowroomscanauxcamera'],
             'rules' => array_merge(
                 (array)$conditiondata['rules'],
                 ['custom_rules' => $customrules]

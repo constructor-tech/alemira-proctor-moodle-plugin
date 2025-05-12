@@ -32,7 +32,6 @@ use core_availability\info_module;
 use moodle_exception;
 use quiz;
 use stdClass;
-use availability_proctor\state;
 
 /**
  * Proctor by Constructor condition
@@ -49,7 +48,7 @@ class condition extends \core_availability\condition {
         'biometryenabled', 'biometryskipfail', 'biometryflow', 'biometrytheme',
         'calculator', 'auxiliarycamera', 'auxiliarycameramode',
         'forbiddenprocesses', 'allowedprocesses', 'streamspreset',
-        'sendmanualwarningstolearner',
+        'sendmanualwarningstolearner', 'allowroomscanauxcamera',
     ];
 
     /** @var array List of default values for visible warnings */
@@ -103,6 +102,7 @@ class condition extends \core_availability\condition {
         'biometryenabled' => false,
         'biometryskipfail' => false,
         'sendmanualwarningstolearner' => true,
+        'allowroomscanauxcamera' => false,
     ];
 
     /** @var array List of possible calculator options */
@@ -211,6 +211,9 @@ class condition extends \core_availability\condition {
 
     /** @var bool Biometric identification skips failures */
     public $sendmanualwarningstolearner = true;
+
+    /** @var bool Allow room scan using aux camera */
+    public $allowroomscanauxcamera = false;
 
     /**
      * Construct
@@ -434,8 +437,8 @@ class condition extends \core_availability\condition {
      * @return bool
      */
     public static function has_proctor_condition($cm) {
-        $econds = self::get_conditions($cm);
-        return (bool) $econds;
+        $conditions = self::get_conditions($cm);
+        return !empty($conditions);
     }
 
     /**
@@ -495,6 +498,7 @@ class condition extends \core_availability\condition {
             'forbiddenprocesses' => $this->forbiddenprocesses,
             'streamspreset' => $this->streamspreset,
             'sendmanualwarningstolearner' => (bool) $this->sendmanualwarningstolearner,
+            'allowroomscanauxcamera' => (bool) $this->allowroomscanauxcamera,
         ];
     }
 
