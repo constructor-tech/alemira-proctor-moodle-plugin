@@ -127,6 +127,10 @@ class defaults_form extends \moodleform {
         $mform->setType('sendmanualwarningstolearner', PARAM_BOOL);
         $mform->setDefault('sendmanualwarningstolearner', true);
 
+        $mform->addElement('advcheckbox', 'allowroomscanauxcamera', get_string('allowroomscanauxcamera',  'availability_proctor'));
+        $mform->setType('allowroomscanauxcamera', PARAM_BOOL);
+        $mform->setDefault('allowroomscanauxcamera', false);
+
 
         $mform->addElement('header', 'proctoring_rules', get_string('rules', 'availability_proctor'));
 

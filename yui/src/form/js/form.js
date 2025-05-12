@@ -51,6 +51,7 @@ M.availability_proctor.form.getNode = function(json) {
     var allowedProcessesId = id + '_allowedProcesses';
     var forbiddenProcessesId = id + '_forbiddenProcesses';
     var sendManualWarningsToLearnerId = id + '_sendManualWarningsToLearner';
+    var allowRoomScanAuxCameraId = id + '_allowRoomScanAuxCamera';
 
     var tabButtonOne, tabButtonTwo, tabOne, tabTwo;
 
@@ -228,7 +229,13 @@ M.availability_proctor.form.getNode = function(json) {
         '<label for="' + sendManualWarningsToLearnerId + '">' +
         '<input type="checkbox" name="sendmanualwarningstolearner" id="' + sendManualWarningsToLearnerId + '" value="1">&nbsp;' +
          getString('enable') + '</label> '
-    );  
+    );
+
+    html += formGroup(allowRoomScanAuxCameraId, getString('allowroomscanauxcamera'),
+        '<label for="' + allowRoomScanAuxCameraId + '">' +
+        '<input type="checkbox" name="allowroomscanauxcamera" id="' + allowRoomScanAuxCameraId + '" value="1">&nbsp;' +
+        getString('enable') + '</label> '
+    );
 
     html += formGroup(userAgreementId, getString('user_agreement_url'),
         '<input name="useragreementurl" id="' + userAgreementId + '" class="form-control" value="" />'
@@ -489,6 +496,10 @@ M.availability_proctor.form.getNode = function(json) {
         node.one('select[name=securebrowserlevel] option[value=' + json.securebrowserlevel + ']').set('selected', 'selected');
     }
 
+    if (json.allowroomscanauxcamera !== undefined) {
+        node.one('#' + allowRoomScanAuxCameraId).set('checked', json.allowroomscanauxcamera ? 'checked' : null);
+    }
+
     // Setting hardcoded defaults when no user-defined exist.
     for (var wrkey in this.warnings) {
         if (json.warnings[wrkey] === undefined) {
@@ -605,6 +616,7 @@ M.availability_proctor.form.fillValue = function(value, node) {
     value.streamspreset = node.one('select[name=streamspreset]').get('value').trim();
     value.allowedprocesses = node.one('textarea[name=allowedprocesses]').get('value').trim();
     value.forbiddenprocesses = node.one('textarea[name=forbiddenprocesses]').get('value').trim();
+    value.allowroomscanauxcamera = node.one('input[name=allowroomscanauxcamera]').get('checked');
 
     value.biometryenabled = node.one('input[name=biometryenabled]').get('checked');
     value.biometryskipfail = node.one('input[name=biometryskipfail]').get('checked');

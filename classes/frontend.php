@@ -59,7 +59,7 @@ class frontend extends \core_availability\frontend {
             'auxiliary_camera', 'auxiliary_camera_mode', 'auxiliary_camera_mode_photo',
             'auxiliary_camera_mode_video',
             'allowed_processes', 'forbidden_processes', 'processes_list_hint',
-            'sendmanualwarningstolearner',
+            'sendmanualwarningstolearner', 'allowroomscanauxcamera',
         ];
 
         foreach (condition::WARNINGS as $key => $value) {
