@@ -121,6 +121,7 @@ $string['allowmultipledisplays'] = 'Allow multiple displays';
 $string['allowvirtualenvironment'] = 'Virtual machine accesss';
 $string['checkidphotoquality'] = 'Assess ID photo quality';
 $string['sendmanualwarningstolearner'] = 'Send manual warnings to learner';
+$string['allowroomscanauxcamera'] = 'Allow room scan using aux camera';
 
 $string['rules'] = "Allow during exam";
 $string['custom_rules'] = "Custom exam rules";
