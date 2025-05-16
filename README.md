@@ -52,3 +52,11 @@ If the student attempted the module once, for every following attempt a new Proc
 * `defaults.php` - Admin section for changing default proctored exam settings
 * `api.php` - Webhook implementing Proctor Simple API - receives information on session status changes and echeduled exams
 * `entry.php` - Learner is redirected here inside proctoring. Handles seemless auths and redirects to quiz
+
+### Local development
+
+* Install moodle by following the official [installation guide](https://docs.moodle.org/500/en/Installing_Moodle). 
+  Use a PHP version required for your Moodle version of choice. The setup process will guide you through additional requirements.
+* Clone this repository into `[moodle_dir]/availability/condition/proctor`
+* Enable Developer mode and debug messages output in `Site administration → Development`
+* For rebuilding the frontend part, you have to use YUI and Shifter, see the [official guide](https://moodledev.io/docs/5.0/guides/javascript/yui)
