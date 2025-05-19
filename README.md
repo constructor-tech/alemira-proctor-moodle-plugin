@@ -2,7 +2,7 @@
 
 ## Requirements
 
-Proctor by Constructor plugin was tested with Moodle versions 3.8 to 4.5.
+Proctor by Constructor plugin was tested with Moodle versions 3.8 to 4.1.
 
 ## Installation and integration
 
