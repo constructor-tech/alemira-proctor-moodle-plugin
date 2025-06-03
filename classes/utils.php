@@ -37,7 +37,7 @@ class utils {
     }
 
     /**
-     * Provides logict for proctoring fader, exist as soon a possible if
+     * Provides logic for proctoring fader, exist as soon a possible if
      * no protection is reqired.
      * @param \stdClass $attempt Attempt
      */
@@ -86,9 +86,8 @@ class utils {
         $biometrydata = $client->biometry_data($USER);
 
         $timedata = $client->time_data($timebracket);
-        $pageurl = $PAGE->url;
-        $pageurl->param('proctor_accesscode', $entry->accesscode);
-        $attemptdata = $client->attempt_data($entry->accesscode, $pageurl->out(false));
+        $starturl = self::generate_start_url($entry, $USER);
+        $attemptdata = $client->attempt_data($entry->accesscode, $starturl);
 
         $data = array_merge($data, $userdata, $timedata, $attemptdata, $biometrydata);
 
@@ -104,7 +103,7 @@ class utils {
             $formdata = $client->get_form('start', $data);
             $entryreset = isset($SESSION->availability_proctor_reset) && $SESSION->availability_proctor_reset;
 
-            // Our entry is active, we are showing user a fader.
+            // Our entry is active, we are showing the user a fader.
             ob_start();
             include(dirname(__FILE__).'/../templates/proctoring_fader.php');
             $output = ob_get_clean();
@@ -113,7 +112,28 @@ class utils {
     }
 
     /**
-     * When attempt is started, see if we are in proctoring, reset old entries,
+     * Generate exam start url, with auth token if enabled in config
+     * @param $entry
+     * @param $user
+     * @return string
+     */
+    public static function generate_start_url($entry, $user) {
+        $urlparams = ['proctor_accesscode' => $entry->accesscode];
+
+        if (get_config('availability_proctor', 'seamless_auth')) {
+            // Token is valid for 3 months.
+            // We want a timeframe log enough for the user to pass a quiz but clean the db at some point.
+            $tokenvaliduntil = time() + (3 * 60 * 60 * 24);
+            $urlparams['token'] = get_user_key('availability_proctor', $user->id, null, false, $tokenvaliduntil);
+        }
+
+        $url = new \moodle_url('/availability/condition/proctor/entry.php', $urlparams);
+
+        return $url->out(false);
+    }
+
+    /**
+     * When an attempt is started, see if we are in proctoring, reset old entries,
      * redirect to proctoring if needed
      * @param \stdClass $course course
      * @param \stdClass $cm cm
@@ -180,16 +200,7 @@ class utils {
 
         $timebracket = common::get_timebracket_for_cm('quiz', $cminfo, $user->id);
 
-        $urlparams = ['proctor_accesscode' => $entry->accesscode];
-
-        if (get_config('availability_proctor', 'seamless_auth')) {
-            // Token is valid for 3 month.
-            // We want timeframe log enough for user to pass exam, but clean the db at some point.
-            $tokenvaliduntil = time() + (3 * 60 * 60 * 24);
-            $urlparams['token'] = get_user_key('availability_proctor', $user->id, null, false, $tokenvaliduntil);
-        }
-
-        $location = new \moodle_url('/availability/condition/proctor/entry.php', $urlparams);
+        $starturl = self::generate_start_url($entry, $user);
 
         $lang = current_language();
 
@@ -198,7 +209,7 @@ class utils {
         $userdata = $client->user_data($user, $lang);
         $biometrydata = $client->biometry_data($user);
         $timedata = $client->time_data($timebracket);
-        $attemptdata = $client->attempt_data($entry->accesscode, $location->out(false));
+        $attemptdata = $client->attempt_data($entry->accesscode, $starturl);
 
         $data = array_merge($data, $userdata, $timedata, $attemptdata, $biometrydata);
 
