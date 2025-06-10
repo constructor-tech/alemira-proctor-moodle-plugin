@@ -190,8 +190,8 @@ $string['comment'] = 'Comment';
 $string['details'] = 'Details';
 
 // Fader screen.
-$string['fader_awaiting_proctoring'] = 'Constructor Proctor proctoring starts...';
-$string['fader_instructions'] = '<p>please wait</p>';
+$string['fader_awaiting_proctoring'] = 'Proctoring is launching.';
+$string['fader_instructions'] = '<p>Please wait and do not close the page</p>';
 $string['fader_reset'] = 'Session was reset, you need to restart the exam';
 
 // Dafault settings
