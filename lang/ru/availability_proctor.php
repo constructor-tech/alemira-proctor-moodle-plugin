@@ -128,11 +128,7 @@ $string['custom_rules'] = "Нестандартные правила";
 
 $string['user_agreement_url'] = "URL пользовательского соглашения";
 
-$string['biometry_header'] = 'Параметры биометрической идентификации';
-$string['biometry_enabled'] = 'Включить биометрическую идентификацию';
-$string['biometry_skipfail'] = 'Пропускать пользователя в экзамен при отрицательном результате идентификации';
-$string['biometry_flow'] = 'Название Verification Flow';
-$string['biometry_theme'] = 'Тема';
+$string['preliminary_check'] = 'Предварительная проверка личности студента';
 
 $string['time_scheduled'] = 'Время записи в календаре';
 $string['time_finish'] = 'Время попытки';

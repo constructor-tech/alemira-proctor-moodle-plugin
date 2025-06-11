@@ -40,10 +40,7 @@ M.availability_proctor.form.getNode = function(json) {
     var checkidphotoqualityId = id + '_checkidphotoquality';
     var enableSecureBrowserId = id + '_secureBrowser';
     var secureBrowserLevelId = id + '_secureBrowserLevel';
-    var biometryEnabledId = id + '_biometryEnabled';
-    var biometrySkipfailId = id + '_biometrySkipfail';
-    var biometryFlowId = id + '_biometryFlow';
-    var biometryThemeId = id + '_biometryTheme';
+    var preliminaryCheckId = id + '_preliminaryCheck';
     var userAgreementId = id + '_userAgreement';
     var webCameraMainViewId = id + '_webCameraMainView';
     var calculatorId = id + '_calculator';
@@ -262,6 +259,11 @@ M.availability_proctor.form.getNode = function(json) {
         '<select name="streamspreset" id="' + streamsPresetId + '" class="custom-select">' + streamsPresetOptions + '</select>'
     );
 
+    html += formGroup(preliminaryCheckId, getString('preliminary_check'),
+        '<input type="checkbox" name="preliminarycheck" id="' + preliminaryCheckId + '" value="1">&nbsp;' +
+        '<label for="' + preliminaryCheckId + '">' + getString('enable') + '</label> '
+    );
+
     var ruleOptions = '';
     for (var key in this.rules) {
         var keyId = id + '_' + key;
@@ -319,22 +321,6 @@ M.availability_proctor.form.getNode = function(json) {
         scoringOptions += formGroup(skeyId, getString('scoring_' + skey), scoringInputHTML);
     }
 
-    var biometryOptions = '';
-    biometryOptions += formGroup(biometryEnabledId, getString('biometry_enabled'),
-        '<input type="checkbox" name="biometryenabled" id="' + biometryEnabledId + '" value="1">&nbsp;' +
-        '<label for="' + biometryEnabledId + '">' + getString('enable') + '</label> '
-    );
-    biometryOptions += formGroup(biometrySkipfailId, getString('biometry_skipfail'),
-        '<input type="checkbox" name="biometryskipfail" id="' + biometrySkipfailId + '" value="1">&nbsp;' +
-        '<label for="' + biometrySkipfailId + '">' + getString('enable') + '</label> '
-    );
-    biometryOptions += formGroup(biometryFlowId, getString('biometry_flow'),
-        '<input type="text" name="biometryflow" id="' + biometryFlowId + '" class="form-control">'
-    );
-    biometryOptions += formGroup(biometryThemeId, getString('biometry_theme'),
-        '<input type="text" name="biometrytheme" id="' + biometryThemeId + '" class="form-control">'
-    );
-
 
     var htmlTwo = '';
     htmlTwo += formGroup(null, getString('visible_warnings'),
@@ -343,10 +329,6 @@ M.availability_proctor.form.getNode = function(json) {
 
     htmlTwo += formGroup(null, getString('scoring_params_header'),
                  moreLess(scoringOptions),
-                 true);
-
-    htmlTwo += formGroup(null, getString('biometry_header'),
-                 moreLess(biometryOptions),
                  true);
 
 
@@ -468,20 +450,8 @@ M.availability_proctor.form.getNode = function(json) {
         node.one('#' + sendManualWarningsToLearnerId).set('checked', json.sendmanualwarningstolearner ? 'checked' : null);
     }
 
-    if (json.biometryenabled !== undefined) {
-        node.one('#' + biometryEnabledId).set('checked', json.biometryenabled ? 'checked' : null);
-    }
-
-    if (json.biometryskipfail !== undefined) {
-        node.one('#' + biometrySkipfailId).set('checked', json.biometryskipfail ? 'checked' : null);
-    }
-
-    if (json.biometryflow !== undefined) {
-        node.one('#' + biometryFlowId).set('value', json.biometryflow);
-    }
-
-    if (json.biometrytheme !== undefined) {
-        node.one('#' + biometryThemeId).set('value', json.biometrytheme);
+    if (json.preliminarycheck !== undefined) {
+        node.one('#' + preliminaryCheckId).set('checked', json.preliminarycheck ? 'checked' : null);
     }
 
     if (json.calculator !== undefined) {
@@ -617,11 +587,7 @@ M.availability_proctor.form.fillValue = function(value, node) {
     value.allowedprocesses = node.one('textarea[name=allowedprocesses]').get('value').trim();
     value.forbiddenprocesses = node.one('textarea[name=forbiddenprocesses]').get('value').trim();
     value.allowroomscanauxcamera = node.one('input[name=allowroomscanauxcamera]').get('checked');
-
-    value.biometryenabled = node.one('input[name=biometryenabled]').get('checked');
-    value.biometryskipfail = node.one('input[name=biometryskipfail]').get('checked');
-    value.biometryflow = node.one('input[name=biometryflow]').get('value').trim();
-    value.biometrytheme = node.one('input[name=biometrytheme]').get('value').trim();
+    value.preliminarycheck = node.one('input[name=preliminarycheck]').get('checked');
 
     value.rules = {};
     rulesInputs = node.all('.rules input');

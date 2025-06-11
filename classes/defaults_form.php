@@ -131,6 +131,9 @@ class defaults_form extends \moodleform {
         $mform->setType('allowroomscanauxcamera', PARAM_BOOL);
         $mform->setDefault('allowroomscanauxcamera', false);
 
+        $mform->addElement('advcheckbox', 'preliminarycheck', get_string('preliminary_check', 'availability_proctor'));
+        $mform->setType('preliminarycheck', PARAM_BOOL);
+
 
         $mform->addElement('header', 'proctoring_rules', get_string('rules', 'availability_proctor'));
 
@@ -157,16 +160,6 @@ class defaults_form extends \moodleform {
             $mform->setDefault('scoring['.$key.']', $field['default']);
         }
 
-        $mform->addElement('header', 'biometry_header', get_string('biometry_header', 'availability_proctor'));
-
-        $mform->addElement('advcheckbox', 'biometryenabled', get_string('biometry_enabled', 'availability_proctor'));
-        $mform->setType('biometryenabled', PARAM_BOOL);
-        $mform->addElement('advcheckbox', 'biometryskipfail', get_string('biometry_skipfail', 'availability_proctor'));
-        $mform->setType('biometryskipfail', PARAM_BOOL);
-        $mform->addElement('text', 'biometryflow', get_string('biometry_flow', 'availability_proctor'));
-        $mform->setType('biometryflow', PARAM_TEXT);
-        $mform->addElement('text', 'biometrytheme', get_string('biometry_theme', 'availability_proctor'));
-        $mform->setType('biometrytheme', PARAM_TEXT);
 
         $mform->addElement('header', 'proctored_groups', get_string('select_groups', 'availability_proctor'));
         $coursegroups = $this->get_group_options();
