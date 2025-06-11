@@ -83,13 +83,12 @@ class utils {
         $client = new client($condition);
         $data = $client->exam_data($course, $cm);
         $userdata = $client->user_data($USER, $lang);
-        $biometrydata = $client->biometry_data($USER);
 
         $timedata = $client->time_data($timebracket);
         $starturl = self::generate_start_url($entry, $USER);
         $attemptdata = $client->attempt_data($entry->accesscode, $starturl);
 
-        $data = array_merge($data, $userdata, $timedata, $attemptdata, $biometrydata);
+        $data = array_merge($data, $userdata, $timedata, $attemptdata);
 
         if ($condition->schedulingrequired && empty($entry->timescheduled)) {
             $data['schedule'] = true;
@@ -207,11 +206,10 @@ class utils {
         $client = new \availability_proctor\client($condition);
         $data = $client->exam_data($course, $cminfo);
         $userdata = $client->user_data($user, $lang);
-        $biometrydata = $client->biometry_data($user);
         $timedata = $client->time_data($timebracket);
         $attemptdata = $client->attempt_data($entry->accesscode, $starturl);
 
-        $data = array_merge($data, $userdata, $timedata, $attemptdata, $biometrydata);
+        $data = array_merge($data, $userdata, $timedata, $attemptdata);
 
         if ($condition->schedulingrequired) {
             $data['schedule'] = true;
