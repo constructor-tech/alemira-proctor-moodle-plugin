@@ -128,11 +128,7 @@ $string['custom_rules'] = "Custom exam rules";
 
 $string['user_agreement_url'] = "Terms and conditions URL";
 
-$string['biometry_header'] = 'Biometric identification';
-$string['biometry_enabled'] = 'Enable biometric identification';
-$string['biometry_skipfail'] = 'Allow user to continue on failure of identification';
-$string['biometry_flow'] = 'Verification flow name';
-$string['biometry_theme'] = 'Theme';
+$string['preliminary_check'] = 'Preliminary check of student\'s identity';
 
 $string['time_scheduled'] = 'Scheduled';
 $string['time_finish'] = 'Attempt finished at';
