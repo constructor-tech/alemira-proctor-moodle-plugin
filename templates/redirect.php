@@ -40,7 +40,7 @@ defined('MOODLE_INTERNAL') || die();
               <?php if(isset($formdata['token'])): ?>
                   <input type="hidden" value="<?php echo $formdata['token'] ?>" name="token">
               <?php endif ?>
-              <button type="submit">Go to Proctor by Constructor</button>
+              <button type="submit">Go to Proctoring system</button>
           </form>
       </div>
       <script type="text/javascript">
