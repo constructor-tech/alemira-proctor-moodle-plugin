@@ -45,7 +45,7 @@ function availability_proctor_after_require_login() {
 
     // User is trying to start an attempt, redirect to proctor if it is not started.
     $scriptname = isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'] : null;
-    if ($scriptname == '/mod/quiz/startattempt.php') {
+   if (($scriptname == '/mod/quiz/startattempt.php') || (strpos($scriptname, '/mod/quiz/startattempt.php') !== false)){ 
         $cmid = required_param('cmid', PARAM_INT); // Course module id.
 
         if (!$cm = get_coursemodule_from_id('quiz', $cmid)) {
