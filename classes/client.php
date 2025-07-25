@@ -294,12 +294,22 @@ class client {
         $userpicture->includetoken = $user->id;
         $profileimageurl = $userpicture->get_url($PAGE)->out(false);
 
+        $special = null;
+        foreach(profile_get_user_fields_with_data($user->id) as $field) {
+            if($field->get_shortname() != "proctor_special_accommodations") {
+                continue;
+            }
+
+            $special = strip_tags($field->data);
+        }
+
         $data = [
             'userId' => $user->username,
             'firstName' => $user->firstname,
             'lastName' => $user->lastname,
             'thirdName' => $user->middlename,
             'email' => $this->useremails ? $user->email : null,
+            'specialAccommodationsInfo' => $special,
             'preliminaryCheck' => [
                 'enabled' => $conditiondata['preliminarycheck'],
                 'photo_url' => $profileimageurl,
