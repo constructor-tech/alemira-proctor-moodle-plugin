@@ -44,8 +44,7 @@ class condition extends \core_availability\condition {
         'securebrowser', 'securebrowserlevel',
         'allowmultipledisplays', 'allowvirtualenvironment',
         'checkidphotoquality', 'webcameramainview',
-        'scoring', 'warnings', 'rules', 'customrules', 'groups',
-        'biometryenabled', 'biometryskipfail', 'biometryflow', 'biometrytheme',
+        'scoring', 'warnings', 'rules', 'customrules', 'groups', 'preliminarycheck',
         'calculator', 'auxiliarycamera', 'auxiliarycameramode',
         'forbiddenprocesses', 'allowedprocesses', 'streamspreset',
         'sendmanualwarningstolearner', 'allowroomscanauxcamera',
@@ -99,8 +98,7 @@ class condition extends \core_availability\condition {
         'allowmultipledisplays' => false,
         'allowvirtualenvironment' => false,
         'checkidphotoquality' => false,
-        'biometryenabled' => false,
-        'biometryskipfail' => false,
+        'preliminarycheck' => false,
         'sendmanualwarningstolearner' => true,
         'allowroomscanauxcamera' => false,
     ];
@@ -182,17 +180,8 @@ class condition extends \core_availability\condition {
     /** @var calculator */
     public $calculator = 'off';
 
-    /** @var bool Biometric identification enabled */
-    public $biometryenabled = false;
-
-    /** @var bool Biometric identification skips failures */
-    public $biometryskipfail = false;
-
-    /** @var string Biometric flow name*/
-    public $biometryflow = null;
-
-    /** @var string Biometric identification screen theme name */
-    public $biometrytheme = null;
+    /** @var bool Preliminary check enabled */
+    public $preliminarycheck = false;
 
     /** @var string List of custom rules */
     public $customrules = null;
@@ -209,7 +198,7 @@ class condition extends \core_availability\condition {
     /** @var string Stream settings preset */
     public $streamspreset = null;
 
-    /** @var bool Biometric identification skips failures */
+    /** @var bool Send manual warnings to learner */
     public $sendmanualwarningstolearner = true;
 
     /** @var bool Allow room scan using aux camera */
@@ -291,14 +280,6 @@ class condition extends \core_availability\condition {
 
         if (!empty($structure->useragreementurl)) {
             $this->useragreementurl = $structure->useragreementurl;
-        }
-
-        if (!empty($structure->biometryflow)) {
-            $this->biometryflow = $structure->biometryflow;
-        }
-
-        if (!empty($structure->biometrytheme)) {
-            $this->biometrytheme = $structure->biometrytheme;
         }
 
         if (!empty($structure->groups)) {
@@ -499,6 +480,7 @@ class condition extends \core_availability\condition {
             'streamspreset' => $this->streamspreset,
             'sendmanualwarningstolearner' => (bool) $this->sendmanualwarningstolearner,
             'allowroomscanauxcamera' => (bool) $this->allowroomscanauxcamera,
+            'preliminarycheck' =>  (bool) $this->preliminarycheck,
         ];
     }
 
