@@ -44,6 +44,13 @@ If the student attempted the module once, for every following attempt a new Proc
 2. Find the exam you want to allow a new attempt for. Click the button `New entry`.
 
 
+### Special accomodation field
+The plugin allows passing learner's special accommodation to Constuctor Proctor, a custom profile field has to be created for that.
+1. Go to `Admin -> Users -> User profile fields`
+2. Click `Create a new profile field -> Text area`
+3. Set short name to `proctor_special_accommodations`, set name to something readable, e.g. "Proctoring special accommodations"
+
+
 ## Structure
 
 ### Entrypoints
