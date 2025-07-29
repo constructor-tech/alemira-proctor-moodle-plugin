@@ -248,6 +248,7 @@ class client {
             'examId' => $cm->id,
             'examName' => $cm->name,
             'courseName' => $course->fullname,
+            'courseCode' => $course->shortname,
             'duration' => $conditiondata['duration'],
             'schedule' => false,
             'proctoring' => $conditiondata['mode'],
@@ -308,6 +309,7 @@ class client {
             'firstName' => $user->firstname,
             'lastName' => $user->lastname,
             'thirdName' => $user->middlename,
+            'shortName' => $user->username,
             'email' => $this->useremails ? $user->email : null,
             'specialAccommodationsInfo' => $special,
             'preliminaryCheck' => [
