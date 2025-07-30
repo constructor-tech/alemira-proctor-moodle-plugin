@@ -309,7 +309,6 @@ class client {
             'firstName' => $user->firstname,
             'lastName' => $user->lastname,
             'thirdName' => $user->middlename,
-            'shortName' => $user->username,
             'email' => $this->useremails ? $user->email : null,
             'specialAccommodationsInfo' => $special,
             'preliminaryCheck' => [
