@@ -248,6 +248,7 @@ class client {
             'examId' => $cm->id,
             'examName' => $cm->name,
             'courseName' => $course->fullname,
+            'courseCode' => $course->shortname,
             'duration' => $conditiondata['duration'],
             'schedule' => false,
             'proctoring' => $conditiondata['mode'],
