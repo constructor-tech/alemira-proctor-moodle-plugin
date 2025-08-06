@@ -280,43 +280,40 @@ class client {
     }
 
     /**
-     * Format biometry-related data for API
-     * @param stdClass $user User object
-     * @return array
-     */
-    public function biometry_data($user) {
-        global $PAGE;
-        $userpicture = new \user_picture($user);
-        $userpicture->size = 1; // Size f1.
-        $userpicture->includetoken = $user->id;
-        $profileimageurl = $userpicture->get_url($PAGE)->out(false);
-
-        $conditiondata = $this->condition->to_json();
-
-        return [
-            'biometricIdentification' => [
-                'enabled' => $conditiondata['biometryenabled'],
-                'skip_fail' => $conditiondata['biometryskipfail'],
-                'flow' => $conditiondata['biometryflow'],
-                'theme' => $conditiondata['biometrytheme'],
-                'photo_url' => $profileimageurl,
-            ],
-        ];
-    }
-
-    /**
      * Format user-related data for API
      * @param stdClass $user User object
      * @param string|null $moodlelang user's language according to moodle
      * @return array
      */
     public function user_data($user, $moodlelang = null) {
+        global $PAGE;
+        $conditiondata = $this->condition->to_json();
+
+        $userpicture = new \user_picture($user);
+        $userpicture->size = 1; // Size f1.
+        $userpicture->includetoken = $user->id;
+        $profileimageurl = $userpicture->get_url($PAGE)->out(false);
+
+        $special = null;
+        foreach(profile_get_user_fields_with_data($user->id) as $field) {
+            if($field->get_shortname() != "proctor_special_accommodations") {
+                continue;
+            }
+
+            $special = strip_tags($field->data);
+        }
+
         $data = [
             'userId' => $user->username,
             'firstName' => $user->firstname,
             'lastName' => $user->lastname,
             'thirdName' => $user->middlename,
             'email' => $this->useremails ? $user->email : null,
+            'specialAccommodationsInfo' => $special,
+            'preliminaryCheck' => [
+                'enabled' => $conditiondata['preliminarycheck'],
+                'photo_url' => $profileimageurl,
+            ],
         ];
 
         if ($moodlelang) {
