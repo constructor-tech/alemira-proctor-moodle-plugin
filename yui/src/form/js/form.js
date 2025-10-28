@@ -34,7 +34,6 @@ M.availability_proctor.form.getNode = function(json) {
     var identificationId = id + '_identification';
     var customRulesId = id + '_customRules';
     var auxiliaryCameraId = id + '_auxCamera';
-    var auxiliaryCameraModeId = id + '_auxCameraMode';
     var allowmultipledisplaysId = id + '_allowmultipledisplays';
     var allowvirtualenvironmentId = id + '_allowvirtualenvironment';
     var checkidphotoqualityId = id + '_checkidphotoquality';
@@ -182,13 +181,6 @@ M.availability_proctor.form.getNode = function(json) {
     html += formGroup(auxiliaryCameraId, getString('auxiliary_camera'),
         '<input type="checkbox" name="auxiliarycamera" id="' + auxiliaryCameraId + '" value="1">&nbsp;' +
         '<label for="' + auxiliaryCameraId + '">' + getString('enable') + '</label> '
-    );
-
-    html += formGroup(auxiliaryCameraModeId, getString('auxiliary_camera_mode'),
-        '<select name="auxiliarycameramode" id="' + auxiliaryCameraModeId + '" class="custom-select">' +
-        '  <option value="photo">' + getString('auxiliary_camera_mode_photo') + '</option>' +
-        '  <option value="video">' + getString('auxiliary_camera_mode_video') + '</option>' +
-        '</select>'
     );
 
     html += formGroup(enableSecureBrowserId, getString('enable_secure_browser'),
@@ -383,9 +375,7 @@ M.availability_proctor.form.getNode = function(json) {
             }
         }
 
-        if (!json.auxiliarycameramode) {
-            json.auxiliarycameramode = 'video';
-        }
+        
 
         if (!json.mode) {
             json.mode = 'online';
@@ -422,9 +412,7 @@ M.availability_proctor.form.getNode = function(json) {
         node.one('#' + auxiliaryCameraId).set('checked', json.auxiliarycamera ? 'checked' : null);
     }
 
-    if (json.auxiliarycameramode) {
-        node.one('select[name=auxiliarycameramode] option[value=' + json.auxiliarycameramode + ']').set('selected', 'selected');
-    }
+    
 
     if (json.securebrowser !== undefined) {
         node.one('#' + enableSecureBrowserId).set('checked', json.securebrowser ? 'checked' : null);
@@ -575,7 +563,6 @@ M.availability_proctor.form.fillValue = function(value, node) {
     value.customrules = node.one('textarea[name=customrules]').get('value').trim();
     value.useragreementurl = node.one('input[name=useragreementurl]').get('value').trim();
     value.auxiliarycamera = node.one('input[name=auxiliarycamera]').get('checked');
-    value.auxiliarycameramode = node.one('select[name=auxiliarycameramode]').get('value').trim();
     value.securebrowser = node.one('input[name=securebrowser]').get('checked');
     value.securebrowserlevel = node.one('select[name=securebrowserlevel]').get('value').trim();
     value.allowmultipledisplays = node.one('input[name=allowmultipledisplays]').get('checked');

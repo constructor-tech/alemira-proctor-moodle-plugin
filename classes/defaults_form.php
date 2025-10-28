@@ -82,11 +82,6 @@ class defaults_form extends \moodleform {
 
         $mform->addElement('advcheckbox', 'auxiliarycamera', get_string('auxiliary_camera',  'availability_proctor'));
         $mform->setType('auxiliarycamera', PARAM_BOOL);
-        $mform->addElement('select', 'auxiliarycameramode', get_string('auxiliary_camera_mode', 'availability_proctor'), [
-            '' => '',
-            'photo' => get_string('auxiliary_camera_mode_photo', 'availability_proctor'),
-            'video' => get_string('auxiliary_camera_mode_video', 'availability_proctor'),
-        ]);
 
         $mform->addElement('advcheckbox', 'securebrowser', get_string('enable_secure_browser',  'availability_proctor'));
         $mform->setType('securebrowser', PARAM_BOOL);

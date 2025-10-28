@@ -256,7 +256,6 @@ class client {
             'identification' => $conditiondata['identification'],
             'trial' => $conditiondata['istrial'],
             'auxiliaryCamera' => $conditiondata['auxiliarycamera'],
-            'auxiliaryCameraMode' => $conditiondata['auxiliarycameramode'],
             'scoreConfig' => $scoring,
             'visibleWarnings' => $conditiondata['warnings'],
             'secureBrowser' => $conditiondata['securebrowser'],

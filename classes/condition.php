@@ -45,7 +45,7 @@ class condition extends \core_availability\condition {
         'allowmultipledisplays', 'allowvirtualenvironment',
         'checkidphotoquality', 'webcameramainview',
         'scoring', 'warnings', 'rules', 'customrules', 'groups', 'preliminarycheck',
-        'calculator', 'auxiliarycamera', 'auxiliarycameramode',
+        'calculator', 'auxiliarycamera',
         'forbiddenprocesses', 'allowedprocesses', 'streamspreset',
         'sendmanualwarningstolearner', 'allowroomscanauxcamera',
     ];
@@ -113,10 +113,7 @@ class condition extends \core_availability\condition {
         'default', 'no_video', 'no_ai_detection', /* 'auxcam_and_desktop', 'auxcam_only' */
     ];
 
-    /** @var array List of possible aux camera options */
-    const AUX_CAMERA_MODES = [
-        'photo', 'video',
-    ];
+    
 
     /** @var array List of possible aux camera options */
     const SECURE_BROWSER_LEVELS = [
@@ -159,8 +156,7 @@ class condition extends \core_availability\condition {
     /** @var bool Auxiliary camera enabled */
     public $auxiliarycamera = false;
 
-    /** @var string Auxiliary camera mode */
-    public $auxiliarycameramode = 'video';
+    
 
     /** @var bool Allow to use multiple displays */
     public $allowmultipledisplays = false;
@@ -286,9 +282,7 @@ class condition extends \core_availability\condition {
             $this->groups = $structure->groups;
         }
 
-        if (!empty($structure->auxiliarycameramode)) {
-            $this->auxiliarycameramode = $structure->auxiliarycameramode;
-        }
+        
 
         if (!empty($structure->allowedprocesses)) {
             $this->allowedprocesses = $structure->allowedprocesses;
@@ -470,7 +464,6 @@ class condition extends \core_availability\condition {
             'identification' => $this->identification,
             'useragreementurl' => $this->useragreementurl,
             'auxiliarycamera' => (bool) $this->auxiliarycamera,
-            'auxiliarycameramode' => (string) $this->auxiliarycameramode,
             'customrules' => $this->customrules,
             'calculator' => $this->calculator,
             'securebrowser' => $this->securebrowser,

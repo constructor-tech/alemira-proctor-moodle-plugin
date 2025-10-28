@@ -54,8 +54,7 @@ class frontend extends \core_availability\frontend {
             'secure_browser_level_basic', 'secure_browser_level_medium', 'secure_browser_level_high',
             'allowmultipledisplays', 'allowvirtualenvironment', 'checkidphotoquality',
             'calculator', 'streamspreset', 'preliminary_check',
-            'auxiliary_camera', 'auxiliary_camera_mode', 'auxiliary_camera_mode_photo',
-            'auxiliary_camera_mode_video',
+            'auxiliary_camera',
             'allowed_processes', 'forbidden_processes', 'processes_list_hint',
             'sendmanualwarningstolearner', 'allowroomscanauxcamera',
         ];

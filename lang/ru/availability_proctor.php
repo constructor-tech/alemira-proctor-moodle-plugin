@@ -104,9 +104,7 @@ $string['select_groups'] = 'Использовать прокторинг тол
 $string['is_trial'] = 'Пробный экзамен';
 
 $string['auxiliary_camera'] = 'Вторая камера (смартфон)';
-$string['auxiliary_camera_mode'] = 'Режим второй камеры';
-$string['auxiliary_camera_mode_photo'] = 'Фото';
-$string['auxiliary_camera_mode_video'] = 'Видео';
+ 
 
 $string['enable_secure_browser'] = 'Использовать защищенный браузер';
 $string['secure_browser_level'] = 'Режим защищенного браузера';
