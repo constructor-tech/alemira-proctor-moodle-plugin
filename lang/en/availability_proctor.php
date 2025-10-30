@@ -104,9 +104,7 @@ $string['select_groups'] = 'Enable proctoring for selected groups';
 $string['is_trial'] = 'Demo exam mode';
 
 $string['auxiliary_camera'] = 'Secondary camera';
-$string['auxiliary_camera_mode'] = 'Secondary camera mode';
-$string['auxiliary_camera_mode_photo'] = 'Photo';
-$string['auxiliary_camera_mode_video'] = 'Video';
+ 
 
 $string['enable_secure_browser'] = 'Require Secure Browser';
 $string['secure_browser_level'] = 'Secure Browser level';
