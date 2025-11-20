@@ -67,3 +67,25 @@ The plugin allows passing learner's special accommodation to Constuctor Proctor,
 * Clone this repository into `[moodle_dir]/availability/condition/proctor`
 * Enable Developer mode and debug messages output in `Site administration → Development`
 * For rebuilding the frontend part, you have to use YUI and Shifter, see the [official guide](https://moodledev.io/docs/5.0/guides/javascript/yui)
+
+
+### Build and release
+
+To rebuild minified JS files:
+```
+# install/use Node 20
+brew install nvm
+mkdir -p ~/.nvm && echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.zshrc && echo '[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && . "/opt/homebrew/opt/nvm/nvm.sh"' >> ~/.zshrc
+source ~/.zshrc
+nvm install 20
+nvm use 20
+
+# rebuild YUI in plugin root
+cd .../availability/condition/proctor
+npx --yes shifter --recursive
+```
+
+To create release package:
+```
+python utils/release.py -f
+```
