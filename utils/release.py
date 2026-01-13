@@ -29,6 +29,62 @@ def get_version():
         os.exit(1)
     return version_match.group(1)
 
+def increment_version():
+    """Increment version number by 1 in version.php"""
+    content = open('version.php', 'r').read()
+    version_regex = r'(plugin->version\s*=\s*)(\d+)'
+    version_match = re.search(version_regex, content)
+    if not version_match:
+        print("Can't find version in version.php")
+        sys.exit(1)
+    
+    current_version = int(version_match.group(2))
+    new_version = current_version + 1
+    
+    new_content = re.sub(version_regex, f'\\g<1>{new_version}', content)
+    
+    with open('version.php', 'w') as f:
+        f.write(new_content)
+    
+    print(f"Version incremented: {current_version} -> {new_version}")
+    return str(new_version)
+
+def check_version_exists(version, name='proctor'):
+    """Check if archive with this version already exists"""
+    archive_path = f'releases/{name}-{version}.zip'
+    return os.path.exists(archive_path)
+
+def ask_yes_no(question, default='y'):
+    """Ask user yes/no question with default answer"""
+    valid = {"yes": True, "y": True, "ye": True, "no": False, "n": False}
+    if default == 'y':
+        prompt = " [Y/n] "
+        default_answer = True
+    else:
+        prompt = " [y/N] "
+        default_answer = False
+    
+    # Check if we're running in non-interactive mode (no TTY)
+    if not sys.stdin.isatty():
+        print(question + prompt + f"(auto-answer: {'yes' if default_answer else 'no'})")
+        return default_answer
+    
+    while True:
+        print(question + prompt, end='')
+        try:
+            choice = input().lower().strip()
+        except EOFError:
+            # Handle non-interactive mode
+            print(f"(auto-answer: {'yes' if default_answer else 'no'})")
+            return default_answer
+        
+        if choice == '':
+            return default_answer
+        elif choice in valid:
+            return valid[choice]
+        else:
+            print("Please respond with 'yes' or 'no' (or 'y' or 'n').")
+
 
 def run(name='proctor', dry=False, verbose=False, force=False):
     # List project files
@@ -36,8 +92,34 @@ def run(name='proctor', dry=False, verbose=False, force=False):
     append_files = ['.htaccess',]
 
     output_dir = f'releases/{name}/'
+    
+    # Track version increment
+    version_incremented = False
+    old_version = None
+
+    # Check if output_dir exists and ask to remove it
+    if os.path.exists(output_dir):
+        if ask_yes_no(f'Output directory {output_dir} exists. Remove it?', default='y'):
+            print(f'Removing output dir {output_dir}')
+            shutil.rmtree(output_dir)
+        else:
+            print('Cancelled by user')
+            sys.exit(0)
 
     version = get_version()
+    
+    # Check if version already exists
+    if check_version_exists(version, name):
+        print(f'Archive {name}-{version}.zip already exists in releases/')
+        if ask_yes_no('Increment version and rebuild?', default='y'):
+            old_version = version
+            version = increment_version()
+            version_incremented = True
+            print(f'New version: {version}')
+        else:
+            print('Cancelled by user')
+            sys.exit(0)
+    
     archive_name = f'{name}-{version}.zip'
 
     old_name = 'proctor'
@@ -71,14 +153,6 @@ def run(name='proctor', dry=False, verbose=False, force=False):
     if verbose:
       print("File list:")
       pp(files)
-
-    if os.path.exists(output_dir):
-        print(f'Output dir {output_dir} already exists')
-        if force:
-            print(f'Claning output dir {output_dir}')
-            shutil.rmtree(output_dir)
-        else:
-            sys.exit(1)
 
     if rename:
         print(f"Renaming {old_name} to {name}")
@@ -116,7 +190,37 @@ def run(name='proctor', dry=False, verbose=False, force=False):
     print(f'Creating archive {archive_name}')
     os.chdir('releases')
     os.system(f'zip -r "{archive_name}" {name}')
-    print('Finished')
+    os.chdir('..')
+    
+    # Generate release report
+    print('\n' + '='*60)
+    print('RELEASE REPORT')
+    print('='*60)
+    print(f'Plugin name:      {name}')
+    
+    if version_incremented:
+        print(f'Version:          {old_version} → {version} (incremented)')
+    else:
+        print(f'Version:          {version}')
+    
+    print(f'Archive:          releases/{archive_name}')
+    
+    # Get archive size
+    archive_path = f'releases/{archive_name}'
+    if os.path.exists(archive_path):
+        size_bytes = os.path.getsize(archive_path)
+        size_kb = size_bytes / 1024
+        print(f'Archive size:     {size_kb:.1f} KB ({size_bytes:,} bytes)')
+    
+    # Count files in the release
+    file_count = len([f for f in files if os.path.isfile(f)])
+    dir_count = len([f for f in files if os.path.isdir(f)])
+    print(f'Files included:   {file_count}')
+    print(f'Directories:      {dir_count}')
+    
+    print('='*60)
+    print('✓ Release completed successfully!')
+    print('='*60)
 
 
 
