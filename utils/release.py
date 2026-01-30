@@ -32,7 +32,7 @@ def get_version():
 
 def run(name='proctor', dry=False, verbose=False, force=False):
     # List project files
-    ignore_files = [ 'releases', 'utils',]
+    ignore_files = [ 'releases', 'utils', 'node_modules', '.git']
     append_files = ['.htaccess',]
 
     output_dir = f'releases/{name}/'
@@ -99,7 +99,11 @@ def run(name='proctor', dry=False, verbose=False, force=False):
 
         if os.path.isfile(filename):
             with open(filename) as f:
-                content = f.read()
+                try:
+                    content = f.read()
+                except UnicodeDecodeError as e:
+                    print(f'[release.py] UnicodeDecodeError while reading file as text: {filename}')
+                    raise
 
             content = replace(content, code_patterns)
             content = replace(content, text_patterns)

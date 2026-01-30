@@ -30,7 +30,6 @@ require_once($CFG->dirroot . '/mod/quiz/locallib.php');
 
 use core_availability\info_module;
 use moodle_exception;
-use quiz;
 use stdClass;
 
 /**
