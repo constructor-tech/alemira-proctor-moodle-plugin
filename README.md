@@ -71,24 +71,33 @@ The plugin allows passing learner's special accommodation to Constuctor Proctor,
 
 ### Build and release
 
-To rebuild minified JS files:
-```
-# install/use Node 20
-brew install nvm
-mkdir -p ~/.nvm && echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.zshrc && echo '[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && . "/opt/homebrew/opt/nvm/nvm.sh"' >> ~/.zshrc
-source ~/.zshrc
-nvm install 20
-nvm use 20
+Local build requirements (no Docker):
+- Node.js 20 + npm
+- Python 3
+- zip
+- shifter (`npm install -g shifter`)
 
-# rebuild YUI in plugin root
-cd .../availability/condition/proctor
-npx --yes shifter --recursive
+Local release build:
+```
+make release
 ```
 
-To create release package:
+Local YUI-only build:
 ```
-python utils/release.py -f
+make yui-build
 ```
+
+Dockerized release build (no local deps needed beyond Docker):
+```
+make release-docker
+```
+
+Dockerized YUI-only build:
+```
+make yui-build-docker
+```
+
+Release commands rebuild YUI assets and create the release archive.
 
 ### How to release new version of the plugin
 
