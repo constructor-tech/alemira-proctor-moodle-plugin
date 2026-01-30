@@ -89,3 +89,21 @@ To create release package:
 ```
 python utils/release.py -f
 ```
+
+### How to release new version of the plugin
+
+1. Build with python utils/release.py -f
+
+1. Create a tag based on version from version.php: git tag v2026012100
+
+1. Push tag to the origin git push origin --tags
+
+1. Go to Releases: https://github.com/constructor-tech/alemira-proctor-moodle-plugin/releases → Draft new release
+
+1. Select your fresh tag (“Select tag”), check auto-generated Release title and click “Generate release notes”. Review the notes. 
+
+1. Attach release archive (*.zip file you’ve generated on the step 1). Mark as ‘pre-release’ if you’re still on your branch, do not mark if on master.
+
+1. Check “Set as the latest release”
+
+1. Click “Publish release”
