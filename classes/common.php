@@ -91,7 +91,12 @@ class common {
         }
 
         if ($cm->modname == 'quiz') {
-            $quiz = \mod_quiz\access_manager::load_quiz_and_settings($cm->instance);
+            // Moodle 4.0+ uses namespaced class, older versions use global class.
+            if (class_exists('\mod_quiz\access_manager')) {
+                $quiz = \mod_quiz\access_manager::load_quiz_and_settings($cm->instance);
+            } else {
+                $quiz = \quiz_access_manager::load_quiz_and_settings($cm->instance);
+            }
             $allowedattempts = $quiz->attempts;
             $allowedattempts = $allowedattempts > 0 ? $allowedattempts : null;
         } else {
