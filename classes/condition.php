@@ -63,6 +63,7 @@ class condition extends \core_availability\condition {
 
     /** @var array List of default values for rules */
     const RULES = [
+        'allow_to_use_additional_resources' => false,
         'allow_to_use_websites' => false,
         'allow_to_use_books' => false,
         'allow_to_use_paper' => true,
