@@ -41,6 +41,7 @@ class condition extends \core_availability\condition {
         'duration', 'mode', 'schedulingrequired', 'autorescheduling',
         'istrial', 'identification', 'useragreementurl',
         'securebrowser', 'securebrowserlevel',
+        'allow_to_use_additional_resources',
         'allowmultipledisplays', 'allowvirtualenvironment',
         'checkidphotoquality', 'webcameramainview',
         'scoring', 'warnings', 'rules', 'customrules', 'groups', 'preliminarycheck',
@@ -63,7 +64,6 @@ class condition extends \core_availability\condition {
 
     /** @var array List of default values for rules */
     const RULES = [
-        'allow_to_use_additional_resources' => false,
         'allow_to_use_websites' => false,
         'allow_to_use_books' => false,
         'allow_to_use_paper' => true,
@@ -94,6 +94,7 @@ class condition extends \core_availability\condition {
         'autorescheduling' => false,
         'istrial' => false,
         'securebrowser' => false,
+        'allow_to_use_additional_resources' => false,
         'auxiliarycamera' => false,
         'allowmultipledisplays' => false,
         'allowvirtualenvironment' => false,
@@ -172,6 +173,9 @@ class condition extends \core_availability\condition {
 
     /** @var string Secure browser level of security */
     public $securebrowserlevel = 'basic';
+
+    /** @var bool Allow additional resources in Secure Browser */
+    public $allow_to_use_additional_resources = false;
 
     /** @var calculator */
     public $calculator = 'off';
@@ -468,6 +472,7 @@ class condition extends \core_availability\condition {
             'calculator' => $this->calculator,
             'securebrowser' => $this->securebrowser,
             'securebrowserlevel' => $this->securebrowserlevel,
+            'allow_to_use_additional_resources' => (bool) $this->allow_to_use_additional_resources,
             'allowedprocesses' => $this->allowedprocesses,
             'forbiddenprocesses' => $this->forbiddenprocesses,
             'streamspreset' => $this->streamspreset,

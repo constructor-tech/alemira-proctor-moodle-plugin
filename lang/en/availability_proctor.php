@@ -134,7 +134,7 @@ $string['time_finish'] = 'Attempt finished at';
 $string['auto_rescheduling'] = 'Automatic rescheduling';
 $string['enable'] = 'Enable';
 
-$string['allow_to_use_additional_resources'] = 'Using additional resources (PDF/web)';
+$string['allow_to_use_additional_resources'] = 'Using additional resources (PDF/web) in Secure Browser';
 $string['allow_to_use_websites'] = 'Browsing the internet';
 $string['allow_to_use_books'] = 'Using books or reference materials';
 $string['allow_to_use_paper'] = 'Taking notes on paper';

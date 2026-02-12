@@ -134,7 +134,7 @@ $string['time_finish'] = 'Время попытки';
 $string['auto_rescheduling'] = 'Автоматический сброс при пропуске экзамена';
 $string['enable'] = 'Включить';
 
-$string['allow_to_use_additional_resources'] = 'Разрешить дополнительные ресурсы (PDF/веб)';
+$string['allow_to_use_additional_resources'] = 'Использование дополнительных ресурсов (PDF/веб) в Secure Browser';
 $string['allow_to_use_websites'] = 'Разрешить веб-сайты';
 $string['allow_to_use_books'] = 'Разрешить использование книг';
 $string['allow_to_use_paper'] = 'Разрешить черновики';
