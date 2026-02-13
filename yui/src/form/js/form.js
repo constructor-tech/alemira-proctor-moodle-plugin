@@ -197,10 +197,9 @@ M.availability_proctor.form.getNode = function(json) {
         '</select>'
     );
 
-    html += formGroup(allowToUseAdditionalResourcesId, getString('allow_to_use_additional_resources'),
-        '<label for="' + allowToUseAdditionalResourcesId + '">' +
-        '<input type="checkbox" name="allow_to_use_additional_resources" id="' + allowToUseAdditionalResourcesId + '" value="1">&nbsp;' +
-        getString('enable') + '</label> '
+    html += formGroup(allowToUseAdditionalResourcesId, getString('allowtouseadditionalresources'),
+        '<input type="checkbox" name="allowtouseadditionalresources" id="' + allowToUseAdditionalResourcesId + '" value="1">&nbsp;' +
+        '<label for="' + allowToUseAdditionalResourcesId + '">' + getString('enable') + '</label> '
     );
 
     html += formGroup(allowmultipledisplaysId, getString('allowmultipledisplays'),
@@ -437,9 +436,9 @@ M.availability_proctor.form.getNode = function(json) {
         node.one('#' + allowvirtualenvironmentId).set('checked', json.allowvirtualenvironment ? 'checked' : null);
     }
 
-    if (json.allow_to_use_additional_resources !== undefined) {
+    if (json.allowtouseadditionalresources !== undefined) {
         node.one('#' + allowToUseAdditionalResourcesId).set('checked',
-            json.allow_to_use_additional_resources ? 'checked' : null);
+            json.allowtouseadditionalresources ? 'checked' : null);
     }
 
     if (json.checkidphotoquality !== undefined) {
@@ -577,7 +576,7 @@ M.availability_proctor.form.fillValue = function(value, node) {
     value.auxiliarycamera = node.one('input[name=auxiliarycamera]').get('checked');
     value.securebrowser = node.one('input[name=securebrowser]').get('checked');
     value.securebrowserlevel = node.one('select[name=securebrowserlevel]').get('value').trim();
-    value.allow_to_use_additional_resources = node.one('input[name=allow_to_use_additional_resources]').get('checked');
+    value.allowtouseadditionalresources = node.one('input[name=allowtouseadditionalresources]').get('checked');
     value.allowmultipledisplays = node.one('input[name=allowmultipledisplays]').get('checked');
     value.allowvirtualenvironment = node.one('input[name=allowvirtualenvironment]').get('checked');
     value.sendmanualwarningstolearner = node.one('input[name=sendmanualwarningstolearner]').get('checked');

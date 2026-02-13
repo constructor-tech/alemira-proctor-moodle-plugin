@@ -111,6 +111,7 @@ $string['secure_browser_level'] = 'Режим защищенного брауз�
 $string['secure_browser_level_basic'] = 'Базовый';
 $string['secure_browser_level_medium'] = 'Средний';
 $string['secure_browser_level_high'] = 'Высокий';
+$string['allowtouseadditionalresources'] = 'Использование дополнительных ресурсов (PDF/веб) в Secure Browser';
 $string['allowed_processes'] = 'Разрешенные процессы';
 $string['forbidden_processes'] = 'Запрещенные процессы';
 $string['processes_list_hint'] = 'По одному процессу на строку';
@@ -134,7 +135,6 @@ $string['time_finish'] = 'Время попытки';
 $string['auto_rescheduling'] = 'Автоматический сброс при пропуске экзамена';
 $string['enable'] = 'Включить';
 
-$string['allow_to_use_additional_resources'] = 'Использование дополнительных ресурсов (PDF/веб) в Secure Browser';
 $string['allow_to_use_websites'] = 'Разрешить веб-сайты';
 $string['allow_to_use_books'] = 'Разрешить использование книг';
 $string['allow_to_use_paper'] = 'Разрешить черновики';

@@ -111,6 +111,7 @@ $string['secure_browser_level'] = 'Secure Browser level';
 $string['secure_browser_level_basic'] = 'Basic';
 $string['secure_browser_level_medium'] = 'Medium';
 $string['secure_browser_level_high'] = 'High';
+$string['allowtouseadditionalresources'] = 'Using additional resources (PDF/web) in Secure Browser';
 $string['allowed_processes'] = 'Allowed processes';
 $string['forbidden_processes'] = 'Forbidden processes';
 $string['processes_list_hint'] = 'One process name per line';
@@ -134,7 +135,6 @@ $string['time_finish'] = 'Attempt finished at';
 $string['auto_rescheduling'] = 'Automatic rescheduling';
 $string['enable'] = 'Enable';
 
-$string['allow_to_use_additional_resources'] = 'Using additional resources (PDF/web) in Secure Browser';
 $string['allow_to_use_websites'] = 'Browsing the internet';
 $string['allow_to_use_books'] = 'Using books or reference materials';
 $string['allow_to_use_paper'] = 'Taking notes on paper';

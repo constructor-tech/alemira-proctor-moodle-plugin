@@ -41,7 +41,7 @@ class frontend extends \core_availability\frontend {
 
         $strings = [
             'title', 'error_setduration', 'duration', 'proctoring_mode', 'online_mode',
-            'rules', 'offline_mode', 'identification_mode', 'auto_mode', 'allow_to_use_additional_resources',
+            'rules', 'offline_mode', 'identification_mode', 'auto_mode',
             'allow_to_use_websites',
             'allow_to_use_books', 'allow_to_use_paper', 'allow_to_use_messengers',
             'allow_to_use_calculator', 'allow_to_use_excel', 'allow_to_use_human_assistant',
@@ -53,6 +53,7 @@ class frontend extends \core_availability\frontend {
             'web_camera_main_view', 'web_camera_main_view_front', 'web_camera_main_view_side',
             'visible_warnings', 'scoring_params_header', 'secure_browser_level',
             'secure_browser_level_basic', 'secure_browser_level_medium', 'secure_browser_level_high',
+            'allowtouseadditionalresources',
             'allowmultipledisplays', 'allowvirtualenvironment', 'checkidphotoquality',
             'calculator', 'streamspreset', 'preliminary_check',
             'auxiliary_camera',

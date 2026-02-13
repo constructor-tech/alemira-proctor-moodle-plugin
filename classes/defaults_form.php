@@ -92,9 +92,9 @@ class defaults_form extends \moodleform {
             'high' => get_string('secure_browser_level_high', 'availability_proctor'),
         ]);
 
-        $mform->addElement('advcheckbox', 'allow_to_use_additional_resources',
-            get_string('allow_to_use_additional_resources', 'availability_proctor'));
-        $mform->setType('allow_to_use_additional_resources', PARAM_BOOL);
+        $mform->addElement('advcheckbox', 'allowtouseadditionalresources',
+            get_string('allowtouseadditionalresources', 'availability_proctor'));
+        $mform->setType('allowtouseadditionalresources', PARAM_BOOL);
 
         $mform->addElement('textarea', 'allowedprocesses', get_string('allowed_processes', 'availability_proctor'));
         $mform->addElement('textarea', 'forbiddenprocesses', get_string('forbidden_processes', 'availability_proctor'));
