@@ -96,6 +96,7 @@ $string['streamspreset'] = 'Streams preset';
 $string['streamspreset_default'] = 'Default';
 $string['streamspreset_no_video'] = 'No video';
 $string['streamspreset_no_ai_detection'] = 'No AI detection';
+$string['streamspreset_no_webcam'] = 'No webcam';
 $string['streamspreset_auxcam_and_desktop'] = 'Aux camera and desktop';
 $string['streamspreset_auxcam_only'] = 'Aux camera only';
 

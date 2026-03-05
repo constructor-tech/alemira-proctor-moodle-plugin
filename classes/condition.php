@@ -111,7 +111,7 @@ class condition extends \core_availability\condition {
 
     /** @var array List of possible streamsPreset options */
     const STREAMS_PRESET_OPTIONS = [
-        'default', 'no_video', 'no_ai_detection', /* 'auxcam_and_desktop', 'auxcam_only' */
+        'default', 'no_video', 'no_ai_detection', 'no_webcam', /* 'auxcam_and_desktop', 'auxcam_only' */
     ];
 
     
