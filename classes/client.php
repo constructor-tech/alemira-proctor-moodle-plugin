@@ -260,6 +260,7 @@ class client {
             'visibleWarnings' => $conditiondata['warnings'],
             'secureBrowser' => $conditiondata['securebrowser'],
             'secureBrowserLevel' => $conditiondata['securebrowserlevel'],
+            'allowToUseAdditionalResources' => $conditiondata['allowtouseadditionalresources'],
             'allowMultipleDisplays' => $conditiondata['allowmultipledisplays'],
             'allowVirtualEnvironment' => $conditiondata['allowvirtualenvironment'],
             'checkIdPhotoQuality' => $conditiondata['checkidphotoquality'],

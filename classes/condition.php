@@ -41,6 +41,7 @@ class condition extends \core_availability\condition {
         'duration', 'mode', 'schedulingrequired', 'autorescheduling',
         'istrial', 'identification', 'useragreementurl',
         'securebrowser', 'securebrowserlevel',
+        'allowtouseadditionalresources',
         'allowmultipledisplays', 'allowvirtualenvironment',
         'checkidphotoquality', 'webcameramainview',
         'scoring', 'warnings', 'rules', 'customrules', 'groups', 'preliminarycheck',
@@ -93,6 +94,7 @@ class condition extends \core_availability\condition {
         'autorescheduling' => false,
         'istrial' => false,
         'securebrowser' => false,
+        'allowtouseadditionalresources' => false,
         'auxiliarycamera' => false,
         'allowmultipledisplays' => false,
         'allowvirtualenvironment' => false,
@@ -172,6 +174,9 @@ class condition extends \core_availability\condition {
     /** @var string Secure browser level of security */
     public $securebrowserlevel = 'basic';
 
+    /** @var bool Allow additional resources in Secure Browser */
+    public $allowtouseadditionalresources = false;
+
     /** @var calculator */
     public $calculator = 'off';
 
@@ -238,6 +243,9 @@ class condition extends \core_availability\condition {
 
         foreach (self::BOOL_DEFAULTS as $key => $default) {
             $this->$key = isset($structure->$key) ? $structure->$key : $default;
+        }
+        if (isset($structure->allowtouseadditionalresources)) {
+            $this->allowtouseadditionalresources = (bool) $structure->allowtouseadditionalresources;
         }
 
         if (!empty($structure->warnings)) {
@@ -360,6 +368,9 @@ class condition extends \core_availability\condition {
                 $this->{$prop} = $data[$prop];
             }
         }
+        if (isset($data['allowtouseadditionalresources'])) {
+            $this->allowtouseadditionalresources = (bool) $data['allowtouseadditionalresources'];
+        }
 
         if (isset($data['rules']) && is_array($data['rules'])) {
             foreach ($data['rules'] as $rule) {
@@ -467,6 +478,7 @@ class condition extends \core_availability\condition {
             'calculator' => $this->calculator,
             'securebrowser' => $this->securebrowser,
             'securebrowserlevel' => $this->securebrowserlevel,
+            'allowtouseadditionalresources' => (bool) $this->allowtouseadditionalresources,
             'allowedprocesses' => $this->allowedprocesses,
             'forbiddenprocesses' => $this->forbiddenprocesses,
             'streamspreset' => $this->streamspreset,

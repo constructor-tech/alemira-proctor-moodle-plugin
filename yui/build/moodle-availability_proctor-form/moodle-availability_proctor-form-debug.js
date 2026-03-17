@@ -41,6 +41,7 @@ M.availability_proctor.form.getNode = function(json) {
     var checkidphotoqualityId = id + '_checkidphotoquality';
     var enableSecureBrowserId = id + '_secureBrowser';
     var secureBrowserLevelId = id + '_secureBrowserLevel';
+    var allowToUseAdditionalResourcesId = id + '_allowToUseAdditionalResources';
     var preliminaryCheckId = id + '_preliminaryCheck';
     var userAgreementId = id + '_userAgreement';
     var webCameraMainViewId = id + '_webCameraMainView';
@@ -197,7 +198,12 @@ M.availability_proctor.form.getNode = function(json) {
         '  <option value="high">' + getString('secure_browser_level_high') + '</option>' +
         '</select>'
     );
-    
+
+    html += formGroup(allowToUseAdditionalResourcesId, getString('allowtouseadditionalresources'),
+        '<input type="checkbox" name="allowtouseadditionalresources" id="' + allowToUseAdditionalResourcesId + '" value="1">&nbsp;' +
+        '<label for="' + allowToUseAdditionalResourcesId + '">' + getString('enable') + '</label> '
+    );
+
     html += formGroup(allowmultipledisplaysId, getString('allowmultipledisplays'),
         '<label for="' + allowmultipledisplaysId + '">' +
         '<input type="checkbox" name="allowmultipledisplays" id="' + allowmultipledisplaysId + '" value="1">&nbsp;' +
@@ -432,6 +438,11 @@ M.availability_proctor.form.getNode = function(json) {
         node.one('#' + allowvirtualenvironmentId).set('checked', json.allowvirtualenvironment ? 'checked' : null);
     }
 
+    if (json.allowtouseadditionalresources !== undefined) {
+        node.one('#' + allowToUseAdditionalResourcesId).set('checked',
+            json.allowtouseadditionalresources ? 'checked' : null);
+    }
+
     if (json.checkidphotoquality !== undefined) {
         node.one('#' + checkidphotoqualityId).set('checked', json.checkidphotoquality ? 'checked' : null);
     }
@@ -567,6 +578,7 @@ M.availability_proctor.form.fillValue = function(value, node) {
     value.auxiliarycamera = node.one('input[name=auxiliarycamera]').get('checked');
     value.securebrowser = node.one('input[name=securebrowser]').get('checked');
     value.securebrowserlevel = node.one('select[name=securebrowserlevel]').get('value').trim();
+    value.allowtouseadditionalresources = node.one('input[name=allowtouseadditionalresources]').get('checked');
     value.allowmultipledisplays = node.one('input[name=allowmultipledisplays]').get('checked');
     value.allowvirtualenvironment = node.one('input[name=allowvirtualenvironment]').get('checked');
     value.sendmanualwarningstolearner = node.one('input[name=sendmanualwarningstolearner]').get('checked');

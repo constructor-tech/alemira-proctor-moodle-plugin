@@ -111,6 +111,7 @@ $string['secure_browser_level'] = 'Режим защищенного брауз�
 $string['secure_browser_level_basic'] = 'Базовый';
 $string['secure_browser_level_medium'] = 'Средний';
 $string['secure_browser_level_high'] = 'Высокий';
+$string['allowtouseadditionalresources'] = 'Использование дополнительных ресурсов (PDF/веб) в Secure Browser';
 $string['allowed_processes'] = 'Разрешенные процессы';
 $string['forbidden_processes'] = 'Запрещенные процессы';
 $string['processes_list_hint'] = 'По одному процессу на строку';
