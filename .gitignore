@@ -3,5 +3,6 @@ package-lock.json
 releases
 .DS_Store
 .cursor
+.claude
 openspec
 dev/.moodle
