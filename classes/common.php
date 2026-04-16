@@ -284,6 +284,25 @@ class common {
     }
 
     /**
+     * Compute effective proctoring duration in minutes.
+     * If the underlying activity is a quiz with a time limit, use it.
+     * Otherwise fall back to condition::MAX_LIMIT.
+     *
+     * @param \stdClass|\cm_info $cm Course module
+     * @return int duration in minutes
+     */
+    public static function get_quiz_time_limit($cm) {
+        global $DB;
+        if (!empty($cm->modname) && $cm->modname === 'quiz') {
+            $timelimit = $DB->get_field('quiz', 'timelimit', ['id' => $cm->instance]);
+            if (!empty($timelimit)) {
+                return (int) ceil($timelimit / 60);
+            }
+        }
+        return condition::MAX_LIMIT;
+    }
+
+    /**
      * Gets default proctoring settings from config
      *
      * @return stdClass

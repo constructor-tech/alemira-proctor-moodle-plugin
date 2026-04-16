@@ -50,6 +50,28 @@ class condition extends \core_availability\condition {
         'sendmanualwarningstolearner', 'allowroomscanauxcamera',
     ];
 
+    /**
+     * @var array Subset of properties that belong to a reusable preset
+     * (exam conduct policy). Excludes connection settings, exam-level fields
+     * (istrial, customrules, groups) and duration (computed at runtime).
+     */
+    const PRESET_FIELDS = [
+        'mode', 'schedulingrequired', 'autorescheduling',
+        'identification', 'checkidphotoquality', 'useragreementurl', 'preliminarycheck',
+        'webcameramainview', 'auxiliarycamera', 'allowroomscanauxcamera',
+        'streamspreset', 'sendmanualwarningstolearner',
+        'securebrowser', 'securebrowserlevel',
+        'allowedprocesses', 'forbiddenprocesses', 'allowvirtualenvironment',
+        'allowtouseadditionalresources', 'allowmultipledisplays', 'calculator',
+        'rules', 'warnings', 'scoring',
+    ];
+
+    /**
+     * @var int Fallback exam duration in minutes, used when the activity
+     * (e.g. a Moodle Quiz) has no time limit configured.
+     */
+    const MAX_LIMIT = 480;
+
     /** @var array List of default values for visible warnings */
     const WARNINGS = [
         'warning_extra_user_in_frame' => true,
@@ -204,12 +226,27 @@ class condition extends \core_availability\condition {
     /** @var bool Allow room scan using aux camera */
     public $allowroomscanauxcamera = false;
 
+    /** @var int|null Linked preset id (when condition is preset-backed). */
+    public $preset_id = null;
+
     /**
      * Construct
      *
      * @param stdClass $structure Structure
      */
     public function __construct($structure) {
+        // If the saved structure references a preset, hydrate the preset
+        // fields from the DB onto the same flat properties used by all
+        // downstream code. Exam-level fields (istrial, customrules, groups)
+        // and explicit overrides on the structure are applied on top.
+        if (!empty($structure->preset_id)) {
+            $preset = preset::get_by_id((int) $structure->preset_id);
+            if ($preset) {
+                $this->preset_id = (int) $structure->preset_id;
+                $structure = self::merge_preset_into_structure($structure, $preset);
+            }
+        }
+
         $scoringdefaults = [];
         foreach (self::SCORING as $key => $row) {
             $scoringdefaults[$key] = isset($row['default']) ? $row['default'] : null;
@@ -304,6 +341,32 @@ class condition extends \core_availability\condition {
         }
 
         $this->validate();
+    }
+
+    /**
+     * Apply preset values to a saved structure for consumption by the
+     * existing flat-field __construct logic. Fields explicitly set on
+     * the structure win over preset values.
+     *
+     * @param stdClass $structure Saved availability structure
+     * @param stdClass $preset Decoded preset record (from preset::get_by_id)
+     * @return stdClass merged structure
+     */
+    protected static function merge_preset_into_structure($structure, $preset) {
+        $merged = clone $structure;
+        foreach (self::PRESET_FIELDS as $field) {
+            if (!isset($merged->$field) && isset($preset->$field)) {
+                $merged->$field = $preset->$field;
+            }
+        }
+        // Legacy field name in saved structures.
+        if (!isset($merged->scheduling_required) && isset($preset->schedulingrequired)) {
+            $merged->scheduling_required = $preset->schedulingrequired;
+        }
+        if (!isset($merged->auto_rescheduling) && isset($preset->autorescheduling)) {
+            $merged->auto_rescheduling = $preset->autorescheduling;
+        }
+        return $merged;
     }
 
     /**
@@ -461,12 +524,12 @@ class condition extends \core_availability\condition {
      * @return object
      */
     public function save() {
-        return (object) [
+        $data = [
             'type' => 'proctor',
             'duration' => (int) $this->duration,
             'mode' => (string) $this->mode,
-            'scheduling_required' => (bool) $this->schedulingrequired,
-            'auto_rescheduling' => (bool) $this->autorescheduling,
+            'scheduling_required' => false,
+            'auto_rescheduling' => false,
             'rules' => (array) $this->rules,
             'warnings' => (array) $this->warnings,
             'scoring' => (array) $this->scoring,
@@ -486,6 +549,10 @@ class condition extends \core_availability\condition {
             'allowroomscanauxcamera' => (bool) $this->allowroomscanauxcamera,
             'preliminarycheck' =>  (bool) $this->preliminarycheck,
         ];
+        if (!empty($this->preset_id)) {
+            $data['preset_id'] = (int) $this->preset_id;
+        }
+        return (object) $data;
     }
 
     /**
@@ -580,7 +647,8 @@ class condition extends \core_availability\condition {
         if (WS_SERVER) {
             return get_string('description_no_webservices', 'availability_proctor');
         } else {
-            return get_string('description_proctor', 'availability_proctor');
+            return get_string('description_proctor', 'availability_proctor',
+                get_string('pluginname', 'availability_proctor'));
         }
     }
 

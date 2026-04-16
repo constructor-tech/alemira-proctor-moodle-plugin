@@ -72,27 +72,27 @@ $string['entry_exist'] = 'Новая запись уже существует';
 $string['date_modified'] = 'Дата последнего изменения';
 
 $string['proctoring_mode'] = 'Режим прокторинга';
-$string['online_mode'] = 'Синхронный';
-$string['offline_mode'] = 'Асинхронный';
+$string['online_mode'] = 'Прямой';
+$string['offline_mode'] = 'Обзор';
 $string['auto_mode'] = 'Автоматический';
 $string['identification_mode'] = 'Идентификация';
 
-$string['identification'] = 'Режим фотографирования';
-$string['face_passport_identification'] = 'Лицо и паспорт';
-$string['passport_identification'] = 'Паспорт';
-$string['face_identification'] = 'Лицо';
+$string['identification'] = 'Режим подтверждения личности';
+$string['face_passport_identification'] = 'Лицо и ID';
+$string['passport_identification'] = 'Только ID';
+$string['face_identification'] = 'Только лицо';
 $string['skip_identification'] = 'Пропустить';
 
 $string['web_camera_main_view'] = 'Положение основной камеры';
 $string['web_camera_main_view_front'] = 'Фронтальная';
-$string['web_camera_main_view_side'] = 'Боковая';
+$string['web_camera_main_view_side'] = 'Дополнительная (боковой вид)';
 
 $string['calculator'] = 'Калькулятор';
 $string['calculator_off'] = 'Выключен';
 $string['calculator_simple'] = 'Простой';
 $string['calculator_scientific'] = 'Научный';
 
-$string['streamspreset'] = 'Настройки потоков';
+$string['streamspreset'] = 'Режим записи';
 $string['streamspreset_default'] = 'По умолчанию';
 $string['streamspreset_no_video'] = 'Без видео';
 $string['streamspreset_no_ai_detection'] = 'Без AI';
@@ -112,7 +112,7 @@ $string['secure_browser_level'] = 'Режим защищенного брауз�
 $string['secure_browser_level_basic'] = 'Базовый';
 $string['secure_browser_level_medium'] = 'Средний';
 $string['secure_browser_level_high'] = 'Высокий';
-$string['allowtouseadditionalresources'] = 'Использование дополнительных ресурсов (PDF/веб) в Secure Browser';
+$string['allowtouseadditionalresources'] = 'Разрешить использование дополнительных ресурсов (PDF/веб)';
 $string['allowed_processes'] = 'Разрешенные процессы';
 $string['forbidden_processes'] = 'Запрещенные процессы';
 $string['processes_list_hint'] = 'По одному процессу на строку';
@@ -245,3 +245,109 @@ $string['privacy:metadata:availability_proctor_entries:threshold'] = 'Порог
 $string['privacy:metadata:availability_proctor_entries:warnings'] = 'Список предупреждений прокторинга';
 $string['privacy:metadata:availability_proctor_entries:sessionstart'] = 'Время начала сессии';
 $string['privacy:metadata:availability_proctor_entries:sessionend'] = 'Время окончания сессии';
+
+// ---- Presets (admin and exam-form additions) ----
+$string['proctor:managepresets'] = 'Управление пресетами прокторинга';
+$string['presets'] = 'Глобальные пресеты прокторинга';
+$string['preset_create'] = 'Создать пресет';
+$string['preset_edit'] = 'Редактировать пресет';
+$string['preset_name'] = 'Название пресета';
+$string['preset_is_default'] = 'По умолчанию';
+$string['preset_is_system'] = 'Системный';
+$string['preset_duplicate'] = 'Дублировать';
+$string['preset_set_default'] = 'Установить по умолчанию';
+$string['preset_default_changed'] = 'Пресет по умолчанию изменён.';
+$string['preset_deleted'] = 'Пресет удалён.';
+$string['preset_saved'] = 'Пресет сохранён.';
+$string['preset_delete_confirm'] = 'Удалить этот пресет?';
+$string['preset_settings_summary'] = 'Настройки';
+$string['preset_default_name'] = 'По умолчанию';
+$string['preset_seed_high_stakes'] = 'Экзамен с высокой ставкой';
+$string['preset_seed_low_stakes'] = 'Экзамен с низкой ставкой';
+$string['preset_seed_open_book'] = 'Экзамен с открытыми материалами';
+
+$string['preset_section_identity_meta'] = 'Пресет';
+$string['preset_section_mode'] = 'Режим прокторинга';
+$string['preset_section_identity'] = 'Подтверждение личности';
+$string['preset_section_camera'] = 'Камера и наблюдение';
+$string['preset_section_securebrowser'] = 'Secure Browser';
+$string['preset_section_resources'] = 'Среда экзамена';
+$string['preset_section_rules'] = 'Разрешено во время экзамена';
+$string['preset_section_warnings'] = 'Уведомления учащемуся';
+$string['preset_section_scoring'] = 'Параметры скоринга';
+$string['preset_section_exam'] = 'Настройки экзамена';
+
+$string['load_preset'] = '(изменить)';
+$string['save_personal_preset'] = 'Сохранить как личный пресет';
+$string['save_personal_preset_prompt'] = 'Введите имя для личного пресета.';
+$string['save_personal_preset_hint'] = 'Личные пресеты сохраняются в вашей учётной записи и могут использоваться в любых ваших экзаменах. Они не видны другим пользователям. Глобальные пресеты управляются администраторами сайта в Site administration > Plugins.';
+$string['global_presets'] = 'Глобальные пресеты';
+$string['personal_presets'] = 'Личные пресеты';
+$string['no_presets'] = 'Нет пресетов';
+$string['loaded_preset'] = 'Текущий пресет: {$a}';
+$string['loaded_preset_none'] = 'Нет';
+
+$string['auxiliary_camera_off'] = 'Выкл';
+$string['auxiliary_camera_on'] = 'Вкл';
+$string['delete'] = 'Удалить';
+
+$string['error_preset_cannot_delete'] = 'Этот пресет нельзя удалить (он системный, последний оставшийся или используется экзаменом).';
+$string['error_preset_not_found'] = 'Пресет не найден.';
+$string['error_invalid_payload'] = 'Неверные данные пресета.';
+$string['error_invalid_action'] = 'Неверное действие.';
+$string['error_preset_name_required'] = 'Название пресета обязательно.';
+$string['error_useragreementurl'] = 'Введите корректный URL, начинающийся с http:// или https:// (например: https://example.com/terms).';
+
+// ---- Field hints (admin help buttons + exam-form popovers) ----
+$string['proctoring_mode_help'] = 'Live — Прямая трансляция, где экзамен проводится под наблюдением проктора в реальном времени (в дополнение к ИИ).
+Review — Постэкзаменационная проверка: учащийся сдаёт экзамен в любое время под контролем ИИ. Сессия записывается и затем проверяется проктором на нарушения.
+AI review — Полностью автоматизированный режим без участия проктора. Сессия отслеживается ИИ; нарушения отмечаются по настроенным порогам.';
+$string['sendmanualwarningstolearner_help'] = 'Позволяет проктору отправлять учащемуся ручные предупреждения во время экзамена дополнительно к автоматическим уведомлениям ИИ.';
+$string['identification_help'] = 'Способ проверки личности учащегося перед началом экзамена.';
+$string['checkidphotoquality_help'] = 'Проверяет читаемость фото документа и предлагает переснять его при низком качестве.';
+$string['preliminary_check_help'] = 'Сравнивает фото, сделанное перед экзаменом, с фотографией в профиле Moodle.';
+$string['web_camera_main_view_help'] = 'Front view (по умолчанию) — встроенная веб-камера.
+Auxiliary (side view) — для специализированных установок с боковой камерой; используются другие ИИ-модели.';
+$string['auxiliary_camera_help'] = 'Дополнительная камера, доступная по QR-коду через смартфон учащегося. Рекомендуется для экзаменов с высокой ставкой — снимает клавиатуру и занимает телефон.';
+$string['allowroomscanauxcamera_help'] = 'Позволяет учащемуся выполнить 360-градусное сканирование комнаты дополнительной камерой.';
+$string['allowmultipledisplays_help'] = 'Если выключено — учащиеся с несколькими подключенными мониторами не смогут продолжить (проверяется при настройке демонстрации экрана).';
+$string['streamspreset_help'] = 'Default — стандартная видеозапись (рекомендуется для онлайн-экзаменов).
+No Video — отключает запись видео. Обычно используется для экзаменов на территории учебного заведения с защищённым браузером, где видео не требуется.';
+$string['enable_secure_browser_help'] = 'Требует от учащихся установить Constructor Secure Browser — отдельное приложение, обеспечивающее ограничения на уровне ОС.';
+$string['secure_browser_level_help'] = 'Basic: обнаружение виртуальных машин и USB-устройств.
+Medium: добавляет ограничения, сохраняя гибкость (рекомендуется при разрешении пользовательских процессов).
+High: режим во весь экран всегда сверху, блокирует фоновые приложения.';
+$string['allowtouseadditionalresources_help'] = 'Разрешает учащемуся открывать дополнительные PDF-файлы или веб-ресурсы во время экзамена.';
+$string['allowed_processes_help'] = 'Имена процессов (по одному в строке), разрешённые в Secure Browser.';
+$string['forbidden_processes_help'] = 'Дополнительные имена процессов (по одному в строке) для блокировки в Secure Browser.';
+$string['allowvirtualenvironment_help'] = 'Разрешает сдавать экзамен из виртуальной машины. Обнаружение требует Secure Browser. Обычно для экзаменов по информатике.';
+$string['calculator_help'] = 'Встраивает в интерфейс экзамена калькулятор для учащегося.';
+$string['user_agreement_url_help'] = 'Необязательная ссылка, отображаемая в начале процесса перед экзаменом, чтобы учащиеся могли ознакомиться с условиями.';
+$string['is_trial_help'] = 'Запускает экзамен в демо-режиме — видео не загружается на дашборд проктора. Для тестирования оборудования и хода без записей.';
+$string['custom_rules_help'] = 'Дополнительные правила, специфичные для вашей организации, отображаемые учащимся на странице правил вместе с настроенными правилами.';
+$string['select_groups_help'] = 'Применять прокторинг только к выбранным группам курса. Учащиеся из других групп смогут сдавать экзамен без прокторинга.';
+
+// Per-rule hints.
+$string['allow_to_use_websites_help'] = 'Разрешить просмотр Интернета. Также отключает уведомление «Смена активного окна».';
+$string['allow_to_use_books_help'] = 'Разрешить пользоваться печатными книгами или справочными материалами.';
+$string['allow_to_use_paper_help'] = 'Разрешить вести записи на бумаге во время экзамена.';
+$string['allow_to_use_messengers_help'] = 'Разрешить использование мессенджеров.';
+$string['allow_to_use_excel_help'] = 'Разрешить использование Microsoft Excel.';
+$string['allow_to_use_human_assistant_help'] = 'Разрешить присутствие другого человека рядом с учащимся.';
+$string['allow_absence_in_frame_help'] = 'Разрешить кратковременно покидать зону видимости камеры. Отключает уведомление «Отсутствие учащегося в кадре».';
+$string['allow_voices_help'] = 'Разрешить разговаривать во время экзамена. Отключает уведомление «Звуки голосов».';
+$string['allow_wrong_gaze_direction_help'] = 'Полезно для экзаменов с открытыми материалами. Отключает уведомление «Увод взгляда».';
+
+// Shared title + hint for sections of uniform items.
+// `warnings` already exists above as 'Нарушения' for the log report — keep it
+// for that context. Use a separate key for the alert-visibility help title:
+$string['warnings_help'] = 'Всплывающее окно, показываемое учащемуся при обнаружении этого нарушения. Обнаружение происходит независимо от этой настройки — меняется только видимость для учащегося.';
+$string['scoring'] = 'Вес скоринга';
+$string['scoring_help'] = 'Вес, применяемый к этому типу нарушений при расчёте балла. Оставьте пустым, чтобы использовать значение по умолчанию.';
+$string['scoring_cheater_level_help'] = 'Общий порог (0–100). Сессии с более высоким баллом автоматически помечаются как нарушители. По умолчанию 80.';
+
+// Per-warning hints — only for warnings that can be auto-disabled by an "Allow" rule.
+$string['warning_change_active_window_on_computer_help'] = 'Срабатывает при переключении окон во время экзамена. Автоматически отключается при разрешении «Просмотр Интернета».';
+$string['warning_voice_detected_help'] = 'Срабатывает при обнаружении голоса во время экзамена. Автоматически отключается при разрешении «Разговоры».';
+$string['warning_avert_eyes_help'] = 'Срабатывает при длительном уводе взгляда от экрана. Автоматически отключается при разрешении «Длительный увод взгляда от экрана».';
+$string['warning_no_user_in_frame_help'] = 'Срабатывает, когда учащийся не виден в кадре. Автоматически отключается при разрешении «Выход из кадра».';

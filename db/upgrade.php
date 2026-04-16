@@ -31,5 +31,57 @@ function xmldb_availability_proctor_upgrade($oldversion) {
     global $DB;
     $dbman = $DB->get_manager();
 
+    if ($oldversion < 2026041300) {
+        // Create the new presets table.
+        $table = new xmldb_table('availability_proctor_presets');
+        if (!$dbman->table_exists($table)) {
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+            $table->add_field('name', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('is_default', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('is_system', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('type', XMLDB_TYPE_CHAR, '10', null, XMLDB_NOTNULL, null, 'global');
+            $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+            $table->add_field('mode', XMLDB_TYPE_CHAR, '30', null, null, null, null);
+            $table->add_field('schedulingrequired', XMLDB_TYPE_INTEGER, '1', null, null, null, null);
+            $table->add_field('autorescheduling', XMLDB_TYPE_INTEGER, '1', null, null, null, null);
+            $table->add_field('identification', XMLDB_TYPE_CHAR, '30', null, null, null, null);
+            $table->add_field('checkidphotoquality', XMLDB_TYPE_INTEGER, '1', null, null, null, null);
+            $table->add_field('useragreementurl', XMLDB_TYPE_TEXT, null, null, null, null, null);
+            $table->add_field('preliminarycheck', XMLDB_TYPE_INTEGER, '1', null, null, null, null);
+            $table->add_field('webcameramainview', XMLDB_TYPE_CHAR, '10', null, null, null, null);
+            $table->add_field('auxiliarycamera', XMLDB_TYPE_INTEGER, '1', null, null, null, null);
+            $table->add_field('allowroomscanauxcamera', XMLDB_TYPE_INTEGER, '1', null, null, null, null);
+            $table->add_field('streamspreset', XMLDB_TYPE_CHAR, '30', null, null, null, null);
+            $table->add_field('sendmanualwarningstolearner', XMLDB_TYPE_INTEGER, '1', null, null, null, null);
+            $table->add_field('securebrowser', XMLDB_TYPE_INTEGER, '1', null, null, null, null);
+            $table->add_field('securebrowserlevel', XMLDB_TYPE_CHAR, '10', null, null, null, null);
+            $table->add_field('allowedprocesses', XMLDB_TYPE_TEXT, null, null, null, null, null);
+            $table->add_field('forbiddenprocesses', XMLDB_TYPE_TEXT, null, null, null, null, null);
+            $table->add_field('allowvirtualenvironment', XMLDB_TYPE_INTEGER, '1', null, null, null, null);
+            $table->add_field('allowtouseadditionalresources', XMLDB_TYPE_INTEGER, '1', null, null, null, null);
+            $table->add_field('allowmultipledisplays', XMLDB_TYPE_INTEGER, '1', null, null, null, null);
+            $table->add_field('calculator', XMLDB_TYPE_CHAR, '20', null, null, null, null);
+            $table->add_field('rules', XMLDB_TYPE_TEXT, null, null, null, null, null);
+            $table->add_field('warnings', XMLDB_TYPE_TEXT, null, null, null, null, null);
+            $table->add_field('scoring', XMLDB_TYPE_TEXT, null, null, null, null, null);
+            $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_key('userid', XMLDB_KEY_FOREIGN, ['userid'], 'user', ['id']);
+            $table->add_index('type_default', XMLDB_INDEX_NOTUNIQUE, ['type', 'is_default']);
+
+            $dbman->create_table($table);
+        }
+
+        upgrade_plugin_savepoint(true, 2026041300, 'availability', 'proctor');
+    }
+
+    if ($oldversion < 2026041517) {
+        // Seed the three recommended starter presets (idempotent).
+        \availability_proctor\preset::seed_initial_presets();
+        upgrade_plugin_savepoint(true, 2026041517, 'availability', 'proctor');
+    }
+
     return true;
 }

@@ -71,7 +71,8 @@ function availability_proctor_extend_navigation_frontpage(
     context_course $context
 ) {
     if (has_capability('availability/proctor:logaccess', $context)) {
-        $title = get_string('log_section', 'availability_proctor');
+        $title = get_string('log_section', 'availability_proctor',
+            get_string('pluginname', 'availability_proctor'));
         $url = new \moodle_url('/availability/condition/proctor/index.php');
         $icon = new \pix_icon('i/log', '');
         $node = navigation_node::create($title, $url, navigation_node::TYPE_SETTING, null, null, $icon);

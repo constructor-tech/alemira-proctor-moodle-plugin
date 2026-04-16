@@ -1,3 +1,1222 @@
-YUI.add("moodle-availability_proctor-form",function(fe,e){M.availability_proctor=M.availability_proctor||{},M.availability_proctor.form=fe.Object(M.core_availability.plugin),M.availability_proctor.form.rules=null,M.availability_proctor.form.initInner=function(e,a,n,i,t,l){this.rules=e,this.warnings=a,this.scoring=n,this.defaults=t,this.groups=l,this.streamsPresetOptions=i},M.availability_proctor.form.instId=0,M.availability_proctor.form.getNode=function(e){var a,n,i,t,l,o,s,r,c,u,d,p,m,b,f,h,v,L,j,g,_,w,y,k,x,B,F,C,S,U,H,W,q,Y,N,$,z,G,T,J,K,I,Q,X,O,R,A,P,Z,ee,ae,ne,ie,te,le,oe,se,re,ce,V,ue,de;function D(e,a){return a=a||"availability_proctor",M.util.get_string(e,a)}function pe(e){var a=D("showmore","core_form");return'<a href="#" class="proctor-moreless" data-more="'+a+'" data-less="'+D("showless","core_form")+'">'+a+'</a><div class="hidden col-md-12">'+e+"</div>"}function E(e,a,n,i){return'<span class="availability-group form-group mb-2 d-flex '+(i?"flex-column":"flex-row")+'"><div class="col-md-'+(i?12:5)+' col-form-label d-flex pb-0 pl-md-0">  <label for="'+e+'">'+a+'</label></div><div class="col-md-'+(i?12:7)+' form-inline align-items-start felement pl-md-0">'+n+"</div></span>"}function me(e){setTimeout(e,0)}function be(e){1==e?(k.addClass("btn-primary"),k.removeClass("btn-secondary"),x.addClass("btn-secondary"),x.removeClass("btn-primary"),B.removeClass("hidden"),F.addClass("hidden")):(x.addClass("btn-primary"),x.removeClass("btn-secondary"),k.addClass("btn-secondary"),k.removeClass("btn-primary"),B.addClass("hidden"),F.removeClass("hidden"))}for(U in M.availability_proctor.form.instId+=1,t=(n="proctor"+M.availability_proctor.form.instId)+"_mode",l=n+"_schedulingRequired",o=n+"_autoRescheduling",s=n+"_isTrial",O=n+"_identification",r=n+"_customRules",c=n+"_auxCamera",u=n+"_allowmultipledisplays",d=n+"_allowvirtualenvironment",p=n+"_checkidphotoquality",m=n+"_secureBrowser",b=n+"_secureBrowserLevel",f=n+"_allowToUseAdditionalResources",h=n+"_preliminaryCheck",v=n+"_userAgreement",R=n+"_webCameraMainView",L=n+"_calculator",j=n+"_streamsPreset",g=n+"_allowedProcesses",_=n+"_forbiddenProcesses",w=n+"_sendManualWarningsToLearner",y=n+"_allowRoomScanAuxCamera",C="white-space: break-spaces; display:flex; align-items: baseline; justify-content: flex-start;",i=E(i=n+"_duration",D("duration"),'<input type="text" name="duration" id="'+i+'" class="form-control">'),i=(i=(i=(i=(i=(i=(i=(i=(i=(i=(i=(i=(i=(i=(i=(i=(i=(i+=E(t,D("proctoring_mode"),'<select name="mode" id="'+t+'" class="custom-select">  <option value="online">'+D("online_mode")+'</option>  <option value="identification">'+D("identification_mode")+'</option>  <option value="offline">'+D("offline_mode")+'</option>  <option value="auto">'+D("auto_mode")+"</option></select>"))+E(O,D("identification"),'<select name="identification" id="'+O+'" class="custom-select">  <option value="passport">'+D("passport_identification")+'</option>  <option value="face">'+D("face_identification")+'</option>  <option value="face_and_passport">'+D("face_passport_identification")+'</option>  <option value="skip">'+D("skip_identification")+"</option></select>"))+E(R,D("web_camera_main_view"),'<select name="webcameramainview" id="'+R+'" class="custom-select">  <option value="front">'+D("web_camera_main_view_front")+'</option>  <option value="side">'+D("web_camera_main_view_side")+"</option></select>"))+E(l,D("scheduling_required"),'<input type="checkbox" name="scheduling_required" id="'+l+'" value="1">&nbsp;<label for="'+l+'">'+D("enable")+"</label> "))+E(o,D("auto_rescheduling"),'<input type="checkbox" name="auto_rescheduling" id="'+o+'" value="1">&nbsp;<label for="'+o+'">'+D("enable")+"</label> "))+E(s,D("is_trial"),'<input type="checkbox" name="istrial" id="'+s+'" value="1">&nbsp;<label for="'+s+'">'+D("enable")+"</label> "))+E(c,D("auxiliary_camera"),'<input type="checkbox" name="auxiliarycamera" id="'+c+'" value="1">&nbsp;<label for="'+c+'">'+D("enable")+"</label> "))+E(m,D("enable_secure_browser"),'<input type="checkbox" name="securebrowser" id="'+m+'" value="1">&nbsp;<label for="'+m+'">'+D("enable")+"</label> "))+E(b,D("secure_browser_level"),'<select name="securebrowserlevel" id="'+b+'" class="custom-select">  <option value="basic">'+D("secure_browser_level_basic")+'</option>  <option value="medium">'+D("secure_browser_level_medium")+'</option>  <option value="high">'+D("secure_browser_level_high")+"</option></select>"))+E(f,D("allowtouseadditionalresources"),'<input type="checkbox" name="allowtouseadditionalresources" id="'+f+'" value="1">&nbsp;<label for="'+f+'">'+D("enable")+"</label> "))+E(u,D("allowmultipledisplays"),'<label for="'+u+'"><input type="checkbox" name="allowmultipledisplays" id="'+u+'" value="1">&nbsp;'+D("enable")+"</label> "))+E(d,D("allowvirtualenvironment"),'<label for="'+d+'"><input type="checkbox" name="allowvirtualenvironment" id="'+d+'" value="1">&nbsp;'+D("enable")+"</label> "))+E(p,D("checkidphotoquality"),'<label for="'+p+'"><input type="checkbox" name="checkidphotoquality" id="'+p+'" value="1">&nbsp;'+D("enable")+"</label> "))+E(w,D("sendmanualwarningstolearner"),'<label for="'+w+'"><input type="checkbox" name="sendmanualwarningstolearner" id="'+w+'" value="1">&nbsp;'+D("enable")+"</label> "))+E(y,D("allowroomscanauxcamera"),'<label for="'+y+'"><input type="checkbox" name="allowroomscanauxcamera" id="'+y+'" value="1">&nbsp;'+D("enable")+"</label> "))+E(v,D("user_agreement_url"),'<input name="useragreementurl" id="'+v+'" class="form-control" value="" />'))+E(r,D("custom_rules"),'<textarea name="customrules" id="'+r+'" style="width: 100%" class="form-control"></textarea>'))+E(L,D("calculator"),'<select name="calculator" id="'+L+'" class="custom-select">  <option value="off">'+D("calculator_off")+'</option>  <option value="simple">'+D("calculator_simple")+'</option>  <option value="scientific">'+D("calculator_scientific")+"</option></select>"),S="",this.streamsPresetOptions)S+='<option value="'+(H=this.streamsPresetOptions[U]
-)+'">'+D("streamspreset_"+H)+"</option>";for(q in i=(i+=E(j,D("streamspreset"),'<select name="streamspreset" id="'+j+'" class="custom-select">'+S+"</select>"))+E(h,D("preliminary_check"),'<input type="checkbox" name="preliminarycheck" id="'+h+'" value="1">&nbsp;<label for="'+h+'">'+D("enable")+"</label> "),W="",this.rules)W+='<label for="'+(Y=n+"_"+q)+'" style="'+C+'"><input type="checkbox" name="'+q+'" id="'+Y+'" value="'+q+'" >&nbsp;'+D(q)+"</label>";for($ in i+=E(null,D("rules"),'<div class="rules" style="white-space:nowrap">'+W+"</div>"),N="",this.groups)N+='<label  style="'+C+'"><input value="'+(z=this.groups[$]).id+'" type="checkbox" name="proctoring-groups['+z.id+']">&nbsp;'+z.name+"</label>";for(T in N&&N.length&&(i+=E(null,D("select_groups"),'<div class="groups">'+N+"</div>")),i=(i+=E(_,D("forbidden_processes"),'<textarea name="forbiddenprocesses" id="'+_+'" style="width: 100%" class="form-control"></textarea><div class="text-muted">'+D("processes_list_hint")+"</div>"))+E(g,D("allowed_processes"),'<textarea name="allowedprocesses" id="'+g+'" style="width: 100%" class="form-control"></textarea><div class="text-muted">'+D("processes_list_hint")+"</div>"),G="",this.warnings)G+='<label for="'+(J=n+"_"+T)+'" style="'+C+'"><input type="checkbox" name="'+T+'" id="'+J+'" value="'+T+'" >&nbsp;'+D(T)+"</label>";for(I in K="",this.scoring)X='<input type="number" class="proctor-scoring-input" value=""step="0.01" name="'+I+'"id="scoring_'+(Q=n+"_"+I)+'"min="'+this.scoring[I].min+'" max="'+this.scoring[I].max+'">',K+=E(Q,D("scoring_"+I),X);if(O="",O=(O+=E(null,D("visible_warnings"),'<div class="warnings" style="white-space: nowrap" >'+pe(G)+"</div>",!0))+E(null,D("scoring_params_header"),pe(K),!0),(a=fe.Node.create('<span class="availability_proctor-tabs" style="position:relative"></span>')).setHTML("<label><strong>"+D("title")+"</strong></label><br><br>"),R=fe.Node.create('<div style="position:absolute; top: 0; right: 0;" class="availability_proctor-tab-btns"></div>').appendTo(a),k=fe.Node.create('<a href="#" class="btn btn-primary">1</a>').appendTo(R),x=fe.Node.create('<a href="#" class="btn btn-secondary">2</a>').appendTo(R),B=fe.Node.create('<div class="tab_content">'+i+"</div>").appendTo(a),F=fe.Node.create('<div class="tab_content hidden">'+O+"</div>").appendTo(a),e.rules===undefined&&(e.rules=this.rules),e.warnings===undefined&&(e.warnings=this.warnings),e.scoring=e.scoring||{},e.sendmanualwarningstolearner===undefined&&(e.sendmanualwarningstolearner=!0),e.creating){for(A in this.defaults)if(P=this.defaults[A],"scoring"==A)for(Z in P)e.scoring[Z]=P[Z]?parseFloat(P[Z]):null;else if("rules"==A)for(ee in P)e.rules[ee]=P[ee];else if("warnings"==A)for(ae in P)e.warnings[ae]=!!P[ae];else"groups"==A?e.groups=P:e[A]=P;e.mode||(e.mode="online",e.scheduling_required=!0)}for(ne in e.duration!==undefined&&a.one("input[name=duration]").set("value",e.duration),e.mode!==undefined&&a.one("select[name=mode] option[value="+e.mode+"]").set("selected","selected"),e.identification&&a.one("select[name=identification] option[value="+e.identification+"]").set("selected","selected"),e.webcameramainview&&a.one("select[name=webcameramainview] option[value="+e.webcameramainview+"]").set("selected","selected"),e.auto_rescheduling!==undefined&&a.one("#"+o).set("checked",e.auto_rescheduling?"checked":null),e.istrial!==undefined&&(b=e.istrial?"checked":null,a.one("#"+s).set("checked",b)),e.auxiliarycamera!==undefined&&a.one("#"+c).set("checked",e.auxiliarycamera?"checked":null),e.securebrowser!==undefined&&a.one("#"+m).set("checked",e.securebrowser?"checked":null),e.scheduling_required!==undefined&&a.one("#"+l).set("checked",e.scheduling_required?"checked":null),e.allowmultipledisplays!==undefined&&a.one("#"+u).set("checked",e.allowmultipledisplays?"checked":null),e.allowvirtualenvironment!==undefined&&a.one("#"+d).set("checked",e.allowvirtualenvironment?"checked":null),e.allowtouseadditionalresources!==undefined&&a.one("#"+f).set("checked",e.allowtouseadditionalresources?"checked":null),e.checkidphotoquality!==undefined&&a.one("#"+p).set("checked",e.checkidphotoquality?"checked":null),e.sendmanualwarningstolearner!==undefined&&a.one("#"+w).set("checked",e.sendmanualwarningstolearner?"checked":null),e.preliminarycheck!==undefined&&a.one("#"+h).set("checked",e.preliminarycheck?"checked":null),e.calculator!==undefined&&a.one("select[name=calculator] option[value="+e.calculator+"]").set("selected","selected"),e.streamspreset!==undefined&&a.one("select[name=streamspreset] option[value="+e.streamspreset+"]").set("selected","selected"),e.securebrowserlevel&&a.one("select[name=securebrowserlevel] option[value="+e.securebrowserlevel+"]").set("selected","selected"),e.allowroomscanauxcamera!==undefined&&a.one("#"+y).set("checked",e.allowroomscanauxcamera?"checked":null),this.warnings)e.warnings[ne]===undefined&&(e.warnings[ne]=this.warnings[ne]);for(ie in e.warnings)e.warnings[ie]&&(te=a.one(".warnings input[name="+ie+"]"))&&te.set("checked","checked");for(le in e.rules)e.rules[le]&&(oe=a.one(".rules input[name="+le+"]"))&&oe.set("checked","checked");for(re in se=(se=e.groups instanceof Array?e.groups:[]).map(function(e){return parseInt(e)}),this.groups)V=this.groups[re],ce=-1<se.indexOf(parseInt(V.id)),V="proctoring-groups["+V.id+"]",(V=a.one('.groups input[name="'+V+'"]'))&&ce&&V.set("checked","checked");for(ue in e.scoring)isNaN(e.scoring[ue])||(de=a.one(".proctor-scoring-input[name="+ue+"]"))&&de.set("value",e.scoring[ue]);return e.customrules!==undefined&&a.one("#"+r).set("value",e.customrules),e.useragreementurl!==undefined&&a.one("#"+v).set("value",e.useragreementurl),e.forbiddenprocesses!==undefined&&a.one("#"+_).set("value",e.forbiddenprocesses),e.allowedprocesses!==undefined&&a.one("#"+g).set("value",e.allowedprocesses),a.delegate("valuechange",function(){me(function(){M.core_availability.form.update()})},"input,textarea,select"),a.delegate("click",function(){me(function(){M.core_availability.form.update()})},
-"input[type=checkbox]"),a.delegate("valuechange",function(){var e;e=a.one("select[name=mode]").get("value").trim(),e=0<=["normal","identification"].indexOf(e),a.one("#"+l).set("checked",e)},"#"+t),k.on("click",function(e){e.preventDefault(),be(1)}),x.on("click",function(e){e.preventDefault(),be(2)}),a.delegate("click",function(e){var a;e.preventDefault(),e=e.target,(a=e.next()).hasClass("hidden")?(a.removeClass("hidden"),e.setContent(e.getAttribute("data-less"))):(a.addClass("hidden"),e.setContent(e.getAttribute("data-more")))},".proctor-moreless"),a},M.availability_proctor.form.fillValue=function(n,e){var a,i;n.duration=e.one("input[name=duration]").get("value").trim(),n.mode=e.one("select[name=mode]").get("value").trim(),n.identification=e.one("select[name=identification]").get("value").trim(),n.webcameramainview=e.one("select[name=webcameramainview]").get("value").trim(),n.auto_rescheduling=e.one("input[name=auto_rescheduling]").get("checked"),n.scheduling_required=e.one("input[name=scheduling_required]").get("checked"),n.istrial=e.one("input[name=istrial]").get("checked"),n.customrules=e.one("textarea[name=customrules]").get("value").trim(),n.useragreementurl=e.one("input[name=useragreementurl]").get("value").trim(),n.auxiliarycamera=e.one("input[name=auxiliarycamera]").get("checked"),n.securebrowser=e.one("input[name=securebrowser]").get("checked"),n.securebrowserlevel=e.one("select[name=securebrowserlevel]").get("value").trim(),n.allowtouseadditionalresources=e.one("input[name=allowtouseadditionalresources]").get("checked"),n.allowmultipledisplays=e.one("input[name=allowmultipledisplays]").get("checked"),n.allowvirtualenvironment=e.one("input[name=allowvirtualenvironment]").get("checked"),n.sendmanualwarningstolearner=e.one("input[name=sendmanualwarningstolearner]").get("checked"),n.checkidphotoquality=e.one("input[name=checkidphotoquality]").get("checked"),n.calculator=e.one("select[name=calculator]").get("value").trim(),n.streamspreset=e.one("select[name=streamspreset]").get("value").trim(),n.allowedprocesses=e.one("textarea[name=allowedprocesses]").get("value").trim(),n.forbiddenprocesses=e.one("textarea[name=forbiddenprocesses]").get("value").trim(),n.allowroomscanauxcamera=e.one("input[name=allowroomscanauxcamera]").get("checked"),n.preliminarycheck=e.one("input[name=preliminarycheck]").get("checked"),n.rules={},a=e.all(".rules input"),fe.each(a,function(e){i=e.get("value"),!0===e.get("checked")?n.rules[i]=!0:n.rules[i]=!1}),n.warnings={},a=e.all(".warnings input"),fe.each(a,function(e){i=e.get("value"),!0===e.get("checked")?n.warnings[i]=!0:n.warnings[i]=!1}),n.scoring={},a=e.all(".proctor-scoring-input"),fe.each(a,function(e){i=e.get("name");e=e.get("value").trim();0<e.length?n.scoring[i]=parseFloat(e):n.scoring[i]=null}),n.groups=[],a=e.all(".groups input"),fe.each(a,function(e){var a=e.get("value");!0===e.get("checked")&&n.groups.push(a)})},M.availability_proctor.form.fillErrors=function(e,a){var n={};this.fillValue(n,a),n.duration!==undefined&&new RegExp("^\\d+$").test(n.duration)&&n.duration%30==0||e.push("availability_proctor:error_setduration")}},"@VERSION@",{requires:["base","node","event","moodle-core_availability-form"]});
+YUI.add('moodle-availability_proctor-form', function (Y, NAME) {
+
+/**
+ * JavaScript for form editing proctor availability conditions.
+ *
+ * Layout and field-dependency logic mirror the admin preset form
+ * (classes/preset_form.php). Storage format remains the legacy flat
+ * structure so existing exams continue to work unchanged.
+ *
+ * @module moodle-availability_proctor-form
+ */
+/** @suppress checkVars */
+M.availability_proctor = M.availability_proctor || {};
+
+M.availability_proctor.form = Y.Object(M.core_availability.plugin);
+
+M.availability_proctor.form.rules = null;
+
+M.availability_proctor.form.initInner = function(rules, warnings, scoring, streamsPresetOptions, defaults, groups, context) {
+    this.rules = rules;
+    this.warnings = warnings;
+    this.scoring = scoring;
+    this.defaults = defaults;
+    this.groups = groups;
+    this.streamsPresetOptions = streamsPresetOptions;
+    this.context = context || {ajaxurl: '', sesskey: '', global_presets: [], user_presets: []};
+};
+
+M.availability_proctor.form.instId = 0;
+
+M.availability_proctor.form.getNode = function(json) {
+    M.availability_proctor.form.instId += 1;
+    var node, value;
+
+    // Inject style overrides once: suppress the focus outline/box-shadow on
+    // the help-icon spans so clicking the icon doesn't draw a focus square.
+    if (!M.availability_proctor.form._stylesInjected) {
+        M.availability_proctor.form._stylesInjected = true;
+        var head = Y.one('head');
+        if (head) {
+            head.append(Y.Node.create(
+                '<style>' +
+                '.proctor-help, .proctor-help:focus, .proctor-help:active, .proctor-help:focus-visible,' +
+                '.availability_proctor-tab-btns a, .availability_proctor-tab-btns a:focus,' +
+                '.availability_proctor-tab-btns a:active, .availability_proctor-tab-btns a:focus-visible,' +
+                '.proctor-load-preset, .proctor-load-preset:focus, .proctor-load-preset:active,' +
+                '.proctor-load-preset:focus-visible,' +
+                '.proctor-moreless, .proctor-moreless:focus, .proctor-moreless:active,' +
+                '.proctor-moreless:focus-visible {' +
+                '  outline: none !important; box-shadow: none !important; border: none !important;' +
+                '}' +
+                '</style>'
+            ));
+        }
+    }
+
+    var id = 'proctor' + M.availability_proctor.form.instId;
+    var modeId = id + '_mode';
+    var sendManualWarningsToLearnerId = id + '_sendManualWarningsToLearner';
+    var identificationId = id + '_identification';
+    var checkidphotoqualityId = id + '_checkidphotoquality';
+    var preliminaryCheckId = id + '_preliminaryCheck';
+    var webCameraMainViewId = id + '_webCameraMainView';
+    var auxiliaryCameraId = id + '_auxCamera';
+    var allowRoomScanAuxCameraId = id + '_allowRoomScanAuxCamera';
+    var allowmultipledisplaysId = id + '_allowmultipledisplays';
+    var streamsPresetId = id + '_streamsPreset';
+    var enableSecureBrowserId = id + '_secureBrowser';
+    var secureBrowserLevelId = id + '_secureBrowserLevel';
+    var allowToUseAdditionalResourcesId = id + '_allowToUseAdditionalResources';
+    var allowedProcessesId = id + '_allowedProcesses';
+    var forbiddenProcessesId = id + '_forbiddenProcesses';
+    var allowvirtualenvironmentId = id + '_allowvirtualenvironment';
+    var calculatorId = id + '_calculator';
+    var userAgreementId = id + '_userAgreement';
+    var isTrialId = id + '_isTrial';
+    var customRulesId = id + '_customRules';
+
+    var tabButtonOne, tabButtonTwo, tabOne, tabTwo;
+
+    function getString(identifier, module) {
+        module = module || 'availability_proctor';
+        return M.util.get_string(identifier, module);
+    }
+
+    function moreLess(content) {
+        var showmore = getString('showmore', 'core_form');
+        var showless = getString('showless', 'core_form');
+        return '<a href="#" class="proctor-moreless" data-more="' + showmore + '" data-less="' + showless + '">' +
+            showmore +
+            '</a><div class="hidden col-md-12">' + content + '</div>';
+    }
+
+    function switchMoreLessState(target) {
+        var next = target.next();
+        var hidden = next.hasClass('hidden');
+        if (hidden) {
+            next.removeClass('hidden');
+            target.setContent(target.getAttribute('data-less'));
+        } else {
+            next.addClass('hidden');
+            target.setContent(target.getAttribute('data-more'));
+        }
+    }
+
+    function nextTick(callback) {
+        setTimeout(callback, 0);
+    }
+
+    function switchTab(tab) {
+        if (tab == 1) {
+            tabButtonOne.addClass('btn-primary');
+            tabButtonOne.removeClass('btn-secondary');
+            tabButtonTwo.addClass('btn-secondary');
+            tabButtonTwo.removeClass('btn-primary');
+            tabOne.removeClass('hidden');
+            tabTwo.addClass('hidden');
+        } else {
+            tabButtonTwo.addClass('btn-primary');
+            tabButtonTwo.removeClass('btn-secondary');
+            tabButtonOne.addClass('btn-secondary');
+            tabButtonOne.removeClass('btn-primary');
+            tabOne.addClass('hidden');
+            tabTwo.removeClass('hidden');
+        }
+    }
+
+    var optionStyle = 'white-space: break-spaces; display:flex; align-items: baseline; justify-content: flex-start;';
+
+    /**
+     * Wrap one form field with a label column, marking it via data-field
+     * so visibility toggles can find and hide it.
+     */
+    function formGroup(fieldId, label, content, fullwidth, fieldName, labelHintKey) {
+        var labelcols = fullwidth ? 12 : 5;
+        var fieldcols = fullwidth ? 12 : 7;
+        var flexdir = fullwidth ? 'flex-column' : 'flex-row';
+        var dataAttr = fieldName ? ' data-field="' + fieldName + '"' : '';
+        var labelHelp = '';
+        if (labelHintKey) {
+            // Wrap icon in an inline-flex anchor that vertically centres its
+            // child icon — that way the icon's centre line aligns with the
+            // checkbox/input's centre line in the field column.
+            labelHelp = ' <span class="proctor-help ml-1 d-inline-flex align-items-center"' +
+                ' data-hint-key="' + labelHintKey + '"' +
+                ' role="button" tabindex="0" style="cursor:pointer; outline:none; min-height:1.5rem;">' +
+                '<i class="icon fa fa-question-circle text-info"></i></span>';
+        }
+        // Use start (top) alignment in both columns so the help icon and the
+        // input/checkbox stay on the first line even when the label wraps.
+        return '<span class="availability-group form-group mb-2 d-flex ' + flexdir + '"' + dataAttr + '>' +
+            '<div class="col-md-' + labelcols + ' col-form-label d-flex pb-0 pl-md-0 align-items-start">' +
+            '  <label for="' + fieldId + '" class="mb-0" style="line-height:1.5rem;">' + label + '</label>' + labelHelp +
+            '</div>' +
+            '<div class="col-md-' + fieldcols + ' form-inline align-items-start felement pl-md-0"' +
+            ' style="min-height:1.5rem;">' +
+            content +
+            '</div>' +
+            '</span>';
+    }
+
+    function sectionHeader(label) {
+        return '<h5 class="proctor-section-header mt-3 mb-2 pb-1 border-bottom">' + label + '</h5>';
+    }
+
+    /**
+     * Append a clickable help icon next to the input. Hover and click both
+     * show the same width-capped popover; the native title tooltip is
+     * intentionally omitted so it cannot exceed our width cap.
+     * @param {string} content Existing control HTML
+     * @param {string} hintKey Lang key for the hint text
+     */
+    function withHint(content, hintKey) {
+        return content +
+            ' <span class="proctor-help ml-2" data-hint-key="' + hintKey + '"' +
+            ' role="button" tabindex="0" style="cursor:pointer; outline:none;">' +
+            '<i class="icon fa fa-question-circle text-info"></i>' +
+            '</span>';
+    }
+
+    var html = '';
+
+    // ---- Section: Proctoring mode ----
+    html += sectionHeader(getString('preset_section_mode'));
+    html += formGroup(modeId, getString('proctoring_mode'),
+        '<select name="mode" id="' + modeId + '" class="custom-select">' +
+        '  <option value="online">' + getString('online_mode') + '</option>' +
+        '  <option value="offline">' + getString('offline_mode') + '</option>' +
+        '  <option value="auto">' + getString('auto_mode') + '</option>' +
+        '</select>',
+        false, undefined, 'proctoring_mode_help'
+    );
+    html += formGroup(sendManualWarningsToLearnerId, getString('sendmanualwarningstolearner'),
+        '<input type="checkbox" name="sendmanualwarningstolearner" id="' + sendManualWarningsToLearnerId + '" value="1">&nbsp;' +
+        '<label for="' + sendManualWarningsToLearnerId + '">' + getString('enable') + '</label>',
+        false, 'sendmanualwarningstolearner', 'sendmanualwarningstolearner_help'
+    );
+
+    // ---- Section: Identity verification ----
+    html += sectionHeader(getString('preset_section_identity'));
+    html += formGroup(identificationId, getString('identification'),
+        '<select name="identification" id="' + identificationId + '" class="custom-select">' +
+        '  <option value="face_and_passport">' + getString('face_passport_identification') + '</option>' +
+        '  <option value="passport">' + getString('passport_identification') + '</option>' +
+        '  <option value="face">' + getString('face_identification') + '</option>' +
+        '  <option value="skip">' + getString('skip_identification') + '</option>' +
+        '</select>',
+        false, undefined, 'identification_help'
+    );
+    html += formGroup(checkidphotoqualityId, getString('checkidphotoquality'),
+        '<input type="checkbox" name="checkidphotoquality" id="' + checkidphotoqualityId + '" value="1">&nbsp;' +
+        '<label for="' + checkidphotoqualityId + '">' + getString('enable') + '</label>',
+        false, 'checkidphotoquality', 'checkidphotoquality_help'
+    );
+    html += formGroup(preliminaryCheckId, getString('preliminary_check'),
+        '<input type="checkbox" name="preliminarycheck" id="' + preliminaryCheckId + '" value="1">&nbsp;' +
+        '<label for="' + preliminaryCheckId + '">' + getString('enable') + '</label>',
+        false, 'preliminarycheck', 'preliminary_check_help'
+    );
+
+    // ---- Section: Camera and monitoring ----
+    html += sectionHeader(getString('preset_section_camera'));
+    html += formGroup(webCameraMainViewId, getString('web_camera_main_view'),
+        '<select name="webcameramainview" id="' + webCameraMainViewId + '" class="custom-select">' +
+        '  <option value="front">' + getString('web_camera_main_view_front') + '</option>' +
+        '  <option value="side">' + getString('web_camera_main_view_side') + '</option>' +
+        '</select>',
+        false, undefined, 'web_camera_main_view_help'
+    );
+    html += formGroup(auxiliaryCameraId, getString('auxiliary_camera'),
+        '<select name="auxiliarycamera" id="' + auxiliaryCameraId + '" class="custom-select">' +
+        '  <option value="0">' + getString('auxiliary_camera_off') + '</option>' +
+        '  <option value="1">' + getString('auxiliary_camera_on') + '</option>' +
+        '</select>',
+        false, undefined, 'auxiliary_camera_help'
+    );
+    html += formGroup(allowRoomScanAuxCameraId, getString('allowroomscanauxcamera'),
+        '<input type="checkbox" name="allowroomscanauxcamera" id="' + allowRoomScanAuxCameraId + '" value="1">&nbsp;' +
+        '<label for="' + allowRoomScanAuxCameraId + '">' + getString('enable') + '</label>',
+        false, 'allowroomscanauxcamera', 'allowroomscanauxcamera_help'
+    );
+    html += formGroup(allowmultipledisplaysId, getString('allowmultipledisplays'),
+        '<input type="checkbox" name="allowmultipledisplays" id="' + allowmultipledisplaysId + '" value="1">&nbsp;' +
+        '<label for="' + allowmultipledisplaysId + '">' + getString('enable') + '</label>',
+        false, undefined, 'allowmultipledisplays_help'
+    );
+
+    var streamsPresetOptions = '';
+    for (var spi in this.streamsPresetOptions) {
+        var spkey = this.streamsPresetOptions[spi];
+        streamsPresetOptions += '<option value="' + spkey + '">' + getString('streamspreset_' + spkey) + '</option>';
+    }
+    html += formGroup(streamsPresetId, getString('streamspreset'),
+        '<select name="streamspreset" id="' + streamsPresetId + '" class="custom-select">' + streamsPresetOptions + '</select>',
+        false, undefined, 'streamspreset_help'
+    );
+
+    // ---- Section: Secure Browser ----
+    html += sectionHeader(getString('preset_section_securebrowser'));
+    html += formGroup(enableSecureBrowserId, getString('enable_secure_browser'),
+        '<input type="checkbox" name="securebrowser" id="' + enableSecureBrowserId + '" value="1">&nbsp;' +
+        '<label for="' + enableSecureBrowserId + '">' + getString('enable') + '</label>',
+        false, undefined, 'enable_secure_browser_help'
+    );
+    html += formGroup(secureBrowserLevelId, getString('secure_browser_level'),
+        '<select name="securebrowserlevel" id="' + secureBrowserLevelId + '" class="custom-select">' +
+        '  <option value="basic">' + getString('secure_browser_level_basic') + '</option>' +
+        '  <option value="medium">' + getString('secure_browser_level_medium') + '</option>' +
+        '  <option value="high">' + getString('secure_browser_level_high') + '</option>' +
+        '</select>',
+        false, 'securebrowserlevel', 'secure_browser_level_help'
+    );
+    html += formGroup(allowToUseAdditionalResourcesId, getString('allowtouseadditionalresources'),
+        '<input type="checkbox" name="allowtouseadditionalresources" id="' + allowToUseAdditionalResourcesId + '" value="1">&nbsp;' +
+        '<label for="' + allowToUseAdditionalResourcesId + '">' + getString('enable') + '</label>',
+        false, 'allowtouseadditionalresources', 'allowtouseadditionalresources_help'
+    );
+    html += formGroup(allowedProcessesId, getString('allowed_processes'),
+        '<textarea name="allowedprocesses" id="' + allowedProcessesId + '" style="width: 100%" class="form-control"></textarea>',
+        false, 'allowedprocesses', 'allowed_processes_help'
+    );
+    html += formGroup(forbiddenProcessesId, getString('forbidden_processes'),
+        '<textarea name="forbiddenprocesses" id="' + forbiddenProcessesId + '" style="width: 100%" class="form-control"></textarea>',
+        false, 'forbiddenprocesses', 'forbidden_processes_help'
+    );
+    html += formGroup(allowvirtualenvironmentId, getString('allowvirtualenvironment'),
+        '<input type="checkbox" name="allowvirtualenvironment" id="' + allowvirtualenvironmentId + '" value="1">&nbsp;' +
+        '<label for="' + allowvirtualenvironmentId + '">' + getString('enable') + '</label>',
+        false, 'allowvirtualenvironment', 'allowvirtualenvironment_help'
+    );
+
+    // ---- Section: Allow during exam ----
+    html += sectionHeader(getString('preset_section_rules'));
+    for (var key in this.rules) {
+        // Calculator allowance is derived from the Calculator dropdown below.
+        if (key === 'allow_to_use_calculator') {
+            continue;
+        }
+        var keyId = id + '_' + key;
+        html += formGroup(keyId, getString(key),
+            '<input type="checkbox" class="proctor-rule" name="' + key + '" id="' + keyId + '" value="' + key + '">',
+            false, undefined, key + '_help'
+        );
+    }
+
+    html += formGroup(calculatorId, getString('calculator'),
+        '<select name="calculator" id="' + calculatorId + '" class="custom-select">' +
+        '  <option value="off">' + getString('calculator_off') + '</option>' +
+        '  <option value="simple">' + getString('calculator_simple') + '</option>' +
+        '  <option value="scientific">' + getString('calculator_scientific') + '</option>' +
+        '</select>',
+        false, undefined, 'calculator_help'
+    );
+
+    html += formGroup(userAgreementId, getString('user_agreement_url'),
+        '<input name="useragreementurl" id="' + userAgreementId + '" class="form-control" value="" />',
+        false, undefined, 'user_agreement_url_help'
+    );
+
+    // ---- Exam-only fields (not part of preset) ----
+    html += sectionHeader(getString('preset_section_exam'));
+    html += formGroup(isTrialId, getString('is_trial'),
+        '<input type="checkbox" name="istrial" id="' + isTrialId + '" value="1">&nbsp;' +
+        '<label for="' + isTrialId + '">' + getString('enable') + '</label>',
+        false, undefined, 'is_trial_help'
+    );
+    html += formGroup(customRulesId, getString('custom_rules'),
+        '<textarea name="customrules" id="' + customRulesId + '" style="width: 100%" class="form-control"></textarea>',
+        false, undefined, 'custom_rules_help'
+    );
+    var groupOptions = '';
+    for (var i in this.groups) {
+        var group = this.groups[i];
+        groupOptions += '<label style="' + optionStyle + '">' +
+            '<input value="' + group.id + '" type="checkbox" name="proctoring-groups[' + group.id + ']">' +
+            '&nbsp;' + group.name +
+            '</label>';
+    }
+    if (groupOptions && groupOptions.length) {
+        html += formGroup(null, getString('select_groups'), '<div class="groups">' + groupOptions + '</div>');
+    }
+
+    // ---- Tab 2: Alerts shown to student + Scoring parameters ----
+    // Warnings that get suppressed when the corresponding allow-rule is on.
+    var ruleWarningMap = {
+        'allow_to_use_websites': 'warning_change_active_window_on_computer',
+        'allow_voices': 'warning_voice_detected',
+        'allow_wrong_gaze_direction': 'warning_avert_eyes',
+        'allow_absence_in_frame': 'warning_no_user_in_frame'
+    };
+    var suppressibleWarnings = {};
+    for (var rk in ruleWarningMap) {
+        suppressibleWarnings[ruleWarningMap[rk]] = rk;
+    }
+
+    var warningOptions = '';
+    for (var wkey in this.warnings) {
+        var wkeyId = id + '_' + wkey;
+        var hint = '';
+        if (suppressibleWarnings[wkey]) {
+            hint = ' <span class="proctor-help" data-hint-key="' + wkey + '_help"' +
+                ' role="button" tabindex="0" style="cursor:pointer; outline:none;">' +
+                '<i class="icon fa fa-question-circle text-info"></i></span>';
+        }
+        warningOptions += '<label for="' + wkeyId + '" style="' + optionStyle + '">' +
+            '<input type="checkbox" name="' + wkey + '" id="' + wkeyId + '" value="' + wkey + '">&nbsp;' +
+            getString(wkey) + hint +
+            '</label>';
+    }
+    var scoringOptions = '';
+    for (var skey in this.scoring) {
+        var skeyId = id + '_' + skey;
+        var smin = this.scoring[skey].min;
+        var smax = this.scoring[skey].max;
+        var scoringInputHTML = '<input type="number" class="proctor-scoring-input" value=""' +
+            ' step="0.01" name="' + skey + '" id="scoring_' + skeyId + '"' +
+            ' min="' + smin + '" max="' + smax + '" style="width: 6em;">';
+        var scoringHintKey = skey === 'cheater_level' ? 'scoring_cheater_level_help' : 'scoring_help';
+        scoringOptions += formGroup(skeyId, getString('scoring_' + skey),
+            scoringInputHTML, false, undefined, scoringHintKey);
+    }
+
+    var htmlTwo = '';
+    htmlTwo += sectionHeader(getString('preset_section_warnings'));
+    htmlTwo += '<div class="text-muted small mb-2">' + getString('warnings_help') + '</div>';
+    htmlTwo += '<div class="warnings" style="white-space: nowrap">' + warningOptions + '</div>';
+    htmlTwo += sectionHeader(getString('preset_section_scoring'));
+    htmlTwo += scoringOptions;
+
+    // ---- Build node ----
+    node = Y.Node.create('<span class="availability_proctor-tabs" style="position:relative; display:block;"></span>');
+    node.setHTML('<label><strong>' + getString('title') + '</strong></label><br>');
+
+    // Load-preset toolbar (above the form).
+    var loadBar = Y.Node.create(
+        '<div class="proctor-loadbar mb-2 d-flex align-items-baseline flex-wrap">' +
+        '  <span class="proctor-loaded-preset text-muted mr-2"></span>' +
+        '  <a href="#" class="proctor-load-preset">' + getString('load_preset') + '</a>' +
+        '  <div class="proctor-preset-picker w-100 mt-2" style="display:none; flex-basis:100%;"></div>' +
+        '</div>'
+    ).appendTo(node);
+
+    var tabButtons = Y.Node.create(
+        '<div style="position:absolute; top: 0; right: 0;" class="availability_proctor-tab-btns"></div>'
+    ).appendTo(node);
+    tabButtonOne = Y.Node.create('<a href="#" class="btn btn-primary">1</a>').appendTo(tabButtons);
+    tabButtonTwo = Y.Node.create('<a href="#" class="btn btn-secondary">2</a>').appendTo(tabButtons);
+
+    tabOne = Y.Node.create('<div class="tab_content">' + html + '</div>').appendTo(node);
+    tabTwo = Y.Node.create('<div class="tab_content hidden">' + htmlTwo + '</div>').appendTo(node);
+
+    // Save-as-personal-preset toolbar (below the form, in tab one).
+    var saveBar = Y.Node.create(
+        '<div class="proctor-savebar mt-2">' +
+        '  <a href="#" class="proctor-save-preset btn btn-secondary">' + getString('save_personal_preset') + '</a>' +
+        '  <div class="proctor-save-panel mt-2 p-3 border rounded bg-light" style="display:none; max-width:600px;">' +
+        '    <div class="text-muted small mb-2">' + getString('save_personal_preset_hint') + '</div>' +
+        '    <label class="d-block mb-1">' + getString('save_personal_preset_prompt') + '</label>' +
+        '    <input type="text" class="proctor-save-name form-control mb-2" maxlength="255">' +
+        '    <div class="proctor-save-status text-danger small mb-2" style="display:none;"></div>' +
+        '    <button type="button" class="proctor-save-confirm btn btn-primary btn-sm">' + getString('savechanges', 'core') + '</button>' +
+        '    <button type="button" class="proctor-save-cancel btn btn-secondary btn-sm ml-1">' + getString('cancel', 'core') + '</button>' +
+        '  </div>' +
+        '</div>'
+    ).appendTo(tabOne);
+
+    // ---- Default values ----
+    if (json.rules === undefined) {
+        json.rules = {};
+        for (var dr in this.rules) { json.rules[dr] = this.rules[dr]; }
+    }
+    if (json.warnings === undefined) {
+        json.warnings = {};
+        for (var dw in this.warnings) { json.warnings[dw] = this.warnings[dw]; }
+    }
+    json.scoring = json.scoring || {};
+    if (json.sendmanualwarningstolearner === undefined) {
+        json.sendmanualwarningstolearner = true;
+    }
+
+    if (json.creating) {
+        for (var dkey in this.defaults) {
+            var dvalue = this.defaults[dkey];
+            if (dkey == 'scoring') {
+                for (var dskey in dvalue) {
+                    json.scoring[dskey] = dvalue[dskey] ? parseFloat(dvalue[dskey]) : null;
+                }
+            } else if (dkey == 'rules') {
+                for (var drkey in dvalue) {
+                    json.rules[drkey] = dvalue[drkey];
+                }
+            } else if (dkey == 'warnings') {
+                for (var dwkey in dvalue) {
+                    json.warnings[dwkey] = dvalue[dwkey] ? true : false;
+                }
+            } else if (dkey == 'groups') {
+                json.groups = dvalue;
+            } else {
+                json[dkey] = dvalue;
+            }
+        }
+        if (!json.mode) {
+            json.mode = 'offline';
+        }
+    }
+
+    // ---- Hydrate inputs from json ----
+    if (json.mode !== undefined) {
+        var modeOpt = node.one('select[name=mode] option[value=' + json.mode + ']');
+        if (modeOpt) { modeOpt.set('selected', 'selected'); }
+    }
+    if (json.identification) {
+        var idOpt = node.one('select[name=identification] option[value=' + json.identification + ']');
+        if (idOpt) { idOpt.set('selected', 'selected'); }
+    }
+    if (json.webcameramainview) {
+        var wcOpt = node.one('select[name=webcameramainview] option[value=' + json.webcameramainview + ']');
+        if (wcOpt) { wcOpt.set('selected', 'selected'); }
+    }
+    if (json.istrial !== undefined) {
+        node.one('#' + isTrialId).set('checked', json.istrial ? 'checked' : null);
+    }
+    if (json.auxiliarycamera !== undefined) {
+        var auxVal = json.auxiliarycamera ? '1' : '0';
+        var auxOpt = node.one('select[name=auxiliarycamera] option[value=' + auxVal + ']');
+        if (auxOpt) { auxOpt.set('selected', 'selected'); }
+    }
+    if (json.securebrowser !== undefined) {
+        node.one('#' + enableSecureBrowserId).set('checked', json.securebrowser ? 'checked' : null);
+    }
+    if (json.allowmultipledisplays !== undefined) {
+        node.one('#' + allowmultipledisplaysId).set('checked', json.allowmultipledisplays ? 'checked' : null);
+    }
+    if (json.allowvirtualenvironment !== undefined) {
+        node.one('#' + allowvirtualenvironmentId).set('checked', json.allowvirtualenvironment ? 'checked' : null);
+    }
+    if (json.allowtouseadditionalresources !== undefined) {
+        node.one('#' + allowToUseAdditionalResourcesId).set('checked',
+            json.allowtouseadditionalresources ? 'checked' : null);
+    }
+    if (json.checkidphotoquality !== undefined) {
+        node.one('#' + checkidphotoqualityId).set('checked', json.checkidphotoquality ? 'checked' : null);
+    }
+    if (json.sendmanualwarningstolearner !== undefined) {
+        node.one('#' + sendManualWarningsToLearnerId).set('checked', json.sendmanualwarningstolearner ? 'checked' : null);
+    }
+    if (json.preliminarycheck !== undefined) {
+        node.one('#' + preliminaryCheckId).set('checked', json.preliminarycheck ? 'checked' : null);
+    }
+    if (json.calculator !== undefined) {
+        var calcOpt = node.one('select[name=calculator] option[value=' + json.calculator + ']');
+        if (calcOpt) { calcOpt.set('selected', 'selected'); }
+    }
+    if (json.streamspreset !== undefined) {
+        var spOpt = node.one('select[name=streamspreset] option[value=' + json.streamspreset + ']');
+        if (spOpt) { spOpt.set('selected', 'selected'); }
+    }
+    if (json.securebrowserlevel) {
+        var sblOpt = node.one('select[name=securebrowserlevel] option[value=' + json.securebrowserlevel + ']');
+        if (sblOpt) { sblOpt.set('selected', 'selected'); }
+    }
+    if (json.allowroomscanauxcamera !== undefined) {
+        node.one('#' + allowRoomScanAuxCameraId).set('checked', json.allowroomscanauxcamera ? 'checked' : null);
+    }
+
+    // Warnings: apply hardcoded defaults when missing.
+    for (var wrkey in this.warnings) {
+        if (json.warnings[wrkey] === undefined) {
+            json.warnings[wrkey] = this.warnings[wrkey];
+        }
+    }
+    for (var warningKey in json.warnings) {
+        if (json.warnings[warningKey]) {
+            var winput = node.one('.warnings input[name=' + warningKey + ']');
+            if (winput) { winput.set('checked', 'checked'); }
+        }
+    }
+    for (var ruleKey in json.rules) {
+        if (json.rules[ruleKey]) {
+            var rinput = node.one('input.proctor-rule[name=' + ruleKey + ']');
+            if (rinput) { rinput.set('checked', 'checked'); }
+        }
+    }
+    var selectedGroups = (json.groups instanceof Array) ? json.groups : [];
+    selectedGroups = selectedGroups.map(function(gid) { return parseInt(gid); });
+    for (var gi in this.groups) {
+        var selectedGroup = this.groups[gi];
+        var checked = selectedGroups.indexOf(parseInt(selectedGroup.id)) > -1;
+        var groupKey = 'proctoring-groups[' + selectedGroup.id + ']';
+        var ginput = node.one('.groups input[name="' + groupKey + '"]');
+        if (ginput && checked) { ginput.set('checked', 'checked'); }
+    }
+    for (var scoringKey in json.scoring) {
+        if (!isNaN(json.scoring[scoringKey])) {
+            var sinput = node.one('.proctor-scoring-input[name=' + scoringKey + ']');
+            if (sinput) { sinput.set('value', json.scoring[scoringKey]); }
+        }
+    }
+    if (json.customrules !== undefined) {
+        node.one('#' + customRulesId).set('value', json.customrules);
+    }
+    if (json.useragreementurl !== undefined) {
+        node.one('#' + userAgreementId).set('value', json.useragreementurl);
+    }
+    if (json.forbiddenprocesses !== undefined) {
+        node.one('#' + forbiddenProcessesId).set('value', json.forbiddenprocesses);
+    }
+    if (json.allowedprocesses !== undefined) {
+        node.one('#' + allowedProcessesId).set('value', json.allowedprocesses);
+    }
+
+    // ---- Field-dependency visibility ----
+    function setVisible(fieldName, visible) {
+        var group = node.one('[data-field="' + fieldName + '"]');
+        if (group) {
+            // Bootstrap's `d-flex` sets display:flex !important, so inline
+            // display:none cannot override it. Toggle `d-none` (also !important)
+            // alongside `d-flex` to control visibility reliably.
+            if (visible) {
+                group.removeClass('d-none');
+                group.addClass('d-flex');
+            } else {
+                group.removeClass('d-flex');
+                group.addClass('d-none');
+            }
+        }
+    }
+    function applyDependencies() {
+        var mode = node.one('select[name=mode]').get('value');
+        var liveMode = (mode === 'online');
+        setVisible('sendmanualwarningstolearner', liveMode);
+
+        var ident = node.one('select[name=identification]').get('value');
+        var idCaptured = (ident === 'face_and_passport' || ident === 'passport');
+        setVisible('checkidphotoquality', idCaptured);
+        var faceCaptured = (ident === 'face_and_passport' || ident === 'face');
+        setVisible('preliminarycheck', faceCaptured);
+
+        var auxOn = node.one('select[name=auxiliarycamera]').get('value') === '1';
+        setVisible('allowroomscanauxcamera', auxOn);
+
+        var sbOn = node.one('input[name=securebrowser]').get('checked');
+        setVisible('securebrowserlevel', sbOn);
+        setVisible('allowtouseadditionalresources', sbOn);
+        setVisible('allowedprocesses', sbOn);
+        setVisible('forbiddenprocesses', sbOn);
+        setVisible('allowvirtualenvironment', sbOn);
+
+        // Rules that suppress a corresponding warning: when the rule is on,
+        // force the warning off and disable its checkbox.
+        for (var ruleKey in ruleWarningMap) {
+            var ruleInp = node.one('input.proctor-rule[name=' + ruleKey + ']');
+            if (!ruleInp) { continue; }
+            var warnInp = node.one('.warnings input[name=' + ruleWarningMap[ruleKey] + ']');
+            if (!warnInp) { continue; }
+            if (ruleInp.get('checked')) {
+                warnInp.set('checked', false);
+                warnInp.set('disabled', true);
+            } else {
+                warnInp.set('disabled', false);
+            }
+        }
+    }
+    applyDependencies();
+
+    // ---- Event wiring ----
+    node.delegate('valuechange', function() {
+        nextTick(function() { M.core_availability.form.update(); });
+        applyDependencies();
+        clearLoadedNameOnEdit();
+    }, 'input,textarea,select');
+
+    // Native `change` event covers <select> reliably (valuechange is text-input only).
+    node.delegate('change', function() {
+        nextTick(function() { M.core_availability.form.update(); });
+        applyDependencies();
+        clearLoadedNameOnEdit();
+    }, 'select');
+
+    node.delegate('click', function() {
+        nextTick(function() { M.core_availability.form.update(); });
+        applyDependencies();
+        clearLoadedNameOnEdit();
+    }, 'input[type=checkbox]');
+
+    tabButtonOne.on('click', function(e) {
+        e.preventDefault();
+        switchTab(1);
+    });
+    tabButtonTwo.on('click', function(e) {
+        e.preventDefault();
+        switchTab(2);
+    });
+    node.delegate('click', function(e) {
+        e.preventDefault();
+        switchMoreLessState(e.target);
+    }, '.proctor-moreless');
+
+    // Help icons — show same width-capped info-card popover on hover and click.
+    function helpAnchor(icon) {
+        return icon.ancestor('.availability-group') || icon.ancestor('label');
+    }
+    function showHelp(icon) {
+        var group = helpAnchor(icon);
+        if (!group) { return; }
+        if (group.next('.proctor-help-pop')) { return; }
+        // Close any other open popovers in this form.
+        node.all('.proctor-help-pop').remove();
+        var hintKey = icon.getAttribute('data-hint-key');
+        var text = getString(hintKey)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/\n/g, '<br>');
+        // Cap popover width to ~120% of the form's rendered width.
+        var formWidth = node.get('offsetWidth') || 600;
+        var maxw = Math.round(formWidth * 1.2);
+        var pop = Y.Node.create(
+            '<div class="proctor-help-pop"' +
+            ' style="display:block; margin: 4px 0 8px 0; padding: 10px 14px;' +
+            ' background:#fff; color:#212529;' +
+            ' border:1px solid #ced4da; border-radius:4px;' +
+            ' box-shadow:0 2px 4px rgba(0,0,0,0.08);' +
+            ' font-size:0.9rem; line-height:1.45;' +
+            ' max-width:' + maxw + 'px; box-sizing:border-box;">' +
+            text + '</div>'
+        );
+        group.insert(pop, 'after');
+    }
+    function hideHelp(icon) {
+        var group = helpAnchor(icon);
+        if (!group) { return; }
+        var p = group.next('.proctor-help-pop');
+        if (p) { p.remove(); }
+    }
+    node.delegate('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var icon = e.currentTarget;
+        var group = helpAnchor(icon);
+        if (group && group.next('.proctor-help-pop')) {
+            hideHelp(icon);
+        } else {
+            showHelp(icon);
+        }
+    }, '.proctor-help');
+    node.delegate('mouseenter', function(e) {
+        showHelp(e.currentTarget);
+    }, '.proctor-help');
+    node.delegate('mouseleave', function(e) {
+        hideHelp(e.currentTarget);
+    }, '.proctor-help');
+
+    // Click outside any open popover closes it.
+    Y.one('body').on('click', function() {
+        node.all('.proctor-help-pop').remove();
+    });
+
+    // ---- Preset picker + save-as-personal handlers ----
+    var ctx = M.availability_proctor.form.context;
+
+    // Normalise list shapes — PHP associative arrays can round-trip as objects.
+    function toArray(v) {
+        if (v instanceof Array) { return v; }
+        if (v && typeof v === 'object') {
+            var out = [];
+            for (var k in v) {
+                if (Object.prototype.hasOwnProperty.call(v, k)) { out.push(v[k]); }
+            }
+            return out;
+        }
+        return [];
+    }
+    ctx.global_presets = toArray(ctx.global_presets);
+    ctx.user_presets = toArray(ctx.user_presets);
+
+    function escapeHtml(s) {
+        return String(s == null ? '' : s)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    // Bool fields arrive from PHP/DB as string "0"/"1"; JS treats "0" as
+    // truthy so we must coerce explicitly.
+    function asBool(v) {
+        return parseInt(v, 10) === 1;
+    }
+
+    function presetSummary(p) {
+        var parts = [];
+        if (p.mode) {
+            var modeLabel = '';
+            if (p.mode === 'online') { modeLabel = getString('online_mode'); }
+            else if (p.mode === 'offline') { modeLabel = getString('offline_mode'); }
+            else if (p.mode === 'auto') { modeLabel = getString('auto_mode'); }
+            if (modeLabel) {
+                parts.push(escapeHtml(getString('proctoring_mode')) + ': ' + escapeHtml(modeLabel));
+            }
+        }
+        if (p.identification) {
+            var idMap = {
+                'face_and_passport': 'face_passport_identification',
+                'passport': 'passport_identification',
+                'face': 'face_identification',
+                'skip': 'skip_identification'
+            };
+            if (idMap[p.identification]) {
+                parts.push(escapeHtml(getString('identification')) + ': ' +
+                    escapeHtml(getString(idMap[p.identification])));
+            }
+        }
+        if (p.webcameramainview) {
+            parts.push(escapeHtml(getString('web_camera_main_view')) + ': ' +
+                escapeHtml(getString('web_camera_main_view_' + p.webcameramainview)));
+        }
+        if (asBool(p.auxiliarycamera)) {
+            parts.push(escapeHtml(getString('auxiliary_camera')));
+        }
+        if (asBool(p.securebrowser)) {
+            var lvl = p.securebrowserlevel ?
+                ' (' + escapeHtml(getString('secure_browser_level_' + p.securebrowserlevel)) + ')' : '';
+            parts.push(escapeHtml(getString('enable_secure_browser')) + lvl);
+        }
+        return parts.map(function(p) { return '<div>' + p + '</div>'; }).join('');
+    }
+
+    function renderPicker() {
+        var picker = node.one('.proctor-preset-picker');
+        var html = '<div class="card" style="width:100%;">';
+
+        function renderGroup(label, presets, isUser) {
+            html += '<div class="card-body p-2">';
+            html += '<div class="font-weight-bold small text-uppercase text-muted mb-1">' + escapeHtml(label) + '</div>';
+            if (!presets.length) {
+                html += '<div class="text-muted small px-2 py-1">' + escapeHtml(getString('no_presets')) + '</div>';
+            } else {
+                html += '<ul class="list-group list-group-flush">';
+                for (var i = 0; i < presets.length; i++) {
+                    var p = presets[i];
+                    var del = isUser ?
+                        '<a href="#" class="proctor-delete-preset text-danger small ml-2" data-id="' + p.id + '">' +
+                        escapeHtml(getString('delete')) + '</a>' : '';
+                    html += '<li class="list-group-item p-2 d-flex justify-content-between align-items-start">' +
+                        '<div style="flex:1; min-width:0;">' +
+                        '  <a href="#" class="proctor-pick-preset font-weight-bold" data-id="' + p.id +
+                        '" data-scope="' + (isUser ? 'user' : 'global') + '">' + escapeHtml(p.name) + '</a>' +
+                        '  <div class="small text-muted">' + presetSummary(p) + '</div>' +
+                        '</div>' + del +
+                        '</li>';
+                }
+                html += '</ul>';
+            }
+            html += '</div>';
+        }
+
+        renderGroup(getString('global_presets'), ctx.global_presets, false);
+        renderGroup(getString('personal_presets'), ctx.user_presets, true);
+
+        html += '</div>';
+        picker.setHTML(html);
+    }
+
+    var loadedPresetName = null;
+    var suppressDirty = false;
+
+    function setLoadedName(name) {
+        loadedPresetName = name || null;
+        var label = node.one('.proctor-loaded-preset');
+        if (!label) { return; }
+        var display = name ? escapeHtml(name) : escapeHtml(getString('loaded_preset_none'));
+        label.setHTML(M.util.get_string('loaded_preset', 'availability_proctor', display));
+    }
+
+    function clearLoadedNameOnEdit() {
+        if (suppressDirty) { return; }
+        if (loadedPresetName !== null) { setLoadedName(null); }
+    }
+
+    function applyPresetToForm(preset) {
+        // Scalars / selects.
+        var setSelect = function(name, val) {
+            if (val === null || val === undefined) { return; }
+            var sel = node.one('select[name=' + name + ']');
+            if (!sel) { return; }
+            sel.all('option').each(function(o) { o.set('selected', false); });
+            var opt = sel.one('option[value="' + val + '"]');
+            if (opt) { opt.set('selected', true); }
+        };
+        var setCheckbox = function(name, val) {
+            var inp = node.one('input[name=' + name + ']');
+            // val arrives as "0"/"1" string from PHP — must coerce, since "0" is truthy.
+            if (inp) { inp.set('checked', asBool(val) ? 'checked' : null); }
+        };
+        var setText = function(name, val) {
+            if (val === null || val === undefined) { return; }
+            var inp = node.one('[name=' + name + ']');
+            if (inp) { inp.set('value', val); }
+        };
+
+        setSelect('mode', preset.mode);
+        setSelect('identification', preset.identification);
+        setSelect('webcameramainview', preset.webcameramainview);
+        setSelect('streamspreset', preset.streamspreset);
+        setSelect('securebrowserlevel', preset.securebrowserlevel);
+        setSelect('calculator', preset.calculator);
+        setSelect('auxiliarycamera', asBool(preset.auxiliarycamera) ? '1' : '0');
+
+        setCheckbox('scheduling_required', preset.schedulingrequired);
+        setCheckbox('auto_rescheduling', preset.autorescheduling);
+        setCheckbox('sendmanualwarningstolearner', preset.sendmanualwarningstolearner);
+        setCheckbox('checkidphotoquality', preset.checkidphotoquality);
+        setCheckbox('preliminarycheck', preset.preliminarycheck);
+        setCheckbox('allowroomscanauxcamera', preset.allowroomscanauxcamera);
+        setCheckbox('allowmultipledisplays', preset.allowmultipledisplays);
+        setCheckbox('securebrowser', preset.securebrowser);
+        setCheckbox('allowtouseadditionalresources', preset.allowtouseadditionalresources);
+        setCheckbox('allowvirtualenvironment', preset.allowvirtualenvironment);
+
+        setText('useragreementurl', preset.useragreementurl);
+        setText('allowedprocesses', preset.allowedprocesses);
+        setText('forbiddenprocesses', preset.forbiddenprocesses);
+
+        // Rules / warnings (objects).
+        if (preset.rules) {
+            node.all('input.proctor-rule').each(function(inp) {
+                var key = inp.get('value');
+                inp.set('checked', preset.rules[key] ? 'checked' : null);
+            });
+        }
+        if (preset.warnings) {
+            node.all('.warnings input').each(function(inp) {
+                var key = inp.get('value');
+                inp.set('checked', preset.warnings[key] ? 'checked' : null);
+            });
+        }
+        // Scoring (object).
+        if (preset.scoring) {
+            node.all('.proctor-scoring-input').each(function(inp) {
+                var key = inp.get('name');
+                var val = preset.scoring[key];
+                inp.set('value', (val === null || val === undefined) ? '' : val);
+            });
+        }
+
+        applyDependencies();
+        nextTick(function() { M.core_availability.form.update(); });
+        setLoadedName(preset.name || null);
+    }
+
+    function findPreset(scope, id) {
+        var list = scope === 'user' ? ctx.user_presets : ctx.global_presets;
+        for (var i = 0; i < list.length; i++) {
+            if (parseInt(list[i].id) === parseInt(id)) { return list[i]; }
+        }
+        return null;
+    }
+
+    // Toggle picker visibility.
+    node.one('.proctor-load-preset').on('click', function(e) {
+        e.preventDefault();
+        var picker = node.one('.proctor-preset-picker');
+        var hidden = picker.getStyle('display') === 'none';
+        if (hidden) {
+            renderPicker();
+            picker.setStyle('display', 'block');
+        } else {
+            picker.setStyle('display', 'none');
+        }
+    });
+
+    // Pick a preset from the picker.
+    node.delegate('click', function(e) {
+        e.preventDefault();
+        var t = e.currentTarget;
+        var p = findPreset(t.getAttribute('data-scope'), t.getAttribute('data-id'));
+        if (p) {
+            suppressDirty = true;
+            applyPresetToForm(p);
+            suppressDirty = false;
+            node.one('.proctor-preset-picker').setStyle('display', 'none');
+        }
+    }, '.proctor-pick-preset');
+
+    // Always render the "Current preset: None" label initially.
+    setLoadedName(null);
+
+    // Detect a brand-new restriction. Different Moodle versions signal this
+    // differently:
+    //   - `json.creating` is true (newer versions), OR
+    //   - `json` has no proctor-specific keys (empty state), OR
+    //   - `json` values match the legacy `default_proctoring_settings` blob
+    //     exactly (some versions prefill with that blob on add).
+    var jsonMatchesDefaults = function() {
+        if (!M.availability_proctor.form.defaults) { return false; }
+        var defs = M.availability_proctor.form.defaults;
+        var checkedKeys = ['mode', 'identification', 'webcameramainview',
+            'securebrowser', 'securebrowserlevel', 'auxiliarycamera', 'calculator',
+            'streamspreset', 'allowtouseadditionalresources', 'allowmultipledisplays'];
+        var seenAny = false;
+        for (var ci = 0; ci < checkedKeys.length; ci++) {
+            var k = checkedKeys[ci];
+            if (defs[k] !== undefined) {
+                seenAny = true;
+                // Normalise booleans/strings loosely since types may differ.
+                if (String(defs[k]) !== String(json[k])) {
+                    return false;
+                }
+            }
+        }
+        return seenAny;
+    };
+
+    var isFresh = !!json.creating ||
+        (json.mode === undefined && json.identification === undefined &&
+         json.securebrowser === undefined && json.webcameramainview === undefined) ||
+        jsonMatchesDefaults();
+
+    if (isFresh) {
+        for (var dpi = 0; dpi < ctx.global_presets.length; dpi++) {
+            if (parseInt(ctx.global_presets[dpi].is_default, 10) === 1) {
+                suppressDirty = true;
+                applyPresetToForm(ctx.global_presets[dpi]);
+                suppressDirty = false;
+                break;
+            }
+        }
+    }
+
+    // Delete a personal preset — show inline confirmation next to the row.
+    node.delegate('click', function(e) {
+        e.preventDefault();
+        var t = e.currentTarget;
+        var id = t.getAttribute('data-id');
+        // If a confirmation row is already open for this id, skip.
+        if (t.next('.proctor-delete-confirm')) { return; }
+        // Restore any other delete links and remove any other open confirms.
+        node.all('.proctor-delete-preset').setStyle('display', '');
+        node.all('.proctor-delete-confirm').remove();
+        // Hide the originating Delete link so the row isn't redundant.
+        t.setStyle('display', 'none');
+        var confirmRow = Y.Node.create(
+            '<span class="proctor-delete-confirm small">' +
+            getString('preset_delete_confirm') + ' ' +
+            '<a href="#" class="proctor-delete-yes text-danger ml-1">' + getString('delete') + '</a>' +
+            ' / <a href="#" class="proctor-delete-no ml-1">' + getString('cancel', 'core') + '</a>' +
+            '</span>'
+        );
+        t.insert(confirmRow, 'after');
+
+        confirmRow.one('.proctor-delete-no').on('click', function(ev) {
+            ev.preventDefault();
+            confirmRow.remove();
+            t.setStyle('display', '');
+        });
+        confirmRow.one('.proctor-delete-yes').on('click', function(ev) {
+            ev.preventDefault();
+            Y.io(ctx.ajaxurl, {
+                method: 'POST',
+                data: 'action=delete&sesskey=' + encodeURIComponent(ctx.sesskey) + '&id=' + encodeURIComponent(id),
+                on: {
+                    success: function(_, resp) {
+                        var data;
+                        try { data = JSON.parse(resp.responseText); } catch (err) { data = null; }
+                        if (data && data.ok) {
+                            ctx.user_presets = ctx.user_presets.filter(function(p) {
+                                return parseInt(p.id) !== parseInt(id);
+                            });
+                            renderPicker();
+                        } else {
+                            confirmRow.setHTML('<span class="text-danger">' + ((data && data.error) || 'Error') + '</span>');
+                        }
+                    },
+                    failure: function() {
+                        confirmRow.setHTML('<span class="text-danger">Network error</span>');
+                    }
+                }
+            });
+        });
+    }, '.proctor-delete-preset');
+
+    // Save current form values as a personal preset (inline panel — no browser dialogs).
+    function showSaveStatus(text, isError) {
+        var st = node.one('.proctor-save-status');
+        if (!st) { return; }
+        if (text) {
+            st.setHTML(text);
+            st.setStyle('display', '');
+            st.removeClass('text-danger').removeClass('text-success');
+            st.addClass(isError ? 'text-danger' : 'text-success');
+        } else {
+            st.setStyle('display', 'none');
+        }
+    }
+    function openSavePanel() {
+        node.one('.proctor-save-panel').setStyle('display', 'block');
+        var input = node.one('.proctor-save-name');
+        if (input) {
+            input.set('value', '');
+            input.focus();
+        }
+        showSaveStatus(null);
+    }
+    function closeSavePanel() {
+        node.one('.proctor-save-panel').setStyle('display', 'none');
+        showSaveStatus(null);
+    }
+
+    node.one('.proctor-save-preset').on('click', function(e) {
+        e.preventDefault();
+        openSavePanel();
+    });
+    node.one('.proctor-save-cancel').on('click', function() {
+        closeSavePanel();
+    });
+    node.one('.proctor-save-confirm').on('click', function() {
+        var nameInp = node.one('.proctor-save-name');
+        var name = String(nameInp ? nameInp.get('value') : '').trim();
+        if (name === '') {
+            showSaveStatus(getString('error_preset_name_required'), true);
+            return;
+        }
+
+        var current = {};
+        M.availability_proctor.form.fillValue(current, node);
+        var payload = {
+            mode: current.mode,
+            schedulingrequired: current.scheduling_required,
+            autorescheduling: current.auto_rescheduling,
+            sendmanualwarningstolearner: current.sendmanualwarningstolearner,
+            identification: current.identification,
+            checkidphotoquality: current.checkidphotoquality,
+            preliminarycheck: current.preliminarycheck,
+            useragreementurl: current.useragreementurl,
+            webcameramainview: current.webcameramainview,
+            auxiliarycamera: current.auxiliarycamera,
+            allowroomscanauxcamera: current.allowroomscanauxcamera,
+            allowmultipledisplays: current.allowmultipledisplays,
+            streamspreset: current.streamspreset,
+            securebrowser: current.securebrowser,
+            securebrowserlevel: current.securebrowserlevel,
+            allowtouseadditionalresources: current.allowtouseadditionalresources,
+            allowedprocesses: current.allowedprocesses,
+            forbiddenprocesses: current.forbiddenprocesses,
+            allowvirtualenvironment: current.allowvirtualenvironment,
+            calculator: current.calculator,
+            rules: current.rules,
+            warnings: current.warnings,
+            scoring: current.scoring
+        };
+
+        showSaveStatus('…', false);
+        Y.io(ctx.ajaxurl, {
+            method: 'POST',
+            data: 'action=save' +
+                '&sesskey=' + encodeURIComponent(ctx.sesskey) +
+                '&name=' + encodeURIComponent(name) +
+                '&payload=' + encodeURIComponent(JSON.stringify(payload)),
+            on: {
+                success: function(_, resp) {
+                    var data;
+                    try { data = JSON.parse(resp.responseText); } catch (err) { data = null; }
+                    if (data && data.ok && data.preset) {
+                        ctx.user_presets.push(data.preset);
+                        if (node.one('.proctor-preset-picker').getStyle('display') !== 'none') {
+                            renderPicker();
+                        }
+                        showSaveStatus(getString('preset_saved'), false);
+                        setTimeout(closeSavePanel, 1500);
+                    } else {
+                        showSaveStatus((data && data.error) || 'Error', true);
+                    }
+                },
+                failure: function() { showSaveStatus('Network error', true); }
+            }
+        });
+    });
+
+    return node;
+};
+
+M.availability_proctor.form.fillValue = function(value, node) {
+    var rulesInputs, warningsInputs, scoringInputs, groupsInputs, key;
+    value.mode = node.one('select[name=mode]').get('value').trim();
+    value.identification = node.one('select[name=identification]').get('value').trim();
+    value.webcameramainview = node.one('select[name=webcameramainview]').get('value').trim();
+    value.auto_rescheduling = false;
+    value.scheduling_required = false;
+    value.istrial = node.one('input[name=istrial]').get('checked');
+    value.customrules = node.one('textarea[name=customrules]').get('value').trim();
+    value.useragreementurl = node.one('input[name=useragreementurl]').get('value').trim();
+    value.auxiliarycamera = node.one('select[name=auxiliarycamera]').get('value') === '1';
+    value.securebrowser = node.one('input[name=securebrowser]').get('checked');
+    value.securebrowserlevel = node.one('select[name=securebrowserlevel]').get('value').trim();
+    value.allowtouseadditionalresources = node.one('input[name=allowtouseadditionalresources]').get('checked');
+    value.allowmultipledisplays = node.one('input[name=allowmultipledisplays]').get('checked');
+    value.allowvirtualenvironment = node.one('input[name=allowvirtualenvironment]').get('checked');
+    value.sendmanualwarningstolearner = node.one('input[name=sendmanualwarningstolearner]').get('checked');
+    value.checkidphotoquality = node.one('input[name=checkidphotoquality]').get('checked');
+    value.calculator = node.one('select[name=calculator]').get('value').trim();
+    value.streamspreset = node.one('select[name=streamspreset]').get('value').trim();
+    value.allowedprocesses = node.one('textarea[name=allowedprocesses]').get('value').trim();
+    value.forbiddenprocesses = node.one('textarea[name=forbiddenprocesses]').get('value').trim();
+    value.allowroomscanauxcamera = node.one('input[name=allowroomscanauxcamera]').get('checked');
+    value.preliminarycheck = node.one('input[name=preliminarycheck]').get('checked');
+
+    value.rules = {};
+    rulesInputs = node.all('input.proctor-rule');
+    Y.each(rulesInputs, function(ruleInput) {
+        key = ruleInput.get('value');
+        value.rules[key] = ruleInput.get('checked') === true;
+    });
+    // Calculator-allowance is mirrored from the dropdown.
+    value.rules.allow_to_use_calculator = (value.calculator && value.calculator !== 'off');
+
+    value.warnings = {};
+    warningsInputs = node.all('.warnings input');
+    Y.each(warningsInputs, function(warningInput) {
+        key = warningInput.get('value');
+        value.warnings[key] = warningInput.get('checked') === true;
+    });
+
+    value.scoring = {};
+    scoringInputs = node.all('.proctor-scoring-input');
+    Y.each(scoringInputs, function(scoringInput) {
+        key = scoringInput.get('name');
+        var scoringValue = scoringInput.get('value').trim();
+        value.scoring[key] = scoringValue.length > 0 ? parseFloat(scoringValue) : null;
+    });
+
+    value.groups = [];
+    groupsInputs = node.all('.groups input');
+    Y.each(groupsInputs, function(groupInput) {
+        var id = groupInput.get('value');
+        if (groupInput.get('checked') === true) {
+            value.groups.push(id);
+        }
+    });
+};
+
+M.availability_proctor.form.fillErrors = function(errors, node) {
+    var value = {};
+    this.fillValue(value, node);
+    if (!value.mode) {
+        errors.push('availability_proctor:proctoring_mode');
+    }
+    if (!value.identification) {
+        errors.push('availability_proctor:identification');
+    }
+    if (!value.webcameramainview) {
+        errors.push('availability_proctor:web_camera_main_view');
+    }
+    if (!value.streamspreset) {
+        errors.push('availability_proctor:streamspreset');
+    }
+    if (value.useragreementurl) {
+        var url = String(value.useragreementurl).trim();
+        if (!/^https?:\/\//i.test(url)) {
+            errors.push('availability_proctor:error_useragreementurl');
+        }
+    }
+};
+
+
+}, '@VERSION@', {"requires": ["base", "node", "event", "io-base", "json", "event-mouseenter", "moodle-core_availability-form"]});

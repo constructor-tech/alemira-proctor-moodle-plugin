@@ -38,12 +38,13 @@ class frontend extends \core_availability\frontend {
         global $PAGE;
         $PAGE->requires->string_for_js('showmore', 'core_form');
         $PAGE->requires->string_for_js('showless', 'core_form');
+        $PAGE->requires->string_for_js('savechanges', 'core');
+        $PAGE->requires->string_for_js('cancel', 'core');
 
         $strings = [
-            'title', 'error_setduration', 'duration', 'proctoring_mode', 'online_mode',
-            'rules', 'offline_mode', 'identification_mode', 'auto_mode',
-            'allow_to_use_websites',
-            'allow_to_use_books', 'allow_to_use_paper', 'allow_to_use_messengers',
+            'title', 'proctoring_mode', 'online_mode', 'offline_mode', 'auto_mode',
+            'rules',
+            'allow_to_use_websites', 'allow_to_use_books', 'allow_to_use_paper', 'allow_to_use_messengers',
             'allow_to_use_calculator', 'allow_to_use_excel', 'allow_to_use_human_assistant',
             'allow_absence_in_frame', 'allow_voices', 'allow_wrong_gaze_direction',
             'auto_rescheduling', 'enable', 'scheduling_required',
@@ -51,14 +52,39 @@ class frontend extends \core_availability\frontend {
             'passport_identification', 'skip_identification', 'enable_secure_browser',
             'is_trial', 'custom_rules', 'user_agreement_url', 'select_groups',
             'web_camera_main_view', 'web_camera_main_view_front', 'web_camera_main_view_side',
-            'visible_warnings', 'scoring_params_header', 'secure_browser_level',
+            'secure_browser_level',
             'secure_browser_level_basic', 'secure_browser_level_medium', 'secure_browser_level_high',
             'allowtouseadditionalresources',
             'allowmultipledisplays', 'allowvirtualenvironment', 'checkidphotoquality',
             'calculator', 'streamspreset', 'preliminary_check',
-            'auxiliary_camera',
+            'auxiliary_camera', 'auxiliary_camera_off', 'auxiliary_camera_on',
             'allowed_processes', 'forbidden_processes', 'processes_list_hint',
             'sendmanualwarningstolearner', 'allowroomscanauxcamera',
+            'preset_section_mode', 'preset_section_identity', 'preset_section_camera',
+            'preset_section_securebrowser', 'preset_section_rules',
+            'preset_section_warnings', 'preset_section_scoring', 'preset_section_exam',
+            'load_preset', 'save_personal_preset', 'save_personal_preset_prompt',
+            'save_personal_preset_hint', 'global_presets', 'personal_presets',
+            'no_presets', 'preset_delete_confirm', 'preset_saved', 'delete',
+            'error_preset_name_required', 'error_useragreementurl',
+            'loaded_preset', 'loaded_preset_none',
+            // Inline hints shown under each field in the exam form.
+            'proctoring_mode_help', 'sendmanualwarningstolearner_help',
+            'identification_help', 'checkidphotoquality_help', 'preliminary_check_help',
+            'web_camera_main_view_help', 'auxiliary_camera_help',
+            'allowroomscanauxcamera_help', 'allowmultipledisplays_help',
+            'streamspreset_help',
+            'enable_secure_browser_help', 'secure_browser_level_help',
+            'allowtouseadditionalresources_help', 'allowed_processes_help',
+            'forbidden_processes_help', 'allowvirtualenvironment_help',
+            'calculator_help', 'user_agreement_url_help',
+            'is_trial_help', 'custom_rules_help',
+            'warnings_help', 'scoring_help', 'scoring_cheater_level_help',
+            'allow_to_use_websites_help', 'allow_to_use_books_help',
+            'allow_to_use_paper_help', 'allow_to_use_messengers_help',
+            'allow_to_use_excel_help', 'allow_to_use_human_assistant_help',
+            'allow_absence_in_frame_help', 'allow_voices_help',
+            'allow_wrong_gaze_direction_help',
         ];
 
         foreach (condition::WARNINGS as $key => $value) {
@@ -90,7 +116,7 @@ class frontend extends \core_availability\frontend {
      */
     protected function get_javascript_init_params($course, \cm_info $cm = null,
             \section_info $section = null) {
-        global $DB;
+        global $DB, $USER, $CFG;
 
         $defaults = common::get_default_proctoring_settings();
 
@@ -105,6 +131,17 @@ class frontend extends \core_availability\frontend {
 
         $groups = $DB->get_records('groups', ['courseid' => $course->id], 'name', 'id,name');
 
+        // Build preset lists for the load-preset picker.
+        $globalpresets = array_values(preset::get_all_global());
+        $userpresets = array_values(preset::get_user_presets($USER->id));
+
+        $context = [
+            'ajaxurl' => $CFG->wwwroot . '/availability/condition/proctor/ajax_preset.php',
+            'sesskey' => sesskey(),
+            'global_presets' => $globalpresets,
+            'user_presets' => $userpresets,
+        ];
+
         return [
             condition::RULES,
             condition::WARNINGS,
@@ -112,6 +149,7 @@ class frontend extends \core_availability\frontend {
             condition::STREAMS_PRESET_OPTIONS,
             $defaults,
             $groups,
+            $context,
         ];
     }
 
