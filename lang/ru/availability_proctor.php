@@ -47,9 +47,9 @@ $string['settings_account_name_desc'] = '';
 $string['settings_account_id'] = 'Account ID';
 $string['settings_account_id_desc'] = '';
 $string['settings_user_emails'] = 'Отправлять email пользователей в Proctor by Constructor';
-$string['settings_user_emails_desc'] = '';
+$string['settings_user_emails_desc'] = 'Если включено, Moodle будет отправлять email-адреса экзаменуемых в панель Proctor. Если выключено, Proctor by Constructor автоматически сгенерирует фиктивный email для каждого экзаменуемого в качестве уникального идентификатора в панели.';
 $string['settings_seamless_auth'] = 'Автоматическая авторизация пользователя';
-$string['settings_seamless_auth_desc'] = 'Активация данной опции означает что прокторинг будет хранить авторизационный токен';
+$string['settings_seamless_auth_desc'] = 'Передаёт токены авторизации Moodle в Proctor. Рекомендуется включить эту опцию при использовании Secure Browser.';
 
 $string['description_proctor'] = 'Вы будете перенаправлены на Proctor by Constructor';
 $string['description_no_webservices'] = 'Недоступно через мобильное приложение Moodle';
@@ -312,11 +312,11 @@ $string['auxiliary_camera_help'] = 'Дополнительная камера, �
 $string['allowroomscanauxcamera_help'] = 'Позволяет учащемуся выполнить 360-градусное сканирование комнаты дополнительной камерой.';
 $string['allowmultipledisplays_help'] = 'Если выключено — учащиеся с несколькими подключенными мониторами не смогут продолжить (проверяется при настройке демонстрации экрана).';
 $string['streamspreset_help'] = 'Default — стандартная видеозапись (рекомендуется для онлайн-экзаменов).
-No Video — отключает запись видео. Обычно используется для экзаменов на территории учебного заведения с защищённым браузером, где видео не требуется.';
+<br>No Video — отключает запись видео. Обычно используется для экзаменов на территории учебного заведения с защищённым браузером, где видео не требуется.';
 $string['enable_secure_browser_help'] = 'Требует от учащихся установить Constructor Secure Browser — отдельное приложение, обеспечивающее ограничения на уровне ОС.';
 $string['secure_browser_level_help'] = 'Basic: обнаружение виртуальных машин и USB-устройств.
-Medium: добавляет ограничения, сохраняя гибкость (рекомендуется при разрешении пользовательских процессов).
-High: режим во весь экран всегда сверху, блокирует фоновые приложения.';
+<br>Medium: добавляет ограничения, сохраняя гибкость (рекомендуется при разрешении пользовательских процессов).
+<br>High: режим во весь экран всегда сверху, блокирует фоновые приложения.';
 $string['allowtouseadditionalresources_help'] = 'Разрешает учащемуся открывать дополнительные PDF-файлы или веб-ресурсы во время экзамена.';
 $string['allowed_processes_help'] = 'Имена процессов (по одному в строке), разрешённые в Secure Browser.';
 $string['forbidden_processes_help'] = 'Дополнительные имена процессов (по одному в строке) для блокировки в Secure Browser.';
@@ -343,7 +343,8 @@ $string['allow_wrong_gaze_direction_help'] = 'Полезно для экзаме
 // for that context. Use a separate key for the alert-visibility help title:
 $string['warnings_help'] = 'Всплывающее окно, показываемое учащемуся при обнаружении этого нарушения. Обнаружение происходит независимо от этой настройки — меняется только видимость для учащегося.';
 $string['scoring'] = 'Вес скоринга';
-$string['scoring_help'] = 'Вес, применяемый к этому типу нарушений при расчёте балла. Оставьте пустым, чтобы использовать значение по умолчанию.';
+$string['scoring_help'] = 'Вес, применяемый к этому типу нарушений при расчёте балла.';
+$string['scoring_section_hint'] = 'Вес, применяемый к этому типу нарушений при расчёте балла. Оставьте пустым, чтобы использовать значение по умолчанию.';
 $string['scoring_cheater_level_help'] = 'Общий порог (0–100). Сессии с более высоким баллом автоматически помечаются как нарушители. По умолчанию 80.';
 
 // Per-warning hints — only for warnings that can be auto-disabled by an "Allow" rule.

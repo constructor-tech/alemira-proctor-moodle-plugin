@@ -79,7 +79,7 @@ class frontend extends \core_availability\frontend {
             'forbidden_processes_help', 'allowvirtualenvironment_help',
             'calculator_help', 'user_agreement_url_help',
             'is_trial_help', 'custom_rules_help',
-            'warnings_help', 'scoring_help', 'scoring_cheater_level_help',
+            'warnings_help', 'scoring_help', 'scoring_section_hint', 'scoring_cheater_level_help',
             'allow_to_use_websites_help', 'allow_to_use_books_help',
             'allow_to_use_paper_help', 'allow_to_use_messengers_help',
             'allow_to_use_excel_help', 'allow_to_use_human_assistant_help',

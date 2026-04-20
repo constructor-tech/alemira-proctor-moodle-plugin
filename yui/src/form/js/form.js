@@ -383,6 +383,7 @@ M.availability_proctor.form.getNode = function(json) {
     htmlTwo += '<div class="text-muted small mb-2">' + getString('warnings_help') + '</div>';
     htmlTwo += '<div class="warnings" style="white-space: nowrap">' + warningOptions + '</div>';
     htmlTwo += sectionHeader(getString('preset_section_scoring'));
+    htmlTwo += '<div class="text-muted small mb-2">' + getString('scoring_section_hint') + '</div>';
     htmlTwo += scoringOptions;
 
     // ---- Build node ----

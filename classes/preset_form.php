@@ -192,6 +192,8 @@ class preset_form extends \moodleform {
 
         // ---- Scoring ----
         $mform->addElement('header', 'preset_section_scoring', get_string('preset_section_scoring', 'availability_proctor'));
+        $mform->addElement('static', 'scoring_section_hint', '',
+            \html_writer::div(get_string('scoring_section_hint', 'availability_proctor'), 'text-muted small'));
         foreach (condition::SCORING as $key => $field) {
             $mform->addElement('float', 'scoring[' . $key . ']', get_string('scoring_' . $key, 'availability_proctor'),
                 ['size' => 6, 'style' => 'width: 6em']);
