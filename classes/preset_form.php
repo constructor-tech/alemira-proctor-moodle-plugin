@@ -18,6 +18,7 @@
  * Preset edit form.
  *
  * @package    availability_proctor
+ * @copyright  2026 Constructor Tech
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -27,6 +28,13 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . '/formslib.php');
 
+/**
+ * Form for creating and editing proctoring presets.
+ *
+ * @package    availability_proctor
+ * @copyright  2026 Constructor Tech
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class preset_form extends \moodleform {
     protected function definition() {
         $mform = $this->_form;

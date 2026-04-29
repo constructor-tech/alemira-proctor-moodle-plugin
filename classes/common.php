@@ -28,6 +28,10 @@ use availability_proctor\condition;
 
 /**
  * Collection of static methods, used throughout the code
+ *
+ * @package    availability_proctor
+ * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class common {
     /**

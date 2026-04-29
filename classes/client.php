@@ -28,6 +28,10 @@ use stdClass;
 
 /**
  * Client class
+ *
+ * @package    availability_proctor
+ * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class client {
     /** @var string Date format string, default ISO8601 not accepted by API */

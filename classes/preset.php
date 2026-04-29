@@ -18,7 +18,7 @@
  * Availability plugin for integration with Proctor by Constructor.
  *
  * @package    availability_proctor
- * @copyright  2026 Constructor
+ * @copyright  2026 Constructor Tech
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -34,6 +34,10 @@ use stdClass;
  * Stores the subset of proctoring fields enumerated in
  * condition::PRESET_FIELDS plus identity metadata
  * (name, is_default, is_system, type, userid).
+ *
+ * @package    availability_proctor
+ * @copyright  2026 Constructor Tech
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class preset {
     const TABLE = 'availability_proctor_presets';

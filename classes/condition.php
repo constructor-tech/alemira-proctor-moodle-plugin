@@ -34,6 +34,10 @@ use stdClass;
 
 /**
  * Proctor by Constructor condition
+ *
+ * @package    availability_proctor
+ * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class condition extends \core_availability\condition {
     /** @var array List of (de-)serializable properties */

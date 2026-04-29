@@ -34,7 +34,7 @@ if ($seamlessauth && $token) {
     $key = validate_user_key($token, $script, null);
 
     if (!$user = $DB->get_record('user', ['id' => $key->userid])) {
-        print_error('invaliduserid');
+        throw new \moodle_exception('invaliduserid');
     }
 
     core_user::require_active_user($user, true, true);

@@ -26,20 +26,36 @@ namespace availability_proctor;
 
 /**
  * Utils class
+ *
+ * @package    availability_proctor
+ * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class utils {
-    public static function quiz_settings_classname(){
+    /**
+     * Returns the correct quiz settings class name for this Moodle version.
+     *
+     * @return string Fully qualified class name
+     */
+    public static function quiz_settings_classname() {
         return class_exists('\mod_quiz\quiz_settings') ? '\mod_quiz\quiz_settings' : 'quiz';
     }
 
-    public static function quiz_attempt_classname(){
+    /**
+     * Returns the correct quiz attempt class name for this Moodle version.
+     *
+     * @return string Fully qualified class name
+     */
+    public static function quiz_attempt_classname() {
         return class_exists('\mod_quiz\quiz_attempt') ? '\mod_quiz\quiz_attempt' : 'quiz_attempt';
     }
 
     /**
-     * Provides logic for proctoring fader, exist as soon a possible if
-     * no protection is reqired.
+     * Provides logic for proctoring fader, exit as soon as possible if
+     * no protection is required.
+     *
      * @param \stdClass $attempt Attempt
+     * @return string HTML output for the fader overlay
      */
     public static function handle_proctoring_fader($attempt) {
         global $DB, $USER, $PAGE, $SESSION;
@@ -181,10 +197,11 @@ CSS;
     }
 
     /**
-     * Generate exam start url, with auth token if enabled in config
-     * @param $entry
-     * @param $user
-     * @return string
+     * Generate exam start url, with auth token if enabled in config.
+     *
+     * @param \stdClass $entry Proctor entry record
+     * @param \stdClass $user User record
+     * @return string The start URL
      */
     public static function generate_start_url($entry, $user) {
         $urlparams = ['proctor_accesscode' => $entry->accesscode];
@@ -203,10 +220,12 @@ CSS;
 
     /**
      * When an attempt is started, see if we are in proctoring, reset old entries,
-     * redirect to proctoring if needed
-     * @param \stdClass $course course
-     * @param \stdClass $cm cm
-     * @param \stdClass $user user
+     * redirect to proctoring if needed.
+     *
+     * @param \stdClass $course Course record
+     * @param \stdClass $cm Course module record
+     * @param \stdClass $user User record
+     * @return void
      */
     public static function handle_start_attempt($course, $cm, $user) {
         global $SESSION, $DB;
@@ -294,8 +313,10 @@ CSS;
     }
 
     /**
-     * If accesscode param is provided, find entry, handle it's state.
+     * If accesscode param is provided, find entry, handle its state.
+     *
      * @param string $accesscode Accesscode/SessionId value
+     * @return void
      */
     public static function handle_accesscode_param($accesscode) {
         global $SESSION, $DB, $CFG;

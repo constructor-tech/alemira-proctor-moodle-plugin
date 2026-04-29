@@ -27,6 +27,13 @@ namespace availability_proctor;
 use availability_proctor\utils;
 
 
+/**
+ * Hook callbacks for Moodle 4.4+ hook system.
+ *
+ * @package    availability_proctor
+ * @copyright  2019-2024 Maksim Burnin <maksim.burnin@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class hooks {
     /**
      * Hooks into head rendering. Adds proctoring fader/shade and accompanying javascript

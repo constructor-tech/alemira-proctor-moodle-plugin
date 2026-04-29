@@ -35,6 +35,10 @@ use core_privacy\local\request\transform;
 
 /**
  * Implementation of the privacy subsystem plugin provider.
+ *
+ * @package    availability_proctor
+ * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class provider implements
     \core_privacy\local\metadata\provider,

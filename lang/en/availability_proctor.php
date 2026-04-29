@@ -67,21 +67,27 @@ $string['preset_section_scoring'] = 'Scoring parameters';
 $string['preset_section_exam'] = 'Exam settings';
 
 // ---- Help strings (shown via Moodle addHelpButton and inline hints). ----
-$string['proctoring_mode_help'] = 'Live — Live proctoring mode in which the exam is monitored by a human proctor in real-time (in addition to AI monitoring).
-Review — Post-exam review mode in which examinees take the exam at any time under AI supervision. The session is recorded and later reviewed by a human proctor to assess for violations.
-AI review — Fully automated mode without human review. The session is monitored by AI only; violations are flagged based on the configured scoring thresholds.';
+$string['proctoring_mode_help'] = 'Live — Live proctoring mode in which the exam is monitored by a human proctor ' .
+    'in real-time (in addition to AI monitoring).
+Review — Post-exam review mode in which examinees take the exam at any time under AI supervision. ' .
+    'The session is recorded and later reviewed by a human proctor to assess for violations.
+AI review — Fully automated mode without human review. The session is monitored by AI only; ' .
+    'violations are flagged based on the configured scoring thresholds.';
 $string['sendmanualwarningstolearner_help'] = 'Allows the proctor to send manual warnings to the learner during the exam, in addition to automatic AI warnings.';
 $string['identification_help'] = 'Method used to verify the learner before the exam.';
 $string['checkidphotoquality_help'] = 'Checks that the ID photo is readable and prompts the learner to re-take it if poor.';
 $string['preliminary_check_help'] = 'Compares the pre-exam webcam capture to the learner\'s Moodle profile picture.';
 $string['web_camera_main_view_help'] = 'Front view (default) uses the standard laptop webcam.
 Auxiliary (side view) is for specific setups with a side-mounted camera and uses different AI models.';
-$string['auxiliary_camera_help'] = 'A secondary camera accessed via a QR code scanned with the learner\'s phone. Recommended for high-stakes exams — captures the keyboard area and keeps the phone occupied.';
+$string['auxiliary_camera_help'] = 'A secondary camera accessed via a QR code scanned with the learner\'s phone. ' .
+    'Recommended for high-stakes exams — captures the keyboard area and keeps the phone occupied.';
 $string['allowroomscanauxcamera_help'] = 'Lets the learner perform a 360° room scan with the secondary camera.';
 $string['allowmultipledisplays_help'] = 'When disabled, learners with multiple monitors connected cannot proceed (detected during the pre-exam screen-share step).';
 $string['streamspreset_help'] = 'Default — standard video recording (recommended for online exams).
-<br>No Video — disables video recording. It\'s typically used for on-campus exam rooms where the Secure Browser ensures learners cannot leave the exam page, making video recording unnecessary in a controlled physical environment.';
-$string['enable_secure_browser_help'] = 'Requires learners to install the Constructor Secure Browser, a dedicated application that enforces machine-level restrictions during the exam.';
+<br>No Video — disables video recording. It\'s typically used for on-campus exam rooms where the Secure Browser ' .
+    'ensures learners cannot leave the exam page, making video recording unnecessary in a controlled physical environment.';
+$string['enable_secure_browser_help'] = 'Requires learners to install the Constructor Secure Browser, ' .
+    'a dedicated application that enforces machine-level restrictions during the exam.';
 $string['secure_browser_level_help'] = 'Basic: detects virtual machines and USB devices.
 <br>Medium: adds restrictions while allowing limited flexibility (recommended when allowing custom processes).
 <br>High: full-screen always-on-top mode, blocks background applications.';
@@ -109,14 +115,17 @@ $string['allow_wrong_gaze_direction_help'] = 'Useful for open-book exams. Disabl
 // Shared help for sections of uniform items. Moodle's addHelpButton requires
 // both a title string (the identifier) and a body string (identifier + _help).
 $string['warnings'] = 'Alert shown to student';
-$string['warnings_help'] = 'Pop-up shown to the learner in-exam when this violation is detected. Detection still happens regardless of this setting — only learner visibility changes.';
+$string['warnings_help'] = 'Pop-up shown to the learner in-exam when this violation is detected. ' .
+    'Detection still happens regardless of this setting — only learner visibility changes.';
 $string['scoring'] = 'Scoring weight';
 $string['scoring_help'] = 'Weight applied to this violation type when computing the learner\'s cheating score.';
 $string['scoring_section_hint'] = 'Weight applied to this violation type when computing the learner\'s cheating score. Leave blank to use the default.';
 // Per-warning hints — only for warnings that can be auto-disabled by an "Allow" rule.
-$string['warning_change_active_window_on_computer_help'] = 'Detected when the learner switches windows during the exam. Automatically disabled when "Browsing the Internet" is allowed.';
+$string['warning_change_active_window_on_computer_help'] = 'Detected when the learner switches windows during the exam. ' .
+    'Automatically disabled when "Browsing the Internet" is allowed.';
 $string['warning_voice_detected_help'] = 'Detected when voice is heard during the exam. Automatically disabled when "Talking" is allowed.';
-$string['warning_avert_eyes_help'] = 'Detected when the learner looks away from the screen for a prolonged time. Automatically disabled when "Prolonged looking away from screen" is allowed.';
+$string['warning_avert_eyes_help'] = 'Detected when the learner looks away from the screen for a prolonged time. ' .
+    'Automatically disabled when "Prolonged looking away from screen" is allowed.';
 $string['warning_no_user_in_frame_help'] = 'Detected when no user is visible in the webcam. Automatically disabled when "Leaving webcam frame" is allowed.';
 
 $string['scoring_cheater_level'] = 'Cheater score threshold';
@@ -124,7 +133,9 @@ $string['scoring_cheater_level_help'] = 'Overall threshold (0–100). Sessions s
 $string['load_preset'] = '(change)';
 $string['save_personal_preset'] = 'Save as personal preset';
 $string['save_personal_preset_prompt'] = 'Enter a name for your personal preset.';
-$string['save_personal_preset_hint'] = 'Personal presets are saved to your account and can be reused in any of your exams. They are not visible to other users. Global presets are managed by site administrators in Site administration > Plugins.';
+$string['save_personal_preset_hint'] = 'Personal presets are saved to your account and can be reused in any of your exams. ' .
+    'They are not visible to other users. ' .
+    'Global presets are managed by site administrators in Site administration > Plugins.';
 $string['loaded_preset'] = 'Current preset: {$a}';
 $string['loaded_preset_none'] = 'None';
 $string['global_presets'] = 'Global presets';
@@ -147,7 +158,9 @@ $string['settings_account_name_desc'] = '';
 $string['settings_account_id'] = 'Account ID';
 $string['settings_account_id_desc'] = '';
 $string['settings_user_emails'] = 'Send user emails to {$a}';
-$string['settings_user_emails_desc'] = 'If checked, Moodle will send examinee\'s email addresses to the Proctor Dashboard. If not checked, Proctor by Constructor will automatically generate a mock email address for each examinee to use as a unique identifier in the Dashboard.';
+$string['settings_user_emails_desc'] = 'If checked, Moodle will send examinee\'s email addresses to the Proctor Dashboard. ' .
+    'If not checked, Proctor by Constructor will automatically generate a mock email address ' .
+    'for each examinee to use as a unique identifier in the Dashboard.';
 $string['settings_seamless_auth'] = 'Seamless authorization';
 $string['settings_seamless_auth_desc'] = 'Forwards Moodle authentication tokens to Proctor. It is advised to enable this option if you use Secure Browser.';
 
@@ -273,6 +286,7 @@ $string['scheduling_required'] = 'Calendar booking required';
 $string['apply_filter'] = 'Apply filter';
 $string['allcourses'] = 'All courses';
 $string['allstatuses'] = 'All statuses';
+$string['selectauser'] = 'Select a user';
 $string['userquery'] = 'Username or Email starts with';
 $string['fromdate'] = 'From date:';
 $string['todate'] = 'To date:';

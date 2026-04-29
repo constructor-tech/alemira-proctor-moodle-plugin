@@ -30,6 +30,10 @@ require_once($CFG->libdir . '/tablelib.php');
 
 /**
  * Outputs detailed info about log entry
+ *
+ * @package    availability_proctor
+ * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class log_details {
     /**
@@ -137,14 +141,14 @@ class log_details {
         $threshold = $entry->threshold ? json_decode($entry->threshold) : (object)['attention' => null, 'rejected' => null];
 
         if ($entry->review_link !== null) {
-            $reviewlink = "<a href='" . $entry->review_link . "'>"
+            $reviewlink = "<a href='" . s($entry->review_link) . "'>"
                 . get_string('log_report_link', 'availability_proctor') . "</a>";
         } else {
             $reviewlink = null;
         }
 
         if ($entry->archiveurl !== null) {
-            $archivelink = "<a href='" . $entry->archiveurl . "'>"
+            $archivelink = "<a href='" . s($entry->archiveurl) . "'>"
                 . get_string('log_archive_link', 'availability_proctor') . "</a>";
         } else {
             $archivelink = null;
@@ -184,7 +188,7 @@ class log_details {
 
         $table->add_data([
             get_string('user'),
-            $user->firstname . " " . $user->lastname . "<br>" . $user->email,
+            s($user->firstname) . " " . s($user->lastname) . "<br>" . s($user->email),
         ]);
 
         $table->add_data([

@@ -30,6 +30,13 @@ use availability_proctor\common;
 use availability_proctor\condition;
 use availability_proctor\utils;
 
+/**
+ * Event observer callbacks.
+ *
+ * @package    availability_proctor
+ * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class observers {
     /**
      * When attempt is started, update entry accordingly

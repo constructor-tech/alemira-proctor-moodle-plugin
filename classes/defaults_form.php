@@ -28,6 +28,13 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . '/formslib.php');
 
+/**
+ * Form for editing default proctoring settings.
+ *
+ * @package    availability_proctor
+ * @copyright  2019-2023 Maksim Burnin <maksim.burnin@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class defaults_form extends \moodleform {
     protected function get_group_options() {
         global $DB;
