@@ -139,7 +139,7 @@ M.availability_proctor.form.getNode = function(json) {
             // Wrap icon in an inline-flex anchor that vertically centres its
             // child icon — that way the icon's centre line aligns with the
             // checkbox/input's centre line in the field column.
-            labelHelp = ' <span class="proctor-help ml-1 d-inline-flex align-items-center"' +
+            labelHelp = ' <span class="proctor-help ml-auto d-inline-flex align-items-center"' +
                 ' data-hint-key="' + labelHintKey + '"' +
                 ' role="button" tabindex="0" style="cursor:pointer; outline:none; min-height:1.5rem;">' +
                 '<i class="icon fa fa-question-circle text-info"></i></span>';
@@ -189,8 +189,7 @@ M.availability_proctor.form.getNode = function(json) {
         false, undefined, 'proctoring_mode_help'
     );
     html += formGroup(sendManualWarningsToLearnerId, getString('sendmanualwarningstolearner'),
-        '<input type="checkbox" name="sendmanualwarningstolearner" id="' + sendManualWarningsToLearnerId + '" value="1">&nbsp;' +
-        '<label for="' + sendManualWarningsToLearnerId + '">' + getString('enable') + '</label>',
+        '<input type="checkbox" name="sendmanualwarningstolearner" id="' + sendManualWarningsToLearnerId + '" value="1">',
         false, 'sendmanualwarningstolearner', 'sendmanualwarningstolearner_help'
     );
 
@@ -206,13 +205,11 @@ M.availability_proctor.form.getNode = function(json) {
         false, undefined, 'identification_help'
     );
     html += formGroup(checkidphotoqualityId, getString('checkidphotoquality'),
-        '<input type="checkbox" name="checkidphotoquality" id="' + checkidphotoqualityId + '" value="1">&nbsp;' +
-        '<label for="' + checkidphotoqualityId + '">' + getString('enable') + '</label>',
+        '<input type="checkbox" name="checkidphotoquality" id="' + checkidphotoqualityId + '" value="1">',
         false, 'checkidphotoquality', 'checkidphotoquality_help'
     );
     html += formGroup(preliminaryCheckId, getString('preliminary_check'),
-        '<input type="checkbox" name="preliminarycheck" id="' + preliminaryCheckId + '" value="1">&nbsp;' +
-        '<label for="' + preliminaryCheckId + '">' + getString('enable') + '</label>',
+        '<input type="checkbox" name="preliminarycheck" id="' + preliminaryCheckId + '" value="1">',
         false, 'preliminarycheck', 'preliminary_check_help'
     );
 
@@ -233,13 +230,11 @@ M.availability_proctor.form.getNode = function(json) {
         false, undefined, 'auxiliary_camera_help'
     );
     html += formGroup(allowRoomScanAuxCameraId, getString('allowroomscanauxcamera'),
-        '<input type="checkbox" name="allowroomscanauxcamera" id="' + allowRoomScanAuxCameraId + '" value="1">&nbsp;' +
-        '<label for="' + allowRoomScanAuxCameraId + '">' + getString('enable') + '</label>',
+        '<input type="checkbox" name="allowroomscanauxcamera" id="' + allowRoomScanAuxCameraId + '" value="1">',
         false, 'allowroomscanauxcamera', 'allowroomscanauxcamera_help'
     );
     html += formGroup(allowmultipledisplaysId, getString('allowmultipledisplays'),
-        '<input type="checkbox" name="allowmultipledisplays" id="' + allowmultipledisplaysId + '" value="1">&nbsp;' +
-        '<label for="' + allowmultipledisplaysId + '">' + getString('enable') + '</label>',
+        '<input type="checkbox" name="allowmultipledisplays" id="' + allowmultipledisplaysId + '" value="1">',
         false, undefined, 'allowmultipledisplays_help'
     );
 
@@ -256,8 +251,7 @@ M.availability_proctor.form.getNode = function(json) {
     // ---- Section: Secure Browser ----
     html += sectionHeader(getString('preset_section_securebrowser'));
     html += formGroup(enableSecureBrowserId, getString('enable_secure_browser'),
-        '<input type="checkbox" name="securebrowser" id="' + enableSecureBrowserId + '" value="1">&nbsp;' +
-        '<label for="' + enableSecureBrowserId + '">' + getString('enable') + '</label>',
+        '<input type="checkbox" name="securebrowser" id="' + enableSecureBrowserId + '" value="1">',
         false, undefined, 'enable_secure_browser_help'
     );
     html += formGroup(secureBrowserLevelId, getString('secure_browser_level'),
@@ -269,8 +263,7 @@ M.availability_proctor.form.getNode = function(json) {
         false, 'securebrowserlevel', 'secure_browser_level_help'
     );
     html += formGroup(allowToUseAdditionalResourcesId, getString('allowtouseadditionalresources'),
-        '<input type="checkbox" name="allowtouseadditionalresources" id="' + allowToUseAdditionalResourcesId + '" value="1">&nbsp;' +
-        '<label for="' + allowToUseAdditionalResourcesId + '">' + getString('enable') + '</label>',
+        '<input type="checkbox" name="allowtouseadditionalresources" id="' + allowToUseAdditionalResourcesId + '" value="1">',
         false, 'allowtouseadditionalresources', 'allowtouseadditionalresources_help'
     );
     html += formGroup(allowedProcessesId, getString('allowed_processes'),
@@ -282,8 +275,7 @@ M.availability_proctor.form.getNode = function(json) {
         false, 'forbiddenprocesses', 'forbidden_processes_help'
     );
     html += formGroup(allowvirtualenvironmentId, getString('allowvirtualenvironment'),
-        '<input type="checkbox" name="allowvirtualenvironment" id="' + allowvirtualenvironmentId + '" value="1">&nbsp;' +
-        '<label for="' + allowvirtualenvironmentId + '">' + getString('enable') + '</label>',
+        '<input type="checkbox" name="allowvirtualenvironment" id="' + allowvirtualenvironmentId + '" value="1">',
         false, 'allowvirtualenvironment', 'allowvirtualenvironment_help'
     );
 
@@ -318,8 +310,7 @@ M.availability_proctor.form.getNode = function(json) {
     // ---- Exam-only fields (not part of preset) ----
     html += sectionHeader(getString('preset_section_exam'));
     html += formGroup(isTrialId, getString('is_trial'),
-        '<input type="checkbox" name="istrial" id="' + isTrialId + '" value="1">&nbsp;' +
-        '<label for="' + isTrialId + '">' + getString('enable') + '</label>',
+        '<input type="checkbox" name="istrial" id="' + isTrialId + '" value="1">',
         false, undefined, 'is_trial_help'
     );
     html += formGroup(customRulesId, getString('custom_rules'),
