@@ -83,5 +83,42 @@ function xmldb_availability_proctor_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026041517, 'availability', 'proctor');
     }
 
+    if ($oldversion < 2026051101) {
+        // Rename previously-seeded system presets from their localized names
+        // to locale-independent canonicals, so future upgrades dedupe correctly
+        // regardless of $CFG->lang. Only matches rows still bearing a known
+        // localized seed name AND flagged is_system=1 — admin-renamed rows
+        // are left untouched.
+        $renames = [
+            \availability_proctor\preset::SEED_NAME_HIGH_STAKES => [
+                'High-stakes exam', 'Экзамен с высокой ставкой',
+            ],
+            \availability_proctor\preset::SEED_NAME_LOW_STAKES => [
+                'Low-stakes exam', 'Экзамен с низкой ставкой',
+            ],
+            \availability_proctor\preset::SEED_NAME_OPEN_BOOK => [
+                'Open-book exam', 'Экзамен с открытыми материалами',
+            ],
+        ];
+        foreach ($renames as $canonical => $aliases) {
+            // Skip if the canonical name is already in use by another row.
+            if ($DB->record_exists('availability_proctor_presets',
+                    ['name' => $canonical, 'type' => 'global'])) {
+                continue;
+            }
+            list($insql, $params) = $DB->get_in_or_equal($aliases, SQL_PARAMS_NAMED, 'alias');
+            $params['type'] = 'global';
+            $params['issystem'] = 1;
+            $params['newname'] = $canonical;
+            $DB->execute(
+                "UPDATE {availability_proctor_presets}
+                    SET name = :newname
+                  WHERE type = :type AND is_system = :issystem AND name $insql",
+                $params
+            );
+        }
+        upgrade_plugin_savepoint(true, 2026051101, 'availability', 'proctor');
+    }
+
     return true;
 }

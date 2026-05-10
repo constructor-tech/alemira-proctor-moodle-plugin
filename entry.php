@@ -42,4 +42,9 @@ if ($seamlessauth && $token) {
     complete_user_login($user);
 }
 
+// Without a token (seamless auth disabled, or learner manually following the
+// link) we still need an authenticated session before touching the SESSION
+// state in handle_accesscode_param. No-op for users already logged in.
+require_login();
+
 \availability_proctor\utils::handle_accesscode_param($accesscode);

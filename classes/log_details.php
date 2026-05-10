@@ -49,7 +49,7 @@ class log_details {
     /**
      * Constructor
      * @param int $id Entry id
-     * @param string $url
+     * @param \moodle_url $url page URL the details page was reached from
      */
     public function __construct($id, $url) {
         $this->id = $id;

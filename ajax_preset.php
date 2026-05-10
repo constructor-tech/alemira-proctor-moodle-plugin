@@ -18,6 +18,7 @@
  * AJAX endpoint for personal preset save/delete from the exam settings form.
  *
  * @package    availability_proctor
+ * @copyright  2026 Constructor Tech
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -29,6 +30,12 @@ use availability_proctor\preset;
 
 require_login();
 require_sesskey();
+
+// Personal-preset management is only meaningful while editing activities in
+// a course. Anchor the capability check on the course the form is rendered for.
+$courseid = required_param('courseid', PARAM_INT);
+$coursecontext = context_course::instance($courseid);
+require_capability('moodle/course:manageactivities', $coursecontext);
 
 header('Content-Type: application/json');
 
@@ -59,7 +66,16 @@ try {
         throw new \moodle_exception('error_invalid_action', 'availability_proctor');
     }
 
-} catch (\Throwable $e) {
+} catch (\moodle_exception $e) {
+    // moodle_exception messages route through get_string and are safe to surface.
     http_response_code(400);
     echo json_encode(['ok' => false, 'error' => $e->getMessage()]);
+} catch (\Throwable $e) {
+    // Internal errors (DB/PHP) — log the detail server-side, return a generic message.
+    debugging('availability_proctor ajax_preset error: ' . $e->getMessage(), DEBUG_DEVELOPER);
+    http_response_code(500);
+    echo json_encode([
+        'ok' => false,
+        'error' => get_string('error_internal', 'availability_proctor'),
+    ]);
 }

@@ -29,18 +29,18 @@ defined('MOODLE_INTERNAL') || die();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title><?php echo $pagetitle ?></title>
+    <title><?php echo s($pagetitle) ?></title>
   </head>
   <body>
       <div style="text-align: center">
-          <form action="<?php echo $formdata['action'] ?>"
-                method="<?php echo $formdata['method'] ?>"
+          <form action="<?php echo s($formdata['action']) ?>"
+                method="<?php echo s($formdata['method']) ?>"
                 id="availability_proctor_redirect_form"
           >
-              <?php if(isset($formdata['token'])): ?>
-                  <input type="hidden" value="<?php echo $formdata['token'] ?>" name="token">
+              <?php if (isset($formdata['token'])): ?>
+                  <input type="hidden" value="<?php echo s($formdata['token']) ?>" name="token">
               <?php endif ?>
-              <button type="submit">Go to Proctoring system</button>
+              <button type="submit"><?php echo s($gobuttonlabel) ?></button>
           </form>
       </div>
       <script type="text/javascript">

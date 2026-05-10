@@ -263,11 +263,6 @@ $string['preset_deleted'] = 'Пресет удалён.';
 $string['preset_saved'] = 'Пресет сохранён.';
 $string['preset_delete_confirm'] = 'Удалить этот пресет?';
 $string['preset_settings_summary'] = 'Настройки';
-$string['preset_default_name'] = 'По умолчанию';
-$string['preset_seed_high_stakes'] = 'Экзамен с высокой ставкой';
-$string['preset_seed_low_stakes'] = 'Экзамен с низкой ставкой';
-$string['preset_seed_open_book'] = 'Экзамен с открытыми материалами';
-
 $string['preset_section_identity_meta'] = 'Пресет';
 $string['preset_section_mode'] = 'Режим прокторинга';
 $string['preset_section_identity'] = 'Подтверждение личности';
@@ -300,6 +295,18 @@ $string['error_preset_cannot_delete'] = 'Этот пресет нельзя уд
 $string['error_preset_not_found'] = 'Пресет не найден.';
 $string['error_invalid_payload'] = 'Неверные данные пресета.';
 $string['error_invalid_action'] = 'Неверное действие.';
+$string['error_internal'] = 'Произошла внутренняя ошибка. Повторите попытку или обратитесь к администратору.';
+$string['error_preset_name_taken'] = 'Пресет с таким названием уже существует.';
+$string['error_preset_user_quota'] = 'Достигнут лимит личных пресетов ({$a}). Удалите ненужный, чтобы сохранить новый.';
+$string['error_preset_default_missing'] = 'Не найден пресет прокторинга по умолчанию, а стартовый набор не удалось создать автоматически. Обратитесь к администратору.';
+$string['preset_display_high_stakes'] = 'Экзамен с высокой ставкой';
+$string['preset_display_low_stakes'] = 'Экзамен с низкой ставкой';
+$string['preset_display_open_book'] = 'Экзамен с открытыми материалами';
+$string['redirecting_to_proctor'] = 'Перенаправление в {$a}';
+$string['proctor_go_to_system'] = 'Перейти в систему прокторинга';
+$string['secure_browser_enabled'] = 'Включён';
+$string['secure_browser_disabled'] = 'Выключен';
+$string['selectauser'] = 'Выберите пользователя';
 $string['error_preset_name_required'] = 'Название пресета обязательно.';
 $string['error_useragreementurl'] = 'Введите корректный URL, начинающийся с http:// или https:// ' .
     '(например: https://example.com/terms).';
@@ -380,3 +387,7 @@ $string['warning_avert_eyes_help'] = 'Срабатывает при длител
     'Автоматически отключается при разрешении «Длительный увод взгляда от экрана».';
 $string['warning_no_user_in_frame_help'] = 'Срабатывает, когда учащийся не виден в кадре. ' .
     'Автоматически отключается при разрешении «Выход из кадра».';
+$string['warning_extra_user_in_frame_help'] = 'Срабатывает, когда в кадре виден ещё один человек помимо учащегося.';
+$string['warning_substitution_user_help'] = 'Срабатывает, когда человек в кадре не совпадает с прошедшим идентификацию учащимся.';
+$string['warning_forbidden_device_help'] = 'Срабатывает при обнаружении в кадре внешнего устройства (телефон, планшет, второй монитор).';
+$string['warning_phone_help'] = 'Срабатывает, когда в кадре виден телефон.';

@@ -89,6 +89,10 @@ class frontend extends \core_availability\frontend {
             'allow_to_use_excel_help', 'allow_to_use_human_assistant_help',
             'allow_absence_in_frame_help', 'allow_voices_help',
             'allow_wrong_gaze_direction_help',
+            // Per-warning hints rendered next to suppressible warnings in the
+            // activity-edit form (form.js shows hint icons on these four).
+            'warning_change_active_window_on_computer_help', 'warning_voice_detected_help',
+            'warning_avert_eyes_help', 'warning_no_user_in_frame_help',
         ];
 
         foreach (condition::WARNINGS as $key => $value) {
@@ -135,13 +139,22 @@ class frontend extends \core_availability\frontend {
 
         $groups = $DB->get_records('groups', ['courseid' => $course->id], 'name', 'id,name');
 
-        // Build preset lists for the load-preset picker.
+        // Build preset lists for the load-preset picker. Override `name` with
+        // the localized display name so the picker shows the seeded preset
+        // titles in the user's language; storage stays on the canonical key.
         $globalpresets = array_values(preset::get_all_global());
+        foreach ($globalpresets as $gp) {
+            $gp->name = preset::display_name($gp);
+        }
         $userpresets = array_values(preset::get_user_presets($USER->id));
+        foreach ($userpresets as $up) {
+            $up->name = preset::display_name($up);
+        }
 
         $context = [
             'ajaxurl' => $CFG->wwwroot . '/availability/condition/proctor/ajax_preset.php',
             'sesskey' => sesskey(),
+            'courseid' => (int) $course->id,
             'global_presets' => $globalpresets,
             'user_presets' => $userpresets,
         ];

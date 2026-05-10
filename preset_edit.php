@@ -18,6 +18,7 @@
  * Admin page: create / edit a single proctoring preset.
  *
  * @package    availability_proctor
+ * @copyright  2026 Constructor Tech
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -55,8 +56,17 @@ if ($id) {
     if (!$existing) {
         throw new \moodle_exception('error_preset_not_found', 'availability_proctor');
     }
+    // This admin page only manages global presets; personal presets are
+    // owned by individual users and handled through the activity form.
+    if ($existing->type !== preset::TYPE_GLOBAL) {
+        throw new \moodle_exception('error_preset_not_found', 'availability_proctor');
+    }
     // Form expects rules/warnings/scoring as arrays; preset::decode already does that.
     $form->set_data($existing);
+} else {
+    // New preset: pre-populate from the current default global preset
+    // so admins start from the same baseline as the seeded default.
+    $form->set_data((object) preset::get_defaults());
 }
 
 if ($data = $form->get_data()) {
@@ -67,51 +77,39 @@ if ($data = $form->get_data()) {
             $data->$field = null;
         }
     }
-    // Mirror the Calculator dropdown into the rule shown to the learner:
-    // off -> not allowed; simple/scientific -> allowed.
-    if (!isset($data->rules) || !is_array($data->rules)) {
-        $data->rules = [];
-    }
-    $data->rules['allow_to_use_calculator'] = !empty($data->calculator) && $data->calculator !== 'off';
-
-    // Enforce rule -> warning suppression: when an "allow" rule is on,
-    // force the corresponding warning off in the saved preset.
-    if (!isset($data->warnings) || !is_array($data->warnings)) {
-        $data->warnings = [];
-    }
-    $rulewarningmap = [
-        'allow_to_use_websites' => 'warning_change_active_window_on_computer',
-        'allow_voices' => 'warning_voice_detected',
-        'allow_wrong_gaze_direction' => 'warning_avert_eyes',
-        'allow_absence_in_frame' => 'warning_no_user_in_frame',
-    ];
-    foreach ($rulewarningmap as $rkey => $wkey) {
-        if (!empty($data->rules[$rkey])) {
-            $data->warnings[$wkey] = 0;
-        }
-    }
-
+    // Calculator->rule mirroring and rule->warning suppression are applied
+    // inside preset::save() via normalize_before_save().
     $newid = preset::save($data);
     redirect($listurl, get_string('preset_saved', 'availability_proctor'));
 }
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading($id ? get_string('preset_edit', 'availability_proctor') : get_string('preset_create', 'availability_proctor'));
+$headingkey = $id ? 'preset_edit' : 'preset_create';
+echo $OUTPUT->heading(get_string($headingkey, 'availability_proctor'));
 $form->display();
 
 // Live-uncheck the auto-suppressed warning when its corresponding allow-rule is toggled on.
-$PAGE->requires->js_init_code(<<<'JS'
+// Map is derived from preset::RULE_WARNING_MAP so all sources (server save, server form,
+// client JS) agree on the same set of pairs.
+$jsmap = [];
+foreach (preset::RULE_WARNING_MAP as $rkey => $wkey) {
+    $jsmap['rules[' . $rkey . ']'] = 'warnings[' . $wkey . ']';
+}
+$PAGE->requires->js_init_code(
+    'var availabilityProctorRuleWarningMap = ' . json_encode($jsmap) . ';' . "\n" .
+    <<<'JS'
 (function() {
-    var map = {
-        'rules[allow_to_use_websites]': 'warnings[warning_change_active_window_on_computer]',
-        'rules[allow_voices]': 'warnings[warning_voice_detected]',
-        'rules[allow_wrong_gaze_direction]': 'warnings[warning_avert_eyes]',
-        'rules[allow_absence_in_frame]': 'warnings[warning_no_user_in_frame]'
-    };
+    var map = availabilityProctorRuleWarningMap;
+    // Moodle's advcheckbox renders TWO inputs sharing the same name — a hidden
+    // fallback (value=0) and the visible checkbox. We must target the visible
+    // one or .checked reads/writes apply to the hidden input and do nothing.
+    function findCheckbox(name) {
+        return document.querySelector('input[type="checkbox"][name="' + name + '"]');
+    }
     function sync() {
         Object.keys(map).forEach(function(rname) {
-            var rule = document.querySelector('input[name="' + rname + '"]');
-            var warn = document.querySelector('input[name="' + map[rname] + '"]');
+            var rule = findCheckbox(rname);
+            var warn = findCheckbox(map[rname]);
             if (!rule || !warn) { return; }
             if (rule.checked) {
                 warn.checked = false;
@@ -119,7 +117,7 @@ $PAGE->requires->js_init_code(<<<'JS'
         });
     }
     Object.keys(map).forEach(function(rname) {
-        var rule = document.querySelector('input[name="' + rname + '"]');
+        var rule = findCheckbox(rname);
         if (rule) { rule.addEventListener('change', sync); }
     });
     sync();

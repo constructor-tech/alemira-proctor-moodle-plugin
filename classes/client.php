@@ -248,16 +248,10 @@ class client {
 
         // Enforce rule -> warning suppression: when an "allow" rule is on,
         // the corresponding warning is forced off in the API payload regardless
-        // of what is stored on the condition.
-        $rulewarningmap = [
-            'allow_to_use_websites' => 'warning_change_active_window_on_computer',
-            'allow_voices' => 'warning_voice_detected',
-            'allow_wrong_gaze_direction' => 'warning_avert_eyes',
-            'allow_absence_in_frame' => 'warning_no_user_in_frame',
-        ];
+        // of what is stored on the condition. Source of truth lives on preset.
         $rules = (array) $conditiondata['rules'];
         $warnings = (array) $conditiondata['warnings'];
-        foreach ($rulewarningmap as $rkey => $wkey) {
+        foreach (preset::RULE_WARNING_MAP as $rkey => $wkey) {
             if (!empty($rules[$rkey])) {
                 $warnings[$wkey] = false;
             }

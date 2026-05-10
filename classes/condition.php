@@ -40,7 +40,14 @@ use stdClass;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class condition extends \core_availability\condition {
-    /** @var array List of (de-)serializable properties */
+    /**
+     * @var array List of (de-)serializable properties.
+     *
+     * IMPORTANT: keep this list in sync with PRESET_FIELDS below — every
+     * preset field is also a serializable property. Anything added to
+     * PROPS that should live on a preset must also be added to
+     * PRESET_FIELDS, and vice versa.
+     */
     const PROPS = [
         'duration', 'mode', 'schedulingrequired', 'autorescheduling',
         'istrial', 'identification', 'useragreementurl',
@@ -55,7 +62,7 @@ class condition extends \core_availability\condition {
     ];
 
     /**
-     * @var array Subset of properties that belong to a reusable preset
+     * @var array Subset of PROPS that belongs to a reusable preset
      * (exam conduct policy). Excludes connection settings, exam-level fields
      * (istrial, customrules, groups) and duration (computed at runtime).
      */
@@ -278,7 +285,7 @@ class condition extends \core_availability\condition {
             $manualmodes = ['online', 'identification'];
             $this->schedulingrequired = in_array($this->mode, $manualmodes);
         }
-        if (!isset($structure->auto_rescheduling)) {
+        if (isset($structure->auto_rescheduling)) {
             $this->autorescheduling = $structure->auto_rescheduling;
         }
 

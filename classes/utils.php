@@ -306,7 +306,9 @@ CSS;
 
         $formdata = $client->get_form('start', $data);
 
-        $pagetitle = "Redirecting to Proctor by Constructor";
+        $pagetitle = get_string('redirecting_to_proctor', 'availability_proctor',
+            get_string('pluginname', 'availability_proctor'));
+        $gobuttonlabel = get_string('proctor_go_to_system', 'availability_proctor');
 
         include(dirname(__FILE__).'/../templates/redirect.php');
         die();

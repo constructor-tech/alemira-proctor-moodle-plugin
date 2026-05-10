@@ -37,8 +37,6 @@ require_capability('moodle/site:config', $context);
 
 $PAGE->set_title(get_string('defaults', 'availability_proctor'));
 
-$PAGE->requires->js_call_amd('availability_proctor/admin', 'init');
-
 $PAGE->navbar->includesettingsbase = true;
 
 $PAGE->set_pagelayout('admin');

@@ -63,7 +63,6 @@ class preset_form extends \moodleform {
         $mform->addElement('advcheckbox', 'sendmanualwarningstolearner',
             get_string('sendmanualwarningstolearner', 'availability_proctor'));
         $mform->setType('sendmanualwarningstolearner', PARAM_BOOL);
-        $mform->setDefault('sendmanualwarningstolearner', 1);
         $mform->addHelpButton('sendmanualwarningstolearner', 'sendmanualwarningstolearner', 'availability_proctor');
         // Only meaningful in Live (online) proctoring mode.
         $mform->hideIf('sendmanualwarningstolearner', 'mode', 'neq', 'online');
@@ -120,7 +119,8 @@ class preset_form extends \moodleform {
         $mform->addHelpButton('streamspreset', 'streamspreset', 'availability_proctor');
 
         // ---- Secure Browser ----
-        $mform->addElement('header', 'preset_section_securebrowser', get_string('preset_section_securebrowser', 'availability_proctor'));
+        $mform->addElement('header', 'preset_section_securebrowser',
+            get_string('preset_section_securebrowser', 'availability_proctor'));
         $mform->addElement('advcheckbox', 'securebrowser', get_string('enable_secure_browser', 'availability_proctor'));
         $mform->setType('securebrowser', PARAM_BOOL);
         $mform->addHelpButton('securebrowser', 'enable_secure_browser', 'availability_proctor');
@@ -129,7 +129,6 @@ class preset_form extends \moodleform {
             'medium' => get_string('secure_browser_level_medium', 'availability_proctor'),
             'high' => get_string('secure_browser_level_high', 'availability_proctor'),
         ]);
-        $mform->setDefault('securebrowserlevel', 'basic');
         $mform->addHelpButton('securebrowserlevel', 'secure_browser_level', 'availability_proctor');
         $mform->hideIf('securebrowserlevel', 'securebrowser', 'eq', 0);
         $mform->addElement('advcheckbox', 'allowtouseadditionalresources',
@@ -145,7 +144,8 @@ class preset_form extends \moodleform {
         $mform->setType('forbiddenprocesses', PARAM_TEXT);
         $mform->addHelpButton('forbiddenprocesses', 'forbidden_processes', 'availability_proctor');
         $mform->hideIf('forbiddenprocesses', 'securebrowser', 'eq', 0);
-        $mform->addElement('advcheckbox', 'allowvirtualenvironment', get_string('allowvirtualenvironment', 'availability_proctor'));
+        $mform->addElement('advcheckbox', 'allowvirtualenvironment',
+            get_string('allowvirtualenvironment', 'availability_proctor'));
         $mform->setType('allowvirtualenvironment', PARAM_BOOL);
         $mform->addHelpButton('allowvirtualenvironment', 'allowvirtualenvironment', 'availability_proctor');
         $mform->hideIf('allowvirtualenvironment', 'securebrowser', 'eq', 0);
@@ -161,7 +161,6 @@ class preset_form extends \moodleform {
             }
             $mform->addElement('advcheckbox', 'rules[' . $key . ']', get_string($key, 'availability_proctor'));
             $mform->setType('rules[' . $key . ']', PARAM_BOOL);
-            $mform->setDefault('rules[' . $key . ']', $default);
             $mform->addHelpButton('rules[' . $key . ']', $key, 'availability_proctor');
         }
 
@@ -181,19 +180,13 @@ class preset_form extends \moodleform {
         $mform->addElement('static', 'warnings_section_hint', '',
             \html_writer::div(get_string('warnings_help', 'availability_proctor'), 'text-muted small'));
         // Warnings that get suppressed when the corresponding allow-rule is on.
-        $rulewarningmap = [
-            'allow_to_use_websites' => 'warning_change_active_window_on_computer',
-            'allow_voices' => 'warning_voice_detected',
-            'allow_wrong_gaze_direction' => 'warning_avert_eyes',
-            'allow_absence_in_frame' => 'warning_no_user_in_frame',
-        ];
-        $warningtorule = array_flip($rulewarningmap);
+        $warningtorule = array_flip(preset::RULE_WARNING_MAP);
         foreach (condition::WARNINGS as $key => $default) {
             $mform->addElement('advcheckbox', 'warnings[' . $key . ']', get_string($key, 'availability_proctor'));
             $mform->setType('warnings[' . $key . ']', PARAM_BOOL);
-            $mform->setDefault('warnings[' . $key . ']', $default);
+            $mform->addHelpButton('warnings[' . $key . ']', $key, 'availability_proctor');
+            // Suppress the warning when the matching allow-rule is on.
             if (isset($warningtorule[$key])) {
-                $mform->addHelpButton('warnings[' . $key . ']', $key, 'availability_proctor');
                 $mform->disabledIf('warnings[' . $key . ']', 'rules[' . $warningtorule[$key] . ']', 'eq', 1);
             }
         }
@@ -205,7 +198,6 @@ class preset_form extends \moodleform {
         foreach (condition::SCORING as $key => $field) {
             $mform->addElement('float', 'scoring[' . $key . ']', get_string('scoring_' . $key, 'availability_proctor'),
                 ['size' => 6, 'style' => 'width: 6em']);
-            $mform->setDefault('scoring[' . $key . ']', $field['default']);
             // cheater_level has its own more specific help; others share one.
             $helpid = $key === 'cheater_level' ? 'scoring_cheater_level' : 'scoring';
             $mform->addHelpButton('scoring[' . $key . ']', $helpid, 'availability_proctor');
@@ -214,6 +206,13 @@ class preset_form extends \moodleform {
         $this->add_action_buttons();
     }
 
+    /**
+     * Server-side validation of the preset form.
+     *
+     * @param array $data submitted form data
+     * @param array $files submitted files
+     * @return array map of fieldname => error string
+     */
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
         foreach (condition::SCORING as $key => $field) {

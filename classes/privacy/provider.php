@@ -44,6 +44,12 @@ class provider implements
     \core_privacy\local\metadata\provider,
     \core_privacy\local\request\plugin\provider,
     \core_privacy\local\request\core_userlist_provider {
+    /**
+     * Declare the personal data this plugin stores.
+     *
+     * @param collection $collection the metadata collection to add items to
+     * @return collection the same collection (with proctor entry fields added)
+     */
     public static function get_metadata(collection $collection): collection {
         $collection->add_database_table(
             'availability_proctor_entries',

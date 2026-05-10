@@ -106,13 +106,16 @@ class defaults_form extends \moodleform {
         $mform->addElement('textarea', 'allowedprocesses', get_string('allowed_processes', 'availability_proctor'));
         $mform->addElement('textarea', 'forbiddenprocesses', get_string('forbidden_processes', 'availability_proctor'));
 
-        $mform->addElement('advcheckbox', 'allowmultipledisplays', get_string('allowmultipledisplays',  'availability_proctor'));
+        $mform->addElement('advcheckbox', 'allowmultipledisplays',
+            get_string('allowmultipledisplays', 'availability_proctor'));
         $mform->setType('allowmultipledisplays', PARAM_BOOL);
 
-        $mform->addElement('advcheckbox', 'allowvirtualenvironment', get_string('allowvirtualenvironment',  'availability_proctor'));
+        $mform->addElement('advcheckbox', 'allowvirtualenvironment',
+            get_string('allowvirtualenvironment', 'availability_proctor'));
         $mform->setType('allowvirtualenvironment', PARAM_BOOL);
 
-        $mform->addElement('advcheckbox', 'checkidphotoquality', get_string('checkidphotoquality',  'availability_proctor'));
+        $mform->addElement('advcheckbox', 'checkidphotoquality',
+            get_string('checkidphotoquality', 'availability_proctor'));
         $mform->setType('checkidphotoquality', PARAM_BOOL);
 
         $mform->addElement('url', 'useragreementurl', get_string('user_agreement_url', 'availability_proctor'));
@@ -130,11 +133,13 @@ class defaults_form extends \moodleform {
         }
         $mform->addElement('select', 'streamspreset', get_string('streamspreset', 'availability_proctor'), $streamspresetoptions);
 
-        $mform->addElement('advcheckbox', 'sendmanualwarningstolearner', get_string('sendmanualwarningstolearner',  'availability_proctor'));
+        $mform->addElement('advcheckbox', 'sendmanualwarningstolearner',
+            get_string('sendmanualwarningstolearner', 'availability_proctor'));
         $mform->setType('sendmanualwarningstolearner', PARAM_BOOL);
         $mform->setDefault('sendmanualwarningstolearner', true);
 
-        $mform->addElement('advcheckbox', 'allowroomscanauxcamera', get_string('allowroomscanauxcamera',  'availability_proctor'));
+        $mform->addElement('advcheckbox', 'allowroomscanauxcamera',
+            get_string('allowroomscanauxcamera', 'availability_proctor'));
         $mform->setType('allowroomscanauxcamera', PARAM_BOOL);
         $mform->setDefault('allowroomscanauxcamera', false);
 

@@ -37,10 +37,6 @@ $string['error_not_in_range'] = 'This value should be between %d and %d';
 $string['error_setduration'] = 'Duration must be a multiple of 30';
 $string['error_preset_cannot_delete'] = 'This preset cannot be deleted (it is the system preset, the last remaining preset, or is in use by an exam).';
 $string['error_preset_not_found'] = 'Preset not found.';
-$string['preset_default_name'] = 'Default';
-$string['preset_seed_high_stakes'] = 'High-stakes exam';
-$string['preset_seed_low_stakes'] = 'Low-stakes exam';
-$string['preset_seed_open_book'] = 'Open-book exam';
 $string['proctor:managepresets'] = 'Manage proctoring presets';
 $string['presets'] = 'Global proctoring presets';
 $string['preset_create'] = 'Create preset';
@@ -120,13 +116,17 @@ $string['warnings_help'] = 'Pop-up shown to the learner in-exam when this violat
 $string['scoring'] = 'Scoring weight';
 $string['scoring_help'] = 'Weight applied to this violation type when computing the learner\'s cheating score.';
 $string['scoring_section_hint'] = 'Weight applied to this violation type when computing the learner\'s cheating score. Leave blank to use the default.';
-// Per-warning hints — only for warnings that can be auto-disabled by an "Allow" rule.
+// Per-warning hints.
 $string['warning_change_active_window_on_computer_help'] = 'Detected when the learner switches windows during the exam. ' .
     'Automatically disabled when "Browsing the Internet" is allowed.';
 $string['warning_voice_detected_help'] = 'Detected when voice is heard during the exam. Automatically disabled when "Talking" is allowed.';
 $string['warning_avert_eyes_help'] = 'Detected when the learner looks away from the screen for a prolonged time. ' .
     'Automatically disabled when "Prolonged looking away from screen" is allowed.';
 $string['warning_no_user_in_frame_help'] = 'Detected when no user is visible in the webcam. Automatically disabled when "Leaving webcam frame" is allowed.';
+$string['warning_extra_user_in_frame_help'] = 'Detected when an additional person is visible in the webcam alongside the learner.';
+$string['warning_substitution_user_help'] = 'Detected when the person currently in the webcam does not match the identified learner.';
+$string['warning_forbidden_device_help'] = 'Detected when an external device (phone, tablet, second monitor) is visible in the webcam view.';
+$string['warning_phone_help'] = 'Detected when a phone is visible in the webcam view.';
 
 $string['scoring_cheater_level'] = 'Cheater score threshold';
 $string['scoring_cheater_level_help'] = 'Overall threshold (0–100). Sessions scoring above this value are auto-flagged as cheaters. Default 80.';
@@ -146,6 +146,17 @@ $string['error_preset_name_required'] = 'Preset name is required.';
 $string['error_useragreementurl'] = 'Please enter a valid URL starting with http:// or https:// (for example: https://example.com/terms).';
 $string['error_invalid_payload'] = 'Invalid preset payload.';
 $string['error_invalid_action'] = 'Invalid action.';
+$string['error_internal'] = 'An internal error occurred. Please try again or contact your administrator.';
+$string['error_preset_name_taken'] = 'A preset with this name already exists.';
+$string['error_preset_user_quota'] = 'You have reached the maximum number of personal presets ({$a}). Delete an unused preset before saving a new one.';
+$string['error_preset_default_missing'] = 'No default proctoring preset is available and the starter set could not be created automatically. Please contact your administrator.';
+$string['preset_display_high_stakes'] = 'High-stakes exam';
+$string['preset_display_low_stakes'] = 'Low-stakes exam';
+$string['preset_display_open_book'] = 'Open-book exam';
+$string['redirecting_to_proctor'] = 'Redirecting to {$a}';
+$string['proctor_go_to_system'] = 'Go to proctoring system';
+$string['secure_browser_enabled'] = 'Enabled';
+$string['secure_browser_disabled'] = 'Disabled';
 
 $string['settings_proctor_url'] = '{$a} URL';
 $string['settings_proctor_url_desc'] = '';

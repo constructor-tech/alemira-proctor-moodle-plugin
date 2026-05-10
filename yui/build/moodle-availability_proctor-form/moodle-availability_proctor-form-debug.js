@@ -23,7 +23,7 @@ M.availability_proctor.form.initInner = function(rules, warnings, scoring, strea
     this.defaults = defaults;
     this.groups = groups;
     this.streamsPresetOptions = streamsPresetOptions;
-    this.context = context || {ajaxurl: '', sesskey: '', global_presets: [], user_presets: []};
+    this.context = context || {ajaxurl: '', sesskey: '', courseid: 0, global_presets: [], user_presets: []};
 };
 
 M.availability_proctor.form.instId = 0;
@@ -1011,7 +1011,9 @@ M.availability_proctor.form.getNode = function(json) {
             ev.preventDefault();
             Y.io(ctx.ajaxurl, {
                 method: 'POST',
-                data: 'action=delete&sesskey=' + encodeURIComponent(ctx.sesskey) + '&id=' + encodeURIComponent(id),
+                data: 'action=delete&sesskey=' + encodeURIComponent(ctx.sesskey) +
+                    '&courseid=' + encodeURIComponent(ctx.courseid) +
+                    '&id=' + encodeURIComponent(id),
                 on: {
                     success: function(_, resp) {
                         var data;
@@ -1108,6 +1110,7 @@ M.availability_proctor.form.getNode = function(json) {
             method: 'POST',
             data: 'action=save' +
                 '&sesskey=' + encodeURIComponent(ctx.sesskey) +
+                '&courseid=' + encodeURIComponent(ctx.courseid) +
                 '&name=' + encodeURIComponent(name) +
                 '&payload=' + encodeURIComponent(JSON.stringify(payload)),
             on: {

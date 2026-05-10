@@ -18,6 +18,7 @@
  * Admin page: list of global proctoring presets.
  *
  * @package    availability_proctor
+ * @copyright  2026 Constructor Tech
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -72,6 +73,8 @@ if ($action && $id) {
 }
 
 $presets = preset::get_all_global($sort, $dir);
+// One DB pass instead of one LIKE-scan per preset.
+$usedset = preset::get_used_preset_ids();
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('presets', 'availability_proctor'));
@@ -143,14 +146,14 @@ $summary = function($p) {
     }
     if (!empty($p->securebrowser)) {
         $label = get_string('enable_secure_browser', 'availability_proctor') . ': '
-            . get_string('auxiliary_camera_on', 'availability_proctor');
+            . get_string('secure_browser_enabled', 'availability_proctor');
         if (!empty($p->securebrowserlevel)) {
             $label .= ' (' . get_string('secure_browser_level_' . $p->securebrowserlevel, 'availability_proctor') . ')';
         }
         $items[] = $label;
     } else {
         $items[] = get_string('enable_secure_browser', 'availability_proctor') . ': '
-            . get_string('auxiliary_camera_off', 'availability_proctor');
+            . get_string('secure_browser_disabled', 'availability_proctor');
     }
 
     if (!empty($p->auxiliarycamera)) {
@@ -181,7 +184,7 @@ foreach ($presets as $p) {
         );
     }
 
-    if (preset::can_delete($p)) {
+    if (preset::can_delete($p, $usedset)) {
         $deleteurl = new moodle_url($listurl, ['action' => 'delete', 'id' => $p->id, 'sesskey' => sesskey()]);
         $actions[] = $OUTPUT->action_link(
             $deleteurl,
@@ -191,7 +194,7 @@ foreach ($presets as $p) {
     }
 
     $table->data[] = [
-        format_string($p->name),
+        format_string(preset::display_name($p)),
         $summary($p),
         !empty($p->is_default) ? $OUTPUT->pix_icon('i/checked', '') : '',
         !empty($p->is_system) ? $OUTPUT->pix_icon('i/checked', '') : '',
