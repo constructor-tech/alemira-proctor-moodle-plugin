@@ -23,33 +23,36 @@
  */
 
 defined('MOODLE_INTERNAL') || die();
-?><!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title><?php echo s($pagetitle) ?></title>
-  </head>
-  <body>
-      <div style="text-align: center">
-          <form action="<?php echo s($formdata['action']) ?>"
-                method="<?php echo s($formdata['method']) ?>"
-                id="availability_proctor_redirect_form"
-          >
-              <?php if (isset($formdata['token'])): ?>
-                  <input type="hidden" value="<?php echo s($formdata['token']) ?>" name="token">
-              <?php endif ?>
-              <button type="submit"><?php echo s($gobuttonlabel) ?></button>
-          </form>
-      </div>
-      <script type="text/javascript">
-          function redirect() {
-              document.getElementById('availability_proctor_redirect_form').submit();
-          }
-          try { redirect() } catch (e) { console.error(e) };
-          setTimeout(redirect, 5000);
-          setTimeout(redirect, 10000);
-      </script>
-  </body>
-</html>
+
+$tokeninput = '';
+if (isset($formdata['token'])) {
+    $tokeninput = '<input type="hidden" value="' . s($formdata['token']) . '" name="token">';
+}
+
+echo '<!DOCTYPE html>' .
+    '<html>' .
+    '<head>' .
+    '<meta charset="UTF-8">' .
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0">' .
+    '<meta http-equiv="X-UA-Compatible" content="ie=edge">' .
+    '<title>' . s($pagetitle) . '</title>' .
+    '</head>' .
+    '<body>' .
+    '<div style="text-align: center">' .
+    '<form action="' . s($formdata['action']) . '"' .
+        ' method="' . s($formdata['method']) . '"' .
+        ' id="availability_proctor_redirect_form">' .
+    $tokeninput .
+    '<button type="submit">' . s($gobuttonlabel) . '</button>' .
+    '</form>' .
+    '</div>' .
+    '<script type="text/javascript">' .
+    'function redirect() {' .
+    '    document.getElementById(\'availability_proctor_redirect_form\').submit();' .
+    '}' .
+    'try { redirect() } catch (e) { console.error(e) }' .
+    'setTimeout(redirect, 5000);' .
+    'setTimeout(redirect, 10000);' .
+    '</script>' .
+    '</body>' .
+    '</html>';

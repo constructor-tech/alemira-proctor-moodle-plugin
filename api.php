@@ -36,15 +36,17 @@ require_once('../../../config.php');
 
 global $DB;
 
-// Moodle has no wrapper for raw HTTP request headers, so $_SERVER access is
-// unavoidable here. The endpoint authenticates via JWT verified below.
-// phpcs:disable moodle.PHP.ForbiddenGlobalUse.FoundDirect
-if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
-    $auth = $_SERVER['HTTP_AUTHORIZATION'];
-} else if (isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
-    $auth = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
-} else {
-    $auth = null;
+// Moodle has no wrapper for raw HTTP request headers; getallheaders() works
+// across supported SAPIs without touching server-level superglobals.
+// The endpoint authenticates via JWT verified below.
+$headers = function_exists('getallheaders') ? getallheaders() : [];
+$auth = null;
+foreach ($headers as $hname => $hvalue) {
+    $lname = strtolower($hname);
+    if ($lname === 'authorization' || $lname === 'redirect-http-authorization') {
+        $auth = $hvalue;
+        break;
+    }
 }
 
 if (empty($auth) || !preg_match('/JWT /', $auth)) {
@@ -52,7 +54,6 @@ if (empty($auth) || !preg_match('/JWT /', $auth)) {
     exit;
 }
 $token = explode(' ', $auth)[1];
-// phpcs:enable moodle.PHP.ForbiddenGlobalUse.FoundDirect
 
 $client = new client(null);
 

@@ -44,10 +44,9 @@ function availability_proctor_after_require_login() {
     global $USER, $DB;
 
     // User is trying to start an attempt, redirect to proctor if it is not started.
-    // SCRIPT_NAME is a server-set value; Moodle has no wrapper that exposes
-    // the currently running script reliably from a hook callback.
-    // phpcs:ignore moodle.PHP.ForbiddenGlobalUse.FoundDirect
-    $scriptname = isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'] : null;
+    // qualified_me() returns the full URL; extract just the path for comparison.
+    $currenturl = qualified_me();
+    $scriptname = $currenturl ? parse_url((string) $currenturl, PHP_URL_PATH) : null;
     if ($scriptname == '/mod/quiz/startattempt.php') {
         $cmid = required_param('cmid', PARAM_INT); // Course module id.
 
