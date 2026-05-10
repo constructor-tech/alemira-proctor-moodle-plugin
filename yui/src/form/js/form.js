@@ -653,7 +653,6 @@ M.availability_proctor.form.getNode = function(json) {
     function showHelp(icon) {
         var group = helpAnchor(icon);
         if (!group) { return; }
-        if (group.next('.proctor-help-pop')) { return; }
         // Close any other open popovers in this form.
         node.all('.proctor-help-pop').remove();
         var hintKey = icon.getAttribute('data-hint-key');
@@ -663,22 +662,28 @@ M.availability_proctor.form.getNode = function(json) {
         // Cap popover width to ~120% of the form's rendered width.
         var formWidth = node.get('offsetWidth') || 600;
         var maxw = Math.round(formWidth * 1.2);
+        // Absolute positioning so the popover overlays the next row instead
+        // of pushing all subsequent content down (which would resize the
+        // form box noticeably, especially in Safari on macOS).
+        group.setStyle('position', 'relative');
         var pop = Y.Node.create(
             '<div class="proctor-help-pop"' +
-            ' style="display:block; margin: 4px 0 8px 0; padding: 10px 14px;' +
+            ' style="position: absolute; top: 100%; left: 0; z-index: 1050;' +
+            ' margin-top: 2px; padding: 10px 14px;' +
             ' background:#fff; color:#212529;' +
             ' border:1px solid #ced4da; border-radius:4px;' +
-            ' box-shadow:0 2px 4px rgba(0,0,0,0.08);' +
+            ' box-shadow:0 2px 6px rgba(0,0,0,0.15);' +
             ' font-size:0.9rem; line-height:1.45;' +
-            ' max-width:' + maxw + 'px; box-sizing:border-box;">' +
+            ' max-width:' + maxw + 'px; box-sizing:border-box;' +
+            ' min-width: 240px;">' +
             text + '</div>'
         );
-        group.insert(pop, 'after');
+        group.append(pop);
     }
     function hideHelp(icon) {
         var group = helpAnchor(icon);
         if (!group) { return; }
-        var p = group.next('.proctor-help-pop');
+        var p = group.one('.proctor-help-pop');
         if (p) { p.remove(); }
     }
     node.delegate('click', function(e) {
