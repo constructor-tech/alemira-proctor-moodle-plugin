@@ -24,19 +24,25 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+// Brand-specific product name comes from the brand class (not translatable —
+// same string in every locale). The base lang file stays brand-neutral so it
+// doesn't need rewriting per build.
+require_once(__DIR__ . '/../../classes/brand.php');
+$pluginnamebrand = \availability_proctor\brand::DISPLAY_NAME;
+
 $string['proctor:logaccess'] = 'Доступ к отчету Proctor';
 $string['proctor:logaccess_course'] = 'Доступ к отчету Proctor (определенный курс)';
 $string['proctor:logaccess_all'] = 'Доступ к отчету Proctor (все курсы)';
 
-$string['description'] = 'Позволяет студентам использовать сервис "Proctor by Constructor"';
-$string['pluginname'] = 'Прокторинг "Proctor by Constructor"';
-$string['title'] = 'Proctor by Constructor';
+$string['description'] = 'Позволяет студентам использовать сервис ' . $pluginnamebrand;
+$string['pluginname'] = $pluginnamebrand;
+$string['title'] = $pluginnamebrand;
 
 $string['error_no_entry_found'] = 'No exam entry found by accesscode';
 $string['error_not_in_range'] = 'Значение должно быть в диапазоне от %d до %d';
 $string['error_setduration'] = 'Длительность в минутах должна быть кратна 30 (30, 60, 90)';
 
-$string['settings_proctor_url'] = 'Proctor by Constructor URL';
+$string['settings_proctor_url'] = $pluginnamebrand . ' URL';
 $string['settings_proctor_url_desc'] = '';
 $string['settings_integration_name'] = 'Integration Name';
 $string['settings_integration_name_desc'] = '';
@@ -46,14 +52,14 @@ $string['settings_account_name'] = 'Account Name';
 $string['settings_account_name_desc'] = '';
 $string['settings_account_id'] = 'Account ID';
 $string['settings_account_id_desc'] = '';
-$string['settings_user_emails'] = 'Отправлять email пользователей в Proctor by Constructor';
+$string['settings_user_emails'] = 'Отправлять email пользователей в ' . $pluginnamebrand;
 $string['settings_user_emails_desc'] = 'Если включено, Moodle будет отправлять email-адреса экзаменуемых в панель Proctor. ' .
-    'Если выключено, Proctor by Constructor автоматически сгенерирует фиктивный email ' .
+    'Если выключено, ' . $pluginnamebrand . ' автоматически сгенерирует фиктивный email ' .
     'для каждого экзаменуемого в качестве уникального идентификатора в панели.';
 $string['settings_seamless_auth'] = 'Автоматическая авторизация пользователя';
 $string['settings_seamless_auth_desc'] = 'Передаёт токены авторизации Moodle в Proctor. Рекомендуется включить эту опцию при использовании Secure Browser.';
 
-$string['description_proctor'] = 'Вы будете перенаправлены на Proctor by Constructor';
+$string['description_proctor'] = 'Вы будете перенаправлены на ' . $pluginnamebrand;
 $string['description_no_webservices'] = 'Недоступно через мобильное приложение Moodle';
 
 $string['settings'] = 'Настройки интеграции';
@@ -333,7 +339,7 @@ $string['allowmultipledisplays_help'] = 'Если выключено — уча�
 $string['streamspreset_help'] = 'Default — стандартная видеозапись (рекомендуется для онлайн-экзаменов).
 <br>No Video — отключает запись видео. Обычно используется для экзаменов на территории учебного заведения ' .
     'с защищённым браузером, где видео не требуется.';
-$string['enable_secure_browser_help'] = 'Требует от учащихся установить Constructor Secure Browser — ' .
+$string['enable_secure_browser_help'] = 'Требует от учащихся установить ' . $pluginnamebrand . ' Secure Browser — ' .
     'отдельное приложение, обеспечивающее ограничения на уровне ОС.';
 $string['secure_browser_level_help'] = 'Basic: обнаружение виртуальных машин и USB-устройств.
 <br>Medium: добавляет ограничения, сохраняя гибкость (рекомендуется при разрешении пользовательских процессов).

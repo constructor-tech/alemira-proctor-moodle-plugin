@@ -77,6 +77,12 @@ if ($data = $form->get_data()) {
             $data->$field = null;
         }
     }
+    // Brand-hidden fields are ignored from the submitted form and
+    // replaced with the default global preset's values. Skipped when
+    // editing the default preset itself (which would override-from-self).
+    if (empty($existing) || empty($existing->is_default)) {
+        preset::apply_hidden_field_defaults($data);
+    }
     // Calculator->rule mirroring and rule->warning suppression are applied
     // inside preset::save() via normalize_before_save().
     $newid = preset::save($data);

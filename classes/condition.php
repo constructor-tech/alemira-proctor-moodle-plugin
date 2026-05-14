@@ -351,6 +351,29 @@ class condition extends \core_availability\condition {
             $this->streamspreset = $structure->streamspreset;
         }
 
+        // Brand-hidden fields are always forced to the default preset's value,
+        // overriding whatever the saved structure or a tampered submission set.
+        // This is the backend security boundary for visibility (mirror of the
+        // form-side gating in preset_form/defaults_form).
+        $defaultpreset = preset::get_default();
+        if ($defaultpreset) {
+            foreach (brand::HIDDEN_FORM_FIELDS as $key) {
+                if (!in_array($key, self::PRESET_FIELDS, true)) {
+                    continue;
+                }
+                if (!property_exists($defaultpreset, $key) && !isset($defaultpreset->$key)) {
+                    continue;
+                }
+                $value = $defaultpreset->$key;
+                // rules/warnings/scoring are kept as stdClass elsewhere in this
+                // class; preset::decode() returns them as arrays, so cast back.
+                if (in_array($key, ['rules', 'warnings', 'scoring'], true)) {
+                    $value = (object) (is_array($value) ? $value : (array) $value);
+                }
+                $this->$key = $value;
+            }
+        }
+
         $this->validate();
     }
 
@@ -386,6 +409,20 @@ class condition extends \core_availability\condition {
      * @return null
      */
     public function validate() {
+        // rules/warnings/scoring are accessed as objects below, but callers
+        // (from_json, brand-hidden-field override, raw structure import) may
+        // hand them in as arrays. Normalize once here so the loops below work
+        // regardless of how the caller wrote the field.
+        if (!is_object($this->rules)) {
+            $this->rules = (object) (array) $this->rules;
+        }
+        if (!is_object($this->warnings)) {
+            $this->warnings = (object) (array) $this->warnings;
+        }
+        if (!is_object($this->scoring)) {
+            $this->scoring = (object) (array) $this->scoring;
+        }
+
         $keys = array_keys(self::RULES);
         foreach ($this->rules as $key => $value) {
             if (!in_array($key, $keys)) {
@@ -588,10 +625,7 @@ class condition extends \core_availability\condition {
     }
 
     /**
-     * Check if condition is limiteted to groups, and is user is part
-     * of these groups.
-     * There is possibility to make this method private and move it
-     * to has_examus_condition, or maybe something else.
+     * Check if condition is limited to groups, and if the user is part of those groups.
      *
      * @param \cm_info $cm Cm
      * @return int $userid userid

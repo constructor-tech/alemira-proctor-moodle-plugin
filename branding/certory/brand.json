@@ -1,0 +1,15 @@
+{
+    "frankenstyle": "certory",
+    "display_name": "Certory",
+    "code_patterns": {
+        "PROCTOR": "CERTORY",
+        "proctor": "certory",
+        "certorying": "proctoring",
+        "certoryed": "proctored"
+    },
+    "text_patterns": {
+        "Constructor Secure Browser": "Certory Secure Browser",
+        "Constructor Proctor": "Proctor by Certory",
+        "by Constructor": "by Certory"
+    }
+}

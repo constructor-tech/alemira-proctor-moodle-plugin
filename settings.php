@@ -54,7 +54,8 @@ if ($hassiteconfig) {
     if ($ADMIN->fulltree) {
         $pluginsettings->add(new admin_setting_configtext('availability_proctor/proctor_url',
             new lang_string('settings_proctor_url', 'availability_proctor', $pluginname),
-            new lang_string('settings_proctor_url_desc', 'availability_proctor'), '', PARAM_HOST));
+            new lang_string('settings_proctor_url_desc', 'availability_proctor'),
+            \availability_proctor\brand::DEFAULT_PROCTOR_URL, PARAM_HOST));
 
         $pluginsettings->add(new admin_setting_configtext('availability_proctor/integration_name',
             new lang_string('settings_integration_name', 'availability_proctor'),
@@ -72,13 +73,17 @@ if ($hassiteconfig) {
             new lang_string('settings_account_name', 'availability_proctor'),
             new lang_string('settings_account_name_desc', 'availability_proctor'), '', PARAM_TEXT));
 
-        $pluginsettings->add(new admin_setting_configcheckbox('availability_proctor/user_emails',
-            new lang_string('settings_user_emails', 'availability_proctor', $pluginname),
-            new lang_string('settings_user_emails_desc', 'availability_proctor'), 1));
+        if (\availability_proctor\brand::is_setting_visible('user_emails')) {
+            $pluginsettings->add(new admin_setting_configcheckbox('availability_proctor/user_emails',
+                new lang_string('settings_user_emails', 'availability_proctor', $pluginname),
+                new lang_string('settings_user_emails_desc', 'availability_proctor'), 1));
+        }
 
-        $pluginsettings->add(new admin_setting_configcheckbox('availability_proctor/seamless_auth',
-            new lang_string('settings_seamless_auth', 'availability_proctor'),
-            new lang_string('settings_seamless_auth_desc', 'availability_proctor'), 1));
+        if (\availability_proctor\brand::is_setting_visible('seamless_auth')) {
+            $pluginsettings->add(new admin_setting_configcheckbox('availability_proctor/seamless_auth',
+                new lang_string('settings_seamless_auth', 'availability_proctor'),
+                new lang_string('settings_seamless_auth_desc', 'availability_proctor'), 1));
+        }
 
     }
 }

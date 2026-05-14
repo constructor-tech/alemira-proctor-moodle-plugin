@@ -24,13 +24,19 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+// Brand-specific product name comes from the brand class (not translatable —
+// same string in every locale). The base lang file stays brand-neutral so it
+// doesn't need rewriting per build.
+require_once(__DIR__ . '/../../classes/brand.php');
+$pluginnamebrand = \availability_proctor\brand::DISPLAY_NAME;
+
 $string['proctor:logaccess'] = 'Proctor log access';
 $string['proctor:logaccess_course'] = 'Proctor log access for course';
 $string['proctor:logaccess_all'] = 'Proctor log access for all courses';
 
-$string['pluginname'] = 'Constructor Proctor';
-$string['description'] = 'Allows students to use Constructor Proctor';
-$string['title'] = 'Constructor Proctor';
+$string['pluginname'] = $pluginnamebrand;
+$string['description'] = 'Allows students to use ' . $pluginnamebrand;
+$string['title'] = $pluginnamebrand;
 
 $string['error_no_entry_found'] = 'No exam entry found by accesscode';
 $string['error_not_in_range'] = 'This value should be between %d and %d';
@@ -82,7 +88,7 @@ $string['allowmultipledisplays_help'] = 'When disabled, learners with multiple m
 $string['streamspreset_help'] = 'Default — standard video recording (recommended for online exams).
 <br>No Video — disables video recording. It\'s typically used for on-campus exam rooms where the Secure Browser ' .
     'ensures learners cannot leave the exam page, making video recording unnecessary in a controlled physical environment.';
-$string['enable_secure_browser_help'] = 'Requires learners to install the Constructor Secure Browser, ' .
+$string['enable_secure_browser_help'] = 'Requires learners to install the ' . $pluginnamebrand . ' Secure Browser, ' .
     'a dedicated application that enforces machine-level restrictions during the exam.';
 $string['secure_browser_level_help'] = 'Basic: detects virtual machines and USB devices.
 <br>Medium: adds restrictions while allowing limited flexibility (recommended when allowing custom processes).
@@ -170,7 +176,7 @@ $string['settings_account_id'] = 'Account ID';
 $string['settings_account_id_desc'] = '';
 $string['settings_user_emails'] = 'Send user emails to {$a}';
 $string['settings_user_emails_desc'] = 'If checked, Moodle will send examinee\'s email addresses to the Proctor Dashboard. ' .
-    'If not checked, Proctor by Constructor will automatically generate a mock email address ' .
+    'If not checked, ' . $pluginnamebrand . ' will automatically generate a mock email address ' .
     'for each examinee to use as a unique identifier in the Dashboard.';
 $string['settings_seamless_auth'] = 'Seamless authorization';
 $string['settings_seamless_auth_desc'] = 'Forwards Moodle authentication tokens to Proctor. It is advised to enable this option if you use Secure Browser.';

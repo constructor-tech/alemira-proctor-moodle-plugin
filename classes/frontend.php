@@ -157,6 +157,7 @@ class frontend extends \core_availability\frontend {
             'courseid' => (int) $course->id,
             'global_presets' => $globalpresets,
             'user_presets' => $userpresets,
+            'hidden_fields' => array_values(brand::HIDDEN_FORM_FIELDS),
         ];
 
         return [

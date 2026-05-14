@@ -55,68 +55,87 @@ class defaults_form extends \moodleform {
 
         $mform->addElement('header', 'proctoring_settings', get_string('defaults_proctoring_settings', 'availability_proctor'));
 
-        $mform->addElement('text', 'duration', get_string('duration', 'availability_proctor'));
-        $mform->setType('duration', PARAM_INT);
-        $mform->addRule('duration', null, 'numeric');
+        // Exam duration is computed at runtime from the activity (quiz timelimit
+        // or condition::MAX_LIMIT fallback) — not an admin-configurable default.
+        // schedulingrequired/autorescheduling are dead UI; backend always sends
+        // false to the proctor API (see client::create_session_data).
 
-        $mform->addElement('select', 'mode', get_string('proctoring_mode', 'availability_proctor'), [
-            '' => '',
-            'online' => get_string('online_mode', 'availability_proctor'),
-            'offline' => get_string('offline_mode', 'availability_proctor'),
-            'auto' => get_string('auto_mode', 'availability_proctor'),
-            'identification' => get_string('identification_mode', 'availability_proctor'),
-        ]);
+        if (brand::is_form_field_visible('mode')) {
+            $mform->addElement('select', 'mode', get_string('proctoring_mode', 'availability_proctor'), [
+                '' => '',
+                'online' => get_string('online_mode', 'availability_proctor'),
+                'offline' => get_string('offline_mode', 'availability_proctor'),
+                'auto' => get_string('auto_mode', 'availability_proctor'),
+                'identification' => get_string('identification_mode', 'availability_proctor'),
+            ]);
+        }
 
-        $mform->addElement('select', 'identification', get_string('identification', 'availability_proctor'), [
-            '' => '',
-            'face_and_passport' => get_string('face_passport_identification', 'availability_proctor'),
-            'passport' => get_string('passport_identification', 'availability_proctor'),
-            'face' => get_string('face_identification', 'availability_proctor'),
-            'skip' => get_string('skip_identification', 'availability_proctor'),
-        ]);
+        if (brand::is_form_field_visible('identification')) {
+            $mform->addElement('select', 'identification', get_string('identification', 'availability_proctor'), [
+                '' => '',
+                'face_and_passport' => get_string('face_passport_identification', 'availability_proctor'),
+                'passport' => get_string('passport_identification', 'availability_proctor'),
+                'face' => get_string('face_identification', 'availability_proctor'),
+                'skip' => get_string('skip_identification', 'availability_proctor'),
+            ]);
+        }
 
-        $mform->addElement('select', 'webcameramainview', get_string('web_camera_main_view', 'availability_proctor'), [
-            '' => '',
-            'front' => get_string('web_camera_main_view_front', 'availability_proctor'),
-            'side' => get_string('web_camera_main_view_side', 'availability_proctor'),
-        ]);
+        if (brand::is_form_field_visible('webcameramainview')) {
+            $mform->addElement('select', 'webcameramainview', get_string('web_camera_main_view', 'availability_proctor'), [
+                '' => '',
+                'front' => get_string('web_camera_main_view_front', 'availability_proctor'),
+                'side' => get_string('web_camera_main_view_side', 'availability_proctor'),
+            ]);
+        }
 
-        $mform->addElement('advcheckbox', 'schedulingrequired', get_string('scheduling_required', 'availability_proctor'));
-        $mform->setType('schedulingrequired', PARAM_BOOL);
+        if (brand::is_form_field_visible('auxiliarycamera')) {
+            $mform->addElement('advcheckbox', 'auxiliarycamera', get_string('auxiliary_camera',  'availability_proctor'));
+            $mform->setType('auxiliarycamera', PARAM_BOOL);
+        }
 
-        $mform->addElement('advcheckbox', 'autorescheduling', get_string('auto_rescheduling', 'availability_proctor'));
-        $mform->setType('autorescheduling', PARAM_BOOL);
+        if (brand::is_form_field_visible('securebrowser')) {
+            $mform->addElement('advcheckbox', 'securebrowser', get_string('enable_secure_browser',  'availability_proctor'));
+            $mform->setType('securebrowser', PARAM_BOOL);
+        }
+        if (brand::is_form_field_visible('securebrowserlevel')) {
+            $mform->addElement('select', 'securebrowserlevel', get_string('secure_browser_level', 'availability_proctor'), [
+                '' => '',
+                'basic' => get_string('secure_browser_level_basic', 'availability_proctor'),
+                'medium' => get_string('secure_browser_level_medium', 'availability_proctor'),
+                'high' => get_string('secure_browser_level_high', 'availability_proctor'),
+            ]);
+        }
 
-        $mform->addElement('advcheckbox', 'auxiliarycamera', get_string('auxiliary_camera',  'availability_proctor'));
-        $mform->setType('auxiliarycamera', PARAM_BOOL);
+        if (brand::is_form_field_visible('allowtouseadditionalresources')) {
+            $mform->addElement('advcheckbox', 'allowtouseadditionalresources',
+                get_string('allowtouseadditionalresources', 'availability_proctor'));
+            $mform->setType('allowtouseadditionalresources', PARAM_BOOL);
+        }
 
-        $mform->addElement('advcheckbox', 'securebrowser', get_string('enable_secure_browser',  'availability_proctor'));
-        $mform->setType('securebrowser', PARAM_BOOL);
-        $mform->addElement('select', 'securebrowserlevel', get_string('secure_browser_level', 'availability_proctor'), [
-            '' => '',
-            'basic' => get_string('secure_browser_level_basic', 'availability_proctor'),
-            'medium' => get_string('secure_browser_level_medium', 'availability_proctor'),
-            'high' => get_string('secure_browser_level_high', 'availability_proctor'),
-        ]);
+        if (brand::is_form_field_visible('allowedprocesses')) {
+            $mform->addElement('textarea', 'allowedprocesses', get_string('allowed_processes', 'availability_proctor'));
+        }
+        if (brand::is_form_field_visible('forbiddenprocesses')) {
+            $mform->addElement('textarea', 'forbiddenprocesses', get_string('forbidden_processes', 'availability_proctor'));
+        }
 
-        $mform->addElement('advcheckbox', 'allowtouseadditionalresources',
-            get_string('allowtouseadditionalresources', 'availability_proctor'));
-        $mform->setType('allowtouseadditionalresources', PARAM_BOOL);
+        if (brand::is_form_field_visible('allowmultipledisplays')) {
+            $mform->addElement('advcheckbox', 'allowmultipledisplays',
+                get_string('allowmultipledisplays', 'availability_proctor'));
+            $mform->setType('allowmultipledisplays', PARAM_BOOL);
+        }
 
-        $mform->addElement('textarea', 'allowedprocesses', get_string('allowed_processes', 'availability_proctor'));
-        $mform->addElement('textarea', 'forbiddenprocesses', get_string('forbidden_processes', 'availability_proctor'));
+        if (brand::is_form_field_visible('allowvirtualenvironment')) {
+            $mform->addElement('advcheckbox', 'allowvirtualenvironment',
+                get_string('allowvirtualenvironment', 'availability_proctor'));
+            $mform->setType('allowvirtualenvironment', PARAM_BOOL);
+        }
 
-        $mform->addElement('advcheckbox', 'allowmultipledisplays',
-            get_string('allowmultipledisplays', 'availability_proctor'));
-        $mform->setType('allowmultipledisplays', PARAM_BOOL);
-
-        $mform->addElement('advcheckbox', 'allowvirtualenvironment',
-            get_string('allowvirtualenvironment', 'availability_proctor'));
-        $mform->setType('allowvirtualenvironment', PARAM_BOOL);
-
-        $mform->addElement('advcheckbox', 'checkidphotoquality',
-            get_string('checkidphotoquality', 'availability_proctor'));
-        $mform->setType('checkidphotoquality', PARAM_BOOL);
+        if (brand::is_form_field_visible('checkidphotoquality')) {
+            $mform->addElement('advcheckbox', 'checkidphotoquality',
+                get_string('checkidphotoquality', 'availability_proctor'));
+            $mform->setType('checkidphotoquality', PARAM_BOOL);
+        }
 
         $mform->addElement('url', 'useragreementurl', get_string('user_agreement_url', 'availability_proctor'));
         $mform->setType('useragreementurl', PARAM_URL);
@@ -127,49 +146,63 @@ class defaults_form extends \moodleform {
         }
         $mform->addElement('select', 'calculator', get_string('calculator', 'availability_proctor'), $calculatoroptions);
 
-        $streamspresetoptions = [];
-        foreach (condition::STREAMS_PRESET_OPTIONS as $key) {
-            $streamspresetoptions[$key] = get_string('streamspreset_' . $key, 'availability_proctor');
-        }
-        $mform->addElement('select', 'streamspreset', get_string('streamspreset', 'availability_proctor'), $streamspresetoptions);
-
-        $mform->addElement('advcheckbox', 'sendmanualwarningstolearner',
-            get_string('sendmanualwarningstolearner', 'availability_proctor'));
-        $mform->setType('sendmanualwarningstolearner', PARAM_BOOL);
-        $mform->setDefault('sendmanualwarningstolearner', true);
-
-        $mform->addElement('advcheckbox', 'allowroomscanauxcamera',
-            get_string('allowroomscanauxcamera', 'availability_proctor'));
-        $mform->setType('allowroomscanauxcamera', PARAM_BOOL);
-        $mform->setDefault('allowroomscanauxcamera', false);
-
-        $mform->addElement('advcheckbox', 'preliminarycheck', get_string('preliminary_check', 'availability_proctor'));
-        $mform->setType('preliminarycheck', PARAM_BOOL);
-
-
-        $mform->addElement('header', 'proctoring_rules', get_string('rules', 'availability_proctor'));
-
-        foreach (condition::RULES as $key => $value) {
-            $mform->addElement('advcheckbox', 'rules['.$key.']', get_string($key, 'availability_proctor'));
-            $mform->setType('rules['.$key.']', PARAM_BOOL);
-            $mform->setDefault('rules['.$key.']', $value);
+        if (brand::is_form_field_visible('streamspreset')) {
+            $streamspresetoptions = [];
+            foreach (condition::STREAMS_PRESET_OPTIONS as $key) {
+                $streamspresetoptions[$key] = get_string('streamspreset_' . $key, 'availability_proctor');
+            }
+            $mform->addElement('select', 'streamspreset', get_string('streamspreset', 'availability_proctor'), $streamspresetoptions);
         }
 
-        $mform->addElement('textarea', 'customrules', get_string('custom_rules', 'availability_proctor'));
-        $mform->setType('customrules', PARAM_TEXT);
-
-        $mform->addElement('header', 'visible_warnings', get_string('visible_warnings', 'availability_proctor'));
-        foreach (condition::WARNINGS as $key => $value) {
-            $mform->addElement('advcheckbox', 'warnings['.$key.']', get_string($key, 'availability_proctor'));
-            $mform->setType('warnings['.$key.']', PARAM_BOOL);
-            $mform->setDefault('warnings['.$key.']', $value);
+        if (brand::is_form_field_visible('sendmanualwarningstolearner')) {
+            $mform->addElement('advcheckbox', 'sendmanualwarningstolearner',
+                get_string('sendmanualwarningstolearner', 'availability_proctor'));
+            $mform->setType('sendmanualwarningstolearner', PARAM_BOOL);
+            $mform->setDefault('sendmanualwarningstolearner', true);
         }
 
-        $mform->addElement('header', 'scoring_params', get_string('scoring_params_header', 'availability_proctor'));
-        foreach (condition::SCORING as $key => $field) {
-            $mform->addElement('float', 'scoring['.$key.']', get_string('scoring_'.$key, 'availability_proctor'));
-            $mform->addRule('scoring['.$key.']', null, 'numeric');
-            $mform->setDefault('scoring['.$key.']', $field['default']);
+        if (brand::is_form_field_visible('allowroomscanauxcamera')) {
+            $mform->addElement('advcheckbox', 'allowroomscanauxcamera',
+                get_string('allowroomscanauxcamera', 'availability_proctor'));
+            $mform->setType('allowroomscanauxcamera', PARAM_BOOL);
+            $mform->setDefault('allowroomscanauxcamera', false);
+        }
+
+        if (brand::is_form_field_visible('preliminarycheck')) {
+            $mform->addElement('advcheckbox', 'preliminarycheck', get_string('preliminary_check', 'availability_proctor'));
+            $mform->setType('preliminarycheck', PARAM_BOOL);
+        }
+
+
+        if (brand::is_form_field_visible('rules')) {
+            $mform->addElement('header', 'proctoring_rules', get_string('rules', 'availability_proctor'));
+
+            foreach (condition::RULES as $key => $value) {
+                $mform->addElement('advcheckbox', 'rules['.$key.']', get_string($key, 'availability_proctor'));
+                $mform->setType('rules['.$key.']', PARAM_BOOL);
+                $mform->setDefault('rules['.$key.']', $value);
+            }
+
+            $mform->addElement('textarea', 'customrules', get_string('custom_rules', 'availability_proctor'));
+            $mform->setType('customrules', PARAM_TEXT);
+        }
+
+        if (brand::is_form_field_visible('warnings')) {
+            $mform->addElement('header', 'visible_warnings', get_string('visible_warnings', 'availability_proctor'));
+            foreach (condition::WARNINGS as $key => $value) {
+                $mform->addElement('advcheckbox', 'warnings['.$key.']', get_string($key, 'availability_proctor'));
+                $mform->setType('warnings['.$key.']', PARAM_BOOL);
+                $mform->setDefault('warnings['.$key.']', $value);
+            }
+        }
+
+        if (brand::is_form_field_visible('scoring')) {
+            $mform->addElement('header', 'scoring_params', get_string('scoring_params_header', 'availability_proctor'));
+            foreach (condition::SCORING as $key => $field) {
+                $mform->addElement('float', 'scoring['.$key.']', get_string('scoring_'.$key, 'availability_proctor'));
+                $mform->addRule('scoring['.$key.']', null, 'numeric');
+                $mform->setDefault('scoring['.$key.']', $field['default']);
+            }
         }
 
 
@@ -197,10 +230,6 @@ class defaults_form extends \moodleform {
 
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
-
-        if (!empty($data['duration']) && $data['duration'] % 30 != 0) {
-            $errors['duration'] = get_string('error_setduration', 'availability_proctor');
-        }
 
         foreach (condition::SCORING as $key => $field) {
             if (!empty($data['scoring'][$key])) {

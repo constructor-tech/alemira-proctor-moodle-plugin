@@ -64,7 +64,10 @@ if ($form->is_cancelled()) {
         if (empty($data->calculator)) {
             $data->calculator = null;
         }
-        
+
+        // Brand-hidden fields are ignored from the submitted form and
+        // replaced with the default global preset's values.
+        \availability_proctor\preset::apply_hidden_field_defaults($data);
 
         \availability_proctor\common::set_default_proctoring_settings($data);
     } else {

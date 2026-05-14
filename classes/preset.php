@@ -153,17 +153,26 @@ class preset {
 
     /**
      * Get the default preset (one is guaranteed to exist after install).
+     * Per-request cached: called on every condition read via the hidden-field
+     * enforcement path, and we don't want a DB hit each time.
      *
      * @return stdClass|false
      */
     public static function get_default() {
         global $DB;
+        static $cache = null;
+        static $cached = false;
+        if ($cached) {
+            return $cache;
+        }
         $record = $DB->get_record(self::TABLE, ['is_default' => 1, 'type' => self::TYPE_GLOBAL]);
         if (!$record) {
             // Fall back to any global preset.
             $record = $DB->get_record(self::TABLE, ['type' => self::TYPE_GLOBAL], '*', IGNORE_MULTIPLE);
         }
-        return $record ? self::decode($record) : false;
+        $cache = $record ? self::decode($record) : false;
+        $cached = true;
+        return $cache;
     }
 
     /**
@@ -254,6 +263,40 @@ class preset {
         $dir = strtoupper($dir) === 'DESC' ? 'DESC' : 'ASC';
         $records = $DB->get_records(self::TABLE, ['type' => self::TYPE_GLOBAL], "$sort $dir, name ASC");
         return array_map([self::class, 'decode'], $records);
+    }
+
+    /**
+     * For each entry in brand::HIDDEN_FORM_FIELDS that maps to a preset
+     * field, replace the submitted value with the current default global
+     * preset's value. Section meta-keys in the hidden list are skipped.
+     *
+     * This is the backend half of the brand visibility model: the form gate
+     * stops admins seeing the field, this helper stops a crafted POST from
+     * sneaking a value through.
+     *
+     * @param object|array $data form-submitted data (modified in place for objects)
+     * @return object|array same shape with hidden fields overridden
+     */
+    public static function apply_hidden_field_defaults($data) {
+        if (empty(brand::HIDDEN_FORM_FIELDS)) {
+            return $data;
+        }
+        $default = self::get_default();
+        if (!$default) {
+            return $data;
+        }
+        foreach (brand::HIDDEN_FORM_FIELDS as $key) {
+            if (!in_array($key, condition::PRESET_FIELDS, true)) {
+                continue;
+            }
+            $value = isset($default->$key) ? $default->$key : null;
+            if (is_array($data)) {
+                $data[$key] = $value;
+            } else {
+                $data->$key = $value;
+            }
+        }
+        return $data;
     }
 
     /**
@@ -573,14 +616,26 @@ class preset {
     }
 
     /**
-     * Seed the three recommended starter presets (idempotent — only inserts
-     * presets that don't already exist by canonical name). Sets Low-stakes
-     * as default.
+     * Seed system presets from the brand-specific catalog at preset_seed::definitions().
+     * Idempotent: only inserts presets that don't already exist by name.
      *
      * @return void
      */
     public static function seed_initial_presets() {
-        // Build complete rules / warnings / scoring with sensible defaults.
+        foreach (preset_seed::definitions() as $def) {
+            self::seed_preset_if_missing($def['name'], $def['fields'], $def['is_default']);
+        }
+    }
+
+    /**
+     * Return the field values shared by every seeded preset (rules all off
+     * except paper, warnings all on, scoring at coded defaults, sensible
+     * neutrals for the rest). Called from preset_seed implementations to
+     * build full preset records.
+     *
+     * @return array
+     */
+    public static function default_field_values() {
         $rules_all_false = [];
         foreach (condition::RULES as $k => $_) {
             $rules_all_false[$k] = false;
@@ -598,7 +653,7 @@ class preset {
             $scoring_defaults[$k] = isset($row['default']) ? $row['default'] : null;
         }
 
-        $base = [
+        return [
             'preliminarycheck' => 0,
             'allowroomscanauxcamera' => 0,
             'calculator' => 'off',
@@ -612,60 +667,6 @@ class preset {
             'warnings' => $warnings_all_on,
             'scoring' => $scoring_defaults,
         ];
-
-        // High-stakes: Live + Face & ID + Secure Browser (medium) + Aux camera.
-        self::seed_preset_if_missing(
-            self::SEED_NAME_HIGH_STAKES,
-            array_merge($base, [
-                'mode' => 'online',
-                'sendmanualwarningstolearner' => 1,
-                'identification' => 'face_and_passport',
-                'checkidphotoquality' => 1,
-                'auxiliarycamera' => 1,
-                'securebrowser' => 1,
-                'securebrowserlevel' => 'medium',
-            ]),
-            false
-        );
-
-        // Low-stakes (default): Review + Only face, no Secure Browser, no aux cam.
-        // Paper notes are NOT allowed for low-stakes exams.
-        $low_stakes_rules = $rules_all_false;
-        $low_stakes_rules['allow_to_use_paper'] = false;
-        self::seed_preset_if_missing(
-            self::SEED_NAME_LOW_STAKES,
-            array_merge($base, [
-                'mode' => 'offline',
-                'sendmanualwarningstolearner' => 0,
-                'identification' => 'face',
-                'checkidphotoquality' => 0,
-                'auxiliarycamera' => 0,
-                'securebrowser' => 0,
-                'securebrowserlevel' => 'basic',
-                'rules' => $low_stakes_rules,
-            ]),
-            true
-        );
-
-        // Open-book: Review + Only face + websites/books/look-away allowed.
-        $open_book_rules = $rules_all_false;
-        $open_book_rules['allow_to_use_websites'] = true;
-        $open_book_rules['allow_to_use_books'] = true;
-        $open_book_rules['allow_wrong_gaze_direction'] = true;
-        self::seed_preset_if_missing(
-            self::SEED_NAME_OPEN_BOOK,
-            array_merge($base, [
-                'mode' => 'offline',
-                'sendmanualwarningstolearner' => 0,
-                'identification' => 'face',
-                'checkidphotoquality' => 0,
-                'auxiliarycamera' => 0,
-                'securebrowser' => 0,
-                'securebrowserlevel' => 'basic',
-                'rules' => $open_book_rules,
-            ]),
-            false
-        );
     }
 
     /**
