@@ -703,8 +703,12 @@ M.availability_proctor.form.getNode = function(json) {
         // Close any other open popovers in this form.
         node.all('.proctor-help-pop').remove();
         var hintKey = icon.getAttribute('data-hint-key');
+        // Lang strings are authored content (trusted), but we still escape
+        // unexpected angle brackets defensively. Authored <br> tags are
+        // restored after the escape pass so help text can break lines.
         var text = getString(hintKey)
             .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/&lt;br\s*\/?&gt;/gi, '<br>')
             .replace(/\n/g, '<br>');
         // Cap popover width to ~120% of the form's rendered width.
         var formWidth = node.get('offsetWidth') || 600;

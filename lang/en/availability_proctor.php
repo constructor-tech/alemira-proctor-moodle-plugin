@@ -70,10 +70,10 @@ $string['preset_section_exam'] = 'Exam settings';
 
 // ---- Help strings (shown via Moodle addHelpButton and inline hints). ----
 $string['proctoring_mode_help'] = 'Live — Live proctoring mode in which the exam is monitored by a human proctor ' .
-    'in real-time (in addition to AI monitoring).
-Review — Post-exam review mode in which examinees take the exam at any time under AI supervision. ' .
-    'The session is recorded and later reviewed by a human proctor to assess for violations.
-AI review — Fully automated mode without human review. The session is monitored by AI only; ' .
+    'in real-time (in addition to AI monitoring).<br>' .
+    'Review — Post-exam review mode in which examinees take the exam at any time under AI supervision. ' .
+    'The session is recorded and later reviewed by a human proctor to assess for violations.<br>' .
+    'AI review — Fully automated mode without human review. The session is monitored by AI only; ' .
     'violations are flagged based on the configured scoring thresholds.';
 $string['sendmanualwarningstolearner_help'] = 'Allows the proctor to send manual warnings to the learner during the exam, in addition to automatic AI warnings.';
 $string['identification_help'] = 'Method used to verify the learner before the exam.';
