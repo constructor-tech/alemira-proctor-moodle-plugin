@@ -305,25 +305,4 @@ class common {
         }
         return condition::MAX_LIMIT;
     }
-
-    /**
-     * Gets default proctoring settings from config
-     *
-     * @return stdClass
-     **/
-    public static function get_default_proctoring_settings() {
-        $json = get_config('availability_proctor', 'default_proctoring_settings');
-        $json = empty($json) ? '{}' : $json;
-        return json_decode($json);
-    }
-
-    /**
-     * Set default proctoring settings from config
-     *
-     * @return void
-     **/
-    public static function set_default_proctoring_settings($data) {
-        $json = json_encode($data);
-        set_config('default_proctoring_settings', $json, 'availability_proctor');
-    }
 }

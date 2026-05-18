@@ -865,7 +865,15 @@ M.availability_proctor.form.getNode = function(json) {
     }
 
     var loadedPresetName = null;
+    var loadedPresetId = null;
     var suppressDirty = false;
+
+    function setLoadedPresetId(id) {
+        loadedPresetId = (id !== undefined && id !== null && id !== '') ? parseInt(id) : null;
+        // Mirror onto the form root so fillValue (a sibling method without
+        // access to this closure) can read it on save.
+        node.setAttribute('data-loaded-preset-id', loadedPresetId !== null ? String(loadedPresetId) : '');
+    }
 
     function setLoadedName(name) {
         loadedPresetName = name || null;
@@ -877,7 +885,10 @@ M.availability_proctor.form.getNode = function(json) {
 
     function clearLoadedNameOnEdit() {
         if (suppressDirty) { return; }
-        if (loadedPresetName !== null) { setLoadedName(null); }
+        if (loadedPresetName !== null || loadedPresetId !== null) {
+            setLoadedPresetId(null);
+            setLoadedName(null);
+        }
     }
 
     function applyPresetToForm(preset) {
@@ -948,6 +959,7 @@ M.availability_proctor.form.getNode = function(json) {
 
         applyDependencies();
         nextTick(function() { M.core_availability.form.update(); });
+        setLoadedPresetId(preset.id);
         setLoadedName(preset.name || null);
     }
 
@@ -985,8 +997,19 @@ M.availability_proctor.form.getNode = function(json) {
         }
     }, '.proctor-pick-preset');
 
-    // Always render the "Current preset: None" label initially.
+    // Always render the "Current preset: None" label initially. If the
+    // saved structure carries a preset_id, restore both the label and the
+    // hidden id by looking up the preset in the global/user lists.
+    setLoadedPresetId(null);
     setLoadedName(null);
+    if (json.preset_id) {
+        var savedId = parseInt(json.preset_id);
+        var savedPreset = findPreset('global', savedId) || findPreset('user', savedId);
+        if (savedPreset) {
+            setLoadedPresetId(savedId);
+            setLoadedName(savedPreset.name || null);
+        }
+    }
 
     // Detect a brand-new restriction. Different Moodle versions signal this
     // differently:
@@ -1195,6 +1218,14 @@ M.availability_proctor.form.fillValue = function(value, node) {
     function s(sel) { var e = node.one(sel); return e ? e.get('value').trim() : ''; }
     function b(sel) { var e = node.one(sel); return e ? e.get('checked') : false; }
     function selBool(sel) { var e = node.one(sel); return e ? (e.get('value') === '1') : false; }
+
+    // preset_id is stored on the form root node as a data attribute (set when
+    // a preset is loaded; cleared on manual edit). Carrying it through save
+    // lets condition::__construct re-hydrate preset fields on next open.
+    var pidAttr = node.getAttribute('data-loaded-preset-id');
+    if (pidAttr) {
+        value.preset_id = parseInt(pidAttr);
+    }
 
     value.mode = s('select[name=mode]');
     value.identification = s('select[name=identification]');

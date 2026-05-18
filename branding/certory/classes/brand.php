@@ -47,7 +47,7 @@ class brand {
         'preset_section_identity',
         'preset_section_securebrowser',
 
-        // Generic section meta-keys (work in both preset_form and defaults_form).
+        // Generic section meta-keys for the preset edit form.
         'warnings',
         'scoring',
 

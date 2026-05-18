@@ -319,11 +319,14 @@ class preset {
         $record = self::encode(clone $data);
         $record->timemodified = $now;
 
+        // Type defaults to global for any record without one. Form data for
+        // existing-preset edits arrives without a type field (the form doesn't
+        // expose it), so defaulting here covers both insert and update paths.
+        if (empty($record->type)) {
+            $record->type = self::TYPE_GLOBAL;
+        }
         if (empty($record->id)) {
             $record->timecreated = $now;
-            if (empty($record->type)) {
-                $record->type = self::TYPE_GLOBAL;
-            }
             if (!isset($record->is_default)) {
                 $record->is_default = 0;
             }

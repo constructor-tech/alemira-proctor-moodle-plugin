@@ -55,9 +55,9 @@ class brand {
     const HIDDEN_INTEGRATION_SETTINGS = [];
 
     /**
-     * Form element names hidden from preset_form and defaults_form for this
-     * brand. The literal string 'rules' hides the entire allowed-items
-     * section (header + every rules[<key>] checkbox). Empty array = show all.
+     * Form element names hidden from preset_form for this brand. The literal
+     * string 'rules' hides the entire allowed-items section (header + every
+     * rules[<key>] checkbox). Empty array = show all.
      */
     const HIDDEN_FORM_FIELDS = [];
 

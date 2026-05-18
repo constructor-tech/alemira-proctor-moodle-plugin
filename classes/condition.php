@@ -354,7 +354,7 @@ class condition extends \core_availability\condition {
         // Brand-hidden fields are always forced to the default preset's value,
         // overriding whatever the saved structure or a tampered submission set.
         // This is the backend security boundary for visibility (mirror of the
-        // form-side gating in preset_form/defaults_form).
+        // form-side gating in preset_form).
         $defaultpreset = preset::get_default();
         if ($defaultpreset) {
             foreach (brand::HIDDEN_FORM_FIELDS as $key) {

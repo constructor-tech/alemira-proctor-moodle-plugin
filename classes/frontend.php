@@ -126,16 +126,9 @@ class frontend extends \core_availability\frontend {
             \section_info $section = null) {
         global $DB, $USER, $CFG;
 
-        $defaults = common::get_default_proctoring_settings();
-
-        $groupdefaults = [];
-        if (isset($defaults->groups)) {
-            $groupdefaults = (array)$defaults->groups;
-            $coursekey = (int)$course->id;
-            $groupdefaults = isset($groupdefaults[$coursekey]) ? $groupdefaults[$coursekey] : [];
-            $groupdefaults = array_keys((array)$groupdefaults);
-        }
-        $defaults->groups = $groupdefaults;
+        $defaultpreset = preset::get_default();
+        $defaults = $defaultpreset ? clone $defaultpreset : new \stdClass();
+        $defaults->groups = [];
 
         $groups = $DB->get_records('groups', ['courseid' => $course->id], 'name', 'id,name');
 
