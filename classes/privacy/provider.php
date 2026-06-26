@@ -65,6 +65,21 @@ class provider implements
             'privacy:metadata:availability_proctor_entries'
         );
 
+        $collection->add_external_location_link(
+            'proctor_service',
+            [
+                'userid'                  => 'privacy:metadata:proctor_service:userid',
+                'firstname'               => 'privacy:metadata:proctor_service:firstname',
+                'lastname'                => 'privacy:metadata:proctor_service:lastname',
+                'middlename'              => 'privacy:metadata:proctor_service:middlename',
+                'email'                   => 'privacy:metadata:proctor_service:email',
+                'photo_url'               => 'privacy:metadata:proctor_service:photo_url',
+                'language'                => 'privacy:metadata:proctor_service:language',
+                'specialaccommodationsinfo' => 'privacy:metadata:proctor_service:specialaccommodationsinfo',
+            ],
+            'privacy:metadata:proctor_service'
+        );
+
         return $collection;
     }
 

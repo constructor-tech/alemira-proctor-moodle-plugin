@@ -228,6 +228,15 @@ $string['warning_desktop_request_pending'] = 'Desktop is not shared';
 
 $string['privacy:path'] = 'Proctor exam entries';
 $string['privacy:metadata:availability_proctor_entries'] = 'List of exam entries in proctoring system';
+$string['privacy:metadata:proctor_service'] = 'Personal data transmitted to the Constructor Proctor service to create and manage proctored exam sessions.';
+$string['privacy:metadata:proctor_service:userid'] = 'The Moodle username used as a unique identifier in the proctoring service.';
+$string['privacy:metadata:proctor_service:firstname'] = 'The first name of the user.';
+$string['privacy:metadata:proctor_service:lastname'] = 'The last name of the user.';
+$string['privacy:metadata:proctor_service:middlename'] = 'The middle name of the user.';
+$string['privacy:metadata:proctor_service:email'] = 'The email address of the user (sent only when the "Send user emails" setting is enabled).';
+$string['privacy:metadata:proctor_service:photo_url'] = 'URL of the user\'s Moodle profile picture, used for identity verification during the preliminary check.';
+$string['privacy:metadata:proctor_service:language'] = 'The interface language of the user.';
+$string['privacy:metadata:proctor_service:specialaccommodationsinfo'] = 'Special accommodations information from the user\'s custom Moodle profile field.';
 $string['privacy:metadata:availability_proctor_entries:courseid'] = 'Course ID';
 $string['privacy:metadata:availability_proctor_entries:cmid'] = 'Course Module ID';
 $string['privacy:metadata:availability_proctor_entries:attemptid'] = 'Quiz attempt ID';
