@@ -38,4 +38,10 @@ class state {
      * @var array $attempt Array containing data about current attempt
      */
     public static $attempt;
+
+    /**
+     * @var bool $lockdown True when a SCORM or assign page is being accessed
+     *                     through Proctor and navigation chrome must be hidden.
+     */
+    public static $lockdown = false;
 }

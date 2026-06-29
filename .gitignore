@@ -8,3 +8,7 @@ releases
 !.claude/commands/**
 openspec
 dev/.moodle
+*.swp
+*.swo
+.env
+.env.*

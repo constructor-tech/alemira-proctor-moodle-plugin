@@ -46,11 +46,11 @@ class hooks {
      * @return string|void The legacy implementation will return a string, the hook implementation will return nothing.
      */
     public static function before_standard_head_html_generation($hook = null) {
-        global $DB, $USER;
+        global $DB, $USER, $PAGE;
 
         $html = '';
 
-        // If there is no active attempt, do nothing.
+        // Quiz: existing behaviour — fader shown on in-progress quiz attempt pages.
         if (isset(state::$attempt['attempt_id'])) {
             $attemptid = state::$attempt['attempt_id'];
             $attempt = $DB->get_record('quiz_attempts', ['id' => $attemptid]);
@@ -59,6 +59,27 @@ class hooks {
             } else {
                 $html = utils::handle_proctoring_fader($attempt);
             }
+        }
+
+        // SCORM: fader shown on the SCORM view page when there is an active proctoring entry.
+        if (!$html && !empty($PAGE->cm) && $PAGE->cm->modname === 'scorm') {
+            $html = utils::handle_proctoring_fader_scorm($PAGE->cm);
+        }
+
+        // Assign: fader shown on the assign view page when there is an active proctoring entry.
+        if (!$html && !empty($PAGE->cm) && $PAGE->cm->modname === 'assign') {
+            $html = utils::handle_proctoring_fader_assign($PAGE->cm);
+        }
+
+        // Lockdown: hide Moodle navigation chrome on SCORM/assign pages when Proctor
+        // is active. state::$lockdown is set by handle_start_attempt_scorm/assign
+        // (which runs in availability_proctor_after_require_login, before this hook),
+        // mirroring exactly how quiz uses state::$attempt.
+        if (state::$lockdown) {
+            if (!$html) {
+                $html .= utils::get_lockdown_css();
+            }
+            $html .= utils::get_hide_chrome_js();
         }
 
         if ($hook) {

@@ -59,6 +59,47 @@ function availability_proctor_after_require_login() {
 
         utils::handle_start_attempt($course, $cm, $USER);
     }
+
+    // SCORM: intercept the view page to enforce proctoring before the SCO is launched.
+    if ($scriptname == '/mod/scorm/view.php') {
+        $id = optional_param('id', 0, PARAM_INT);
+
+        if ($id) {
+            if (!$cm = get_coursemodule_from_id('scorm', $id)) {
+                throw new \moodle_exception('invalidcoursemodule');
+            }
+            if (!$course = $DB->get_record('course', ['id' => $cm->course])) {
+                throw new \moodle_exception("coursemisconf");
+            }
+
+            utils::handle_start_attempt_scorm($course, $cm, $USER);
+        }
+    }
+
+    // SCORM player: user clicked Enter on the view page; apply lockdown if session has
+    // a proctor accesscode (set by scorm.php bridge on the preceding view.php request).
+    if ($scriptname == '/mod/scorm/player.php') {
+        global $SESSION;
+        if (!empty($SESSION->availability_proctor_accesscode)) {
+            \availability_proctor\state::$lockdown = true;
+        }
+    }
+
+    // Assign: intercept the view page to enforce proctoring before the assignment is shown.
+    if ($scriptname == '/mod/assign/view.php') {
+        $id = optional_param('id', 0, PARAM_INT);
+
+        if ($id) {
+            if (!$cm = get_coursemodule_from_id('assign', $id)) {
+                throw new \moodle_exception('invalidcoursemodule');
+            }
+            if (!$course = $DB->get_record('course', ['id' => $cm->course])) {
+                throw new \moodle_exception("coursemisconf");
+            }
+
+            utils::handle_start_attempt_assign($course, $cm, $USER);
+        }
+    }
 }
 
 /**
