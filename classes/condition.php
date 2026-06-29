@@ -59,6 +59,7 @@ class condition extends \core_availability\condition {
         'calculator', 'auxiliarycamera',
         'forbiddenprocesses', 'allowedprocesses', 'streamspreset',
         'sendmanualwarningstolearner', 'allowroomscanauxcamera',
+        'proctoremails',
     ];
 
     /**
@@ -120,6 +121,15 @@ class condition extends \core_availability\condition {
         'forbidden_device' => ['min' => 0, 'max' => 10, 'default' => null],
         'voice' => ['min' => 0, 'max' => 10, 'default' => null],
         'phone' => ['min' => 0, 'max' => 10, 'default' => null],
+        'mic_muted' => ['min' => 0, 'max' => 10, 'default' => null],
+        'mic_no_device' => ['min' => 0, 'max' => 10, 'default' => null],
+        'mic_no_sound' => ['min' => 0, 'max' => 10, 'default' => null],
+        'camera_no_device' => ['min' => 0, 'max' => 10, 'default' => null],
+        'camera_no_picture' => ['min' => 0, 'max' => 10, 'default' => null],
+        'no_aux_camera_photo' => ['min' => 0, 'max' => 10, 'default' => null],
+        'no_ping' => ['min' => 0, 'max' => 10, 'default' => null],
+        'desktop_request_pending' => ['min' => 0, 'max' => 10, 'default' => null],
+        'account_collision' => ['min' => 0, 'max' => 10, 'default' => null],
     ];
 
     /** @var array List of default values for boolean exam properties */
@@ -227,6 +237,9 @@ class condition extends \core_availability\condition {
 
     /** @var array Apply condition to specified groups */
     public $groups = [];
+
+    /** @var array|null Emails of proctors assigned to this exam (Live review mode only) */
+    public $proctoremails = null;
 
     /** @var string Stream settings preset */
     public $streamspreset = null;
@@ -337,7 +350,9 @@ class condition extends \core_availability\condition {
             $this->groups = $structure->groups;
         }
 
-        
+        if (!empty($structure->proctoremails)) {
+            $this->proctoremails = $structure->proctoremails;
+        }
 
         if (!empty($structure->allowedprocesses)) {
             $this->allowedprocesses = $structure->allowedprocesses;
@@ -523,6 +538,16 @@ class condition extends \core_availability\condition {
         $forbiddenprocesses = array_filter($forbiddenprocesses);
         $result['forbiddenprocesses'] = empty($forbiddenprocesses) ? null : $forbiddenprocesses;
 
+        // Proctor emails: one address per line, normalized to a list of strings.
+        // Only meaningful in Live (online) review mode; cleared otherwise so the
+        // API payload never carries assigned proctors for non-live exams.
+        $proctoremails = $result['proctoremails'];
+        $proctoremails = is_string($proctoremails) ? trim($proctoremails) : '';
+        $proctoremails = preg_split('/\R+/', $proctoremails);
+        $proctoremails = array_filter(array_map('trim', $proctoremails));
+        $result['proctoremails'] = (empty($proctoremails) || $result['mode'] !== 'online')
+            ? null : array_values($proctoremails);
+
         return $result;
     }
 
@@ -586,6 +611,7 @@ class condition extends \core_availability\condition {
             'useragreementurl' => $this->useragreementurl,
             'auxiliarycamera' => (bool) $this->auxiliarycamera,
             'customrules' => $this->customrules,
+            'proctoremails' => $this->proctoremails,
             'calculator' => $this->calculator,
             'securebrowser' => $this->securebrowser,
             'securebrowserlevel' => $this->securebrowserlevel,

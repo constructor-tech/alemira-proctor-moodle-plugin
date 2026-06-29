@@ -293,6 +293,12 @@ class client {
             ),
         ];
 
+        // Assigned proctors (Live review mode only). condition::to_json() already
+        // nulls this out for non-online modes, so only attach when present.
+        if (!empty($conditiondata['proctoremails'])) {
+            $data['proctorEmails'] = $conditiondata['proctoremails'];
+        }
+
         return $data;
     }
 

@@ -133,6 +133,8 @@ $string['allowroomscanauxcamera'] = 'Разрешить сканирование
 
 $string['rules'] = 'Правила';
 $string['custom_rules'] = "Нестандартные правила";
+$string['proctor_emails'] = "Назначить прокторов";
+$string['proctor_emails_placeholder'] = "proctor1@example.com\nproctor2@example.com";
 
 $string['user_agreement_url'] = "URL пользовательского соглашения";
 
@@ -165,6 +167,15 @@ $string['scoring_active_window_changed'] = 'Смена активного окн
 $string['scoring_forbidden_device'] = 'Запрещенное оборудование';
 $string['scoring_voice'] = 'Звуки голосов в трансляции';
 $string['scoring_phone'] = 'Использование телефона';
+$string['scoring_mic_muted'] = 'Микрофон отключён';
+$string['scoring_mic_no_device'] = 'Микрофон не подключён';
+$string['scoring_mic_no_sound'] = 'Тишина в микрофоне';
+$string['scoring_camera_no_device'] = 'Камера не подключена';
+$string['scoring_camera_no_picture'] = 'Нет изображения с камеры';
+$string['scoring_no_aux_camera_photo'] = 'Нет фото со вспомогательной камеры';
+$string['scoring_no_ping'] = 'Приложение тестируемого потеряло связь с сервером';
+$string['scoring_desktop_request_pending'] = 'Ожидание запроса рабочего стола';
+$string['scoring_account_collision'] = 'Использование нескольких аккаунтов в течение одного экзамена';
 
 $string['status_new'] = 'Попытка не начата';
 $string['status_started'] = 'Попытка начата';
@@ -357,6 +368,8 @@ $string['is_trial_help'] = 'Запускает экзамен в демо-реж
     'Для тестирования оборудования и хода без записей.';
 $string['custom_rules_help'] = 'Дополнительные правила, специфичные для вашей организации, ' .
     'отображаемые учащимся на странице правил вместе с настроенными правилами.';
+$string['proctor_emails_help'] = 'Укажите в этом поле электронные адреса прокторов. ' .
+    'Если ничего не указано, будет автоматически назначен любой доступный проктор.';
 $string['select_groups_help'] = 'Применять прокторинг только к выбранным группам курса. ' .
     'Учащиеся из других групп смогут сдавать экзамен без прокторинга.';
 

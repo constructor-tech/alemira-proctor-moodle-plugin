@@ -76,6 +76,7 @@ M.availability_proctor.form.getNode = function(json) {
     var userAgreementId = id + '_userAgreement';
     var isTrialId = id + '_isTrial';
     var customRulesId = id + '_customRules';
+    var proctorEmailsId = id + '_proctorEmails';
 
     var tabButtonOne, tabButtonTwo, tabOne, tabTwo;
 
@@ -350,6 +351,12 @@ M.availability_proctor.form.getNode = function(json) {
     if (groupOptions && groupOptions.length) {
         html += formGroup(null, getString('select_groups'), '<div class="groups">' + groupOptions + '</div>');
     }
+    // Assigned proctors: one email per line. Only meaningful in Live (online)
+    // review mode — visibility is toggled in applyDependencies().
+    html += formGroup(proctorEmailsId, getString('proctor_emails'),
+        '<textarea name="proctoremails" id="' + proctorEmailsId + '" style="width: 100%" class="form-control"></textarea>',
+        false, 'proctoremails', 'proctor_emails_help'
+    );
 
     // ---- Tab 2: Alerts shown to student + Scoring parameters ----
     // Warnings that get suppressed when the corresponding allow-rule is on.
@@ -589,6 +596,19 @@ M.availability_proctor.form.getNode = function(json) {
     if (json.customrules !== undefined) {
         setOn('#' + customRulesId, 'value', json.customrules);
     }
+    // Example placeholder (one address per line) — set via setAttribute so the
+    // newline and quoting survive (gets cleared once the admin starts typing).
+    var proctorEmailsEl = node.one('#' + proctorEmailsId);
+    if (proctorEmailsEl) {
+        proctorEmailsEl.setAttribute('placeholder', getString('proctor_emails_placeholder'));
+    }
+    if (json.proctoremails !== undefined && json.proctoremails !== null) {
+        // Stored as either a raw textarea string or an array of addresses;
+        // render one address per line either way.
+        var pe = Y.Lang.isArray(json.proctoremails)
+            ? json.proctoremails.join('\n') : json.proctoremails;
+        setOn('#' + proctorEmailsId, 'value', pe);
+    }
     if (json.useragreementurl !== undefined) {
         setOn('#' + userAgreementId, 'value', json.useragreementurl);
     }
@@ -623,6 +643,8 @@ M.availability_proctor.form.getNode = function(json) {
         var modeEl = node.one('select[name=mode]');
         var liveMode = modeEl ? (modeEl.get('value') === 'online') : false;
         setVisible('sendmanualwarningstolearner', liveMode);
+        // Assigned proctors apply only to Live (online) review mode.
+        setVisible('proctoremails', liveMode);
 
         var identEl = node.one('select[name=identification]');
         var ident = identEl ? identEl.get('value') : '';
@@ -1234,6 +1256,7 @@ M.availability_proctor.form.fillValue = function(value, node) {
     value.scheduling_required = false;
     value.istrial = b('input[name=istrial]');
     value.customrules = s('textarea[name=customrules]');
+    value.proctoremails = s('textarea[name=proctoremails]');
     value.useragreementurl = s('input[name=useragreementurl]');
     value.auxiliarycamera = selBool('select[name=auxiliarycamera]');
     value.securebrowser = b('input[name=securebrowser]');

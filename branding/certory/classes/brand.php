@@ -67,6 +67,7 @@ class brand {
         'allowedprocesses',
         'forbiddenprocesses',
         'allowvirtualenvironment',
+        'proctoremails',
     ];
 
     public static function is_setting_visible($key) {

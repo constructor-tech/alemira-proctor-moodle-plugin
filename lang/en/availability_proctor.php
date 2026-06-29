@@ -101,6 +101,7 @@ $string['calculator_help'] = 'Embeds an in-exam calculator widget available to t
 $string['user_agreement_url_help'] = 'Optional URL displayed at the start of the pre-exam process so learners can review your exam terms.';
 $string['is_trial_help'] = 'Runs this exam in demo mode — no video is uploaded to the proctoring dashboard. For testing equipment and flow without generating recordings.';
 $string['custom_rules_help'] = 'Additional rules specific to your organization, shown to learners on the rules page in addition to the preset allow/forbid rules.';
+$string['proctor_emails_help'] = 'Enter the emails of the proctors in this field. If nothing is entered, any available proctor will be assigned automatically.';
 $string['select_groups_help'] = 'Apply proctoring only to the selected course groups. Learners in other groups can take the exam without proctoring.';
 
 // Per-rule help — most are self-explanatory; the ones that also suppress AI warnings are called out.
@@ -257,6 +258,8 @@ $string['allowroomscanauxcamera'] = 'Allow room scan using aux camera';
 
 $string['rules'] = "Allow during exam";
 $string['custom_rules'] = "Custom exam rules";
+$string['proctor_emails'] = "Assign proctors";
+$string['proctor_emails_placeholder'] = "proctor1@example.com\nproctor2@example.com";
 
 $string['user_agreement_url'] = "Terms and conditions URL";
 
@@ -289,6 +292,15 @@ $string['scoring_active_window_changed'] = 'Active window is changed';
 $string['scoring_forbidden_device'] = 'Forbidden hardware';
 $string['scoring_voice'] = 'Voice detected';
 $string['scoring_phone'] = 'Phone is used';
+$string['scoring_mic_muted'] = 'Microphone is muted';
+$string['scoring_mic_no_device'] = 'Microphone is not connected';
+$string['scoring_mic_no_sound'] = 'Microphone silence';
+$string['scoring_camera_no_device'] = 'Camera is not connected';
+$string['scoring_camera_no_picture'] = 'No image from camera';
+$string['scoring_no_aux_camera_photo'] = 'No aux camera photo';
+$string['scoring_no_ping'] = 'Test taker application lost its connection with the server';
+$string['scoring_desktop_request_pending'] = 'Desktop request pending';
+$string['scoring_account_collision'] = 'Using multiple accounts across one exam';
 
 $string['status_new'] = 'New';
 $string['status_started'] = 'Started';
