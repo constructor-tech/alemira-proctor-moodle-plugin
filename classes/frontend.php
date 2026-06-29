@@ -125,7 +125,7 @@ class frontend extends \core_availability\frontend {
      */
     protected function get_javascript_init_params($course, \cm_info $cm = null,
             \section_info $section = null) {
-        global $DB, $USER, $CFG;
+        global $DB, $USER;
 
         $defaultpreset = preset::get_default();
         $defaults = $defaultpreset ? clone $defaultpreset : new \stdClass();
@@ -146,11 +146,9 @@ class frontend extends \core_availability\frontend {
         }
 
         $context = [
-            'ajaxurl' => $CFG->wwwroot . '/availability/condition/proctor/ajax_preset.php',
-            'sesskey' => sesskey(),
-            'courseid' => (int) $course->id,
+            'courseid'      => (int) $course->id,
             'global_presets' => $globalpresets,
-            'user_presets' => $userpresets,
+            'user_presets'  => $userpresets,
             'hidden_fields' => array_values(brand::HIDDEN_FORM_FIELDS),
         ];
 
