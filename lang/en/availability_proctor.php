@@ -180,7 +180,10 @@ $string['settings_user_emails_desc'] = 'If checked, Moodle will send examinee\'s
     'If not checked, ' . $pluginnamebrand . ' will automatically generate a mock email address ' .
     'for each examinee to use as a unique identifier in the Dashboard.';
 $string['settings_seamless_auth'] = 'Seamless authorization';
-$string['settings_seamless_auth_desc'] = 'Forwards Moodle authentication tokens to Proctor. It is advised to enable this option if you use Secure Browser.';
+$string['settings_seamless_auth_desc'] = 'Forwards a short-lived, single-use Moodle authentication token to Proctor so learners are logged in automatically when redirected back. ' .
+    'Recommended when using Secure Browser. ' .
+    'Security note: tokens are valid for 8 hours and bound to a specific exam entry. ' .
+    'On shared exam devices, learners should log out after completing the exam.';
 
 $string['description_proctor'] = 'You will be redirected to {$a}';
 $string['description_no_webservices'] = 'Can not be accessed via Moodle mobile app';

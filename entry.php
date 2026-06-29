@@ -30,14 +30,21 @@ $accesscode = required_param('proctor_accesscode', PARAM_RAW);
 $seamlessauth = get_config('availability_proctor', 'seamless_auth');
 
 if ($seamlessauth && $token) {
-    $script = 'availability_proctor';
-    $key = validate_user_key($token, $script, null);
+    // Look up the entry first so we can validate the token is bound to this specific exam.
+    if (!$entry = $DB->get_record('availability_proctor_entries', ['accesscode' => $accesscode])) {
+        throw new \moodle_exception('error_no_entry_found', 'availability_proctor');
+    }
+
+    $key = validate_user_key($token, 'availability_proctor', $entry->id);
 
     if (!$user = $DB->get_record('user', ['id' => $key->userid])) {
         throw new \moodle_exception('invaliduserid');
     }
 
     core_user::require_active_user($user, true, true);
+
+    // Delete the key immediately — token is single-use.
+    $DB->delete_records('user_private_key', ['id' => $key->id]);
 
     complete_user_login($user);
 }

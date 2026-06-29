@@ -207,10 +207,11 @@ CSS;
         $urlparams = ['proctor_accesscode' => $entry->accesscode];
 
         if (get_config('availability_proctor', 'seamless_auth')) {
-            // Token is valid for 3 months.
-            // We want a timeframe log enough for the user to pass a quiz but clean the db at some point.
-            $tokenvaliduntil = time() + (3 * 60 * 60 * 24);
-            $urlparams['token'] = get_user_key('availability_proctor', $user->id, null, false, $tokenvaliduntil);
+            // Token expires in 8 hours — enough to cover any exam window.
+            // Bound to this specific entry so it cannot be replayed against a different activity.
+            // entry.php deletes the key immediately after use (single-use).
+            $tokenvaliduntil = time() + (8 * 60 * 60);
+            $urlparams['token'] = get_user_key('availability_proctor', $user->id, $entry->id, false, $tokenvaliduntil);
         }
 
         $url = new \moodle_url('/availability/condition/proctor/entry.php', $urlparams);
