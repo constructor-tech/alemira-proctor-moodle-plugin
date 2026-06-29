@@ -56,6 +56,10 @@ $string['settings_user_emails'] = 'Отправлять email пользоват
 $string['settings_user_emails_desc'] = 'Если включено, Moodle будет отправлять email-адреса экзаменуемых в панель Proctor. ' .
     'Если выключено, ' . $pluginnamebrand . ' автоматически сгенерирует фиктивный email ' .
     'для каждого экзаменуемого в качестве уникального идентификатора в панели.';
+$string['event_session_started'] = 'Сессия прокторинга начата';
+$string['event_session_finished'] = 'Сессия прокторинга завершена';
+$string['event_user_logged_in_via_token'] = 'Пользователь вошёл через токен автоматической авторизации';
+
 $string['settings_seamless_auth'] = 'Автоматическая авторизация пользователя';
 $string['settings_seamless_auth_desc'] = 'Передаёт в Proctor одноразовый краткосрочный токен аутентификации Moodle, чтобы учащиеся входили в систему автоматически при возврате. ' .
     'Рекомендуется при использовании Secure Browser. ' .

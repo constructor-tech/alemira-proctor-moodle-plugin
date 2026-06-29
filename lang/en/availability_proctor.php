@@ -179,6 +179,10 @@ $string['settings_user_emails'] = 'Send user emails to {$a}';
 $string['settings_user_emails_desc'] = 'If checked, Moodle will send examinee\'s email addresses to the Proctor Dashboard. ' .
     'If not checked, ' . $pluginnamebrand . ' will automatically generate a mock email address ' .
     'for each examinee to use as a unique identifier in the Dashboard.';
+$string['event_session_started'] = 'Proctoring session started';
+$string['event_session_finished'] = 'Proctoring session finished';
+$string['event_user_logged_in_via_token'] = 'User logged in via seamless auth token';
+
 $string['settings_seamless_auth'] = 'Seamless authorization';
 $string['settings_seamless_auth_desc'] = 'Forwards a short-lived, single-use Moodle authentication token to Proctor so learners are logged in automatically when redirected back. ' .
     'Recommended when using Secure Browser. ' .

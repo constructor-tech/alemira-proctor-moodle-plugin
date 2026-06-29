@@ -119,6 +119,12 @@ class observers {
         if ($inhibitredirect) {
             return;
         }
+
+        \availability_proctor\event\session_started::create([
+            'objectid' => $entry->id,
+            'context'  => \context_module::instance($cmid),
+            'userid'   => $USER->id,
+        ])->trigger();
     }
 
     /**
@@ -181,6 +187,12 @@ class observers {
 
         $client = new client();
         $client->finish_session($entry->accesscode, $redirecturl->out(false));
+
+        \availability_proctor\event\session_finished::create([
+            'objectid' => $entry->id,
+            'context'  => \context_module::instance($cmid),
+            'userid'   => $userid,
+        ])->trigger();
     }
 
     /**

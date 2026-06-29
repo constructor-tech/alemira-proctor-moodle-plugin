@@ -47,6 +47,15 @@ if ($seamlessauth && $token) {
     $DB->delete_records('user_private_key', ['id' => $key->id]);
 
     complete_user_login($user);
+
+    $entry = $DB->get_record('availability_proctor_entries', ['accesscode' => $accesscode]);
+    if ($entry) {
+        \availability_proctor\event\user_logged_in_via_token::create([
+            'objectid' => $entry->id,
+            'context'  => \context_module::instance($entry->cmid),
+            'userid'   => $user->id,
+        ])->trigger();
+    }
 }
 
 // Without a token (seamless auth disabled, or learner manually following the
