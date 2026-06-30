@@ -18,6 +18,7 @@
  * Post-install hook: seed one default system preset.
  *
  * @package    availability_proctor
+ * @copyright  2019-2024 Maksim Burnin <maksim.burnin@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
