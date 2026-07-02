@@ -297,7 +297,9 @@ class client {
 
         $special = null;
         foreach(profile_get_user_fields_with_data($user->id) as $field) {
-            if($field->get_shortname() != "proctor_special_accommodations") {
+            // Use the record property instead of get_shortname(): the getter
+            // only exists since Moodle 3.11 and fatals on older versions.
+            if($field->field->shortname != "proctor_special_accommodations") {
                 continue;
             }
 
