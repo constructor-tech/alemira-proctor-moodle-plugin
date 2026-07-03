@@ -88,7 +88,7 @@ def ask_yes_no(question, default='y'):
 
 def run(name='proctor', dry=False, verbose=False, force=False):
     # List project files
-    ignore_files = [ 'releases', 'utils', 'node_modules', '.git', 'openspec', '.cursor']
+    ignore_files = [ 'releases', 'utils', 'node_modules', '.git', 'openspec', '.cursor', 'dev']
     append_files = ['.htaccess',]
 
     output_dir = f'releases/{name}/'

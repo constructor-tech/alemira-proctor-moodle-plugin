@@ -1,0 +1,135 @@
+# Local Moodle dev stand for the Proctor availability plugin.
+#
+# Each Moodle version is a compose profile with its own DB and moodledata
+# volumes, so settings and data persist across restarts. Use dev/moodle.sh —
+# it clones Moodle sources on first run and performs the CLI install.
+#
+# Profiles:  310  311  405  500
+# Ports:     8310 8311 8405 8500
+
+services:
+  db310:
+    image: mariadb:10.5
+    profiles: ["310"]
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: moodle
+      MARIADB_USER: moodle
+      MARIADB_PASSWORD: moodle
+    volumes:
+      - dbdata310:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  web310:
+    image: moodlehq/moodle-php-apache:7.4
+    profiles: ["310"]
+    depends_on:
+      db310:
+        condition: service_healthy
+    ports:
+      - "8310:80"
+    volumes:
+      - ./.moodle/310:/var/www/html
+      - moodledata310:/var/www/moodledata
+
+  db311:
+    image: mariadb:10.5
+    profiles: ["311"]
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: moodle
+      MARIADB_USER: moodle
+      MARIADB_PASSWORD: moodle
+    volumes:
+      - dbdata311:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  web311:
+    image: moodlehq/moodle-php-apache:7.4
+    profiles: ["311"]
+    depends_on:
+      db311:
+        condition: service_healthy
+    ports:
+      - "8311:80"
+    volumes:
+      - ./.moodle/311:/var/www/html
+      - moodledata311:/var/www/moodledata
+
+  db405:
+    image: mariadb:10.11
+    profiles: ["405"]
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: moodle
+      MARIADB_USER: moodle
+      MARIADB_PASSWORD: moodle
+    volumes:
+      - dbdata405:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  web405:
+    image: moodlehq/moodle-php-apache:8.2
+    profiles: ["405"]
+    depends_on:
+      db405:
+        condition: service_healthy
+    ports:
+      - "8405:80"
+    volumes:
+      - ./.moodle/405:/var/www/html
+      - moodledata405:/var/www/moodledata
+
+  db500:
+    image: mariadb:10.11
+    profiles: ["500"]
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: moodle
+      MARIADB_USER: moodle
+      MARIADB_PASSWORD: moodle
+    volumes:
+      - dbdata500:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  web500:
+    image: moodlehq/moodle-php-apache:8.3
+    profiles: ["500"]
+    depends_on:
+      db500:
+        condition: service_healthy
+    ports:
+      - "8500:80"
+    volumes:
+      - ./.moodle/500:/var/www/html
+      - moodledata500:/var/www/moodledata
+
+volumes:
+  dbdata310:
+  moodledata310:
+  dbdata311:
+  moodledata311:
+  dbdata405:
+  moodledata405:
+  dbdata500:
+  moodledata500:
