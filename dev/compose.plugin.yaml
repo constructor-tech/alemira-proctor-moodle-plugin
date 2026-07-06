@@ -1,0 +1,31 @@
+# Overlay: live-mount the plugin working tree into each Moodle.
+# Applied by dev/moodle.sh unless --clean is passed.
+#
+# The repo root is mounted as availability/condition/proctor. The dev/
+# subdirectory (which contains the multi-hundred-MB Moodle source clones)
+# is shadowed with a tmpfs so Moodle never walks into it.
+
+services:
+  web310:
+    volumes:
+      - ..:/var/www/html/availability/condition/proctor
+    tmpfs:
+      - /var/www/html/availability/condition/proctor/dev
+
+  web311:
+    volumes:
+      - ..:/var/www/html/availability/condition/proctor
+    tmpfs:
+      - /var/www/html/availability/condition/proctor/dev
+
+  web405:
+    volumes:
+      - ..:/var/www/html/availability/condition/proctor
+    tmpfs:
+      - /var/www/html/availability/condition/proctor/dev
+
+  web500:
+    volumes:
+      - ..:/var/www/html/availability/condition/proctor
+    tmpfs:
+      - /var/www/html/availability/condition/proctor/dev
