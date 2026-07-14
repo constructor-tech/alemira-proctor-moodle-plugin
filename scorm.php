@@ -40,7 +40,7 @@ if ($entry && (int)$entry->cmid === $id && (int)$entry->userid === (int)$USER->i
     if ($entry->status !== 'started') {
         $DB->set_field('availability_proctor_entries', 'status', 'started', ['id' => $entry->id]);
     }
-    $SESSION->availability_proctor_accesscode = $proctor_accesscode;
+    \availability_proctor\session_cache::set_accesscode($proctor_accesscode);
 }
 
 redirect(new moodle_url('/mod/scorm/view.php', ['id' => $id, 'proctor_lockdown' => '1']));

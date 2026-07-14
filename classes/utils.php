@@ -58,7 +58,7 @@ class utils {
      * @return string HTML output for the fader overlay
      */
     public static function handle_proctoring_fader($attempt) {
-        global $DB, $USER, $PAGE, $SESSION;
+        global $DB, $USER, $PAGE;
 
         $cmid = state::$attempt['cm_id'];
         $courseid = state::$attempt['course_id'];
@@ -90,12 +90,10 @@ class utils {
 
         $entry = common::create_entry($condition, $USER->id, $cm);
 
-        if (
-            !empty($SESSION->availability_proctor_accesscode) &&
-                $entry->accesscode != $SESSION->availability_proctor_accesscode
-        ) {
-            $SESSION->availability_proctor_accesscode = null;
-            $SESSION->availability_proctor_reset = true;
+        $sessionaccesscode = session_cache::get_accesscode();
+        if (!empty($sessionaccesscode) && $entry->accesscode != $sessionaccesscode) {
+            session_cache::clear_accesscode();
+            session_cache::set_reset();
         }
 
         $timebracket = common::get_timebracket_for_cm('quiz', $cm, $USER->id);
@@ -121,7 +119,7 @@ class utils {
         if ($entryisactive || $attemptinprogess) {
             // We have to pass formdata in any case because exam can be opened outside iframe.
             $formdata = $client->get_form('start', $data);
-            $entryreset = isset($SESSION->availability_proctor_reset) && $SESSION->availability_proctor_reset;
+            $entryreset = session_cache::is_reset();
 
             // Our entry is active, we are showing the user a fader.
             ob_start();
@@ -381,7 +379,7 @@ CSS;
      * @return void
      */
     public static function handle_start_attempt($course, $cm, $user) {
-        global $SESSION, $DB;
+        global $DB;
         $modinfo = get_fast_modinfo($course->id);
         $cminfo = $modinfo->get_cm($cm->id);
 
@@ -400,7 +398,7 @@ CSS;
             return;
         }
 
-        $accesscode = isset($SESSION->availability_proctor_accesscode) ? $SESSION->availability_proctor_accesscode : null;
+        $accesscode = session_cache::get_accesscode();
         $entry = null;
         $reset = false;
         if ($accesscode) {
@@ -423,8 +421,8 @@ CSS;
             }
 
             if ($reset) {
-                unset($SESSION->availability_proctor_accesscode);
-                $SESSION->availability_proctor_reset = true;
+                session_cache::clear_accesscode();
+                session_cache::set_reset();
             }
 
             // We don't want to redirect at this stage.
@@ -475,7 +473,7 @@ CSS;
      * @return string HTML output for the fader overlay
      */
     public static function handle_proctoring_fader_scorm($cm) {
-        global $USER, $SESSION;
+        global $USER;
 
         $courseid = $cm->course;
         $modinfo = get_fast_modinfo($courseid);
@@ -495,12 +493,10 @@ CSS;
 
         $entry = common::create_entry($condition, $USER->id, $cminfo);
 
-        if (
-            !empty($SESSION->availability_proctor_accesscode) &&
-                $entry->accesscode != $SESSION->availability_proctor_accesscode
-        ) {
-            $SESSION->availability_proctor_accesscode = null;
-            $SESSION->availability_proctor_reset = true;
+        $sessionaccesscode = session_cache::get_accesscode();
+        if (!empty($sessionaccesscode) && $entry->accesscode != $sessionaccesscode) {
+            session_cache::clear_accesscode();
+            session_cache::set_reset();
         }
 
         $timebracket = common::get_timebracket_for_cm('scorm', $cminfo, $USER->id);
@@ -526,7 +522,7 @@ CSS;
 
         if ($entryisactive) {
             $formdata = $client->get_form('start', $data);
-            $entryreset = isset($SESSION->availability_proctor_reset) && $SESSION->availability_proctor_reset;
+            $entryreset = session_cache::is_reset();
 
             ob_start();
             $attempt = null;
@@ -547,7 +543,7 @@ CSS;
      * @return void
      */
     public static function handle_start_attempt_scorm($course, $cm, $user) {
-        global $SESSION, $DB;
+        global $DB;
 
         // proctor_lockdown=1 is appended by scorm.php bridge — mark lockdown immediately
         // regardless of condition, so hooks.php can inject CSS/JS even when the CM has
@@ -568,19 +564,19 @@ CSS;
             return;
         }
 
-        $accesscode = isset($SESSION->availability_proctor_accesscode) ? $SESSION->availability_proctor_accesscode : null;
+        $accesscode = session_cache::get_accesscode();
 
         if ($accesscode) {
             $entry = $DB->get_record('availability_proctor_entries', ['accesscode' => $accesscode]);
 
             if ($entry && !in_array($entry->status, ['new', 'scheduled', 'started'])) {
-                unset($SESSION->availability_proctor_accesscode);
-                $SESSION->availability_proctor_reset = true;
+                session_cache::clear_accesscode();
+                session_cache::set_reset();
             }
 
             if ($entry && $entry->cmid != $cminfo->id) {
-                unset($SESSION->availability_proctor_accesscode);
-                $SESSION->availability_proctor_reset = true;
+                session_cache::clear_accesscode();
+                session_cache::set_reset();
             }
 
             // User is coming from Proctor — mark lockdown and let through.
@@ -592,8 +588,8 @@ CSS;
 
         if ($entry->status === 'started') {
             // Ensure session has the accesscode so handle_proctoring_fader_scorm can show the fader.
-            if (empty($SESSION->availability_proctor_accesscode)) {
-                $SESSION->availability_proctor_accesscode = $entry->accesscode;
+            if (empty(session_cache::get_accesscode())) {
+                session_cache::set_accesscode($entry->accesscode);
             }
             return;
         }
@@ -634,7 +630,7 @@ CSS;
      * @return void
      */
     public static function handle_start_attempt_assign($course, $cm, $user) {
-        global $SESSION, $DB;
+        global $DB;
 
         // proctor_lockdown=1 is appended by assign.php bridge.
         if (optional_param('proctor_lockdown', 0, PARAM_INT)) {
@@ -653,19 +649,19 @@ CSS;
             return;
         }
 
-        $accesscode = isset($SESSION->availability_proctor_accesscode) ? $SESSION->availability_proctor_accesscode : null;
+        $accesscode = session_cache::get_accesscode();
 
         if ($accesscode) {
             $entry = $DB->get_record('availability_proctor_entries', ['accesscode' => $accesscode]);
 
             if ($entry && !in_array($entry->status, ['new', 'scheduled', 'started'])) {
-                unset($SESSION->availability_proctor_accesscode);
-                $SESSION->availability_proctor_reset = true;
+                session_cache::clear_accesscode();
+                session_cache::set_reset();
             }
 
             if ($entry && $entry->cmid != $cminfo->id) {
-                unset($SESSION->availability_proctor_accesscode);
-                $SESSION->availability_proctor_reset = true;
+                session_cache::clear_accesscode();
+                session_cache::set_reset();
             }
 
             state::$lockdown = true;
@@ -675,8 +671,8 @@ CSS;
         $entry = common::create_entry($condition, $user->id, $cminfo);
 
         if ($entry->status === 'started') {
-            if (empty($SESSION->availability_proctor_accesscode)) {
-                $SESSION->availability_proctor_accesscode = $entry->accesscode;
+            if (empty(session_cache::get_accesscode())) {
+                session_cache::set_accesscode($entry->accesscode);
             }
             return;
         }
@@ -715,7 +711,7 @@ CSS;
      * @return string HTML output for the fader overlay
      */
     public static function handle_proctoring_fader_assign($cm) {
-        global $USER, $SESSION;
+        global $USER;
 
         $courseid = $cm->course;
         $modinfo = get_fast_modinfo($courseid);
@@ -735,12 +731,10 @@ CSS;
 
         $entry = common::create_entry($condition, $USER->id, $cminfo);
 
-        if (
-            !empty($SESSION->availability_proctor_accesscode) &&
-                $entry->accesscode != $SESSION->availability_proctor_accesscode
-        ) {
-            $SESSION->availability_proctor_accesscode = null;
-            $SESSION->availability_proctor_reset = true;
+        $sessionaccesscode = session_cache::get_accesscode();
+        if (!empty($sessionaccesscode) && $entry->accesscode != $sessionaccesscode) {
+            session_cache::clear_accesscode();
+            session_cache::set_reset();
         }
 
         $timebracket = common::get_timebracket_for_cm('assign', $cminfo, $USER->id);
@@ -766,7 +760,7 @@ CSS;
 
         if ($entryisactive) {
             $formdata = $client->get_form('start', $data);
-            $entryreset = isset($SESSION->availability_proctor_reset) && $SESSION->availability_proctor_reset;
+            $entryreset = session_cache::is_reset();
 
             ob_start();
             $attempt = null;
@@ -784,12 +778,12 @@ CSS;
      * @return array|void Returns ['modname'=>..., 'cmid'=>...] for SCORM/assign, void for quiz (redirect happens internally)
      */
     public static function handle_accesscode_param($accesscode) {
-        global $SESSION, $DB, $CFG;
+        global $DB, $CFG;
 
         // User is coming from proctor, reset is done if it was requested before.
-        unset($SESSION->availability_proctor_reset);
+        session_cache::clear_reset();
 
-        $SESSION->availability_proctor_accesscode = $accesscode;
+        session_cache::set_accesscode($accesscode);
 
         // We know accesscode is passed in params.
         $entry = $DB->get_record('availability_proctor_entries', [
@@ -809,7 +803,7 @@ CSS;
             $newentry = \availability_proctor\common::most_recent_entry($entry);
             if ($newentry && $newentry->id != $entry->id) {
                 $entry = $newentry;
-                $SESSION->availability_proctor_reset = true;
+                session_cache::set_reset();
             }
 
             $modinfo = get_fast_modinfo($entry->courseid);
@@ -818,11 +812,11 @@ CSS;
             // The entry is already finished or canceled, we need to reset it.
             if (!in_array($entry->status, ['new', 'scheduled', 'started'])) {
                 $entry = \availability_proctor\common::create_entry($condition, $entry->userid, $cminfo);
-                $SESSION->availability_proctor_reset = true;
+                session_cache::set_reset();
             }
         } else {
             // If entry does not exist, we need to create a new one and redirect.
-            $SESSION->availability_proctor_reset = true;
+            session_cache::set_reset();
         }
 
         if ($entry) {

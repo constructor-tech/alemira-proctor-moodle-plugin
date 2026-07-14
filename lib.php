@@ -25,6 +25,7 @@
 use availability_proctor\state;
 use availability_proctor\utils;
 use availability_proctor\hooks;
+use availability_proctor\session_cache;
 
 /**
  * Hooks into head rendering. Adds proctoring fader/shade and accompanying javascript
@@ -79,8 +80,7 @@ function availability_proctor_after_require_login() {
     // SCORM player: user clicked Enter on the view page; apply lockdown if session has
     // a proctor accesscode (set by scorm.php bridge on the preceding view.php request).
     if ($scriptname == '/mod/scorm/player.php') {
-        global $SESSION;
-        if (!empty($SESSION->availability_proctor_accesscode)) {
+        if (!empty(session_cache::get_accesscode())) {
             \availability_proctor\state::$lockdown = true;
         }
     }

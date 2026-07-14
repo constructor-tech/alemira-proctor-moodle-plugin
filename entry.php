@@ -59,8 +59,8 @@ if ($seamlessauth && $token) {
 }
 
 // Without a token (seamless auth disabled, or learner manually following the
-// link) we still need an authenticated session before touching the SESSION
-// state in handle_accesscode_param. No-op for users already logged in.
+// link) we still need an authenticated session before touching the session
+// cache state in handle_accesscode_param. No-op for users already logged in.
 require_login();
 
 \availability_proctor\utils::handle_accesscode_param($accesscode);
