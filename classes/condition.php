@@ -538,6 +538,13 @@ class condition extends \core_availability\condition {
         $forbiddenprocesses = array_filter($forbiddenprocesses);
         $result['forbiddenprocesses'] = empty($forbiddenprocesses) ? null : $forbiddenprocesses;
 
+        // Demo exam mode must never connect to a live proctor. Override the
+        // stored mode to offline so the proctoremails suppression below and
+        // any other mode-dependent logic automatically applies.
+        if (!empty($result['istrial'])) {
+            $result['mode'] = 'offline';
+        }
+        
         // Proctor emails: one address per line, normalized to a list of strings.
         // Only meaningful in Live (online) review mode; cleared otherwise so the
         // API payload never carries assigned proctors for non-live exams.

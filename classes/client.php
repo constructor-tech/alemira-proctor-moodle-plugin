@@ -258,6 +258,15 @@ class client {
         }
         $conditiondata['warnings'] = (object) $warnings;
 
+        // Demo exams must never be connected to a live proctor, regardless of
+        // the preset's configured proctoring mode. This avoids proctoring
+        // costs on sessions that produce no recording (see CONTRIB ticket
+        // for demo exam mode / post-exam review override).
+        $proctoringmode = $conditiondata['mode'];
+        if (!empty($conditiondata['istrial'])) {
+            $proctoringmode = 'offline';
+        }
+
         $data = [
             'accountId' => $this->accountid,
             'accountName' => $this->accountname,
