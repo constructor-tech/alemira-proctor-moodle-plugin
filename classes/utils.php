@@ -51,6 +51,37 @@ class utils {
     }
 
     /**
+     * Queues the fader AMD module and returns a hidden marker element carrying
+     * its config. $formdata includes a signed JWT, so combined with the
+     * strings it can exceed js_call_amd()'s ~1024-character argument-size
+     * guidance (Moodle logs a debugging warning past that). The data travels
+     * via a data-attribute instead, per Moodle's own suggestion in that
+     * warning; the AMD module reads it back off the DOM.
+     *
+     * @param array $strings {awaitingProctoring, instructions, reset}
+     * @param array|null $formdata {action, method, token}
+     * @param bool $reset
+     * @return string HTML snippet to append to the page output
+     */
+    private static function fader_amd_markup($strings, $formdata, $reset) {
+        global $PAGE;
+
+        $config = json_encode([
+            'strings' => $strings,
+            'formdata' => $formdata,
+            'reset' => $reset,
+        ]);
+
+        $PAGE->requires->js_call_amd('availability_proctor/fader', 'init');
+
+        return \html_writer::tag('div', '', [
+            'id' => 'availability-proctor-fader-config',
+            'data-config' => $config,
+            'style' => 'display:none',
+        ]);
+    }
+
+    /**
      * Provides logic for proctoring fader, exit as soon as possible if
      * no protection is required.
      *
@@ -122,9 +153,12 @@ class utils {
             $entryreset = session_cache::is_reset();
 
             // Our entry is active, we are showing the user a fader.
-            ob_start();
-            include(dirname(__FILE__).'/../templates/proctoring_fader.php');
-            $output .= ob_get_clean();
+            $strings = [
+                'awaitingProctoring' => get_string('fader_awaiting_proctoring', 'availability_proctor'),
+                'instructions' => get_string('fader_instructions', 'availability_proctor'),
+                'reset' => get_string('fader_reset', 'availability_proctor'),
+            ];
+            $output .= self::fader_amd_markup($strings, $formdata, $entryreset);
         }
 
         return $output;
@@ -379,7 +413,7 @@ CSS;
      * @return void
      */
     public static function handle_start_attempt($course, $cm, $user) {
-        global $DB;
+        global $DB, $OUTPUT;
         $modinfo = get_fast_modinfo($course->id);
         $cminfo = $modinfo->get_cm($cm->id);
 
@@ -461,7 +495,14 @@ CSS;
             get_string('pluginname', 'availability_proctor'));
         $gobuttonlabel = get_string('proctor_go_to_system', 'availability_proctor');
 
-        include(dirname(__FILE__).'/../templates/redirect.php');
+        echo $OUTPUT->render_from_template('availability_proctor/redirect', [
+            'pagetitle' => $pagetitle,
+            'gobuttonlabel' => $gobuttonlabel,
+            'action' => $formdata['action'],
+            'method' => $formdata['method'],
+            'hastoken' => isset($formdata['token']),
+            'token' => $formdata['token'] ?? '',
+        ]);
         die();
     }
 
@@ -524,10 +565,12 @@ CSS;
             $formdata = $client->get_form('start', $data);
             $entryreset = session_cache::is_reset();
 
-            ob_start();
-            $attempt = null;
-            include(dirname(__FILE__).'/../templates/proctoring_fader.php');
-            $output .= ob_get_clean();
+            $strings = [
+                'awaitingProctoring' => get_string('fader_awaiting_proctoring', 'availability_proctor'),
+                'instructions' => get_string('fader_instructions', 'availability_proctor'),
+                'reset' => get_string('fader_reset', 'availability_proctor'),
+            ];
+            $output .= self::fader_amd_markup($strings, $formdata, $entryreset);
         }
 
         return $output;
@@ -543,7 +586,7 @@ CSS;
      * @return void
      */
     public static function handle_start_attempt_scorm($course, $cm, $user) {
-        global $DB;
+        global $DB, $OUTPUT;
 
         // proctor_lockdown=1 is appended by scorm.php bridge — mark lockdown immediately
         // regardless of condition, so hooks.php can inject CSS/JS even when the CM has
@@ -616,7 +659,14 @@ CSS;
             get_string('pluginname', 'availability_proctor'));
         $gobuttonlabel = get_string('proctor_go_to_system', 'availability_proctor');
 
-        include(dirname(__FILE__).'/../templates/redirect.php');
+        echo $OUTPUT->render_from_template('availability_proctor/redirect', [
+            'pagetitle' => $pagetitle,
+            'gobuttonlabel' => $gobuttonlabel,
+            'action' => $formdata['action'],
+            'method' => $formdata['method'],
+            'hastoken' => isset($formdata['token']),
+            'token' => $formdata['token'] ?? '',
+        ]);
         die();
     }
 
@@ -630,7 +680,7 @@ CSS;
      * @return void
      */
     public static function handle_start_attempt_assign($course, $cm, $user) {
-        global $DB;
+        global $DB, $OUTPUT;
 
         // proctor_lockdown=1 is appended by assign.php bridge.
         if (optional_param('proctor_lockdown', 0, PARAM_INT)) {
@@ -699,7 +749,14 @@ CSS;
             get_string('pluginname', 'availability_proctor'));
         $gobuttonlabel = get_string('proctor_go_to_system', 'availability_proctor');
 
-        include(dirname(__FILE__).'/../templates/redirect.php');
+        echo $OUTPUT->render_from_template('availability_proctor/redirect', [
+            'pagetitle' => $pagetitle,
+            'gobuttonlabel' => $gobuttonlabel,
+            'action' => $formdata['action'],
+            'method' => $formdata['method'],
+            'hastoken' => isset($formdata['token']),
+            'token' => $formdata['token'] ?? '',
+        ]);
         die();
     }
 
@@ -762,10 +819,12 @@ CSS;
             $formdata = $client->get_form('start', $data);
             $entryreset = session_cache::is_reset();
 
-            ob_start();
-            $attempt = null;
-            include(dirname(__FILE__).'/../templates/proctoring_fader.php');
-            $output .= ob_get_clean();
+            $strings = [
+                'awaitingProctoring' => get_string('fader_awaiting_proctoring', 'availability_proctor'),
+                'instructions' => get_string('fader_instructions', 'availability_proctor'),
+                'reset' => get_string('fader_reset', 'availability_proctor'),
+            ];
+            $output .= self::fader_amd_markup($strings, $formdata, $entryreset);
         }
 
         return $output;

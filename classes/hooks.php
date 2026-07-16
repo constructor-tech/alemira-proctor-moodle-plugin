@@ -62,12 +62,15 @@ class hooks {
         }
 
         // SCORM: fader shown on the SCORM view page when there is an active proctoring entry.
-        if (!$html && !empty($PAGE->cm) && $PAGE->cm->modname === 'scorm') {
+        // Note: $PAGE->cm is exposed via moodle_page::__get(), and moodle_page defines no
+        // __isset(), so empty()/isset() on it always report "unset" regardless of the real
+        // value — compare against null directly instead.
+        if (!$html && $PAGE->cm !== null && $PAGE->cm->modname === 'scorm') {
             $html = utils::handle_proctoring_fader_scorm($PAGE->cm);
         }
 
         // Assign: fader shown on the assign view page when there is an active proctoring entry.
-        if (!$html && !empty($PAGE->cm) && $PAGE->cm->modname === 'assign') {
+        if (!$html && $PAGE->cm !== null && $PAGE->cm->modname === 'assign') {
             $html = utils::handle_proctoring_fader_assign($PAGE->cm);
         }
 

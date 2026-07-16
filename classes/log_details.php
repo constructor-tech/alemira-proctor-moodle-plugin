@@ -59,7 +59,7 @@ class log_details {
      * Renders and echoes log entry detail page
      */
     public function render() {
-        global $DB;
+        global $DB, $OUTPUT;
         $entry = $DB->get_record('availability_proctor_entries', ['id' => $this->id]);
         $user = $DB->get_record('user', ['id' => $entry->userid]);
 
@@ -250,8 +250,9 @@ class log_details {
             return;
         }
 
-        echo "<hr>";
-        echo "<h2>".get_string('log_details_warnings', 'availability_proctor')."</h2>";
+        echo $OUTPUT->render_from_template('availability_proctor/log_details_separator', [
+            'heading' => get_string('log_details_warnings', 'availability_proctor'),
+        ]);
 
         $table = new \flexible_table('availability_proctor_show');
 

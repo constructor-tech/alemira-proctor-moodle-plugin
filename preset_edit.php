@@ -101,34 +101,6 @@ $jsmap = [];
 foreach (preset::RULE_WARNING_MAP as $rkey => $wkey) {
     $jsmap['rules[' . $rkey . ']'] = 'warnings[' . $wkey . ']';
 }
-$PAGE->requires->js_init_code(
-    'var availabilityProctorRuleWarningMap = ' . json_encode($jsmap) . ';' . "\n" .
-    <<<'JS'
-(function() {
-    var map = availabilityProctorRuleWarningMap;
-    // Moodle's advcheckbox renders TWO inputs sharing the same name — a hidden
-    // fallback (value=0) and the visible checkbox. We must target the visible
-    // one or .checked reads/writes apply to the hidden input and do nothing.
-    function findCheckbox(name) {
-        return document.querySelector('input[type="checkbox"][name="' + name + '"]');
-    }
-    function sync() {
-        Object.keys(map).forEach(function(rname) {
-            var rule = findCheckbox(rname);
-            var warn = findCheckbox(map[rname]);
-            if (!rule || !warn) { return; }
-            if (rule.checked) {
-                warn.checked = false;
-            }
-        });
-    }
-    Object.keys(map).forEach(function(rname) {
-        var rule = findCheckbox(rname);
-        if (rule) { rule.addEventListener('change', sync); }
-    });
-    sync();
-})();
-JS
-);
+$PAGE->requires->js_call_amd('availability_proctor/preset_edit', 'init', [$jsmap]);
 
 echo $OUTPUT->footer();
