@@ -24,19 +24,13 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-// Brand-specific product name comes from the brand class (not translatable —
-// same string in every locale). The base lang file stays brand-neutral so it
-// doesn't need rewriting per build.
-require_once(__DIR__ . '/../../classes/brand.php');
-$pluginnamebrand = \availability_proctor\brand::DISPLAY_NAME;
-
 $string['proctor:logaccess'] = 'Proctor log access';
 $string['proctor:logaccess_course'] = 'Proctor log access for course';
 $string['proctor:logaccess_all'] = 'Proctor log access for all courses';
 
-$string['pluginname'] = $pluginnamebrand;
-$string['description'] = 'Allows students to use ' . $pluginnamebrand;
-$string['title'] = $pluginnamebrand;
+$string['pluginname'] = 'Constructor Proctor';
+$string['description'] = 'Allows students to use Constructor Proctor';
+$string['title'] = 'Constructor Proctor';
 
 $string['error_no_entry_found'] = 'No exam entry found by accesscode';
 $string['error_not_in_range'] = 'This value should be between %d and %d';
@@ -88,8 +82,7 @@ $string['allowmultipledisplays_help'] = 'When disabled, learners with multiple m
 $string['streamspreset_help'] = 'Default — standard video recording (recommended for online exams).
 <br>No Video — disables video recording. It\'s typically used for on-campus exam rooms where the Secure Browser ' .
     'ensures learners cannot leave the exam page, making video recording unnecessary in a controlled physical environment.';
-$string['enable_secure_browser_help'] = 'Requires learners to install the ' . $pluginnamebrand . ' Secure Browser, ' .
-    'a dedicated application that enforces machine-level restrictions during the exam.';
+$string['enable_secure_browser_help'] = 'Requires learners to install the Constructor Proctor Secure Browser, a dedicated application that enforces machine-level restrictions during the exam.';
 $string['secure_browser_level_help'] = 'Basic: detects virtual machines and USB devices.
 <br>Medium: adds restrictions while allowing limited flexibility (recommended when allowing custom processes).
 <br>High: full-screen always-on-top mode, blocks background applications.';
@@ -176,9 +169,7 @@ $string['settings_account_name_desc'] = '';
 $string['settings_account_id'] = 'Account ID';
 $string['settings_account_id_desc'] = '';
 $string['settings_user_emails'] = 'Send user emails to {$a}';
-$string['settings_user_emails_desc'] = 'If checked, Moodle will send examinee\'s email addresses to the Proctor Dashboard. ' .
-    'If not checked, ' . $pluginnamebrand . ' will automatically generate a mock email address ' .
-    'for each examinee to use as a unique identifier in the Dashboard.';
+$string['settings_user_emails_desc'] = 'If checked, Moodle will send examinee\'s email addresses to the Proctor Dashboard. If not checked, Constructor Proctor will automatically generate a mock email address for each examinee to use as a unique identifier in the Dashboard.';
 $string['event_session_started'] = 'Proctoring session started';
 $string['event_session_finished'] = 'Proctoring session finished';
 $string['event_user_logged_in_via_token'] = 'User logged in via seamless auth token';
@@ -399,7 +390,7 @@ $string['privacy:metadata:availability_proctor_entries:review_link'] = 'Review U
 $string['privacy:metadata:availability_proctor_entries:archiveurl'] = 'Archive URL';
 $string['privacy:metadata:availability_proctor_entries:timecreated'] = 'Time when entry was created';
 $string['privacy:metadata:availability_proctor_entries:timemodified'] = 'Time when entry was last modified';
-$string['privacy:metadata:availability_proctor_entries:timescheduled'] = '';
+$string['privacy:metadata:availability_proctor_entries:timescheduled'] = 'Time when the exam session was scheduled';
 $string['privacy:metadata:availability_proctor_entries:score'] = 'Proctoring score';
 $string['privacy:metadata:availability_proctor_entries:comment'] = 'Proctor\'s comment';
 $string['privacy:metadata:availability_proctor_entries:threshold'] = 'Score threshold';

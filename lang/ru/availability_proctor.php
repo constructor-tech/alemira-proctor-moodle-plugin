@@ -24,25 +24,19 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-// Brand-specific product name comes from the brand class (not translatable —
-// same string in every locale). The base lang file stays brand-neutral so it
-// doesn't need rewriting per build.
-require_once(__DIR__ . '/../../classes/brand.php');
-$pluginnamebrand = \availability_proctor\brand::DISPLAY_NAME;
-
 $string['proctor:logaccess'] = 'Доступ к отчету Proctor';
 $string['proctor:logaccess_course'] = 'Доступ к отчету Proctor (определенный курс)';
 $string['proctor:logaccess_all'] = 'Доступ к отчету Proctor (все курсы)';
 
-$string['description'] = 'Позволяет студентам использовать сервис ' . $pluginnamebrand;
-$string['pluginname'] = $pluginnamebrand;
-$string['title'] = $pluginnamebrand;
+$string['description'] = 'Позволяет студентам использовать сервис Constructor Proctor';
+$string['pluginname'] = 'Constructor Proctor';
+$string['title'] = 'Constructor Proctor';
 
 $string['error_no_entry_found'] = 'No exam entry found by accesscode';
 $string['error_not_in_range'] = 'Значение должно быть в диапазоне от %d до %d';
 $string['error_setduration'] = 'Длительность в минутах должна быть кратна 30 (30, 60, 90)';
 
-$string['settings_proctor_url'] = $pluginnamebrand . ' URL';
+$string['settings_proctor_url'] = 'Constructor Proctor URL';
 $string['settings_proctor_url_desc'] = '';
 $string['settings_integration_name'] = 'Integration Name';
 $string['settings_integration_name_desc'] = '';
@@ -52,10 +46,8 @@ $string['settings_account_name'] = 'Account Name';
 $string['settings_account_name_desc'] = '';
 $string['settings_account_id'] = 'Account ID';
 $string['settings_account_id_desc'] = '';
-$string['settings_user_emails'] = 'Отправлять email пользователей в ' . $pluginnamebrand;
-$string['settings_user_emails_desc'] = 'Если включено, Moodle будет отправлять email-адреса экзаменуемых в панель Proctor. ' .
-    'Если выключено, ' . $pluginnamebrand . ' автоматически сгенерирует фиктивный email ' .
-    'для каждого экзаменуемого в качестве уникального идентификатора в панели.';
+$string['settings_user_emails'] = 'Отправлять email пользователей в Constructor Proctor';
+$string['settings_user_emails_desc'] = 'Если включено, Moodle будет отправлять email-адреса экзаменуемых в панель Proctor. Если выключено, Constructor Proctor автоматически сгенерирует фиктивный email для каждого экзаменуемого в качестве уникального идентификатора в панели.';
 $string['event_session_started'] = 'Сессия прокторинга начата';
 $string['event_session_finished'] = 'Сессия прокторинга завершена';
 $string['event_user_logged_in_via_token'] = 'Пользователь вошёл через токен автоматической авторизации';
@@ -66,7 +58,7 @@ $string['settings_seamless_auth_desc'] = 'Передаёт в Proctor однор
     'Примечание по безопасности: токены действительны в течение 8 часов и привязаны к конкретной записи экзамена. ' .
     'На общих экзаменационных устройствах учащимся следует выходить из системы после завершения экзамена.';
 
-$string['description_proctor'] = 'Вы будете перенаправлены на ' . $pluginnamebrand;
+$string['description_proctor'] = 'Вы будете перенаправлены на Constructor Proctor';
 $string['description_no_webservices'] = 'Недоступно через мобильное приложение Moodle';
 
 $string['settings'] = 'Настройки интеграции';
@@ -357,8 +349,7 @@ $string['allowmultipledisplays_help'] = 'Если выключено — уча�
 $string['streamspreset_help'] = 'Default — стандартная видеозапись (рекомендуется для онлайн-экзаменов).
 <br>No Video — отключает запись видео. Обычно используется для экзаменов на территории учебного заведения ' .
     'с защищённым браузером, где видео не требуется.';
-$string['enable_secure_browser_help'] = 'Требует от учащихся установить ' . $pluginnamebrand . ' Secure Browser — ' .
-    'отдельное приложение, обеспечивающее ограничения на уровне ОС.';
+$string['enable_secure_browser_help'] = 'Требует от учащихся установить Constructor Proctor Secure Browser — отдельное приложение, обеспечивающее ограничения на уровне ОС.';
 $string['secure_browser_level_help'] = 'Basic: обнаружение виртуальных машин и USB-устройств.
 <br>Medium: добавляет ограничения, сохраняя гибкость (рекомендуется при разрешении пользовательских процессов).
 <br>High: режим во весь экран всегда сверху, блокирует фоновые приложения.';
