@@ -898,17 +898,14 @@ CSS;
                     'id' => $cminfo->id,
                     'proctor_accesscode' => $entry->accesscode,
                 ]);
-            } else if (!empty($entry->attemptid)) {
-                // Attempt already exists (e.g. user came back from a re-triggered pre-check on an in-progress attempt).
-                // Go straight to the attempt so the user doesn't have to click "Continue your attempt" again.
-                $quizurl = new \moodle_url('/mod/quiz/attempt.php', ['attempt' => $entry->attemptid]);
             } else {
-                // No attempt yet: jump to startattempt.php which will create the attempt and redirect into it.
-                // handle_start_attempt() will short-circuit because the session accesscode is already set above.
-                $quizurl = new \moodle_url('/mod/quiz/startattempt.php', [
-                    'cmid' => $cminfo->id,
-                    'sesskey' => sesskey(),
-                ]);
+                // Land on the quiz view page instead of creating the attempt here. The entry
+                // iframe is loaded by the Proctor web app while the learner is still in the
+                // system check, so jumping into startattempt.php at this point would create the
+                // attempt (and start the exam timer) before proctoring begins. The attempt is
+                // created only when the user clicks "Attempt quiz" after passing the check;
+                // handle_start_attempt() short-circuits on the accesscode stored above.
+                $quizurl = new \moodle_url('/mod/quiz/view.php', ['id' => $cminfo->id]);
             }
             redirect($quizurl);
             exit;

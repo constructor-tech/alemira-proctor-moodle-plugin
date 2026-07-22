@@ -23,7 +23,7 @@ M.availability_proctor.form.initInner = function(rules, warnings, scoring, strea
     this.defaults = defaults;
     this.groups = groups;
     this.streamsPresetOptions = streamsPresetOptions;
-    this.context = context || {ajaxurl: '', sesskey: '', courseid: 0, global_presets: [], user_presets: []};
+    this.context = context || {courseid: 0, global_presets: [], user_presets: []};
     this.hiddenFields = (context && context.hidden_fields) ? context.hidden_fields : [];
 };
 
@@ -1103,28 +1103,24 @@ M.availability_proctor.form.getNode = function(json) {
         });
         confirmRow.one('.proctor-delete-yes').on('click', function(ev) {
             ev.preventDefault();
-            Y.io(ctx.ajaxurl, {
-                method: 'POST',
-                data: 'action=delete&sesskey=' + encodeURIComponent(ctx.sesskey) +
-                    '&courseid=' + encodeURIComponent(ctx.courseid) +
-                    '&id=' + encodeURIComponent(id),
-                on: {
-                    success: function(_, resp) {
-                        var data;
-                        try { data = JSON.parse(resp.responseText); } catch (err) { data = null; }
-                        if (data && data.ok) {
+            require(['core/ajax'], function(Ajax) {
+                Ajax.call([{
+                    methodname: 'availability_proctor_delete_user_preset',
+                    args: {courseid: ctx.courseid, id: parseInt(id)},
+                    done: function(result) {
+                        if (result.ok) {
                             ctx.user_presets = ctx.user_presets.filter(function(p) {
                                 return parseInt(p.id) !== parseInt(id);
                             });
                             renderPicker();
                         } else {
-                            confirmRow.setHTML('<span class="text-danger">' + ((data && data.error) || 'Error') + '</span>');
+                            confirmRow.setHTML('<span class="text-danger">Error</span>');
                         }
                     },
-                    failure: function() {
-                        confirmRow.setHTML('<span class="text-danger">Network error</span>');
+                    fail: function(ex) {
+                        confirmRow.setHTML('<span class="text-danger">' + (ex.message || 'Network error') + '</span>');
                     }
-                }
+                }]);
             });
         });
     }, '.proctor-delete-preset');
@@ -1200,30 +1196,32 @@ M.availability_proctor.form.getNode = function(json) {
         };
 
         showSaveStatus('…', false);
-        Y.io(ctx.ajaxurl, {
-            method: 'POST',
-            data: 'action=save' +
-                '&sesskey=' + encodeURIComponent(ctx.sesskey) +
-                '&courseid=' + encodeURIComponent(ctx.courseid) +
-                '&name=' + encodeURIComponent(name) +
-                '&payload=' + encodeURIComponent(JSON.stringify(payload)),
-            on: {
-                success: function(_, resp) {
-                    var data;
-                    try { data = JSON.parse(resp.responseText); } catch (err) { data = null; }
-                    if (data && data.ok && data.preset) {
-                        ctx.user_presets.push(data.preset);
-                        if (node.one('.proctor-preset-picker').getStyle('display') !== 'none') {
-                            renderPicker();
+        require(['core/ajax'], function(Ajax) {
+            Ajax.call([{
+                methodname: 'availability_proctor_save_user_preset',
+                args: {
+                    courseid: ctx.courseid,
+                    name: name,
+                    payload: JSON.stringify(payload)
+                },
+                done: function(result) {
+                    if (result.ok && result.preset) {
+                        var preset;
+                        try { preset = JSON.parse(result.preset); } catch (e) { preset = null; }
+                        if (preset) {
+                            ctx.user_presets.push(preset);
+                            if (node.one('.proctor-preset-picker').getStyle('display') !== 'none') {
+                                renderPicker();
+                            }
                         }
                         showSaveStatus(getString('preset_saved'), false);
                         setTimeout(closeSavePanel, 1500);
                     } else {
-                        showSaveStatus((data && data.error) || 'Error', true);
+                        showSaveStatus('Error', true);
                     }
                 },
-                failure: function() { showSaveStatus('Network error', true); }
-            }
+                fail: function(ex) { showSaveStatus(ex.message || 'Network error', true); }
+            }]);
         });
     });
 

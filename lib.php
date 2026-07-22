@@ -42,12 +42,15 @@ function availability_proctor_before_standard_html_head() {
  * This hook is used for exams that require scheduling.
  **/
 function availability_proctor_after_require_login() {
-    global $USER, $DB;
+    global $USER, $DB, $SCRIPT;
 
     // User is trying to start an attempt, redirect to proctor if it is not started.
-    // qualified_me() returns the full URL; extract just the path for comparison.
-    $currenturl = qualified_me();
-    $scriptname = $currenturl ? parse_url((string) $currenturl, PHP_URL_PATH) : null;
+    // $SCRIPT (set by initialise_fullme() in setup.php) is the path of the actually
+    // executing script relative to wwwroot. Do NOT use qualified_me()/$PAGE->url here:
+    // mod/quiz/startattempt.php sets its page URL to view.php before require_login(),
+    // so the URL-based value never matches and the attempt would be created (and the
+    // quiz timer started) before the user is redirected to proctoring.
+    $scriptname = $SCRIPT;
     if ($scriptname == '/mod/quiz/startattempt.php') {
         $cmid = required_param('cmid', PARAM_INT); // Course module id.
 
