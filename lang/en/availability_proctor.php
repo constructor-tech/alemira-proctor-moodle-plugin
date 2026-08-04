@@ -142,6 +142,7 @@ $string['allow_to_use_paper'] = 'Taking notes on paper';
 $string['allow_to_use_messengers'] = 'Using messengers';
 $string['allow_to_use_calculator'] = 'Using calculator';
 $string['allow_to_use_excel'] = 'Using Microsoft Excel';
+$string['allow_to_use_spell_check_tools'] = 'Using Spell Check Tools';
 $string['allow_to_use_human_assistant'] = 'Using other person’s help';
 $string['allow_absence_in_frame'] = 'Leaving webcam frame';
 $string['allow_voices'] = 'Talking';
