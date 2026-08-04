@@ -151,6 +151,7 @@ $string['allow_to_use_paper'] = 'Разрешить черновики';
 $string['allow_to_use_messengers'] = 'Разрешить мессенджеры';
 $string['allow_to_use_calculator'] = 'Разрешить калькулятор';
 $string['allow_to_use_excel'] = 'Разрешить использование Excel';
+$string['allow_to_use_spell_check_tools'] = 'Разрешить использование средств проверки правописания';
 $string['allow_to_use_human_assistant'] = 'Разрешить помощь людей';
 $string['allow_absence_in_frame'] = 'Разрешить выход из комнаты';
 $string['allow_voices'] = 'Разрешить голоса';

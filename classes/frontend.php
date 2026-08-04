@@ -46,10 +46,12 @@ class frontend extends \core_availability\frontend {
         $PAGE->requires->string_for_js('cancel', 'core');
 
         $strings = [
-            'title', 'proctoring_mode', 'online_mode', 'offline_mode', 'auto_mode',
+            'title', 'error_setduration', 'duration', 'proctoring_mode', 'online_mode', 'offline_mode',
+            'auto_mode', 'identification_mode',
             'rules',
             'allow_to_use_websites', 'allow_to_use_books', 'allow_to_use_paper', 'allow_to_use_messengers',
-            'allow_to_use_calculator', 'allow_to_use_excel', 'allow_to_use_human_assistant',
+            'allow_to_use_calculator', 'allow_to_use_excel', 'allow_to_use_spell_check_tools',
+            'allow_to_use_human_assistant',
             'allow_absence_in_frame', 'allow_voices', 'allow_wrong_gaze_direction',
             'auto_rescheduling', 'enable', 'scheduling_required',
             'identification', 'face_passport_identification', 'face_identification',

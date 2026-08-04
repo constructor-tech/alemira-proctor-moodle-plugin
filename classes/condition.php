@@ -104,6 +104,7 @@ class condition extends \core_availability\condition {
         'allow_to_use_messengers' => false,
         'allow_to_use_calculator' => true,
         'allow_to_use_excel' => false,
+        'allow_to_use_spell_check_tools' => false,
         'allow_to_use_human_assistant' => false,
         'allow_absence_in_frame' => false,
         'allow_voices' => false,
