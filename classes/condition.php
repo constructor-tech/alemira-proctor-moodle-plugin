@@ -257,7 +257,7 @@ class condition extends \core_availability\condition {
 
         if (!empty($structure->rules)) {
             $rules = array_merge(self::RULES, (array)$structure->rules);
-            $this->rules = $structure->rules;
+            $this->rules = (object)$rules;
         } else {
             $this->rules = (object)self::RULES;
         }
