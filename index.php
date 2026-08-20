@@ -38,15 +38,24 @@ $baseurl = '/availability/condition/proctor/index.php';
 $action = optional_param('action', 'index', PARAM_ALPHA);
 
 if ($action == 'renew') {
+    require_sesskey();
     $id = required_param('id', PARAM_TEXT);
     $force = optional_param('force', false, PARAM_TEXT);
 
     if (\availability_proctor\common::reset_entry(['id' => $id], $force)) {
-        redirect('index.php', get_string('new_entry_created', 'availability_proctor'),
-                 null, \core\output\notification::NOTIFY_SUCCESS);
+        redirect(
+            'index.php',
+            get_string('new_entry_created', 'availability_proctor'),
+            null,
+            \core\output\notification::NOTIFY_SUCCESS
+        );
     } else {
-        redirect('index.php', get_string('entry_exist', 'availability_proctor'),
-                 null, \core\output\notification::NOTIFY_ERROR);
+        redirect(
+            'index.php',
+            get_string('entry_exist', 'availability_proctor'),
+            null,
+            \core\output\notification::NOTIFY_ERROR
+        );
     }
 }
 
@@ -64,8 +73,18 @@ if ($action == 'index') {
         'status'       => optional_param('status', null, PARAM_TEXT),
     ];
 
-    $from = isset($_GET['from']) ? $_GET['from'] : ['day' => null, 'month' => null, 'year' => null];
-    $to = isset($_GET['to']) ? $_GET['to'] : ['day' => date('j'), 'month' => date('n'), 'year' => date('Y')];
+    $fromraw = optional_param_array('from', [], PARAM_INT);
+    $from = [
+        'day' => isset($fromraw['day']) ? $fromraw['day'] : null,
+        'month' => isset($fromraw['month']) ? $fromraw['month'] : null,
+        'year' => isset($fromraw['year']) ? $fromraw['year'] : null,
+    ];
+    $toraw = optional_param_array('to', [], PARAM_INT);
+    $to = [
+        'day' => isset($toraw['day']) ? $toraw['day'] : (int)date('j'),
+        'month' => isset($toraw['month']) ? $toraw['month'] : (int)date('n'),
+        'year' => isset($toraw['year']) ? $toraw['year'] : (int)date('Y'),
+    ];
 
     if ($from['day'] > 0 && $from['month'] > 0 && $from['year'] > 0) {
         $filters = array_merge($filters, [
