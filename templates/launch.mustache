@@ -1,0 +1,169 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template availability_proctor/launch
+
+    The proctored launch page: hosts the SDK and embeds the quiz attempt.
+
+    Context variables required for this template:
+    * quizname - Name of the quiz, for the heading.
+    * starturl - Core start-attempt URL, loaded into the iframe on examStarted.
+    * tokenurl - Endpoint returning serverOrigin, integrationName and jwt.
+    * eventurl - Endpoint recording SDK session events.
+    * backurl - Quiz view page, for the abnormal-exit route.
+    * modulesrc - This plugin's ES module.
+    * sdksrc - The hosted SDK module URL, passed to the module rather than
+      hardcoded a second time there.
+
+    Example context (json):
+    {
+        "quizname": "Final exam",
+        "starturl": "https://moodle.example.com/mod/quiz/startattempt.php?cmid=7&sesskey=abc",
+        "tokenurl": "https://moodle.example.com/availability/condition/proctor/token.php?sessionid=42&sesskey=abc",
+        "eventurl": "https://moodle.example.com/availability/condition/proctor/event.php?sessionid=42&sesskey=abc",
+        "backurl": "https://moodle.example.com/mod/quiz/view.php?id=7",
+        "modulesrc": "https://moodle.example.com/availability/condition/proctor/js/proctor.js",
+        "sdksrc": "https://sdk.web.proctor.constructor.app/proctoring.js"
+    }
+}}
+{{!
+    The URLs and the strings JavaScript needs are passed as data attributes
+    rather than built in the module, so that no UI text is hardcoded in
+    JavaScript and the module needs no separate string-loading round trip.
+}}
+<div id="proctor-sdk-app"
+     data-starturl="{{starturl}}"
+     data-tokenurl="{{tokenurl}}"
+     data-eventurl="{{eventurl}}"
+     data-backurl="{{backurl}}"
+     data-sdksrc="{{{sdksrc}}}"
+     data-errorlead="{{#str}} launch_error_lead, availability_proctor {{/str}}"
+     data-errortechnical="{{#str}} launch_error_technical, availability_proctor {{/str}}"
+     data-errorserver="{{#str}} launch_error_server, availability_proctor {{/str}}"
+     data-timeoutmessage="{{#str}} launch_timeout, availability_proctor {{/str}}"
+     data-abandonedmessage="{{#str}} error_abandoned, availability_proctor {{/str}}"
+     data-requirement-browser="{{#str}} launch_requirement_browser, availability_proctor {{/str}}"
+     data-requirement-camera="{{#str}} launch_requirement_camera, availability_proctor {{/str}}">
+
+    <h1 class="sr-only accesshide">{{quizname}}</h1>
+
+    {{!
+        No confirmation here. Core already asks: the quiz view page shows its own
+        "Start attempt" dialog with the time limit before it sends the student to
+        startattempt.php, and this page is reached through that. A second prompt
+        would be the same question twice.
+
+        So proctoring starts on load, and this block is only what the student sees
+        for the moment before the SDK paints over it.
+
+        The user gesture browsers require for screen capture comes from the SDK's own
+        preparation steps, which have their own buttons, rather than from a button
+        here.
+
+        Hidden with JavaScript off, through the "body:not(.jsenabled)" rule in
+        styles.css: nothing is starting in that case, and leaving this on screen
+        put "Starting proctoring" directly above the <noscript> notice saying the
+        exam cannot start, which is two contradictory messages at once.
+    }}
+    <div id="proctor-sdk-intro" class="proctor-sdk-intro" aria-busy="true">
+        <h2>{{quizname}}</h2>
+        <div class="proctor-sdk-loading">
+            {{> core/loading }}
+            <p class="mb-0">{{#str}} launch_starting, availability_proctor {{/str}}</p>
+        </div>
+        <p class="text-muted">{{#str}} launch_requirement_stay, availability_proctor {{/str}}</p>
+    </div>
+
+    {{!
+        Without JavaScript there is no SDK, so there is no session and the access
+        rule serves no questions. Saying so plainly beats leaving a dead button:
+        the enforcement is server-side, so this notice is information, not a check.
+    }}
+    <noscript>
+        <div class="alert alert-danger m-4">
+            {{#str}} error_nojavascript, availability_proctor {{/str}}
+        </div>
+    </noscript>
+
+    {{! Failures from the SDK or the token endpoint land here. }}
+    <div id="proctor-sdk-error" class="alert alert-danger m-4 proctor-sdk-hidden" role="alert" aria-live="assertive"
+         tabindex="-1">
+        <p id="proctor-sdk-error-lead" class="mb-2"></p>
+        <ul id="proctor-sdk-error-requirements" class="mb-0"></ul>
+        <details id="proctor-sdk-error-detail" class="proctor-sdk-error-detail proctor-sdk-hidden">
+            <summary></summary>
+            <pre></pre>
+        </details>
+    </div>
+
+    {{! Shown with the error, because a failed start needs a way out of it. }}
+    <div id="proctor-sdk-recover" class="m-4 proctor-sdk-hidden">
+        <button type="button" id="proctor-sdk-retry" class="btn btn-primary">
+            {{#str}} launch_retry, availability_proctor {{/str}}
+        </button>
+        <a href="{{backurl}}" class="btn btn-secondary">
+            {{#str}} backtoquiz, availability_proctor {{/str}}
+        </a>
+    </div>
+
+{{!
+    No CSS here for the SDK's own controls, on purpose.
+
+    Overriding them was tried twice and both attempts were worse than the problem:
+    reverting buttons stripped the SDK's own styling down to browser defaults, and
+    forcing checkbox appearance only papered over the real cause.
+
+    The real cause was ordering. The SDK injects its stylesheet when init() runs, and
+    CSS of equal specificity is decided by document order, so starting the SDK before
+    Moodle had finished loading its own stylesheets let Moodle's land last and flatten
+    the SDK's controls. proctor.js waits for the load event instead, which is what a
+    click used to guarantee for free. styles.css above is scoped to .proctor-sdk-*
+    classes only, for the same reason.
+}}
+
+    {{! Shown while the exam runs, after examFinished stops the recording. }}
+    <div id="proctor-sdk-tail" class="alert alert-warning proctor-sdk-tail proctor-sdk-hidden" role="status">
+        {{#str}} notice_recordingstopped, availability_proctor {{/str}}
+    </div>
+
+    {{!
+        The quiz attempt. src is set from JavaScript on examStarted rather than
+        here, so the questions are never fetched before the session is live.
+
+        The iframe works under either setting of allowframembedding, so no site
+        configuration is needed. Off -- the default -- makes Moodle send
+        X-Frame-Options: SAMEORIGIN, which still permits a page to embed itself;
+        on makes it send no such header at all. What does need re-verifying is a
+        reverse proxy that rewrites the header, since that is outside Moodle's
+        control.
+    }}
+    <iframe id="proctor-sdk-frame"
+            title="{{quizname}}"
+            class="proctor-sdk-frame proctor-sdk-hidden"
+            allow="fullscreen">
+    </iframe>
+</div>
+
+{{!
+    A plain ES module, loaded directly rather than through Moodle's AMD pipeline,
+    because the SDK is a hosted ES module that RequireJS cannot load. This is the
+    one place in the plugin where that matters.
+}}
+<script type="module">
+    import {start} from '{{{modulesrc}}}';
+    start(document.getElementById('proctor-sdk-app'));
+</script>

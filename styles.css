@@ -1,0 +1,112 @@
+/*
+ * This file is part of Moodle - http://moodle.org/
+ *
+ * Moodle is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Moodle is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @package    availability_proctor
+ * @copyright  2026 Constructor Tech
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+/*
+ * Styles for the launch page and the session report.
+ *
+ * Scoped entirely to .proctor-sdk-* classes. Deliberately nothing here touches
+ * the SDK's own controls: overriding them was tried twice, and both attempts
+ * were worse than the problem they tried to solve (see amd/src/proctor.js and
+ * templates/launch.mustache). If the SDK's checkboxes or buttons ever render
+ * unstyled again, the cause is stylesheet load order, not a missing rule here.
+ */
+
+/* Launch page: state containers, toggled by adding/removing this class rather
+ * than writing element.style.display from JavaScript.
+ *
+ * !important because this competes with the display rule of whatever it is
+ * hiding, and both are single-class selectors -- equal specificity, so document
+ * order decides. .proctor-sdk-frame below sets display:block and comes later,
+ * which meant the quiz iframe was never actually hidden: measured 2026-08-18,
+ * a learner part-way through the preparation steps could see core's
+ * "Start attempt / Cancel" page rendered behind the SDK. Reordering the rules
+ * would fix it today and break again the next time a state container needs a
+ * display of its own, so the hiding rule wins outright instead. */
+.proctor-sdk-hidden {
+    display: none !important;
+}
+
+.proctor-sdk-frame {
+    width: 100%;
+    height: 100vh;
+    border: 0;
+    display: block;
+}
+
+.proctor-sdk-intro {
+    padding: 1.5rem;
+}
+
+/* With JavaScript off the intro is a lie: it says proctoring is starting, while
+ * the <noscript> block right below it says the exam cannot start at all, and the
+ * student reads both at once. Hidden through Moodle's own jsenabled class rather
+ * than by having proctor.js reveal it -- page_requirements_manager emits
+ * "document.body.className += ' jsenabled'" at the top of the body, so the class
+ * is on before this page paints and there is no flash, and a module that fails
+ * to load still leaves the student the "Starting proctoring" line rather than an
+ * empty page. */
+body:not(.jsenabled) .proctor-sdk-intro {
+    display: none;
+}
+
+.proctor-sdk-loading {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.proctor-sdk-error-detail {
+    margin-top: 0.75rem;
+}
+
+.proctor-sdk-error-detail pre {
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-size: 0.85em;
+}
+
+.proctor-sdk-tail {
+    margin: 0;
+    border-radius: 0;
+}
+
+/* Session report: status badges and score-with-threshold. */
+.proctor-sdk-score {
+    white-space: nowrap;
+}
+
+.proctor-sdk-score-threshold {
+    color: var(--secondary, #6c757d);
+    font-size: 0.9em;
+}
+
+.proctor-sdk-report-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+}
+
+.proctor-sdk-filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 0.75rem;
+}
