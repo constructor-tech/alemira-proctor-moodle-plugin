@@ -3,5 +3,21 @@ package-lock.json
 releases
 .DS_Store
 .cursor
+.claude
+.vscode
 openspec
+*.swp
+*.swo
+__pycache__/
+.env
+.env.*
+plans/
+CLAUDE.md
+CLAUDE.local.md
+
+# Per-brand overlay sources are kept outside this repository; utils/release.py
+# builds the plain Constructor package when they are absent.
+branding
+
+# Local Moodle dev stand: per-version source clones and state (dev/README.md).
 dev/.moodle
