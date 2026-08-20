@@ -36,19 +36,24 @@ require_once('../../../config.php');
 
 global $DB;
 
-if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
-    $auth = $_SERVER['HTTP_AUTHORIZATION'];
-} else if (isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
-    $auth = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
-} else {
-    $auth = null;
+// Moodle has no wrapper for raw HTTP request headers; getallheaders() works
+// across supported SAPIs without touching server-level superglobals.
+// The endpoint authenticates via JWT verified below.
+$headers = function_exists('getallheaders') ? getallheaders() : [];
+$auth = null;
+foreach ($headers as $hname => $hvalue) {
+    $lname = strtolower($hname);
+    if ($lname === 'authorization' || $lname === 'redirect-http-authorization') {
+        $auth = $hvalue;
+        break;
+    }
 }
 
 if (empty($auth) || !preg_match('/JWT /', $auth)) {
     echo('Not auth provided');
     exit;
 }
-$token = explode(' ', $_SERVER['HTTP_AUTHORIZATION'])[1];
+$token = explode(' ', $auth)[1];
 
 $client = new client(null);
 
@@ -61,11 +66,17 @@ try {
 
 $requestbody = file_get_contents('php://input');
 if (empty($requestbody)) {
+    http_response_code(400);
     echo('No request body');
     exit;
 }
 
 $request = json_decode($requestbody);
+if (!is_object($request) || empty($request->sessionId)) {
+    http_response_code(400);
+    echo('Invalid request body');
+    exit;
+}
 
 $accesscode = $request->sessionId;
 
@@ -74,7 +85,7 @@ $entry = $DB->get_record('availability_proctor_entries', ['accesscode' => $acces
 $method = optional_param('method', '', PARAM_TEXT);
 
 $handlers = [];
-$handlers['review'] = function($entry, $request) {
+$handlers['review'] = function ($entry, $request) {
     global $DB;
     if (isset($request->reportUrl)) {
         $entry->review_link = $request->reportUrl;
@@ -94,24 +105,40 @@ $handlers['review'] = function($entry, $request) {
         $sessionend = common::parse_date($request->sessionEnd);
     }
 
-    $warningtitles = $request->warningTitles;
+    $warningtitles = $request->warningTitles ?? null;
     $warningtitles = !empty($warningtitles) ? $warningtitles : null;
 
-    $entry->status = $request->conclusion;
+    // status is NOTNULL in install.xml, so a payload without a conclusion must
+    // leave the stored value alone rather than write null -- PostgreSQL refuses
+    // a null there outright, and on MySQL it would erase a status already set.
+    if (isset($request->conclusion)) {
+        $entry->status = (string) $request->conclusion;
+    }
     $entry->timemodified = $timenow;
 
-    $entry->comment = $request->comment;
-    $entry->score = $request->score;
-    $entry->threshold = json_encode($request->threshold);
+    $entry->comment = isset($request->comment) ? (string) $request->comment : null;
+
+    // score is an int column. Cast rather than assign the decoded JSON value
+    // straight through: Moodle's DML binds parameters as strings, so a
+    // fractional score arrives at the database as '92.5', which MySQL silently
+    // rounds to 93 while PostgreSQL rejects with "invalid input syntax for type
+    // bigint" -- failing the webhook write, so the result never lands and the
+    // exam shows no outcome. Absent and zero stay distinct: a missing score
+    // means not yet calculated, zero means calculated as clean. This mirrors
+    // what the SDK path already does in session::apply_result().
+    $entry->score = isset($request->score) && is_numeric($request->score)
+        ? (int) $request->score : null;
+
+    $entry->threshold = isset($request->threshold) ? json_encode($request->threshold) : null;
     $entry->sessionstart = $sessionstart;
     $entry->sessionend = $sessionend;
-    $entry->warnings = json_encode($request->warnings);
+    $entry->warnings = isset($request->warnings) ? json_encode($request->warnings) : null;
     $entry->warningstitles = json_encode($warningtitles);
 
     $DB->update_record('availability_proctor_entries', $entry);
 };
 
-$handlers['schedule'] = function($entry, $request) use ($accesscode) {
+$handlers['schedule'] = function ($entry, $request) use ($accesscode) {
     global $DB;
     $event = $request->event;
 
@@ -132,7 +159,6 @@ $handlers['schedule'] = function($entry, $request) use ($accesscode) {
         $DB->update_record('availability_proctor_entries', $entry);
         common::reset_entry(['accesscode' => $accesscode], true);
     }
-
 };
 
 if ($entry) {

@@ -49,4 +49,32 @@ $capabilities = [
         ],
     ],
 
+    'availability/proctor:managepresets' => [
+        'riskbitmask' => RISK_CONFIG,
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => [
+            'manager' => CAP_ALLOW,
+        ],
+    ],
+
+    // Sit a proctored quiz without proctoring, under the SDK model.
+    //
+    // Granted to no archetype by default, which differs from the plugin the SDK
+    // flow was taken from -- it gave this to editingteacher and manager. Both
+    // already reach the questions unproctored through the preview check, which
+    // tests mod/quiz:preview, and core grants that to both roles. So the defaults
+    // would add no access that anyone actually has, while making a capability
+    // whose only real use is exempting a specific student look like something
+    // teachers are meant to hold.
+    //
+    // Deliberately not applied to the hosted flow: adding an exemption path there
+    // would change the behaviour of exams that customers are running today.
+    'availability/proctor:exemptproctoring' => [
+        'riskbitmask' => RISK_PERSONAL,
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => [],
+    ],
+
 ];

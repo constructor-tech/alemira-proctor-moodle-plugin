@@ -31,15 +31,26 @@ use core_privacy\local\request\approved_contextlist;
 use core_privacy\local\request\approved_userlist;
 use core_privacy\local\request\writer;
 use core_privacy\local\request\transform;
+use availability_proctor\session;
 
 
 /**
  * Implementation of the privacy subsystem plugin provider.
+ *
+ * @package    availability_proctor
+ * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class provider implements
     \core_privacy\local\metadata\provider,
-    \core_privacy\local\request\plugin\provider,
-    \core_privacy\local\request\core_userlist_provider {
+    \core_privacy\local\request\core_userlist_provider,
+    \core_privacy\local\request\plugin\provider {
+    /**
+     * Declare the personal data this plugin stores.
+     *
+     * @param collection $collection the metadata collection to add items to
+     * @return collection the same collection (with proctor entry fields added)
+     */
     public static function get_metadata(collection $collection): collection {
         $collection->add_database_table(
             'availability_proctor_entries',
@@ -65,6 +76,113 @@ class provider implements
             'privacy:metadata:availability_proctor_entries'
         );
 
+        $collection->add_database_table(
+            'availability_proctor_presets',
+            [
+                'userid'                        => 'privacy:metadata:availability_proctor_presets:userid',
+                'name'                          => 'privacy:metadata:availability_proctor_presets:name',
+                'mode'                          => 'privacy:metadata:availability_proctor_presets:mode',
+                'schedulingrequired'            => 'privacy:metadata:availability_proctor_presets:schedulingrequired',
+                'autorescheduling'              => 'privacy:metadata:availability_proctor_presets:autorescheduling',
+                'identification'                => 'privacy:metadata:availability_proctor_presets:identification',
+                'checkidphotoquality'           => 'privacy:metadata:availability_proctor_presets:checkidphotoquality',
+                'useragreementurl'              => 'privacy:metadata:availability_proctor_presets:useragreementurl',
+                'preliminarycheck'              => 'privacy:metadata:availability_proctor_presets:preliminarycheck',
+                'webcameramainview'             => 'privacy:metadata:availability_proctor_presets:webcameramainview',
+                'auxiliarycamera'               => 'privacy:metadata:availability_proctor_presets:auxiliarycamera',
+                'allowroomscanauxcamera'        => 'privacy:metadata:availability_proctor_presets:allowroomscanauxcamera',
+                'streamspreset'                 => 'privacy:metadata:availability_proctor_presets:streamspreset',
+                'sendmanualwarningstolearner'   => 'privacy:metadata:availability_proctor_presets:sendmanualwarningstolearner',
+                'securebrowser'                 => 'privacy:metadata:availability_proctor_presets:securebrowser',
+                'securebrowserlevel'            => 'privacy:metadata:availability_proctor_presets:securebrowserlevel',
+                'allowedprocesses'              => 'privacy:metadata:availability_proctor_presets:allowedprocesses',
+                'forbiddenprocesses'            => 'privacy:metadata:availability_proctor_presets:forbiddenprocesses',
+                'allowvirtualenvironment'       => 'privacy:metadata:availability_proctor_presets:allowvirtualenvironment',
+                'allowtouseadditionalresources' => 'privacy:metadata:availability_proctor_presets:allowtouseadditionalresources',
+                'allowmultipledisplays'         => 'privacy:metadata:availability_proctor_presets:allowmultipledisplays',
+                'calculator'                    => 'privacy:metadata:availability_proctor_presets:calculator',
+                'rules'                         => 'privacy:metadata:availability_proctor_presets:rules',
+                'warnings'                      => 'privacy:metadata:availability_proctor_presets:warnings',
+                'scoring'                       => 'privacy:metadata:availability_proctor_presets:scoring',
+                'timecreated'                   => 'privacy:metadata:availability_proctor_presets:timecreated',
+                'timemodified'                  => 'privacy:metadata:availability_proctor_presets:timemodified',
+            ],
+            'privacy:metadata:availability_proctor_presets'
+        );
+
+        // NTG-185: the SDK proctoring model's two tables.
+        //
+        // sessionkey is declared but deliberately NOT exported -- see
+        // export_user_data(). Declaring it is still right: the site does store it
+        // against the student, and this collection is a statement of what is held,
+        // not of what is handed back.
+        $collection->add_database_table(
+            session::TABLE,
+            [
+                'attemptid' => 'privacy:metadata:availability_proctor_sess:attemptid',
+                'quizid' => 'privacy:metadata:availability_proctor_sess:quizid',
+                'userid' => 'privacy:metadata:availability_proctor_sess:userid',
+                'sessionkey' => 'privacy:metadata:availability_proctor_sess:sessionkey',
+                'state' => 'privacy:metadata:availability_proctor_sess:state',
+                'reason' => 'privacy:metadata:availability_proctor_sess:reason',
+                'timecreated' => 'privacy:metadata:availability_proctor_sess:timecreated',
+                'timemodified' => 'privacy:metadata:availability_proctor_sess:timemodified',
+                'timeactive' => 'privacy:metadata:availability_proctor_sess:timeactive',
+                'timebound' => 'privacy:metadata:availability_proctor_sess:timebound',
+                'timefinishing' => 'privacy:metadata:availability_proctor_sess:timefinishing',
+                'timefinished' => 'privacy:metadata:availability_proctor_sess:timefinished',
+                'timeabandoned' => 'privacy:metadata:availability_proctor_sess:timeabandoned',
+                'videouploaded' => 'privacy:metadata:availability_proctor_sess:videouploaded',
+                'timefinishsent' => 'privacy:metadata:availability_proctor_sess:timefinishsent',
+                'conclusion' => 'privacy:metadata:availability_proctor_sess:conclusion',
+                'score' => 'privacy:metadata:availability_proctor_sess:score',
+                'comment' => 'privacy:metadata:availability_proctor_sess:comment',
+                'threshold' => 'privacy:metadata:availability_proctor_sess:threshold',
+                'reporturl' => 'privacy:metadata:availability_proctor_sess:reporturl',
+                'archiveurl' => 'privacy:metadata:availability_proctor_sess:archiveurl',
+                'resultwarnings' => 'privacy:metadata:availability_proctor_sess:resultwarnings',
+                'warningtitles' => 'privacy:metadata:availability_proctor_sess:warningtitles',
+                'sessionstart' => 'privacy:metadata:availability_proctor_sess:sessionstart',
+                'sessionend' => 'privacy:metadata:availability_proctor_sess:sessionend',
+                'timeresult' => 'privacy:metadata:availability_proctor_sess:timeresult',
+            ],
+            'privacy:metadata:availability_proctor_sess'
+        );
+
+        // Declared even though this release ships no writer for the table. The schema
+        // creates it, all three deletion paths erase it and export_user_data() reads
+        // it, so a collection that omitted it would be the one part of the plugin
+        // claiming the data does not exist.
+        $collection->add_database_table(
+            session::TABLE_DENIED,
+            [
+                'attemptid' => 'privacy:metadata:availability_proctor_deny:attemptid',
+                'quizid' => 'privacy:metadata:availability_proctor_deny:quizid',
+                'userid' => 'privacy:metadata:availability_proctor_deny:userid',
+                'sessionid' => 'privacy:metadata:availability_proctor_deny:sessionid',
+                'sessionstate' => 'privacy:metadata:availability_proctor_deny:sessionstate',
+                'reason' => 'privacy:metadata:availability_proctor_deny:reason',
+                'script' => 'privacy:metadata:availability_proctor_deny:script',
+                'timecreated' => 'privacy:metadata:availability_proctor_deny:timecreated',
+            ],
+            'privacy:metadata:availability_proctor_deny'
+        );
+
+        $collection->add_external_location_link(
+            'proctor_service',
+            [
+                'userid'                  => 'privacy:metadata:proctor_service:userid',
+                'firstname'               => 'privacy:metadata:proctor_service:firstname',
+                'lastname'                => 'privacy:metadata:proctor_service:lastname',
+                'middlename'              => 'privacy:metadata:proctor_service:middlename',
+                'email'                   => 'privacy:metadata:proctor_service:email',
+                'photo_url'               => 'privacy:metadata:proctor_service:photo_url',
+                'language'                => 'privacy:metadata:proctor_service:language',
+                'specialaccommodationsinfo' => 'privacy:metadata:proctor_service:specialaccommodationsinfo',
+            ],
+            'privacy:metadata:proctor_service'
+        );
+
         return $collection;
     }
 
@@ -76,12 +194,40 @@ class provider implements
     public static function get_users_in_context(userlist $userlist) {
         $context = $userlist->get_context();
 
-        if (!is_a($context, \context_module::class)) {
-            return;
+        if (is_a($context, \context_module::class)) {
+            $sql = "SELECT userid FROM {availability_proctor_entries} WHERE cmid = :cmid";
+            $userlist->add_from_sql('userid', $sql, ['cmid' => $context->instanceid]);
+
+            // NTG-185: the SDK tables key on quizid, not cmid, so the module has to be
+            // resolved. The {modules} join is not decoration -- cm.instance is only
+            // unique within a module type, so without it a quiz id would match an
+            // assignment with the same instance id and attribute one activity's
+            // students to another.
+            //
+            // Both tables, not just the sessions: a student can hold denial rows on a
+            // quiz where no session row was ever created, since a refusal can happen
+            // before the launch page runs. This list is what a "delete data for these
+            // users in this context" request is built from, so a student missing from
+            // it does not get their data erased.
+            foreach ([session::TABLE, session::TABLE_DENIED] as $table) {
+                $sql = "SELECT pd.userid
+                          FROM {" . $table . "} pd
+                          JOIN {quiz} q ON q.id = pd.quizid
+                          JOIN {course_modules} cm ON cm.instance = q.id
+                          JOIN {modules} m ON m.id = cm.module AND m.name = :modname
+                         WHERE cm.id = :cmid";
+
+                $userlist->add_from_sql('userid', $sql, [
+                    'modname' => 'quiz',
+                    'cmid' => $context->instanceid,
+                ]);
+            }
         }
 
-        $sql = "SELECT userid FROM {availability_proctor_entries} WHERE cmid = :cmid";
-        $userlist->add_from_sql('userid', $sql, ['cmid' => $context->instanceid]);
+        if (is_a($context, \context_system::class)) {
+            $sql = "SELECT userid FROM {availability_proctor_presets} WHERE type = 'user' AND userid IS NOT NULL";
+            $userlist->add_from_sql('userid', $sql, []);
+        }
     }
 
     /**
@@ -91,6 +237,7 @@ class provider implements
      * @return  contextlist   $contextlist  The list of contexts used in this plugin.
      */
     public static function get_contexts_for_userid(int $userid): contextlist {
+        global $DB;
         $contextlist = new contextlist();
 
         $sql = "SELECT c.id
@@ -101,6 +248,29 @@ class provider implements
         ";
 
         $contextlist->add_from_sql($sql, ['userid' => $userid, 'contextlevel' => CONTEXT_MODULE]);
+
+        // NTG-185: the SDK tables, keyed on quizid. Both of them, for the same reason
+        // get_users_in_context() reads both -- a context missing from this list is a
+        // context the export skips and the erasure never reaches.
+        foreach ([session::TABLE, session::TABLE_DENIED] as $table) {
+            $sql = "SELECT ctx.id
+                      FROM {" . $table . "} pd
+                      JOIN {quiz} q ON q.id = pd.quizid
+                      JOIN {course_modules} cm ON cm.instance = q.id
+                      JOIN {modules} m ON m.id = cm.module AND m.name = :modname
+                      JOIN {context} ctx ON ctx.instanceid = cm.id AND ctx.contextlevel = :contextlevel
+                     WHERE pd.userid = :userid";
+
+            $contextlist->add_from_sql($sql, [
+                'modname' => 'quiz',
+                'contextlevel' => CONTEXT_MODULE,
+                'userid' => $userid,
+            ]);
+        }
+
+        if ($DB->record_exists('availability_proctor_presets', ['userid' => $userid, 'type' => 'user'])) {
+            $contextlist->add_system_context();
+        }
 
         return $contextlist;
     }
@@ -116,7 +286,7 @@ class provider implements
         $user = $contextlist->get_user();
         $userid = $user->id;
 
-        list($contextsql, $contextparams) = $DB->get_in_or_equal($contextlist->get_contextids(), SQL_PARAMS_NAMED);
+        [$contextsql, $contextparams] = $DB->get_in_or_equal($contextlist->get_contextids(), SQL_PARAMS_NAMED);
         $params = $contextparams;
 
         $sql = "SELECT
@@ -150,6 +320,107 @@ class provider implements
                 ->export_data([get_string('privacy:path', 'availability_proctor')], $entry);
         }
 
+        // NTG-185: the SDK model's sessions and denials, exported per module context.
+        //
+        // Resolved through get_coursemodule_from_id() rather than the SQL join the two
+        // lookup methods use: here the context is already known, so the cm gives
+        // cm->instance directly and there is no ambiguity to guard against.
+        foreach ($contextlist->get_contexts() as $context) {
+            if (!$context instanceof \context_module) {
+                continue;
+            }
+
+            $cm = get_coursemodule_from_id('quiz', $context->instanceid, 0, false, IGNORE_MISSING);
+            if (!$cm) {
+                continue;
+            }
+
+            $sessions = $DB->get_records(session::TABLE, [
+                'quizid' => $cm->instance,
+                'userid' => $userid,
+            ], 'timecreated ASC');
+
+            // Both tables, because both are declared in get_metadata() and both are
+            // erased by all three deletion paths. Exporting only the sessions would
+            // make the plugin claim to hold denial records, delete them on request,
+            // and never show them to the person asking what is held about them.
+            $denials = $DB->get_records(session::TABLE_DENIED, [
+                'quizid' => $cm->instance,
+                'userid' => $userid,
+            ], 'timecreated ASC');
+
+            if (!$sessions && !$denials) {
+                continue;
+            }
+
+            $sessionexport = [];
+            foreach ($sessions as $sessionrow) {
+                // Built field by field rather than exporting the row, so that adding a
+                // column to the table cannot start leaking it. Two are left out
+                // deliberately:
+                //
+                // sessionkey is the JWT sessionId claim -- a live credential for the
+                // Constructor side of the session, not information about the student.
+                // Exporting it would hand a usable key to whoever receives the file.
+                //
+                // warningtitles holds translated labels for warning *types*, identical
+                // for every student on the site. The hosted export drops the equivalent
+                // warningstitles column for the same reason.
+                $sessionexport[] = [
+                    'state' => $sessionrow->state,
+                    'reason' => $sessionrow->reason,
+                    'conclusion' => $sessionrow->conclusion,
+                    'score' => $sessionrow->score,
+                    'comment' => $sessionrow->comment,
+                    'threshold' => $sessionrow->threshold,
+                    'reporturl' => $sessionrow->reporturl,
+                    'archiveurl' => $sessionrow->archiveurl,
+                    'resultwarnings' => $sessionrow->resultwarnings,
+                    'timecreated' => self::datetime($sessionrow->timecreated),
+                    'timeactive' => self::datetime($sessionrow->timeactive),
+                    'timebound' => self::datetime($sessionrow->timebound),
+                    'timefinishing' => self::datetime($sessionrow->timefinishing),
+                    'timefinished' => self::datetime($sessionrow->timefinished),
+                    'timeabandoned' => self::datetime($sessionrow->timeabandoned),
+                    'videouploaded' => self::datetime($sessionrow->videouploaded),
+                    'sessionstart' => self::datetime($sessionrow->sessionstart),
+                    'sessionend' => self::datetime($sessionrow->sessionend),
+                ];
+            }
+
+            $denialexport = [];
+            foreach ($denials as $denial) {
+                // The reason and the script are the substance: they say what was refused
+                // and where. Kept as the stored codes rather than prose, because those
+                // are what a reviewer sees, so the subject sees the same value that was
+                // recorded about them.
+                $denialexport[] = [
+                    'reason' => $denial->reason,
+                    'script' => $denial->script,
+                    'sessionstate' => $denial->sessionstate,
+                    'timecreated' => self::datetime($denial->timecreated),
+                ];
+            }
+
+            writer::with_context($context)->export_data(
+                [get_string('privacy:path:sdk', 'availability_proctor')],
+                (object) ['sessions' => $sessionexport, 'denials' => $denialexport]
+            );
+        }
+
+        $systemcontext = \context_system::instance();
+        if (in_array($systemcontext->id, $contextlist->get_contextids())) {
+            $presets = $DB->get_records('availability_proctor_presets', ['userid' => $userid, 'type' => 'user']);
+            foreach ($presets as $preset) {
+                foreach (['timecreated', 'timemodified'] as $field) {
+                    if ($preset->{$field}) {
+                        $preset->{$field} = transform::datetime($preset->{$field});
+                    }
+                }
+                writer::with_context($systemcontext)
+                    ->export_data([get_string('privacy:path:presets', 'availability_proctor'), $preset->name], $preset);
+            }
+        }
     }
 
     /**
@@ -160,11 +431,38 @@ class provider implements
     public static function delete_data_for_all_users_in_context(\context $context) {
         global $DB;
 
-        if ($context->contextlevel != CONTEXT_MODULE) {
-            return;
+        if ($context->contextlevel == CONTEXT_MODULE) {
+            $DB->delete_records('availability_proctor_entries', ['cmid' => $context->instanceid]);
+
+            // NTG-185: the SDK tables, by quizid.
+            $cm = get_coursemodule_from_id('quiz', $context->instanceid, 0, false, IGNORE_MISSING);
+            if ($cm) {
+                $DB->delete_records(session::TABLE, ['quizid' => $cm->instance]);
+                $DB->delete_records(session::TABLE_DENIED, ['quizid' => $cm->instance]);
+            }
         }
 
-        $DB->delete_records('availability_proctor_entries', ['cmid' => $context->instanceid]);
+        if ($context->contextlevel == CONTEXT_SYSTEM) {
+            $DB->delete_records('availability_proctor_presets', ['type' => 'user']);
+        }
+    }
+
+    /**
+     * Render a nullable timestamp for export.
+     *
+     * transform::datetime() renders 0 as a real date, so an unset timestamp would be
+     * exported as 1970 -- a date the subject would read as a fact about their exam.
+     * Empty string instead.
+     *
+     * @param int|null $timestamp The timestamp, or null/0 when unset.
+     * @return string
+     */
+    protected static function datetime(?int $timestamp): string {
+        if (empty($timestamp)) {
+            return '';
+        }
+
+        return transform::datetime($timestamp);
     }
 
     /**
@@ -176,15 +474,29 @@ class provider implements
         global $DB;
 
         $context = $userlist->get_context();
-
-        if ($context->contextlevel != CONTEXT_MODULE) {
+        $userids = $userlist->get_userids();
+        if (empty($userids)) {
             return;
         }
+        [$userinsql, $userinparams] = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
 
-        list($userinsql, $userinparams) = $DB->get_in_or_equal($userlist->get_userids(), SQL_PARAMS_NAMED);
-        $params = array_merge(['cmid' => $context->instanceid], $userinparams);
+        if ($context->contextlevel == CONTEXT_MODULE) {
+            $params = array_merge(['cmid' => $context->instanceid], $userinparams);
+            $DB->delete_records_select('availability_proctor_entries', "cmid = :cmid AND userid {$userinsql}", $params);
 
-        $DB->delete_records_select('availability_proctor_entries', "cmid = :cmid AND userid {$userinsql}", $params);
+            // NTG-185: the SDK tables, by quizid.
+            $cm = get_coursemodule_from_id('quiz', $context->instanceid, 0, false, IGNORE_MISSING);
+            if ($cm) {
+                $sdkparams = array_merge(['quizid' => $cm->instance], $userinparams);
+                foreach ([session::TABLE, session::TABLE_DENIED] as $table) {
+                    $DB->delete_records_select($table, "quizid = :quizid AND userid {$userinsql}", $sdkparams);
+                }
+            }
+        }
+
+        if ($context->contextlevel == CONTEXT_SYSTEM) {
+            $DB->delete_records_select('availability_proctor_presets', "type = 'user' AND userid {$userinsql}", $userinparams);
+        }
     }
 
     /**
@@ -197,15 +509,27 @@ class provider implements
         $user = $contextlist->get_user();
         $userid = $user->id;
         foreach ($contextlist as $context) {
-            if ($context->contextlevel != CONTEXT_MODULE) {
-                continue;
+            if ($context->contextlevel == CONTEXT_MODULE) {
+                $DB->delete_records('availability_proctor_entries', [
+                    'cmid' => $context->instanceid,
+                    'userid' => $userid,
+                ]);
+
+                // NTG-185: the SDK tables, by quizid.
+                $cm = get_coursemodule_from_id('quiz', $context->instanceid, 0, false, IGNORE_MISSING);
+                if ($cm) {
+                    foreach ([session::TABLE, session::TABLE_DENIED] as $table) {
+                        $DB->delete_records($table, [
+                            'quizid' => $cm->instance,
+                            'userid' => $userid,
+                        ]);
+                    }
+                }
             }
 
-            $cmid = $context->instanceid;
-            $DB->delete_records('availability_proctor_entries', [
-                'cmid' => $cmid,
-                'userid' => $userid,
-            ]);
+            if ($context->contextlevel == CONTEXT_SYSTEM) {
+                $DB->delete_records('availability_proctor_presets', ['userid' => $userid, 'type' => 'user']);
+            }
         }
     }
 }

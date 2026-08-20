@@ -28,10 +28,27 @@ use stdClass;
 
 /**
  * Client class
+ *
+ * @package    availability_proctor
+ * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class client {
     /** @var string Date format string, default ISO8601 not accepted by API */
     const ISO8601U = "Y-m-d\TH:i:s.uO";
+
+    /**
+     * NTG-185: seconds to wait for the finish request before giving up.
+     *
+     * Deliberately short, and applied to the connect phase as well as the whole
+     * request. finish_sdk_session() is called inline from attempt_submitted, so
+     * this is time the student spends staring at a page that has already accepted
+     * their submission. A slow server hands the work to the ad-hoc task instead,
+     * which is what the retry path is for.
+     *
+     * @var int
+     */
+    const SDK_FINISH_TIMEOUT = 10;
 
     /**
      * Maps moodle languages to proctoring languages
@@ -88,7 +105,7 @@ class client {
      * Initializes variables form plugin config and availability condition
      * @param condition $condition Availability condition
      */
-    public function __construct($condition=null) {
+    public function __construct($condition = null) {
         $this->condition = $condition;
         $this->proctorurl = get_config('availability_proctor', 'proctor_url');
         $this->integrationname = get_config('availability_proctor', 'integration_name');
@@ -105,16 +122,16 @@ class client {
      * @param string $sessionmethod Session method
      * @return string
      */
-    public function api_url($method, $sessionid=null, $sessionmethod=null) {
-        $url = 'https://'.$this->proctorurl.'/api/v2/integration/simple/'.$this->integrationname.'/';
+    public function api_url($method, $sessionid = null, $sessionmethod = null) {
+        $url = 'https://' . $this->proctorurl . '/api/v2/integration/simple/' . $this->integrationname . '/';
 
-        $url .= $method.'/';
+        $url .= $method . '/';
 
         if (!empty($sessionid)) {
-            $url .= $sessionid.'/';
+            $url .= $sessionid . '/';
 
             if (!empty($sessionmethod)) {
-                $url .= $sessionmethod.'/';
+                $url .= $sessionmethod . '/';
             }
         }
 
@@ -127,9 +144,9 @@ class client {
      * @return string
      */
     public function form_url($method) {
-        $baseurl = 'https://'.$this->proctorurl.'/integration/simple/'.$this->integrationname.'/';
+        $baseurl = 'https://' . $this->proctorurl . '/integration/simple/' . $this->integrationname . '/';
 
-        return $baseurl.$method.'/';
+        return $baseurl . $method . '/';
     }
 
     /**
@@ -142,6 +159,96 @@ class client {
         return $this->request('sessions', $sessionid, 'finish', [
             'sessionFinishUrl' => $redirecturl,
         ]);
+    }
+
+    /**
+     * NTG-185: ask Constructor Proctor to finish an SDK session.
+     *
+     * A separate method from finish_session() above rather than a second signature
+     * on it. That method is the call every existing customer's hosted flow makes
+     * on submit; changing its shape to serve the SDK model would change the one
+     * thing this merge must not touch. The two differ in more than arity anyway --
+     * see the three points below -- so sharing one body would mean a method whose
+     * behaviour depended on which model called it.
+     *
+     * Static because its caller has a session row and no condition: session.php
+     * runs from an ad-hoc task as well as from the request, and there is no
+     * condition to construct a client from in either. It reads what it needs from
+     * config::get() instead.
+     *
+     * Three deliberate differences from the hosted call:
+     *
+     * 1. sessionFinishUrl is not sent. It tells the SDK where to send the student
+     *    when the exam ends, and any navigation takes the launch page down with it
+     *    -- including a video upload still in flight. The hosted flow can send it
+     *    safely because Constructor hosts the outer page; under the SDK model that
+     *    page is ours. The student still reaches review: proctor.js redirects once
+     *    videoUploaded resolves.
+     * 2. It reports success or failure rather than returning the response, because
+     *    its caller has to decide whether to queue a retry.
+     * 3. It signs with the ported jwt::request_token() rather than Firebase. The
+     *    hosted half uses the Firebase library Moodle core bundles at lib/php-jwt
+     *    and carries a class_exists() branch because that library's API moved
+     *    between versions; the SDK half has neither. The two JWT stacks stay
+     *    separate on purpose -- see classes/jwt.php.
+     *
+     * @param string $sessionkey The sessionId claim identifying the session.
+     * @return bool True when the session is settled and no retry is needed.
+     */
+    public static function finish_sdk_session(string $sessionkey): bool {
+        $config = config::get();
+
+        if (!config::is_configured($config)) {
+            // There is nothing to call, and no retry will supply a missing
+            // credential. Reported as settled so the ad-hoc task stops rather than
+            // retrying a misconfiguration every run until the queue is cleared.
+            debugging(
+                'availability_proctor: cannot finish session ' . $sessionkey . ', plugin is not configured.',
+                DEBUG_DEVELOPER
+            );
+            return true;
+        }
+
+        $url = sprintf(
+            '%s/api/v2/integration/simple/%s/sessions/%s/finish/',
+            config::server_origin($config),
+            rawurlencode($config->integrationname),
+            rawurlencode($sessionkey)
+        );
+
+        $curl = new \curl();
+        $curl->setHeader([
+            'Content-Type: application/json',
+            'Authorization: JWT ' . jwt::request_token($config->jwtsecret),
+        ]);
+
+        $response = $curl->post($url, '{}', [
+            'CURLOPT_TIMEOUT' => self::SDK_FINISH_TIMEOUT,
+            'CURLOPT_CONNECTTIMEOUT' => self::SDK_FINISH_TIMEOUT,
+        ]);
+
+        $info = $curl->get_info();
+        $status = (int) ($info['http_code'] ?? 0);
+
+        if ($status === 200) {
+            return true;
+        }
+
+        // 4xx means the server understood the request and refused it, so an
+        // identical repeat is refused identically -- only 5xx and transport
+        // failures are worth another attempt. Returning true on 4xx is what stops
+        // the ad-hoc task retrying a permanent refusal forever.
+        $retryable = $status === 0 || $status >= 500;
+
+        debugging(sprintf(
+            'availability_proctor: finish request for session %s returned %d (%s). %s',
+            $sessionkey,
+            $status,
+            $curl->error !== '' ? $curl->error : substr((string) $response, 0, 200),
+            $retryable ? 'Will retry.' : 'Not retrying.'
+        ), DEBUG_DEVELOPER);
+
+        return !$retryable;
     }
 
     /**
@@ -242,6 +349,27 @@ class client {
             }
         }
 
+        // Enforce rule -> warning suppression: when an "allow" rule is on,
+        // the corresponding warning is forced off in the API payload regardless
+        // of what is stored on the condition. Source of truth lives on preset.
+        $rules = (array) $conditiondata['rules'];
+        $warnings = (array) $conditiondata['warnings'];
+        foreach (preset::RULE_WARNING_MAP as $rkey => $wkey) {
+            if (!empty($rules[$rkey])) {
+                $warnings[$wkey] = false;
+            }
+        }
+        $conditiondata['warnings'] = (object) $warnings;
+
+        // Demo exams must never be connected to a live proctor, regardless of
+        // the preset's configured proctoring mode. This avoids proctoring
+        // costs on sessions that produce no recording (see CONTRIB ticket
+        // for demo exam mode / post-exam review override).
+        $proctoringmode = $conditiondata['mode'];
+        if (!empty($conditiondata['istrial'])) {
+            $proctoringmode = 'offline';
+        }
+
         $data = [
             'accountId' => $this->accountid,
             'accountName' => $this->accountname,
@@ -249,7 +377,7 @@ class client {
             'examName' => $cm->name,
             'courseName' => $course->fullname,
             'courseCode' => $course->shortname,
-            'duration' => $conditiondata['duration'],
+            'duration' => common::get_quiz_time_limit($cm),
             'schedule' => false,
             'proctoring' => $conditiondata['mode'],
             'userAgreementUrl' => $conditiondata['useragreementurl'],
@@ -277,6 +405,12 @@ class client {
             ),
         ];
 
+        // Assigned proctors (Live review mode only). condition::to_json() already
+        // nulls this out for non-online modes, so only attach when present.
+        if (!empty($conditiondata['proctoremails'])) {
+            $data['proctorEmails'] = $conditiondata['proctoremails'];
+        }
+
         return $data;
     }
 
@@ -296,10 +430,12 @@ class client {
         $profileimageurl = $userpicture->get_url($PAGE)->out(false);
 
         $special = null;
-        foreach(profile_get_user_fields_with_data($user->id) as $field) {
-            // Use the record property instead of get_shortname(): the getter
-            // only exists since Moodle 3.11 and fatals on older versions.
-            if($field->field->shortname != "proctor_special_accommodations") {
+        foreach (profile_get_user_fields_with_data($user->id) as $field) {
+            // Read the record property rather than calling get_shortname(): the
+            // getter only exists from Moodle 3.11 and is a fatal error below it.
+            // See AP-11152 -- this is the crash that fix was for, and the ported
+            // tree had reintroduced it.
+            if ($field->field->shortname != "proctor_special_accommodations") {
                 continue;
             }
 
