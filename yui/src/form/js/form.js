@@ -1121,8 +1121,6 @@ M.availability_proctor.form.getNode = function(json) {
         setSelect('calculator', preset.calculator);
         setSelect('auxiliarycamera', asBool(preset.auxiliarycamera) ? '1' : '0');
 
-        setCheckbox('scheduling_required', preset.schedulingrequired);
-        setCheckbox('auto_rescheduling', preset.autorescheduling);
         setCheckbox('sendmanualwarningstolearner', preset.sendmanualwarningstolearner);
         setCheckbox('checkidphotoquality', preset.checkidphotoquality);
         setCheckbox('preliminarycheck', preset.preliminarycheck);
@@ -1373,8 +1371,11 @@ M.availability_proctor.form.getNode = function(json) {
         M.availability_proctor.form.fillValue(current, node);
         var payload = {
             mode: current.mode,
-            schedulingrequired: current.scheduling_required,
-            autorescheduling: current.auto_rescheduling,
+            // Both features are off: the form has no control for them and
+            // condition::save() writes false regardless. Kept in the payload
+            // because the preset table still has the columns.
+            schedulingrequired: false,
+            autorescheduling: false,
             sendmanualwarningstolearner: current.sendmanualwarningstolearner,
             identification: current.identification,
             checkidphotoquality: current.checkidphotoquality,
