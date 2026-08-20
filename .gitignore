@@ -5,6 +5,7 @@ releases
 .cursor
 .claude
 .vscode
+ci
 openspec
 *.swp
 *.swo
@@ -15,8 +16,8 @@ plans/
 CLAUDE.md
 CLAUDE.local.md
 
-# Per-brand overlay sources are kept outside this repository; utils/release.py
-# builds the plain Constructor package when they are absent.
+# Per-brand overlay sources. Not part of this package: utils/release.py builds the
+# plain Constructor plugin, and applies an overlay only where one is present.
 branding
 
 # Local Moodle dev stand: per-version source clones and state (dev/README.md).
