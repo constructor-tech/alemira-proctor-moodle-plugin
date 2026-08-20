@@ -101,8 +101,8 @@ IGNORE_PATHS = [
 APPEND_FILES = ['.htaccess']
 
 argument_list = sys.argv[1:]
-short_options = 'hvb:'
-long_options = ['help', 'verbose', 'brand=']
+short_options = 'hvfb:'
+long_options = ['help', 'verbose', 'force', 'brand=']
 
 
 def replace(string, replacements):
@@ -112,10 +112,14 @@ def replace(string, replacements):
 
 
 def display_help():
-    print('Usage: release.py [-v] [-b BRAND]')
+    print('Usage: release.py [-v] [-f] [-b BRAND]')
     print('  -v --verbose          Verbose file-by-file output')
+    print('  -f --force            Overwrite an archive that already exists for this version')
     print('  -b BRAND --brand BRAND  Build only this brand (default: build every brand)')
     print('Available brands: ' + ', '.join(BRANDS.keys()))
+    print('')
+    print('The version comes from version.php and is never modified by this script.')
+    print('Bump it yourself before cutting a new release.')
 
 
 def get_version():
@@ -128,48 +132,8 @@ def get_version():
     return match.group(1)
 
 
-def increment_version():
-    """Bump $plugin->version by 1 in version.php and return the new value as a string."""
-    with open('version.php', 'r', encoding='utf-8') as f:
-        content = f.read()
-    pattern = r'(plugin->version\s*=\s*)(\d+)'
-    match = re.search(pattern, content)
-    if not match:
-        print("Can't find version in version.php")
-        sys.exit(1)
-    new_version = int(match.group(2)) + 1
-    new_content = re.sub(pattern, f'\\g<1>{new_version}', content)
-    with open('version.php', 'w', encoding='utf-8') as f:
-        f.write(new_content)
-    print(f"Version incremented: {match.group(2)} -> {new_version}")
-    return str(new_version)
-
-
 def archive_path(brand_id, version):
     return f'releases/{brand_id}-{version}.zip'
-
-
-def ask_yes_no(question, default='y'):
-    valid = {'yes': True, 'y': True, 'ye': True, 'no': False, 'n': False}
-    default_answer = (default == 'y')
-    prompt = ' [Y/n] ' if default_answer else ' [y/N] '
-
-    if not sys.stdin.isatty():
-        print(question + prompt + f"(auto-answer: {'yes' if default_answer else 'no'})")
-        return default_answer
-
-    while True:
-        print(question + prompt, end='')
-        try:
-            choice = input().lower().strip()
-        except EOFError:
-            print(f"(auto-answer: {'yes' if default_answer else 'no'})")
-            return default_answer
-        if choice == '':
-            return default_answer
-        if choice in valid:
-            return valid[choice]
-        print("Please respond with 'yes' or 'no' (or 'y' or 'n').")
 
 
 def collect_source_files():
@@ -275,7 +239,7 @@ def build_brand(brand_id, brand_config, version, source_files, verbose):
     return artifact
 
 
-def run(only_brand=None, verbose=False):
+def run(only_brand=None, verbose=False, force=False):
     brands_to_build = list(BRANDS.keys())
     if only_brand is not None:
         if only_brand not in BRANDS:
@@ -285,14 +249,23 @@ def run(only_brand=None, verbose=False):
 
     version = get_version()
 
+    # An archive already at this version means either version.php was not bumped
+    # or the same version is being rebuilt on purpose. Both are the operator's
+    # call, so stop and say so rather than deciding.
+    #
+    # This script used to bump version.php itself here, gated on a yes/no prompt
+    # that auto-answered yes when stdin was not a terminal -- so any scripted or
+    # piped build silently rewrote a tracked file. In Moodle $plugin->version is
+    # the upgrade ladder: a phantom bump that gets committed makes every site run
+    # an empty upgrade and burns a number a real savepoint can no longer use.
     existing = [b for b in brands_to_build if os.path.exists(archive_path(b, version))]
-    if existing:
-        print(f"Archives already exist at version {version} for: {', '.join(existing)}")
-        if ask_yes_no('Increment version and rebuild all selected brands?', default='y'):
-            version = increment_version()
-        else:
-            print('Cancelled by user')
-            sys.exit(0)
+    if existing and not force:
+        print(f"An archive already exists at version {version} for: {', '.join(existing)}")
+        print('')
+        print('  version.php is left alone by this script. Either bump')
+        print(f"  $plugin->version past {version} and run again, or pass --force to")
+        print('  overwrite the existing archive at the same version.')
+        sys.exit(1)
 
     source_files = collect_source_files()
     if verbose:
@@ -330,6 +303,8 @@ def main():
             sys.exit(0)
         elif arg in ('-v', '--verbose'):
             opts['verbose'] = True
+        elif arg in ('-f', '--force'):
+            opts['force'] = True
         elif arg in ('-b', '--brand'):
             opts['only_brand'] = value
 
