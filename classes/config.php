@@ -314,10 +314,15 @@ class config {
         'alwaysShowChat' => false,
         'beforeExamList' => false,
         'desktopCheckFirst' => false,
-        // Not an empty default. Omitting the parameter does NOT mean "no workers
-        // disabled" -- the SDK disables these two itself. Recorded explicitly so a
-        // site can see what it is inheriting and change it.
-        'disabledWorkers' => ['watchUploading', 'ping'],
+        // Empty on purpose, and that is not the same as omitting the parameter.
+        // finalise_sdk_config() always sends this key, and the SDK's own default is
+        // ['watchUploading', 'ping'], so an empty list overrides that default and
+        // leaves every background check running. A deliberate departure from the
+        // documented default: this is a proctoring plugin, so a check is switched off
+        // only because an administrator decided to switch it off, on Constructor's
+        // advice. Nothing stored is affected -- no released version shipped this
+        // setting (see db/upgrade.php, savepoint 2026082000).
+        'disabledWorkers' => [],
         'experiment_watchWindowSize' => false,
         'focusRespectsRules' => true,
         'fullScreenWatchFocusAlert' => true,
@@ -327,7 +332,11 @@ class config {
         'observeWorkspace' => 15000,
         'openAgreementLinksInIframe' => false,
         'shouldEnableAudioNotification' => true,
-        'showFinishExamButtonForSessionsWithoutProctor' => true,
+        // No, against the SDK's own default of true. Submitting the quiz ends the
+        // proctoring session on its own, so the panel's button is a second way to
+        // stop rather than the only one, and a button that ends proctoring beside a
+        // quiz still open is the more confusing of the two states to land a learner in.
+        'showFinishExamButtonForSessionsWithoutProctor' => false,
         'showSyscheckSupportNew' => false,
         // No default in the Developer Guide: the SDK simply shows no link. An empty
         // string is therefore meaningfully different from any URL, and the key is
@@ -439,6 +448,54 @@ class config {
         'sdkshowsyschecksupportnew' => 'showSyscheckSupportNew',
         'sdksyscheckhelpurl' => 'syscheckHelpURL',
         'sdktranslationsoverride' => 'translationsOverride',
+    ];
+
+    /**
+     * How the SDK settings are grouped and ordered on the settings page.
+     *
+     * SITE_SDK_SETTINGS is the authoritative name-to-parameter map and is
+     * alphabetical, which is the wrong order to read a settings page in: it put
+     * disabledWorkers -- the one setting here that can leave an exam unmonitored --
+     * fifth of sixteen, between two cosmetic ones. This constant carries presentation
+     * only, so the two concerns cannot drift into a single list.
+     *
+     * The first group follows the learner's own path through the pre-exam check
+     * rather than the alphabet, and the two fields a site should not touch without
+     * advice from Constructor sit last.
+     *
+     * settings.php renders this constant and nothing else, so a name missing from it
+     * would not reach the page at all. Every name must also exist in
+     * SITE_SDK_SETTINGS.
+     *
+     * @var array Heading lang string identifier => ordered site setting names.
+     */
+    const SITE_SDK_GROUPS = [
+        'settings_sdk_group_before' => [
+            'sdkbeforeexamlist',
+            'sdkdesktopcheckfirst',
+            'sdkallowcameraselection',
+            'sdkobserveworkspace',
+            'sdkopenagreementlinksiniframe',
+            'sdkshowsyschecksupportnew',
+            'sdksyscheckhelpurl',
+        ],
+        'settings_sdk_group_during' => [
+            'sdkalwaysshowchat',
+            'sdkaudionotification',
+            'sdkshowfinishexambutton',
+        ],
+        'settings_sdk_group_violations' => [
+            'sdkfocusrespectsrules',
+            'sdkfullscreenwatchfocusalert',
+        ],
+        'settings_sdk_group_wording' => [
+            'sdkidentificationbullets',
+            'sdktranslationsoverride',
+        ],
+        'settings_sdk_group_advanced' => [
+            'sdkdisabledworkers',
+            'sdkexperimentwatchwindowsize',
+        ],
     ];
 
     /**

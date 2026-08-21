@@ -177,58 +177,79 @@ if ($hassiteconfig) {
 
             $yesno = [0 => new lang_string('no'), 1 => new lang_string('yes')];
 
-            foreach (\availability_proctor\config::SITE_SDK_SETTINGS as $name => $key) {
-                $stringid = \availability_proctor\config::SITE_SDK_STRINGS[$name];
-                $label = new lang_string($stringid, 'availability_proctor');
-                $desc = new lang_string($stringid . '_desc', 'availability_proctor');
-                $default = \availability_proctor\config::SDK_CONFIG[$key] ?? null;
+            // Rendered group by group rather than straight down SITE_SDK_SETTINGS.
+            // That map is alphabetical, which put disabledWorkers -- the one setting
+            // here that can leave an exam unmonitored -- fifth of sixteen, between two
+            // cosmetic ones. SITE_SDK_GROUPS carries the reading order and the
+            // headings; SITE_SDK_SETTINGS stays the name-to-parameter map.
+            foreach (\availability_proctor\config::SITE_SDK_GROUPS as $groupstring => $names) {
+                $pluginsettings->add(new admin_setting_heading(
+                    'availability_proctor/' . $groupstring,
+                    new lang_string($groupstring, 'availability_proctor'),
+                    ''
+                ));
 
-                if (is_bool($default)) {
-                    $pluginsettings->add(new admin_setting_configselect(
-                        'availability_proctor/' . $name,
-                        $label,
-                        $desc,
-                        $default ? 1 : 0,
-                        $yesno
-                    ));
-                    continue;
-                }
+                foreach ($names as $name) {
+                    // A name here with no entry in SITE_SDK_SETTINGS is a typo in this
+                    // plugin, not a site's problem: skip it rather than raise a notice
+                    // across the whole settings page.
+                    $key = \availability_proctor\config::SITE_SDK_SETTINGS[$name] ?? null;
+                    if ($key === null) {
+                        continue;
+                    }
 
-                if ($key === \availability_proctor\config::ROOM_SCAN_SETTING) {
-                    // Seconds on this page, milliseconds on the wire; sdk_config()
-                    // multiplies. 0 is a real choice meaning "no Room Scan screen".
+                    $stringid = \availability_proctor\config::SITE_SDK_STRINGS[$name];
+                    $label = new lang_string($stringid, 'availability_proctor');
+                    $desc = new lang_string($stringid . '_desc', 'availability_proctor');
+                    $default = \availability_proctor\config::SDK_CONFIG[$key] ?? null;
+
+                    if (is_bool($default)) {
+                        $pluginsettings->add(new admin_setting_configselect(
+                            'availability_proctor/' . $name,
+                            $label,
+                            $desc,
+                            $default ? 1 : 0,
+                            $yesno
+                        ));
+                        continue;
+                    }
+
+                    if ($key === \availability_proctor\config::ROOM_SCAN_SETTING) {
+                        // Seconds on this page, milliseconds on the wire; sdk_config()
+                        // multiplies. 0 is a real choice meaning "no Room Scan screen".
+                        $pluginsettings->add(new admin_setting_configtext(
+                            'availability_proctor/' . $name,
+                            $label,
+                            $desc,
+                            (string) (int) ($default / \availability_proctor\config::ROOM_SCAN_SCALE),
+                            PARAM_INT,
+                            6
+                        ));
+                        continue;
+                    }
+
+                    if (is_array($default)) {
+                        // disabledWorkers is one worker name per line; the other two
+                        // are nested language-keyed JSON. Both are read back by
+                        // config::cast_sdk_value(), which decides on the content.
+                        $pluginsettings->add(new admin_setting_configtextarea(
+                            'availability_proctor/' . $name,
+                            $label,
+                            $desc,
+                            implode("\n", $default),
+                            PARAM_RAW
+                        ));
+                        continue;
+                    }
+
                     $pluginsettings->add(new admin_setting_configtext(
                         'availability_proctor/' . $name,
                         $label,
                         $desc,
-                        (string) (int) ($default / \availability_proctor\config::ROOM_SCAN_SCALE),
-                        PARAM_INT,
-                        6
+                        (string) $default,
+                        PARAM_RAW_TRIMMED
                     ));
-                    continue;
                 }
-
-                if (is_array($default)) {
-                    // disabledWorkers is one worker name per line; the other two are
-                    // nested language-keyed JSON. Both are read back by
-                    // config::cast_sdk_value(), which decides on the content.
-                    $pluginsettings->add(new admin_setting_configtextarea(
-                        'availability_proctor/' . $name,
-                        $label,
-                        $desc,
-                        implode("\n", $default),
-                        PARAM_RAW
-                    ));
-                    continue;
-                }
-
-                $pluginsettings->add(new admin_setting_configtext(
-                    'availability_proctor/' . $name,
-                    $label,
-                    $desc,
-                    (string) $default,
-                    PARAM_RAW_TRIMMED
-                ));
             }
         }
     }
