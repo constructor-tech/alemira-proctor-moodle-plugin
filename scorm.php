@@ -29,7 +29,7 @@
 require_once('../../../config.php');
 
 $id                 = required_param('id', PARAM_INT);
-$proctor_accesscode = required_param('proctor_accesscode', PARAM_RAW);
+$proctor_accesscode = required_param('proctor_accesscode', PARAM_ALPHANUM);
 
 require_login();
 

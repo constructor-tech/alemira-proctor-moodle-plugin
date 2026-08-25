@@ -25,7 +25,7 @@
 require_once('../../../config.php');
 
 $token = optional_param('token', null, PARAM_ALPHANUM);
-$accesscode = required_param('proctor_accesscode', PARAM_RAW);
+$accesscode = required_param('proctor_accesscode', PARAM_ALPHANUM);
 
 $seamlessauth = get_config('availability_proctor', 'seamless_auth');
 
