@@ -438,10 +438,7 @@ class preset {
         // so wrap them in a transaction to avoid leaving zero defaults if the
         // second statement fails.
         $transaction = $DB->start_delegated_transaction();
-        $DB->execute(
-            "UPDATE {" . self::TABLE . "} SET is_default = 0 WHERE type = ? AND id <> ?",
-            [self::TYPE_GLOBAL, $id]
-        );
+        $DB->set_field_select(self::TABLE, 'is_default', 0, 'type = ? AND id <> ?', [self::TYPE_GLOBAL, $id]);
         $DB->set_field(self::TABLE, 'is_default', 1, ['id' => $id]);
         $transaction->allow_commit();
     }
