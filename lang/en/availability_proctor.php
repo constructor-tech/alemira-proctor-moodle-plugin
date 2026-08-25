@@ -427,3 +427,4 @@ $string['privacy:metadata:availability_proctor_presets:warnings'] = 'Warning vis
 $string['privacy:metadata:availability_proctor_presets:scoring'] = 'Scoring parameters configured in the preset.';
 $string['privacy:metadata:availability_proctor_presets:timecreated'] = 'Time when the preset was created.';
 $string['privacy:metadata:availability_proctor_presets:timemodified'] = 'Time when the preset was last modified.';
+$string['cachedef_session'] = 'Per-session proctoring state (active accesscode, reset flag).';
