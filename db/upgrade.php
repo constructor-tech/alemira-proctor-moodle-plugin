@@ -31,7 +31,7 @@ function xmldb_availability_proctor_upgrade($oldversion) {
     global $DB;
     $dbman = $DB->get_manager();
 
-    if ($oldversion < 2026082601) {
+    if ($oldversion < 2026082801) {
         // Create the new presets table.
         $table = new xmldb_table('availability_proctor_presets');
         if (!$dbman->table_exists($table)) {
@@ -74,16 +74,16 @@ function xmldb_availability_proctor_upgrade($oldversion) {
             $dbman->create_table($table);
         }
 
-        upgrade_plugin_savepoint(true, 2026082601, 'availability', 'proctor');
+        upgrade_plugin_savepoint(true, 2026082801, 'availability', 'proctor');
     }
 
-    if ($oldversion < 2026082602) {
+    if ($oldversion < 2026082802) {
         // Seed the three recommended starter presets (idempotent).
         \availability_proctor\preset::seed_initial_presets();
-        upgrade_plugin_savepoint(true, 2026082602, 'availability', 'proctor');
+        upgrade_plugin_savepoint(true, 2026082802, 'availability', 'proctor');
     }
 
-    if ($oldversion < 2026082603) {
+    if ($oldversion < 2026082803) {
         // Rename previously-seeded system presets from their localized names
         // to locale-independent canonicals, so future upgrades dedupe correctly
         // regardless of $CFG->lang. Only matches rows still bearing a known
@@ -117,7 +117,7 @@ function xmldb_availability_proctor_upgrade($oldversion) {
                 $params
             );
         }
-        upgrade_plugin_savepoint(true, 2026082603, 'availability', 'proctor');
+        upgrade_plugin_savepoint(true, 2026082803, 'availability', 'proctor');
     }
 
     return true;
