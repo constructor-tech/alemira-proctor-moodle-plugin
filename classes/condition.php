@@ -304,7 +304,7 @@ class condition extends \core_availability\condition {
         }
 
         foreach (self::BOOL_DEFAULTS as $key => $default) {
-            $this->$key = isset($structure->$key) ? $structure->$key : $default;
+            $this->$key = isset($structure->$key) ? (bool) $structure->$key : $default;
         }
         if (isset($structure->allowtouseadditionalresources)) {
             $this->allowtouseadditionalresources = (bool) $structure->allowtouseadditionalresources;
@@ -385,6 +385,8 @@ class condition extends \core_availability\condition {
                 // class; preset::decode() returns them as arrays, so cast back.
                 if (in_array($key, ['rules', 'warnings', 'scoring'], true)) {
                     $value = (object) (is_array($value) ? $value : (array) $value);
+                } else if (array_key_exists($key, self::BOOL_DEFAULTS)) {
+                    $value = (bool) $value;
                 }
                 $this->$key = $value;
             }
