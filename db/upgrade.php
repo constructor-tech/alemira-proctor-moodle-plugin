@@ -109,11 +109,11 @@ function xmldb_availability_proctor_upgrade($oldversion) {
             list($insql, $params) = $DB->get_in_or_equal($aliases, SQL_PARAMS_NAMED, 'alias');
             $params['type'] = 'global';
             $params['issystem'] = 1;
-            $params['newname'] = $canonical;
-            $DB->execute(
-                "UPDATE {availability_proctor_presets}
-                    SET name = :newname
-                  WHERE type = :type AND is_system = :issystem AND name $insql",
+            $DB->set_field_select(
+                'availability_proctor_presets',
+                'name',
+                $canonical,
+                "type = :type AND is_system = :issystem AND name $insql",
                 $params
             );
         }
