@@ -82,7 +82,8 @@ class hooks {
             if (!$html) {
                 $html .= utils::get_lockdown_css();
             }
-            $html .= utils::get_hide_chrome_js();
+            $html .= utils::get_hide_chrome_css();
+            $PAGE->requires->js_call_amd('availability_proctor/hidechrome', 'init');
         }
 
         if ($hook) {

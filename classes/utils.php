@@ -180,7 +180,7 @@ class utils {
      * Runs after DOMContentLoaded and again after short delays to override
      * any Moodle JS that reopens the drawer.
      */
-    public static function get_hide_chrome_js() {
+    public static function get_hide_chrome_css() {
         // CSS injected immediately via a <style> element — no body class required,
         // no DOMContentLoaded wait. Covers first paint before any JS runs.
         $immediate_css =
@@ -196,50 +196,11 @@ class utils {
             'margin-top:0!important;padding-top:0!important;' .
             'width:100%!important;max-width:100%!important}';
 
-        return '<style>' . $immediate_css . '</style>' .
-            '<script>(function(){' .
-            'var HIDE=[' .
-                '"#nav-drawer","[data-region=\'drawer\']","[data-region=\'fixed-drawer\']",' .
-                '".drawer",".drawer-left",".drawer-left-toggle",".drawer-toggles",' .
-                '"button[data-toggler=\'drawers\']",".drawercontent",' .
-                '"#page-header","header#page-header","header.navbar","nav.navbar",".navbar",' .
-                '"#page-navbar",".secondary-navigation",".tertiary-navigation",' .
-                '".activity-navigation","[data-region=\'blocks-column\']"' .
-            '];' .
-            'var FIX=["#page","#page-wrapper","#page-content",".main-inner"];' .
-            'function hide(){' .
-                'HIDE.forEach(function(s){' .
-                    'try{document.querySelectorAll(s).forEach(function(el){' .
-                        'el.style.setProperty("display","none","important");' .
-                        'el.style.setProperty("visibility","hidden","important");' .
-                    '});}catch(e){}' .
-                '});' .
-                'if(document.body){' .
-                    'document.body.classList.remove("drawer-open-left","drawer-open-right");' .
-                '}' .
-                'FIX.forEach(function(s){' .
-                    'try{var el=document.querySelector(s);if(el){' .
-                        'el.style.setProperty("margin-left","0","important");' .
-                        'el.style.setProperty("padding-left","0","important");' .
-                        'el.style.setProperty("margin-top","0","important");' .
-                        'el.style.setProperty("padding-top","0","important");' .
-                        'el.style.setProperty("width","100%","important");' .
-                        'el.style.setProperty("max-width","100%","important");' .
-                    '}}catch(e){}' .
-                '});' .
-            '}' .
-            'hide();' .
-            'document.addEventListener("DOMContentLoaded",function(){' .
-                'hide();' .
-                'setTimeout(hide,300);setTimeout(hide,800);setTimeout(hide,2000);' .
-                'var obs=new MutationObserver(function(){hide();});' .
-                'obs.observe(document.documentElement,{childList:true,subtree:true});' .
-            '});' .
-            '})()</script>';
+        return '<style>' . $immediate_css . '</style>';
     }
 
     // Client-side CSS/JS lockdown only — a determined user can still navigate via direct URL.
-    // The MutationObserver in get_hide_chrome_js() re-hides elements on every DOM change;
+    // The MutationObserver in amd/src/hidechrome.js re-hides elements on every DOM change;
     // keep the selector list tight to limit observer callback cost on content-heavy pages.
     public static function get_lockdown_css() {
         $css = <<<CSS
@@ -514,7 +475,7 @@ CSS;
      * @return string HTML output for the fader overlay
      */
     public static function handle_proctoring_fader_scorm($cm) {
-        global $USER;
+        global $USER, $PAGE;
 
         $courseid = $cm->course;
         $modinfo = get_fast_modinfo($courseid);
@@ -558,8 +519,9 @@ CSS;
 
         $entryisactive = in_array($entry->status, ['started', 'scheduled', 'new']);
 
-        // Always inject chrome-hiding JS when user is on a proctored SCORM page.
-        $output .= self::get_hide_chrome_js();
+        // Always inject chrome-hiding CSS (immediate paint) + JS (re-hide on DOM changes).
+        $output .= self::get_hide_chrome_css();
+        $PAGE->requires->js_call_amd('availability_proctor/hidechrome', 'init');
 
         if ($entryisactive) {
             $formdata = $client->get_form('start', $data);
@@ -768,7 +730,7 @@ CSS;
      * @return string HTML output for the fader overlay
      */
     public static function handle_proctoring_fader_assign($cm) {
-        global $USER;
+        global $USER, $PAGE;
 
         $courseid = $cm->course;
         $modinfo = get_fast_modinfo($courseid);
@@ -812,8 +774,9 @@ CSS;
 
         $entryisactive = in_array($entry->status, ['started', 'scheduled', 'new']);
 
-        // Always inject chrome-hiding JS when user is on a proctored assign page.
-        $output .= self::get_hide_chrome_js();
+        // Always inject chrome-hiding CSS (immediate paint) + JS (re-hide on DOM changes).
+        $output .= self::get_hide_chrome_css();
+        $PAGE->requires->js_call_amd('availability_proctor/hidechrome', 'init');
 
         if ($entryisactive) {
             $formdata = $client->get_form('start', $data);
