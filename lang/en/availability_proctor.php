@@ -33,6 +33,7 @@ $string['description'] = 'Allows students to use Constructor Proctor';
 $string['title'] = 'Constructor Proctor';
 
 $string['error_no_entry_found'] = 'No exam entry found by accesscode';
+$string['error_proctoring_disabled'] = 'Proctoring is no longer enabled for this activity. Please contact your instructor.';
 $string['error_not_in_range'] = 'This value should be between %d and %d';
 $string['error_setduration'] = 'Duration must be a multiple of 30';
 $string['error_preset_cannot_delete'] = 'This preset cannot be deleted (it is the system preset, the last remaining preset, or is in use by an exam).';

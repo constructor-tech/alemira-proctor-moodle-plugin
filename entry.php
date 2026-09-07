@@ -34,7 +34,14 @@ if ($seamlessauth && $token) {
     if (!$entry = $DB->get_record('availability_proctor_entries', ['accesscode' => $accesscode])) {
         throw new \moodle_exception('error_no_entry_found', 'availability_proctor');
     }
-
+    // Proctoring may have been disabled/removed from this course module since the
+    // token was issued (tokens are valid for up to 8 hours) — refuse a stale token
+    // rather than logging the user in under a restriction that's no longer active.
+    $modinfo = get_fast_modinfo($entry->courseid);
+    $cm = $modinfo->get_cm($entry->cmid);
+    if (!\availability_proctor\condition::get_proctor_condition($cm)) {
+        throw new \moodle_exception('error_proctoring_disabled', 'availability_proctor');
+    }
     $key = validate_user_key($token, 'availability_proctor', $entry->id);
 
     if (!$user = $DB->get_record('user', ['id' => $key->userid])) {

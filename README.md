@@ -23,6 +23,7 @@ upload the ZIP file and install it.
 3. Choose value for `Send user emails to Constructor Proctor` field, if disabled, Proctor will not receive emails of learners.
 4. Choose value for `Seemless authorization`, if enabled, Proctor will be able to authorize learners into moodle, 
    if disabled, users will have to login into modle inside proctoring.
+   - **Security note:** when enabled, a short-lived authentication token is issued per exam entry. Tokens are single-use (deleted immediately after login), expire after 8 hours, and are bound to the specific exam entry they were issued for. If proctoring is disabled or removed from the course module after a token was issued, the token is rejected at login time rather than being honored.
 
 ## Usage
 

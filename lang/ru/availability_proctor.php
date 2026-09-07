@@ -33,6 +33,7 @@ $string['pluginname'] = 'Constructor Proctor';
 $string['title'] = 'Constructor Proctor';
 
 $string['error_no_entry_found'] = 'No exam entry found by accesscode';
+$string['error_proctoring_disabled'] = 'Прокторинг для этого элемента курса больше не включён. Пожалуйста, обратитесь к преподавателю.';
 $string['error_not_in_range'] = 'Значение должно быть в диапазоне от %d до %d';
 $string['error_setduration'] = 'Длительность в минутах должна быть кратна 30 (30, 60, 90)';
 
