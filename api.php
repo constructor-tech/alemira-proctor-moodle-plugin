@@ -36,16 +36,27 @@ require_once('../../../config.php');
 
 global $DB;
 
-// Moodle has no wrapper for raw HTTP request headers; getallheaders() works
-// across supported SAPIs without touching server-level superglobals.
-// The endpoint authenticates via JWT verified below.
+// Moodle has no wrapper for raw HTTP request headers. Prefer getallheaders(),
+// but keep the server-variable fallback used by the Webapp integration: on
+// PHP-FPM before 7.3 getallheaders() is unavailable, and some web-server
+// configurations expose Authorization only through one of these variables.
 $headers = function_exists('getallheaders') ? getallheaders() : [];
 $auth = null;
-foreach ($headers as $hname => $hvalue) {
-    $lname = strtolower($hname);
-    if ($lname === 'authorization' || $lname === 'redirect-http-authorization') {
-        $auth = $hvalue;
-        break;
+if (is_array($headers)) {
+    foreach ($headers as $hname => $hvalue) {
+        $lname = strtolower($hname);
+        if ($lname === 'authorization' || $lname === 'redirect-http-authorization') {
+            $auth = $hvalue;
+            break;
+        }
+    }
+}
+
+if (empty($auth)) {
+    if (!empty($_SERVER['HTTP_AUTHORIZATION'])) {
+        $auth = $_SERVER['HTTP_AUTHORIZATION'];
+    } else if (!empty($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
+        $auth = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
     }
 }
 

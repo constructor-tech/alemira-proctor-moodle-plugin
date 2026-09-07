@@ -93,8 +93,8 @@ M.availability_proctor.form.getNode = function(json) {
     var customRulesId = id + '_customRules';
     var proctorEmailsId = id + '_proctorEmails';
 
-    // NTG-185: held as parallel arrays rather than as tabOne/tabTwo pairs, so a
-    // third tab needs no new variables and switchTab() no new branch.
+    // Held as parallel arrays so a brand that hides the second tab needs no
+    // separate switching branch.
     var tabBtnNodes = [], tabPanelNodes = [];
     var tabButtonOne, tabButtonTwo, tabOne, tabTwo;
 
@@ -106,16 +106,10 @@ M.availability_proctor.form.getNode = function(json) {
     // via DevTools, its submitted value is dropped server-side.
     var hiddenFields = this.hiddenFields || [];
 
-    // NTG-185: read here, beside hiddenFields, because 'this' is the form object
-    // only at the top of getNode -- the tab-building code further down runs inside
-    // closures where it is not.
     var formContext = this.context || {};
-    var sdkModel = !!formContext.sdk_model;
-    var sdkFields = formContext.sdk_per_quiz || [];
-    // What each field is preselected to when the exam has saved nothing of its own:
-    // 'yes'/'no' for the five booleans, a seconds count for Room Scan. Comes from
-    // the default preset (config::SDK_CONFIG is what seeds that preset), and loading
-    // a different preset moves the fields onto its values instead.
+    // SDK values are never rendered on this form. They are copied from a selected
+    // preset and retained as a hidden snapshot through unrelated activity edits.
+    var sdkFields = formContext.sdk_fields || [];
     var sdkDefaults = formContext.sdk_defaults || {};
     function isHidden(name) {
         return !!name && hiddenFields.indexOf(name) !== -1;
@@ -124,41 +118,6 @@ M.availability_proctor.form.getNode = function(json) {
     function getString(identifier, module) {
         module = module || 'availability_proctor';
         return M.util.get_string(identifier, module);
-    }
-
-    /**
-     * The label for the inherit option: "Use the default (No)", or for Room Scan
-     * "Use the default (15 seconds)".
-     *
-     * Naming the value is the point. "Use the default" alone left the teacher
-     * unable to tell which way the exam would behave, and that is what led to the
-     * option being dropped for a plain Yes/No pair -- which in turn froze every
-     * field on the exam the first time the form was saved.
-     *
-     * @param {string} fieldName Condition property name, e.g. sdkalwaysshowchat.
-     * @return {string}
-     */
-    function sdkInheritLabel(fieldName) {
-        var value = sdkDefaults[fieldName];
-
-        if (fieldName === 'sdkobserveworkspace') {
-            if (value === undefined || value === null || value === '') {
-                return getString('sdk_inherit');
-            }
-            // 0 needs saying in words: "0 seconds" reads as "no wait" rather than
-            // "no Room Scan screen at all".
-            if (parseInt(value, 10) === 0) {
-                return getString('sdk_inherit_no_room_scan');
-            }
-            return M.util.get_string('sdk_inherit_seconds', 'availability_proctor', value);
-        }
-
-        if (value !== 'yes' && value !== 'no') {
-            return getString('sdk_inherit');
-        }
-
-        return M.util.get_string('sdk_inherit_value', 'availability_proctor',
-            getString(value === 'yes' ? 'yes' : 'no', 'core'));
     }
 
     function moreLess(content) {
@@ -481,93 +440,15 @@ M.availability_proctor.form.getNode = function(json) {
     ).appendTo(node);
 
     // Tab 2 holds the warnings + scoring sections. If both are hidden by
-    // brand visibility, htmlTwo is empty — render only tab 1 inline and skip
-    // the tab nav buttons altogether.
+    // brand visibility, render only tab 1 and skip the tab navigation.
     var hasTabTwo = htmlTwo.length > 0;
-
-    // NTG-185: the SDK parameter tab. Rendered only under the SDK proctoring model --
-    // under the hosted one Constructor's own page supplies these values and nothing
-    // this plugin sends carries them, so the tab would be six controls that do
-    // nothing.
-    //
-    // Every field is three-state: '' takes the preset's value, 'yes'/'no' override
-    // it. A checkbox cannot express that -- an unticked box and an untouched box both
-    // submit the same thing -- and an untouched field has to fall through to the
-    // preset, not to false.
-    var htmlThree = '';
-    if (sdkModel && sdkFields.length) {
-        htmlThree += sectionHeader(getString('preset_section_sdk'), 'preset_section_sdk');
-        htmlThree += '<div class="text-muted small mb-2">' + getString('sdk_section_hint') + '</div>';
-
-        // Keyed by the condition property name, so the order and the set come from
-        // config::SDK_PER_QUIZ rather than being repeated here.
-        var sdkLabels = {
-            sdkallowcameraselection: 'settings_sdk_allowcameraselection',
-            sdkalwaysshowchat: 'settings_sdk_alwaysshowchat',
-            sdkfocusrespectsrules: 'settings_sdk_focusrespectsrules',
-            sdkfullscreenwatchfocusalert: 'settings_sdk_fullscreenwatchfocusalert',
-            sdkobserveworkspace: 'settings_sdk_observeworkspace',
-            sdkshowfinishexambutton: 'settings_sdk_showfinishexambuttonforsessionswithoutproctor'
-        };
-
-        for (var sf = 0; sf < sdkFields.length; sf++) {
-            var fname = sdkFields[sf];
-            var fkey = sdkLabels[fname];
-            if (!fkey) {
-                continue;
-            }
-            var fid = id + '_' + fname;
-
-            // The label and its explanation are separate strings. Passing the label
-            // key here made the help icon repeat the label the teacher had just
-            // read; the '_help' variant is the one that explains the parameter.
-            var fhint = fkey + '_help';
-
-            // Three-state, and the empty option names the value it stands for --
-            // "Use the default (No)" rather than a bare "Use the default".
-            //
-            // The empty option is what keeps this exam following the site setting.
-            // A plain Yes/No pair cannot: every select posts a value, so saving the
-            // form once wrote all six onto the exam, and an administrator who later
-            // changed a site setting found the exam ignoring it. Measured on
-            // 2026-08-20 -- a teacher who set only "let learners choose a camera"
-            // also froze that exam's Room Scan duration at whatever it happened to
-            // show.
-            var fdefault = sdkDefaults[fname];
-
-            if (fname === 'sdkobserveworkspace') {
-                // Seconds, as a number rather than a list: this one is not a yes/no
-                // at all, and 0 is a real choice meaning "skip the Room Scan screen".
-                // An empty box is the inherit state, so the placeholder names the
-                // value it would take.
-                htmlThree += formGroup(fid, getString(fkey),
-                    '<input type="number" min="0" name="' + fname + '" id="' + fid + '"' +
-                    ' class="form-control" style="max-width:16em"' +
-                    ' placeholder="' + sdkInheritLabel(fname) + '">',
-                    false, fname, fhint);
-            } else {
-                htmlThree += formGroup(fid, getString(fkey),
-                    '<select name="' + fname + '" id="' + fid + '" class="custom-select">' +
-                    '  <option value="" selected="selected">' + sdkInheritLabel(fname) + '</option>' +
-                    '  <option value="yes">' + getString('yes', 'core') + '</option>' +
-                    '  <option value="no">' + getString('no', 'core') + '</option>' +
-                    '</select>',
-                    false, fname, fhint);
-            }
-        }
-    }
-    var hasTabThree = htmlThree.length > 0;
 
     var tabButtons = Y.Node.create(
         '<div style="position:absolute; top: 0; right: 0;" class="availability_proctor-tab-btns"></div>'
     ).appendTo(node);
     tabButtonOne = Y.Node.create('<a href="#" class="btn btn-primary">1</a>').appendTo(tabButtons);
     tabButtonTwo = Y.Node.create('<a href="#" class="btn btn-secondary">2</a>').appendTo(tabButtons);
-    var tabButtonThree = null;
-    if (hasTabThree) {
-        tabButtonThree = Y.Node.create('<a href="#" class="btn btn-secondary">3</a>').appendTo(tabButtons);
-    }
-    if (!hasTabTwo && !hasTabThree) {
+    if (!hasTabTwo) {
         tabButtons.setStyle('display', 'none');
     }
 
@@ -576,11 +457,6 @@ M.availability_proctor.form.getNode = function(json) {
 
     tabBtnNodes = [tabButtonOne, tabButtonTwo];
     tabPanelNodes = [tabOne, tabTwo];
-    if (hasTabThree) {
-        var tabThree = Y.Node.create('<div class="tab_content hidden">' + htmlThree + '</div>').appendTo(node);
-        tabBtnNodes.push(tabButtonThree);
-        tabPanelNodes.push(tabThree);
-    }
 
     // Save-as-personal-preset toolbar (below the form, in tab one).
     var saveBar = Y.Node.create(
@@ -637,34 +513,19 @@ M.availability_proctor.form.getNode = function(json) {
         }
     }
 
-    // ---- Hydrate inputs from json ----
-    // NTG-185: restore the six SDK overrides this exam saved. Without this an exam
-    // would reopen on "Use the default" whatever the teacher had chosen -- the value
-    // reaches the database correctly and then appears to have been lost, because the
-    // form is the only place a teacher can see it.
-    //
-    // Driven off the same sdkFields list the tab was built from, so a field cannot be
-    // rendered without also being restored.
+    // ---- Hydrate inputs and the hidden SDK snapshot from json ----
+    var sdkSnapshot = {};
+    var sdkSnapshotComplete = true;
     for (var sr = 0; sr < sdkFields.length; sr++) {
         var sName = sdkFields[sr];
-        var sVal = json[sName];
-
-        // Nothing saved: the field stays on "Use the default", which is what keeps
-        // this exam following the site setting.
-        if (sVal === undefined || sVal === null || sVal === '') {
-            continue;
+        if (json[sName] === undefined || json[sName] === null) {
+            sdkSnapshotComplete = false;
         }
-
-        if (sName === 'sdkobserveworkspace') {
-            // A number input, not a select. '0' must survive: it is a real choice
-            // meaning "skip the Room Scan screen".
-            var sNum = node.one('input[name=' + sName + ']');
-            if (sNum) { sNum.set('value', sVal); }
-        } else {
-            var sOpt = node.one('select[name=' + sName + '] option[value=' + sVal + ']');
-            if (sOpt) { sOpt.set('selected', 'selected'); }
-        }
+        sdkSnapshot[sName] = (json[sName] !== undefined && json[sName] !== null)
+            ? json[sName] : sdkDefaults[sName];
     }
+    node.setData('sdk-fields', sdkFields.slice(0));
+    node.setData('sdk-snapshot', sdkSnapshot);
 
     if (json.mode !== undefined) {
         var modeOpt = node.one('select[name=mode] option[value=' + json.mode + ']');
@@ -853,17 +714,21 @@ M.availability_proctor.form.getNode = function(json) {
     applyDependencies();
 
     // ---- Event wiring ----
-    node.delegate('valuechange', function() {
+    node.delegate('valuechange', function(e) {
         nextTick(function() { M.core_availability.form.update(); });
         applyDependencies();
-        clearLoadedNameOnEdit();
+        if (!e.target.ancestor('.proctor-save-panel')) {
+            clearLoadedNameOnEdit();
+        }
     }, 'input,textarea,select');
 
     // Native `change` event covers <select> reliably (valuechange is text-input only).
-    node.delegate('change', function() {
+    node.delegate('change', function(e) {
         nextTick(function() { M.core_availability.form.update(); });
         applyDependencies();
-        clearLoadedNameOnEdit();
+        if (!e.target.ancestor('.proctor-save-panel')) {
+            clearLoadedNameOnEdit();
+        }
     }, 'select');
 
     node.delegate('click', function() {
@@ -876,12 +741,6 @@ M.availability_proctor.form.getNode = function(json) {
         e.preventDefault();
         switchTab(1);
     });
-    if (tabButtonThree) {
-        tabButtonThree.on('click', function(e) {
-            e.preventDefault();
-            switchTab(3);
-        });
-    }
     tabButtonTwo.on('click', function(e) {
         e.preventDefault();
         switchTab(2);
@@ -1067,6 +926,7 @@ M.availability_proctor.form.getNode = function(json) {
 
     var loadedPresetName = null;
     var loadedPresetId = null;
+    var loadedPresetCustom = false;
     var suppressDirty = false;
 
     function setLoadedPresetId(id) {
@@ -1076,11 +936,13 @@ M.availability_proctor.form.getNode = function(json) {
         node.setAttribute('data-loaded-preset-id', loadedPresetId !== null ? String(loadedPresetId) : '');
     }
 
-    function setLoadedName(name) {
+    function setLoadedName(name, custom) {
         loadedPresetName = name || null;
+        loadedPresetCustom = !!custom;
         var label = node.one('.proctor-loaded-preset');
         if (!label) { return; }
-        var display = name ? escapeHtml(name) : escapeHtml(getString('loaded_preset_none'));
+        var display = loadedPresetCustom ? escapeHtml(getString('loaded_preset_custom')) :
+            (name ? escapeHtml(name) : escapeHtml(getString('loaded_preset_none')));
         label.setHTML(M.util.get_string('loaded_preset', 'availability_proctor', display));
     }
 
@@ -1088,8 +950,20 @@ M.availability_proctor.form.getNode = function(json) {
         if (suppressDirty) { return; }
         if (loadedPresetName !== null || loadedPresetId !== null) {
             setLoadedPresetId(null);
-            setLoadedName(null);
+            // The copied SDK snapshot and all other current values stay intact.
+            // Custom means an independent preset-derived configuration, not none.
+            setLoadedName(null, true);
         }
+    }
+
+    function setSdkSnapshot(source) {
+        var snapshot = {};
+        for (var si = 0; si < sdkFields.length; si++) {
+            var field = sdkFields[si];
+            snapshot[field] = (source[field] !== undefined && source[field] !== null)
+                ? source[field] : sdkDefaults[field];
+        }
+        node.setData('sdk-snapshot', snapshot);
     }
 
     function applyPresetToForm(preset) {
@@ -1134,28 +1008,9 @@ M.availability_proctor.form.getNode = function(json) {
         setText('allowedprocesses', preset.allowedprocesses);
         setText('forbiddenprocesses', preset.forbiddenprocesses);
 
-        // NTG-185: the six SDK values the exam can carry. Loading a preset moves the
-        // fields onto that preset's values, which is what makes the preset the
-        // exam's default -- from here the teacher edits away from it if they want to.
-        //
-        // A column that is somehow NULL leaves the field where it is: setSelect and
-        // setText both return early on null. Seeded presets always state a value
-        // (preset::default_field_values), so that is a fallback rather than a case
-        // the teacher meets.
-        //
-        // Driven off sdkFields so a field cannot be rendered on the tab without also
-        // being filled in from a preset; listing them by hand here is how the restore
-        // step came to be missing in the first place.
-        for (var sp = 0; sp < sdkFields.length; sp++) {
-            var spName = sdkFields[sp];
-            if (spName === 'sdkobserveworkspace') {
-                // A number input rather than a select, and '0' is a real value here --
-                // setText passes it through because it only skips null/undefined.
-                setText(spName, preset[spName]);
-            } else {
-                setSelect(spName, preset[spName]);
-            }
-        }
+        // Deliberately replace all sixteen values only on explicit preset selection.
+        // Later activity edits can clear preset_id but never mutate this snapshot.
+        setSdkSnapshot(preset);
 
         // Rules / warnings (objects).
         if (preset.rules) {
@@ -1182,7 +1037,7 @@ M.availability_proctor.form.getNode = function(json) {
         applyDependencies();
         nextTick(function() { M.core_availability.form.update(); });
         setLoadedPresetId(preset.id);
-        setLoadedName(preset.name || null);
+        setLoadedName(preset.name || null, false);
     }
 
     function findPreset(scope, id) {
@@ -1223,13 +1078,18 @@ M.availability_proctor.form.getNode = function(json) {
     // saved structure carries a preset_id, restore both the label and the
     // hidden id by looking up the preset in the global/user lists.
     setLoadedPresetId(null);
-    setLoadedName(null);
+    setLoadedName(null, false);
     if (json.preset_id) {
         var savedId = parseInt(json.preset_id);
         var savedPreset = findPreset('global', savedId) || findPreset('user', savedId);
         if (savedPreset) {
             setLoadedPresetId(savedId);
-            setLoadedName(savedPreset.name || null);
+            setLoadedName(savedPreset.name || null, false);
+            if (!sdkSnapshotComplete) {
+                // Compatibility fallback for a condition saved before snapshots
+                // existed. Complete snapshots are never refreshed on reload.
+                setSdkSnapshot(savedPreset);
+            }
         }
     }
 
@@ -1273,6 +1133,10 @@ M.availability_proctor.form.getNode = function(json) {
                 break;
             }
         }
+    } else if (loadedPresetId === null) {
+        // A saved unlinked condition is an independent configuration. This also
+        // covers a deleted personal preset whose copied values remain usable.
+        setLoadedName(null, true);
     }
 
     // Delete a personal preset — show inline confirmation next to the row.
@@ -1397,6 +1261,10 @@ M.availability_proctor.form.getNode = function(json) {
             warnings: current.warnings,
             scoring: current.scoring
         };
+        for (var spi = 0; spi < sdkFields.length; spi++) {
+            var snapshotField = sdkFields[spi];
+            payload[snapshotField] = current[snapshotField];
+        }
 
         showSaveStatus('…', false);
         require(['core/ajax'], function(Ajax) {
@@ -1450,20 +1318,13 @@ M.availability_proctor.form.fillValue = function(value, node) {
         value.preset_id = parseInt(pidAttr);
     }
 
-    // NTG-185: the six SDK overrides. s() returns '' for a field that is not in the
-    // DOM, which is exactly the inherit value -- so on a hosted site, where the tab is
-    // not rendered at all, every one of these reads as "take the preset's value" and
-    // nothing about the exam changes.
-    //
-    // Read unconditionally rather than behind a model check, because condition::save()
-    // rebuilds the stored JSON from scratch: a key it does not receive is destroyed on
-    // every activity edit, and that has already happened four times in this plugin.
-    value.sdkallowcameraselection = s('select[name=sdkallowcameraselection]');
-    value.sdkalwaysshowchat = s('select[name=sdkalwaysshowchat]');
-    value.sdkfocusrespectsrules = s('select[name=sdkfocusrespectsrules]');
-    value.sdkfullscreenwatchfocusalert = s('select[name=sdkfullscreenwatchfocusalert]');
-    value.sdkobserveworkspace = s('input[name=sdkobserveworkspace]');
-    value.sdkshowfinishexambutton = s('select[name=sdkshowfinishexambutton]');
+    // Carry the complete hidden SDK snapshot through every activity save. Only
+    // applyPresetToForm() replaces it, and only after an explicit preset choice.
+    var sdkFields = node.getData('sdk-fields') || [];
+    var sdkSnapshot = node.getData('sdk-snapshot') || {};
+    for (var si = 0; si < sdkFields.length; si++) {
+        value[sdkFields[si]] = sdkSnapshot[sdkFields[si]];
+    }
 
     value.mode = s('select[name=mode]');
     value.identification = s('select[name=identification]');

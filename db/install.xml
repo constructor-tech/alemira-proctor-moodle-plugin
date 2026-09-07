@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="availability/condition/proctor/db" VERSION="20260817" COMMENT="XMLDB file for Moodle availability/condition/proctor"
+<XMLDB PATH="availability/condition/proctor/db" VERSION="20260824" COMMENT="XMLDB file for Moodle availability/condition/proctor"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../../lib/xmldb/xmldb.xsd"
 >
@@ -35,6 +35,22 @@
         <FIELD NAME="rules" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON rules object"/>
         <FIELD NAME="warnings" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON warnings object"/>
         <FIELD NAME="scoring" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON scoring object"/>
+        <FIELD NAME="sdkallowcameraselection" TYPE="char" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sdkalwaysshowchat" TYPE="char" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sdkbeforeexamlist" TYPE="char" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sdkdesktopcheckfirst" TYPE="char" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sdkdisabledworkers" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="One SDK background worker name per line"/>
+        <FIELD NAME="sdkexperimentwatchwindowsize" TYPE="char" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sdkfocusrespectsrules" TYPE="char" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sdkfullscreenwatchfocusalert" TYPE="char" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sdkidentificationbullets" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON identification onboarding configuration"/>
+        <FIELD NAME="sdkobserveworkspace" TYPE="char" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sdkopenagreementlinksiniframe" TYPE="char" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sdkaudionotification" TYPE="char" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sdkshowfinishexambutton" TYPE="char" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sdkshowsyschecksupportnew" TYPE="char" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sdksyscheckhelpurl" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sdktranslationsoverride" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON SDK translation overrides"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
       </FIELDS>
@@ -78,10 +94,10 @@
         <INDEX NAME="accesscode" UNIQUE="true" FIELDS="accesscode"/>
       </INDEXES>
     </TABLE>
-    <TABLE NAME="availability_proctor_sess" COMMENT="One proctoring session per quiz attempt, for the SDK proctoring model only. The hosted model uses availability_proctor_entries instead. This is the only forensic record of what happened during a session, because the SDK exposes no error channel.">
+    <TABLE NAME="availability_proctor_sess" COMMENT="SDK proctoring sessions. One Moodle attempt may have sequential sessions after an instructor creates New entry. The Webapp model uses availability_proctor_entries instead. Each row is retained as forensic history because the SDK exposes no error channel.">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="attemptid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Nullable until the session binds to an attempt. The session is created before the attempt exists, because the learner is handed off to core's startattempt.php -- which runs the pre-flight chain (quiz password, SEB) and only then creates the attempt. See session::bind_attempt()."/>
+        <FIELD NAME="attemptid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Nullable until a normal launch binds to an attempt. Instructor-created New entries are pre-bound to the existing in-progress attempt so its answers and timer survive while Constructor receives a fresh sessionId."/>
         <FIELD NAME="quizid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="sessionkey" TYPE="char" LENGTH="230" NOTNULL="true" SEQUENCE="false" COMMENT="The sessionId JWT claim. 230 is the maximum the Developer Guide allows. Generated once and read back from this row on every relaunch -- never re-derived, because a reload must reuse the same sessionId."/>
@@ -114,11 +130,11 @@
       </KEYS>
       <INDEXES>
         <INDEX NAME="sessionkey" UNIQUE="true" FIELDS="sessionkey"/>
-        <INDEX NAME="attemptid" UNIQUE="false" FIELDS="attemptid" COMMENT="Not unique: the column is nullable, and databases disagree on whether a unique index permits several NULLs -- MySQL allows it, and that difference must not decide whether two unbound sessions can coexist. One-session-per-attempt is enforced instead by the conditional UPDATE in session::bind_attempt(), which is portable and also settles the race between two simultaneous binds."/>
+        <INDEX NAME="attemptid" UNIQUE="false" FIELDS="attemptid" COMMENT="Not unique: New entry intentionally creates sequential Constructor sessions for the same Moodle attempt, and normal launches also need multiple nullable unbound rows across users and quizzes."/>
         <INDEX NAME="quizid_userid_state" UNIQUE="false" FIELDS="quizid, userid, state" COMMENT="Supports the open-session lookup: does this learner have a live session for this quiz?"/>
       </INDEXES>
     </TABLE>
-    <TABLE NAME="availability_proctor_deny" COMMENT="Blocked access attempts under the SDK proctoring model. Detection only, never a control: it records that someone reached a guarded script without a valid session, after the fact. Separate from the session table because a denial can occur with no session row at all, which is the most interesting case, and because denials are high-volume and want pruning while session rows are evidence to keep. Note that this release ships no writer for this table -- see the note in classes/session.php::record_denial().">
+    <TABLE NAME="availability_proctor_deny" COMMENT="Blocked access attempts under the SDK proctoring model. Separate from the session table because a denial can occur with no session row at all, which is the most interesting case, and because denials are high-volume and want pruning while session rows are evidence to keep.">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="attemptid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Nullable: the attempt may not exist or may not be identifiable on the denied request."/>

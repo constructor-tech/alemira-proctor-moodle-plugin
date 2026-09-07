@@ -25,11 +25,11 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'availability_proctor';
-$plugin->version = 2026082004;
+$plugin->version = 2026082401;
 $plugin->release = 'v2.8';
 // Moodle 3.6, unchanged from v2.7. Deliberately not raised: this release adds
 // nothing that needs a newer core, and raising the floor would withhold the upgrade
-// from 3.6 and 3.7 sites that are running the hosted model perfectly well today.
+// from 3.6 and 3.7 sites that are running the Webapp model perfectly well today.
 //
 // What keeps that true: the external functions use the pre-4.2 external_api global
 // namespace rather than core_external; the hook callbacks in db/hooks.php are simply
@@ -38,7 +38,7 @@ $plugin->release = 'v2.8';
 //
 // The SDK model needs 3.11, and that floor is enforced in code by
 // config::SDK_MIN_VERSION / config::is_sdk_model() rather than declared here, so a
-// site below it installs the plugin and runs the hosted model instead of being
+// site below it installs the plugin and runs the Webapp model instead of being
 // refused the plugin altogether.
 //
 // No $plugin->supported is declared. That field is a closed range whose upper bound

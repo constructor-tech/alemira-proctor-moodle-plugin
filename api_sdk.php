@@ -21,7 +21,7 @@
  * conclusion is known, and calls it again as fields such as the score are filled
  * in, so it must be safe to receive more than once for one session.
  *
- * Separate from api.php, which serves the hosted model, because the two share
+ * Separate from api.php, which serves the Webapp model, because the two share
  * almost nothing: api.php resolves sessionId against
  * availability_proctor_entries.accesscode and this one against
  * availability_proctor_sess.sessionkey; api.php verifies its token with the
@@ -72,7 +72,7 @@ use availability_proctor\session;
  * @param int $status HTTP status code.
  * @param string $message Short plain-text body.
  */
-function availability_proctor_sdk_respond(int $status, string $message): void {
+function availability_proctor_sdk_respond(int $status, string $message) {
     header('Content-Type: text/plain; charset=utf-8', true, $status);
     echo $message;
     die();
@@ -87,7 +87,7 @@ function availability_proctor_sdk_respond(int $status, string $message): void {
  *
  * @return string|null
  */
-function availability_proctor_sdk_bearer_token(): ?string {
+function availability_proctor_sdk_bearer_token() {
     $headers = function_exists('getallheaders') ? getallheaders() : [];
 
     foreach ($headers as $name => $value) {

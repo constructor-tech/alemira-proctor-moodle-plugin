@@ -1,101 +1,147 @@
 # Changelog
 
+## Unreleased
+
+- Moved the site-wide Proctoring model selector below Seamless authorization.
+- Moved all sixteen SDK configuration parameters exclusively into global and
+  personal presets. The integration settings page and activity restriction form
+  no longer expose editable SDK configuration controls. Preset forms show the
+  five SDK groups only under the SDK model, without a redundant outer section;
+  Webapp edits keep the stored values hidden and unchanged.
+- Selecting a preset now copies all sixteen SDK values into the condition as a
+  hidden snapshot. Unlinking a preset by editing another exam field displays
+  **Custom** and preserves the snapshot; later preset edits are not retroactive,
+  while explicitly re-selecting the preset refreshes it.
+- Added preset validation for non-negative whole Room Scan seconds, optional
+  HTTP(S) support URLs, and the two support-managed JSON fields. Duplicate and
+  Save as personal preset deep-copy the complete SDK snapshot.
+- Fixed the SDK hand-off to Constructor Secure Browser so Chrome does not show
+  an unnecessary leave-page confirmation before opening the native app.
+- Added a session-bound, single-use seamless-login bridge for SDK Secure Browser
+  sessions. The native app can open the protected Moodle quiz without asking the
+  learner to log in again, while ordinary top-level quiz tabs remain blocked.
+- Pass the seamless-login bridge through the SDK's `LDBLaunchUrl` parameter.
+  Without this explicit parameter, the SDK launches the current Moodle launch
+  page in the native app's empty cookie store and Moodle displays its login page.
+- After authenticating Secure Browser, return to the SDK launch page rather than
+  opening the quiz directly. This ensures system checks and recording start
+  before Moodle permits the attempt.
+- Fixed SDK token generation on Moodle 3.11 when developer debugging requires
+  the quiz module context before generating the learner profile image URL.
+- Fixed PHP 7.0 compatibility by avoiding PHP 7.1 array-destructuring syntax
+  in production code.
+- Fixed SDK launch with preliminary identity checks on Moodle 3.11 by using the
+  cross-version global `user_picture` output class.
+
 Notable changes to the Proctor by Constructor availability condition
 (`availability_proctor`), newest first.
 
-This file starts at v2.8. Earlier releases are recorded only in the commit history.
+This file starts at v2.8. Earlier releases are recorded in the Git history.
 
 ## v2.8 (2026-08-20)
 
-### Upgrade impact — read before updating a site running live exams
+### Upgrade impact — read before updating a live site
 
-Nothing in this release changes how an existing exam behaves until somebody edits it. Both items
-below are about settings that were being silently discarded and are now kept.
+An upgrade from v2.7 or earlier stays on the **Webapp** model and preserves
+existing conditions, credentials, entries and report history. Clean installations
+start on **SDK**. The intentional behavior changes are described below.
 
-**A site upgrading from v2.7 or earlier stays on the hosted proctoring model.** The new SDK model is
-opt-in per site; see below.
+#### Quiz duration now comes from Moodle
 
-#### Group restrictions on a proctoring condition now take effect
+Both Webapp and SDK use *Quiz settings ▸ Timing ▸ Time limit* as the proctoring
+duration. The old duration stored inside the availability condition is no longer
+sent. A proctored quiz without a Moodle time limit is rejected instead of silently
+opening a 480-minute session. Non-quiz Webapp activities keep the existing
+480-minute fallback.
 
-The proctoring condition has always offered a group restriction, but the selection was never stored:
-Moodle rebuilds the stored restriction from scratch on every activity edit, and this plugin omitted
-the group list when doing so. The practical result was that the restriction never applied and
-**every learner in scope was proctored**, whatever the teacher had selected.
+Check existing quiz time limits before upgrading, especially where the old
+condition duration differed from the Moodle value.
 
-The selection is now stored and honoured.
+#### Scheduling controls were removed
 
-- **Existing exams are unaffected.** They carry an empty group list, which means "everyone", exactly
-  as before.
-- **The change appears the first time a teacher re-saves an activity** with groups selected. From
-  that point on, learners outside the selected groups are *not* proctored — which is what the
-  setting always said it did.
-- If your policy relies on everyone being proctored regardless of group, leave the group restriction
-  empty. Reviewing existing proctored activities for a stale group selection before rolling this out
-  is worthwhile.
+Calendar booking and automatic rescheduling are no longer supported. The Webapp
+request now always sends `schedule: false`; the unused controls have been removed,
+and legacy true values can no longer reopen the booking flow.
+
+#### Group restrictions now persist
+
+Earlier versions displayed group choices but omitted them when Moodle rebuilt the
+condition, so the saved list was empty and every learner was proctored. A group
+selection made and saved after this upgrade is now stored and honoured. Existing
+conditions remain empty until a teacher explicitly selects groups.
+
+Legacy site-wide group defaults are not migrated: group IDs are course-specific,
+and applying values that v2.7 never persisted could unexpectedly exempt learners.
+
+#### Legacy Custom rules remain available
+
+The v2.7 site-wide Custom rules text continues to prefill new restrictions on an
+upgraded site. Existing restrictions keep their own saved Custom rules. This field
+remains exam-level and is not added to presets.
 
 #### Four more exam settings now keep the teacher's choice
 
-The same defect affected four settings that are also available on a preset. Because the exam's own
-value was discarded, the effective value came from the preset instead, so overriding the preset for
-a single exam appeared to do nothing:
+The same save omission affected these per-exam fields:
 
 - Main webcam view
 - Allow multiple displays
 - Allow virtual environment
 - Check ID photo quality
 
-All four are now stored per exam and take precedence over the preset. As above, existing exams keep
-their current behaviour until re-saved.
-
-#### "Send user emails" now works under the SDK model
-
-The setting was read under the wrong name in the SDK code path, so learner email addresses were
-never sent to the Proctor Dashboard regardless of the setting, and the Dashboard showed a generated
-address instead. The hosted model was not affected. If your site has this enabled and uses the SDK
-model, real email addresses will start reaching the Dashboard after this upgrade.
+They are now stored per exam and take precedence over the preset. Existing exams
+keep their effective behavior until a teacher saves a new choice.
 
 ### Added
 
-- **SDK proctoring model.** A second way of running a proctored session, alongside the existing
-  hosted flow. Instead of sending the learner to a Constructor-hosted page, the Constructor Proctor
-  SDK runs on this plugin's own launch page with the quiz embedded in a same-origin iframe. It was
-  added for sites whose browsers refuse the hosted flow's third-party cookies.
-  - Chosen **site-wide** under *Site administration ▸ Plugins ▸ Availability restrictions ▸ Proctor
-    by Constructor ▸ Settings*, not per exam.
-  - **Quizzes only.** Assignments and SCORM packages always use the hosted model.
-  - **Needs Moodle 3.11 or newer.** The plugin still installs and runs the hosted model on 3.8–3.10;
-    a site below the floor behaves exactly as a hosted site even if the setting says SDK.
-  - **Upgrading sites keep the hosted model.** Only a clean install starts on SDK.
-  - The hosted flow is unchanged and remains supported.
-- **Sixteen SDK interface settings** on the integration settings page (shown only under the SDK
-  model), six of which an individual exam may override. They control what the learner sees during
-  the session: Room Scan duration, focus and full-screen alerts, the chat panel, the identification
-  onboarding text, translation overrides and so on.
-- **New capability `availability/proctor:exemptproctoring`** — lets a role sit a proctored quiz
-  without proctoring. Honoured under both proctoring models. Quizzes only: assignments and SCORM
-  packages ignore it. Granted to nobody by default; a site that does not grant it sees no change.
-- **New scheduled task**, *Remove proctoring records for deleted quizzes*, running nightly. A safety
-  net: it removes session records belonging to quizzes that no longer exist, covering deletion paths
-  that fire no event (deleting a whole course is one).
-- Privacy API coverage for the new session tables, including export and deletion.
+- **SDK proctoring model.** The Constructor Proctor SDK runs on the plugin launch
+  page with the quiz in a same-origin iframe.
+  - The model is selected site-wide in the plugin settings.
+  - SDK is available for quizzes on Moodle 3.11 or later.
+  - Moodle 3.6–3.10 continues to run Webapp, even if an SDK value was restored
+    into the database.
+  - Assignment and SCORM always use Webapp.
+- Sixteen SDK interface settings stored only on presets and copied into each
+  configured quiz as an independent snapshot.
+- Capability `availability/proctor:exemptproctoring`, granted to no role by
+  default and enforced under both models for quizzes.
+- A nightly task that removes SDK records belonging to deleted quizzes.
+- Privacy API coverage for the SDK session tables.
+- Instructor-controlled **New entry** recovery for an ended SDK session. It
+  starts a new Constructor session and recording without deleting the learner's
+  in-progress Moodle attempt, saved answers or remaining time.
 
 ### Changed
 
-- Proctoring session records for the SDK model live in two new tables
-  (`availability_proctor_sess`, `availability_proctor_deny`). The hosted model continues to use
-  `availability_proctor_entries`; no data is migrated.
+- SDK quiz pre-flight pages now hide Moodle site and course navigation after
+  proctoring starts. Quiz attempt pages keep their right-hand Quiz navigation
+  while continuing to hide links that leave the protected activity.
+- SDK session records use `availability_proctor_sess` and
+  `availability_proctor_deny`. Webapp continues to use
+  `availability_proctor_entries`; no historical rows are migrated.
+- Reports show Webapp and SDK history together regardless of the active model.
+  Detail links carry the source model so equal numeric IDs cannot open a row from
+  the wrong table.
+- Reports now use responsive filters, clear status and model badges, contextual
+  scores, grouped review actions and a consistent detail view. External report
+  links are limited to HTTP(S), and user identity fields follow Moodle's access
+  rules. Technical Webapp and SDK states are grouped into six reviewer-facing
+  statuses; exact source values remain available in session details. Legacy
+  Webapp `success` outcomes are displayed and filtered as Accepted. Completed
+  sessions default to newest-first order, with unfinished sessions below them.
+- The brief SDK preparation screen now uses a centered, responsive loading state
+  with clearer progress and leave-page guidance.
+- SDK reports recognize terminal webhook data even when the browser-owned local
+  state is stale. Ended sessions block quiz access until an instructor creates a
+  New entry, and sequential sessions remain visible as separate report rows.
 
 ### Fixed
 
-Each of these was a setting that appeared to do nothing. See *Upgrade impact* above for what changes
-on a live site and when.
-
-- Group restrictions on a proctoring condition were never stored, so every learner in scope was
-  proctored.
-- Main webcam view, Allow multiple displays, Allow virtual environment and Check ID photo quality
-  were never stored per exam, so the preset's value was used instead of the teacher's.
-- "Send user emails" was read under the wrong name in the SDK code path and had no effect there.
-- An unrecognised value in one of the six per-exam SDK interface settings switched that setting off
-  instead of falling back to the site default. It could reach the browser as a negative Room Scan
-  duration, or with full-screen and focus violation alerts silently disabled. Such a value now
-  defers to the site setting. Values chosen on the exam form were never affected.
+- Upgraded sites retain their v2.7 Custom rules default for new restrictions.
+- Group restrictions and the four per-exam fields listed above are now persisted.
+- **Send user emails** now works under SDK; it previously read the wrong setting
+  name. Webapp was not affected.
+- Missing SDK snapshots on upgraded conditions resolve from the migrated/default
+  preset and then shipped-safe values; malformed stored fields fall back safely.
+- SDK HTTP requests now load Moodle's HTTP client library explicitly, so New
+  entry status checks and background finish retries do not depend on another page
+  having loaded that library first.

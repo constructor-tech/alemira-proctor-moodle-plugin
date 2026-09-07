@@ -126,6 +126,7 @@ $string['save_personal_preset_prompt'] = 'Enter a name for your personal preset.
 $string['save_personal_preset_hint'] = 'Personal presets are saved to your account and can be reused in any of your exams. They are not visible to other users. Global presets are managed by site administrators in Site administration > Plugins.';
 $string['loaded_preset'] = 'Current preset: {$a}';
 $string['loaded_preset_none'] = 'None';
+$string['loaded_preset_custom'] = 'Custom';
 $string['global_presets'] = 'Global presets';
 $string['personal_presets'] = 'Personal presets';
 $string['no_presets'] = 'No presets';
@@ -156,7 +157,7 @@ Constructor Proctor\'s own web application runs the proctoring session and shows
 The proctoring session runs on a page belonging to this plugin, and the quiz opens in an iframe on that same page. Both are on this site, so nothing is framed across websites and no frame embedding permission is needed.
 
 You can change this at any time. It takes effect on exams that have not started yet. A proctoring session already under way finishes the way it began.';
-$string['settings_proctormodel_hosted'] = 'Webapp';
+$string['settings_proctormodel_webapp'] = 'Webapp';
 $string['settings_proctormodel_sdk'] = 'SDK';
 $string['settings_proctor_url'] = '{$a} URL';
 $string['settings_proctor_url_desc'] = '';
@@ -195,6 +196,11 @@ $string['error_notimelimit'] = 'This quiz has no time limit. A proctoring sessio
 $string['error_notproctored'] = 'Proctoring is not enabled for this quiz.';
 $string['error_notyoursession'] = 'That proctoring session belongs to a different user.';
 $string['error_sessionfinished'] = 'This attempt is finished and cannot be reopened.';
+$string['error_sessionended_newentry'] = 'This proctoring session has ended. Your Moodle attempt and saved answers are still available, but your teacher must create a New entry before you can continue.';
+$string['error_sdk_new_entry_attempt_finished'] = 'A new SDK entry cannot be created because the Moodle attempt is no longer in progress.';
+$string['error_sdk_new_entry_busy'] = 'Another New entry request is already being processed. Try again.';
+$string['error_sdk_new_entry_session_active'] = 'The current Constructor session has not finished, so no new entry was created. End it first or wait for the reconnect timeout.';
+$string['error_sdk_status_unavailable'] = 'Constructor session status could not be verified, so no new entry was created. Try again later.';
 $string['error_unknownevent'] = 'Unknown proctoring session event.';
 
 $string['launch_error_lead'] = 'Proctoring could not start.';
@@ -203,8 +209,9 @@ $string['launch_error_technical'] = 'Technical details';
 $string['launch_requirement_browser'] = 'Use desktop Google Chrome or Microsoft Edge. Other browsers are not supported.';
 $string['launch_requirement_camera'] = 'You need a working camera and microphone, and you will be asked to share your screen.';
 $string['launch_requirement_stay'] = 'Stay on this page until the exam is over and the recording has finished uploading. Closing it early can lose part of the recording.';
+$string['launch_preparing'] = 'Preparing your proctored exam';
 $string['launch_retry'] = 'Try again';
-$string['launch_starting'] = 'Starting proctoring. The system check and identification steps open in a moment.';
+$string['launch_starting'] = 'The system check and identification steps will open in a moment.';
 $string['launch_timeout'] = 'This is taking longer than expected. Check your connection and try again.';
 $string['notice_recordingstopped'] = 'Recording has stopped, but your attempt is still open. Submit your answers now to finish.';
 
@@ -223,6 +230,7 @@ $string['description_no_webservices'] = 'Can not be accessed via Moodle mobile a
 
 $string['settings'] = 'Integration settings';
 $string['log_section'] = '{$a} log';
+$string['log_model'] = 'Model';
 $string['status'] = 'Status';
 $string['module'] = 'Module';
 $string['new_entry'] = 'New entry';
@@ -233,9 +241,37 @@ $string['log_archive_link'] = 'Video';
 $string['log_report_link'] = 'Report';
 $string['log_attempt'] = 'Attempt';
 $string['log_attempt_missing'] = 'deleted';
+$string['report_heading'] = 'Proctoring reports';
+$string['report_intro'] = 'Review Webapp and SDK proctoring sessions in one place.';
+$string['report_filterlegend'] = 'Filter proctoring sessions';
+$string['report_clearfilters'] = 'Clear filters';
+$string['report_resultcount'] = 'Sessions: {$a}';
+$string['report_nomatches'] = 'No proctoring sessions match these filters.';
+$string['report_nosessions'] = 'No proctoring sessions have been recorded yet.';
+$string['report_finished'] = 'Finished at';
+$string['report_activity'] = 'Activity';
+$string['report_score'] = 'Score';
+$string['report_actions'] = 'Actions';
+$string['report_details_heading'] = 'Proctoring session details';
+$string['report_back'] = 'Back to reports';
+$string['report_field'] = 'Field';
+$string['report_value'] = 'Value';
+$string['report_accesscode'] = 'Access code';
+$string['report_deleted_user'] = 'Deleted user';
+$string['report_deleted_course'] = 'Deleted course';
+$string['report_deleted_activity'] = 'Deleted activity';
+$string['report_status_notstarted'] = 'Not started';
+$string['report_status_inprogress'] = 'In progress';
+$string['report_status_needsreview'] = 'Needs review';
+$string['report_status_accepted'] = 'Accepted';
+$string['report_status_rejected'] = 'Rejected';
+$string['report_status_closed'] = 'Closed';
+$string['report_source_status'] = 'Source status';
+$string['report_source_state'] = 'Source state';
+$string['report_source_conclusion'] = 'Source conclusion';
 
 $string['new_entry_created'] = 'New entry created';
-$string['entry_exist'] = 'New entry already exist';
+$string['entry_exist'] = 'A new entry already exists.';
 $string['date_modified'] = 'Date of last change';
 
 $string['proctoring_mode'] = 'Proctoring mode';
@@ -345,15 +381,23 @@ $string['status_rejected'] = 'Rejected';
 $string['status_force_reset'] = 'Force reset';
 $string['status_finished'] = 'Finished';
 $string['status_scheduled'] = 'Scheduled';
+$string['status_success'] = 'Success (legacy)';
+$string['status_canceled'] = 'Canceled';
+$string['status_rescheduled'] = 'Rescheduled';
+$string['status_pending'] = 'Pending';
+$string['status_active'] = 'Active';
+$string['status_finishing'] = 'Finishing';
+$string['status_abandoned'] = 'Abandoned';
 
 $string['scheduling_required'] = 'Calendar booking required';
 $string['apply_filter'] = 'Apply filter';
 $string['allcourses'] = 'All courses';
+$string['allmodules'] = 'All modules';
 $string['allstatuses'] = 'All statuses';
 $string['selectauser'] = 'Select a user';
-$string['userquery'] = 'Username or Email starts with';
-$string['fromdate'] = 'From date:';
-$string['todate'] = 'To date:';
+$string['userquery'] = 'Name, username or email';
+$string['fromdate'] = 'From date';
+$string['todate'] = 'To date';
 
 $string['score'] = 'Cheating score modifier';
 $string['threshold_attention'] = 'Threshold: Attention';
@@ -461,6 +505,22 @@ $string['privacy:metadata:availability_proctor_presets:calculator'] = 'Calculato
 $string['privacy:metadata:availability_proctor_presets:rules'] = 'Exam rules configured in the preset.';
 $string['privacy:metadata:availability_proctor_presets:warnings'] = 'Warning visibility settings configured in the preset.';
 $string['privacy:metadata:availability_proctor_presets:scoring'] = 'Scoring parameters configured in the preset.';
+$string['privacy:metadata:availability_proctor_presets:sdkallowcameraselection'] = 'SDK camera-selection setting stored in the preset.';
+$string['privacy:metadata:availability_proctor_presets:sdkalwaysshowchat'] = 'SDK chat-visibility setting stored in the preset.';
+$string['privacy:metadata:availability_proctor_presets:sdkbeforeexamlist'] = 'SDK pre-exam checklist setting stored in the preset.';
+$string['privacy:metadata:availability_proctor_presets:sdkdesktopcheckfirst'] = 'SDK screen-sharing order setting stored in the preset.';
+$string['privacy:metadata:availability_proctor_presets:sdkdisabledworkers'] = 'SDK background checks disabled by the preset.';
+$string['privacy:metadata:availability_proctor_presets:sdkexperimentwatchwindowsize'] = 'SDK window-size monitoring setting stored in the preset.';
+$string['privacy:metadata:availability_proctor_presets:sdkfocusrespectsrules'] = 'SDK focus detection setting stored in the preset.';
+$string['privacy:metadata:availability_proctor_presets:sdkfullscreenwatchfocusalert'] = 'SDK full-screen alert setting stored in the preset.';
+$string['privacy:metadata:availability_proctor_presets:sdkidentificationbullets'] = 'SDK identification onboarding JSON stored in the preset.';
+$string['privacy:metadata:availability_proctor_presets:sdkobserveworkspace'] = 'SDK Room Scan duration stored in the preset.';
+$string['privacy:metadata:availability_proctor_presets:sdkopenagreementlinksiniframe'] = 'SDK agreement-link behavior stored in the preset.';
+$string['privacy:metadata:availability_proctor_presets:sdkaudionotification'] = 'SDK chat audio notification setting stored in the preset.';
+$string['privacy:metadata:availability_proctor_presets:sdkshowfinishexambutton'] = 'SDK Finish exam button setting stored in the preset.';
+$string['privacy:metadata:availability_proctor_presets:sdkshowsyschecksupportnew'] = 'SDK support-link visibility setting stored in the preset.';
+$string['privacy:metadata:availability_proctor_presets:sdksyscheckhelpurl'] = 'SDK support URL stored in the preset.';
+$string['privacy:metadata:availability_proctor_presets:sdktranslationsoverride'] = 'SDK translation override JSON stored in the preset.';
 $string['privacy:metadata:availability_proctor_presets:timecreated'] = 'Time when the preset was created.';
 $string['privacy:metadata:availability_proctor_presets:timemodified'] = 'Time when the preset was last modified.';
 
@@ -505,10 +565,7 @@ $string['privacy:metadata:availability_proctor_deny:timecreated'] = 'Time when a
 
 // NTG-185: the SDK's own init() parameters. Every description below is written from
 // the Constructor Proctor Developer Guide's own definition of the parameter.
-$string['settings_sdk_heading'] = 'SDK configuration settings';
-$string['settings_sdk_heading_desc'] = 'These settings control the proctoring interface the learner sees during an exam. They apply to every proctored quiz on this site, and a teacher can override most of them for an individual quiz. They have no effect under the Webapp model. Each one maps to an SDK configuration parameter; <a href="https://docs.constructor.tech/documentation/en/developer-portal/proctor-developer-guide/constructor-proctor-sdk/configuration-parameters">Constructor\'s own reference</a> lists them with examples.';
-
-// NTG-185: the SDK settings are rendered in groups; see config::SITE_SDK_GROUPS.
+// SDK preset fields are rendered in groups; see config::SDK_GROUPS.
 $string['settings_sdk_group_before'] = 'Before the exam';
 $string['settings_sdk_group_during'] = 'During the exam';
 $string['settings_sdk_group_violations'] = 'Rule violations';
@@ -555,9 +612,7 @@ $string['settings_sdk_experimentwatchwindowsize'] = 'Monitor the exam window siz
 $string['settings_sdk_experimentwatchwindowsize_desc'] = 'Watches the size of the exam window and warns the learner if it becomes too small to monitor reliably. Marked experimental by Constructor, so test it before using it in a real exam.';
 
 $string['settings_sdk_disabledworkers'] = 'Disabled background checks';
-$string['settings_sdk_disabledworkers_desc'] = 'Names of Constructor Proctor\'s background checks to switch off, one name per line. Leave it empty unless Constructor support asks you to change it: an empty list means every check runs, and switching one off leaves that part of the exam unmonitored without anything in the exam interface showing it. This setting is site-wide, so a teacher cannot change it for an individual exam.
-
-Accepted names: watchCamera, watchFocus, watchMic, watchAuxiliaryCamera, watchExtraScreens, watchUploading, watchDesktopRequests, watchWindowSize, blockSystemProcesses, watchForbiddenProcesses, ping.';
+$string['settings_sdk_disabledworkers_desc'] = 'This advanced setting changes which monitoring checks run during SDK exams. Contact support@constructor.tech before using it, then copy and paste only the values provided by Constructor Support. Leave it empty otherwise; an incorrect value can leave part of an exam unmonitored.';
 
 // NTG-185: report page entries for the SDK proctoring model.
 $string['status_notsubmitted'] = 'Not submitted';
@@ -565,33 +620,27 @@ $string['log_reason'] = 'Reason';
 $string['log_entry_missing'] = 'This proctoring session no longer exists.';
 $string['reason_app_unmounted'] = 'The learner closed the proctoring window';
 $string['reason_bind_timeout'] = 'The exam was never started';
+$string['reason_new_entry'] = 'Replaced by an instructor with New entry';
 
 // NTG-185: the SDK proctoring model requires a newer Moodle than the plugin as a whole.
 $string['error_sdk_unsupported'] = 'Proctoring cannot start because this Moodle version does not support the SDK proctoring model. Moodle 3.11 or later is required. Please contact your site administrator.';
-$string['settings_proctormodel_unsupported'] = 'The SDK proctoring model requires Moodle 3.11 or later, so it is not available on this site. Hosted proctoring is unaffected.';
+$string['settings_proctormodel_unsupported'] = 'The SDK proctoring model requires Moodle 3.11 or later, so it is not available on this site. Webapp proctoring is unaffected.';
 
 // NTG-185: the SDK section on the preset form.
-$string['preset_section_sdk'] = 'SDK configuration settings';
-$string['sdk_section_hint'] = 'These settings control the proctoring interface the learner sees during this exam. Each one starts on the site default, named in brackets; change one here to override it for this exam only. They apply only under the SDK proctoring model.';
-// NTG-185: still used by the preset form, where a column may legitimately say
-// nothing and fall through to the value Constructor ships. The exam form offers
-// Yes/No only -- it is always created from a preset, so it always has a value.
-$string['sdk_inherit'] = 'Use the default';
-// The inherit option names the value it stands for, so the teacher can see which
-// way the exam will behave without leaving the form. {$a} is that value.
-$string['sdk_inherit_value'] = 'Use the default ({$a})';
-$string['sdk_inherit_seconds'] = 'Use the default ({$a} seconds)';
-$string['sdk_inherit_no_room_scan'] = 'Use the default (no Room Scan)';
+$string['error_sdk_observeworkspace'] = 'Room Scan duration must be zero or a positive whole number of seconds.';
+$string['error_sdk_supporturl'] = 'Support link address must be empty or a valid HTTP(S) URL.';
+$string['error_sdk_json'] = 'Enter valid JSON supplied by Constructor Support.';
+$string['error_sdk_value'] = 'Select a valid SDK configuration value.';
+$string['error_invalid_sdk_configuration'] = 'The SDK configuration is invalid: {$a}';
 $string['settings_sdk_identificationbullets'] = 'Identification onboarding items';
-$string['settings_sdk_identificationbullets_desc'] = 'Replaces the bullet list on the identification photo page.';
+$string['settings_sdk_identificationbullets_desc'] = 'This setting customizes the instructions shown during identity verification. Contact support@constructor.tech to request the change, then copy and paste the value provided by Constructor Support. Leave it empty otherwise.';
 $string['settings_sdk_translationsoverride'] = 'Translation overrides';
-$string['settings_sdk_translationsoverride_desc'] = 'Replaces individual pieces of text in the proctoring interface. JSON, keyed by language code and then by translation key. Leave empty unless Constructor support has given you the keys to change.';
+$string['settings_sdk_translationsoverride_desc'] = 'This setting customizes wording in the SDK proctoring interface. Contact support@constructor.tech to request the change, then copy and paste the value provided by Constructor Support. Leave it empty otherwise.';
 
-// NTG-185: Moodle's addHelpButton() looks for '<key>_help', so the preset form's
+// Moodle's addHelpButton() looks for '<key>_help', so the preset form's
 // help icons need these. Same text as the _desc strings the settings page used --
 // deliberately, since the two describe the same parameter and a reader comparing
 // them should not have to wonder whether the difference is meaningful.
-$string['settings_sdk_heading_help'] = 'These settings control the proctoring interface the learner sees during an exam. They apply to every proctored quiz on this site, and a teacher can override most of them for an individual quiz. They have no effect under the Webapp model. Each one maps to an SDK configuration parameter; <a href="https://docs.constructor.tech/documentation/en/developer-portal/proctor-developer-guide/constructor-proctor-sdk/configuration-parameters">Constructor\'s own reference</a> lists them with examples.';
 $string['settings_sdk_allowcameraselection_help'] = 'Lets the learner pick which camera records them during the pre-exam check. It only makes a difference for learners with more than one camera, such as a laptop webcam plus an external one; with a single camera, or when this is disabled, Constructor Proctor selects the camera itself.';
 $string['settings_sdk_alwaysshowchat_help'] = 'Keeps the chat available in every proctoring mode, not only in Live mode. A learner who runs into a problem then always has a way to report it.';
 $string['settings_sdk_beforeexamlist_help'] = 'Shows the learner the list of steps in the pre-exam check before it starts, so they know what to expect.';
@@ -605,8 +654,6 @@ $string['settings_sdk_showfinishexambuttonforsessionswithoutproctor_help'] = 'Sh
 $string['settings_sdk_showsyschecksupportnew_help'] = 'Shows a support link on the pre-exam check pages, so a learner whose camera or microphone fails can reach help without leaving the exam. Set the address in the setting below.';
 $string['settings_sdk_syscheckhelpurl_help'] = 'The address the support link opens. Used only when the support link is switched on above; leave empty to show no link.';
 $string['settings_sdk_experimentwatchwindowsize_help'] = 'Watches the size of the exam window and warns the learner if it becomes too small to monitor reliably. Marked experimental by Constructor, so test it before using it in a real exam.';
-$string['settings_sdk_disabledworkers_help'] = 'Names of Constructor Proctor\'s background checks to switch off, one name per line. Leave it empty unless Constructor support asks you to change it: an empty list means every check runs, and switching one off leaves that part of the exam unmonitored without anything in the exam interface showing it. This setting is site-wide, so a teacher cannot change it for an individual exam.
-
-Accepted names: watchCamera, watchFocus, watchMic, watchAuxiliaryCamera, watchExtraScreens, watchUploading, watchDesktopRequests, watchWindowSize, blockSystemProcesses, watchForbiddenProcesses, ping.';
-$string['settings_sdk_identificationbullets_help'] = 'Replaces the bullet list on the identification photo page.';
-$string['settings_sdk_translationsoverride_help'] = 'Replaces individual pieces of text in the proctoring interface. JSON, keyed by language code and then by translation key. Leave empty unless Constructor support has given you the keys to change.';
+$string['settings_sdk_disabledworkers_help'] = 'This advanced setting changes which monitoring checks run during SDK exams. Contact support@constructor.tech before using it, then copy and paste only the values provided by Constructor Support. Leave it empty otherwise; an incorrect value can leave part of an exam unmonitored.';
+$string['settings_sdk_identificationbullets_help'] = 'This setting customizes the instructions shown during identity verification. Contact support@constructor.tech to request the change, then copy and paste the value provided by Constructor Support. Leave it empty otherwise.';
+$string['settings_sdk_translationsoverride_help'] = 'This setting customizes wording in the SDK proctoring interface. Contact support@constructor.tech to request the change, then copy and paste the value provided by Constructor Support. Leave it empty otherwise.';

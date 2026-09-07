@@ -74,15 +74,21 @@ class hooks {
             $html = utils::handle_proctoring_fader_assign($PAGE->cm);
         }
 
-        // Lockdown: hide Moodle navigation chrome on SCORM/assign pages when Proctor
-        // is active. state::$lockdown is set by handle_start_attempt_scorm/assign
-        // (which runs in availability_proctor_after_require_login, before this hook),
-        // mirroring exactly how quiz uses state::$attempt.
+        // Lockdown: hide Moodle navigation chrome while Proctor is active.
+        // Quiz uses this on core's start-attempt pre-flight page before an attempt
+        // exists; SCORM and assign use it throughout their protected flow.
         if (state::$lockdown) {
             if (!$html) {
                 $html .= utils::get_lockdown_css();
             }
-            $html .= utils::get_hide_chrome_js();
+
+            // Quiz CSS intentionally preserves the right block drawer because it
+            // contains Quiz navigation. The stronger legacy JS hides every drawer
+            // and remains limited to SCORM/assign, where that is still expected.
+            $isquiz = $PAGE->cm !== null && $PAGE->cm->modname === 'quiz';
+            if (!$isquiz) {
+                $html .= utils::get_hide_chrome_js();
+            }
         }
 
         if ($hook) {

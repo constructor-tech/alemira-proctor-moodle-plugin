@@ -288,20 +288,24 @@ class common {
 
     /**
      * Compute effective proctoring duration in minutes.
-     * If the underlying activity is a quiz with a time limit, use it.
-     * Otherwise fall back to condition::MAX_LIMIT.
+     * A quiz must have a time limit; activities without a native time limit
+     * keep the existing condition::MAX_LIMIT fallback.
      *
      * @param \stdClass|\cm_info $cm Course module
      * @return int duration in minutes
+     * @throws \moodle_exception When a quiz has no time limit.
      */
     public static function get_quiz_time_limit($cm) {
         global $DB;
         if (!empty($cm->modname) && $cm->modname === 'quiz') {
             $timelimit = $DB->get_field('quiz', 'timelimit', ['id' => $cm->instance]);
-            if (!empty($timelimit)) {
-                return (int) ceil($timelimit / 60);
+            if (empty($timelimit)) {
+                throw new \moodle_exception('error_notimelimit', 'availability_proctor');
             }
+
+            return (int) ceil($timelimit / 60);
         }
+
         return condition::MAX_LIMIT;
     }
 }

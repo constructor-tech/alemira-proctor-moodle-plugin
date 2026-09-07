@@ -52,52 +52,6 @@ if ($hassiteconfig) {
     $ADMIN->add('availability_proctor_admin', $pluginsettings);
 
     if ($ADMIN->fulltree) {
-        // Which integration delivers proctoring. Listed first because it decides
-        // how every setting below it is used.
-        //
-        // The default is deliberately the hosted model rather than the newer SDK
-        // one. db/install.php writes 'sdk' for a clean install and db/upgrade.php
-        // writes 'hosted' for an existing site, so this default is only ever
-        // reached if neither ran -- and in that case an existing site must come up
-        // with the behaviour it already had. Declaring 'sdk' here would invert
-        // that: a partial or failed upgrade would silently move live exams onto a
-        // different integration.
-        //
-        // NTG-185: the SDK model requires Moodle 4.5, so on an older site it is not
-        // offered -- an administrator should not be able to choose a model that
-        // config::is_sdk_model() will then decline to run.
-        //
-        // The stored value is deliberately NOT rewritten when it is unavailable. A
-        // site that has 'sdk' stored (a restored database, a copied config, or
-        // forced_plugin_settings) runs the hosted flow and keeps the row, so that
-        // upgrading to 4.5 puts the intended model into effect rather than requiring
-        // the setting to be found and re-entered. Overwriting it would also leave the
-        // administrator no way to tell that their choice had been discarded rather
-        // than never applied.
-        $modeloptions = [
-            \availability_proctor\config::MODEL_HOSTED =>
-                new lang_string('settings_proctormodel_hosted', 'availability_proctor'),
-        ];
-
-        if (\availability_proctor\config::is_sdk_available()) {
-            $modeloptions[\availability_proctor\config::MODEL_SDK] =
-                new lang_string('settings_proctormodel_sdk', 'availability_proctor');
-        } else {
-            $pluginsettings->add(new admin_setting_description(
-                'availability_proctor/proctormodel_unsupported',
-                '',
-                new lang_string('settings_proctormodel_unsupported', 'availability_proctor')
-            ));
-        }
-
-        $pluginsettings->add(new admin_setting_configselect(
-            'availability_proctor/proctormodel',
-            new lang_string('settings_proctormodel', 'availability_proctor'),
-            new lang_string('settings_proctormodel_desc', 'availability_proctor', $pluginname),
-            \availability_proctor\config::MODEL_HOSTED,
-            $modeloptions
-        ));
-
         $pluginsettings->add(new admin_setting_configtext(
             'availability_proctor/proctor_url',
             new lang_string('settings_proctor_url', 'availability_proctor', $pluginname),
@@ -155,102 +109,51 @@ if ($hassiteconfig) {
             ));
         }
 
-        // NTG-185: the SDK's init() parameters.
+        // Which integration delivers proctoring. It is rendered immediately after
+        // Seamless authorization. SDK configuration belongs only to presets, so no
+        // SDK configuration section follows on this integration settings page.
         //
-        // Shown only under the SDK model -- under the hosted one Constructor's own
-        // page supplies these and nothing this plugin sends carries them, so the
-        // section would be sixteen controls that do nothing.
+        // The default is deliberately the Webapp model rather than the newer SDK
+        // one. db/install.php writes 'sdk' for a clean install and db/upgrade.php
+        // writes 'webapp' for an existing site, so this default is only ever
+        // reached if neither ran -- and in that case an existing site must come up
+        // with the behaviour it already had. Declaring 'sdk' here would invert
+        // that: a partial or failed upgrade would silently move live exams onto a
+        // different integration.
         //
-        // Booleans are configselect, never configcheckbox. A checkbox draws its tick
-        // from the stored value rather than the declared default, so a setting that
-        // has never been written renders unticked beside the words "Default: Yes",
-        // and saving the page stores the 0 the empty box implies. That switched off
-        // seven settings in a single save when this section was first tried, the
-        // full-screen violation alerts among them. A select stores the chosen value
-        // explicitly and shows the declared default when nothing is stored.
-        if (\availability_proctor\config::is_sdk_model()) {
-            $pluginsettings->add(new admin_setting_heading(
-                'availability_proctor/sdk_heading',
-                new lang_string('settings_sdk_heading', 'availability_proctor'),
-                new lang_string('settings_sdk_heading_desc', 'availability_proctor')
+        // NTG-185: the SDK model requires Moodle 3.11, so on an older site it is not
+        // offered -- an administrator should not be able to choose a model that
+        // config::is_sdk_model() will then decline to run.
+        //
+        // The stored value is deliberately NOT rewritten when it is unavailable. A
+        // site that has 'sdk' stored (a restored database, a copied config, or
+        // forced_plugin_settings) runs the Webapp flow and keeps the row, so that
+        // upgrading to 3.11 puts the intended model into effect rather than requiring
+        // the setting to be found and re-entered. Overwriting it would also leave the
+        // administrator no way to tell that their choice had been discarded rather
+        // than never applied.
+        $modeloptions = [
+            \availability_proctor\config::MODEL_WEBAPP =>
+                new lang_string('settings_proctormodel_webapp', 'availability_proctor'),
+        ];
+
+        if (\availability_proctor\config::is_sdk_available()) {
+            $modeloptions[\availability_proctor\config::MODEL_SDK] =
+                new lang_string('settings_proctormodel_sdk', 'availability_proctor');
+        } else {
+            $pluginsettings->add(new admin_setting_description(
+                'availability_proctor/proctormodel_unsupported',
+                '',
+                new lang_string('settings_proctormodel_unsupported', 'availability_proctor')
             ));
-
-            $yesno = [0 => new lang_string('no'), 1 => new lang_string('yes')];
-
-            // Rendered group by group rather than straight down SITE_SDK_SETTINGS.
-            // That map is alphabetical, which put disabledWorkers -- the one setting
-            // here that can leave an exam unmonitored -- fifth of sixteen, between two
-            // cosmetic ones. SITE_SDK_GROUPS carries the reading order and the
-            // headings; SITE_SDK_SETTINGS stays the name-to-parameter map.
-            foreach (\availability_proctor\config::SITE_SDK_GROUPS as $groupstring => $names) {
-                $pluginsettings->add(new admin_setting_heading(
-                    'availability_proctor/' . $groupstring,
-                    new lang_string($groupstring, 'availability_proctor'),
-                    ''
-                ));
-
-                foreach ($names as $name) {
-                    // A name here with no entry in SITE_SDK_SETTINGS is a typo in this
-                    // plugin, not a site's problem: skip it rather than raise a notice
-                    // across the whole settings page.
-                    $key = \availability_proctor\config::SITE_SDK_SETTINGS[$name] ?? null;
-                    if ($key === null) {
-                        continue;
-                    }
-
-                    $stringid = \availability_proctor\config::SITE_SDK_STRINGS[$name];
-                    $label = new lang_string($stringid, 'availability_proctor');
-                    $desc = new lang_string($stringid . '_desc', 'availability_proctor');
-                    $default = \availability_proctor\config::SDK_CONFIG[$key] ?? null;
-
-                    if (is_bool($default)) {
-                        $pluginsettings->add(new admin_setting_configselect(
-                            'availability_proctor/' . $name,
-                            $label,
-                            $desc,
-                            $default ? 1 : 0,
-                            $yesno
-                        ));
-                        continue;
-                    }
-
-                    if ($key === \availability_proctor\config::ROOM_SCAN_SETTING) {
-                        // Seconds on this page, milliseconds on the wire; sdk_config()
-                        // multiplies. 0 is a real choice meaning "no Room Scan screen".
-                        $pluginsettings->add(new admin_setting_configtext(
-                            'availability_proctor/' . $name,
-                            $label,
-                            $desc,
-                            (string) (int) ($default / \availability_proctor\config::ROOM_SCAN_SCALE),
-                            PARAM_INT,
-                            6
-                        ));
-                        continue;
-                    }
-
-                    if (is_array($default)) {
-                        // disabledWorkers is one worker name per line; the other two
-                        // are nested language-keyed JSON. Both are read back by
-                        // config::cast_sdk_value(), which decides on the content.
-                        $pluginsettings->add(new admin_setting_configtextarea(
-                            'availability_proctor/' . $name,
-                            $label,
-                            $desc,
-                            implode("\n", $default),
-                            PARAM_RAW
-                        ));
-                        continue;
-                    }
-
-                    $pluginsettings->add(new admin_setting_configtext(
-                        'availability_proctor/' . $name,
-                        $label,
-                        $desc,
-                        (string) $default,
-                        PARAM_RAW_TRIMMED
-                    ));
-                }
-            }
         }
+
+        $pluginsettings->add(new admin_setting_configselect(
+            'availability_proctor/proctormodel',
+            new lang_string('settings_proctormodel', 'availability_proctor'),
+            new lang_string('settings_proctormodel_desc', 'availability_proctor', $pluginname),
+            \availability_proctor\config::MODEL_WEBAPP,
+            $modeloptions
+        ));
     }
 }

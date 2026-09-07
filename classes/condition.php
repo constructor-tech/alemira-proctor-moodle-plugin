@@ -60,19 +60,16 @@ class condition extends \core_availability\condition {
         'forbiddenprocesses', 'allowedprocesses', 'streamspreset',
         'sendmanualwarningstolearner', 'allowroomscanauxcamera',
         'proctoremails',
-        // NTG-185: the six SDK parameters an exam may override. Three-state: '' takes
-        // the preset's value, 'yes'/'no' override it (Room Scan carries its number
-        // directly). config::SDK_PER_QUIZ is the authoritative list -- these names
-        // must match its values.
-        //
-        // The other ten are site-wide; see config::SDK_SITE_ONLY.
-        //
-        // Deliberately NOT added to PRESET_FIELDS. That list is the escape hatch from
-        // the brand override below: a field in both HIDDEN_FORM_FIELDS and
-        // PRESET_FIELDS is force-taken from the default preset, ignoring what the
-        // teacher saved.
-        'sdkallowcameraselection', 'sdkalwaysshowchat', 'sdkfocusrespectsrules',
-        'sdkfullscreenwatchfocusalert', 'sdkobserveworkspace', 'sdkshowfinishexambutton',
+        // Hidden SDK preset snapshot. The activity form does not render editable
+        // controls for these fields, but core rebuilds availability JSON from
+        // save(), so every value must remain serializable here.
+        'sdkallowcameraselection', 'sdkalwaysshowchat', 'sdkbeforeexamlist',
+        'sdkdesktopcheckfirst', 'sdkdisabledworkers', 'sdkexperimentwatchwindowsize',
+        'sdkfocusrespectsrules', 'sdkfullscreenwatchfocusalert',
+        'sdkidentificationbullets', 'sdkobserveworkspace',
+        'sdkopenagreementlinksiniframe', 'sdkaudionotification',
+        'sdkshowfinishexambutton', 'sdkshowsyschecksupportnew',
+        'sdksyscheckhelpurl', 'sdktranslationsoverride',
     ];
 
     /**
@@ -89,6 +86,15 @@ class condition extends \core_availability\condition {
         'allowedprocesses', 'forbiddenprocesses', 'allowvirtualenvironment',
         'allowtouseadditionalresources', 'allowmultipledisplays', 'calculator',
         'rules', 'warnings', 'scoring',
+        // All SDK configuration belongs to presets. These values are also copied
+        // into each condition as a hidden, independent snapshot.
+        'sdkallowcameraselection', 'sdkalwaysshowchat', 'sdkbeforeexamlist',
+        'sdkdesktopcheckfirst', 'sdkdisabledworkers', 'sdkexperimentwatchwindowsize',
+        'sdkfocusrespectsrules', 'sdkfullscreenwatchfocusalert',
+        'sdkidentificationbullets', 'sdkobserveworkspace',
+        'sdkopenagreementlinksiniframe', 'sdkaudionotification',
+        'sdkshowfinishexambutton', 'sdkshowsyschecksupportnew',
+        'sdksyscheckhelpurl', 'sdktranslationsoverride',
     ];
 
     /**
@@ -147,7 +153,6 @@ class condition extends \core_availability\condition {
 
     /** @var array List of default values for boolean exam properties */
     const BOOL_DEFAULTS = [
-        'autorescheduling' => false,
         'istrial' => false,
         'securebrowser' => false,
         'allowtouseadditionalresources' => false,
@@ -189,8 +194,8 @@ class condition extends \core_availability\condition {
     /** @var string Main camera */
     public $webcameramainview = 'front';
 
-    /** @var string Default calendar mode */
-    public $schedulingrequired = true;
+    /** @var bool Calendar scheduling is retired and always disabled */
+    public $schedulingrequired = false;
 
     /** @var bool Reschedule when exam was missed */
     public $autorescheduling = false;
@@ -266,48 +271,23 @@ class condition extends \core_availability\condition {
     /** @var bool Allow room scan using aux camera */
     public $allowroomscanauxcamera = false;
 
-    /*
-     * NTG-185: the SDK init() parameters this exam may override.
-     *
-     * Every one initialises to config::SDK_INHERIT (the empty string), and that is
-     * the guarantee the upgrade rests on: a quiz saved by an earlier release carries
-     * none of these keys, __construct therefore never assigns them, and the exam
-     * keeps taking the site setting -- which is exactly what it did before this
-     * release existed.
-     *
-     * The booleans store 'yes' or 'no' rather than true/false because a two-valued
-     * field cannot express "inherit". config::is_sdk_override() is what reads them.
-     */
-
-    /** @var string Let the learner pick a camera: '', 'yes' or 'no'. */
+    /* SDK preset snapshot. Booleans store "yes"/"no"; Room Scan stores seconds. */
     public $sdkallowcameraselection = '';
-
-    /** @var string Keep the chat panel open: '', 'yes' or 'no'. */
     public $sdkalwaysshowchat = '';
-
-
-
-
-    /** @var string Focus detection respects exam rules: '', 'yes' or 'no'. */
+    public $sdkbeforeexamlist = '';
+    public $sdkdesktopcheckfirst = '';
+    public $sdkdisabledworkers = '';
+    public $sdkexperimentwatchwindowsize = '';
     public $sdkfocusrespectsrules = '';
-
-    /** @var string Full-screen violation alerts: '', 'yes' or 'no'. */
     public $sdkfullscreenwatchfocusalert = '';
-
-    /**
-     * @var string Room Scan minimum display time, in SECONDS, or '' to inherit.
-     *
-     * Seconds here and in the forms; config::sdk_config() multiplies by
-     * ROOM_SCAN_SCALE for the wire, where the SDK expects milliseconds. '0' is a
-     * real choice meaning "hide the Room Scan screen", so it must not be confused
-     * with '' -- which is why this is a string rather than an int.
-     */
+    public $sdkidentificationbullets = '';
     public $sdkobserveworkspace = '';
-
-
-
-    /** @var string Finish exam button without a proctor: '', 'yes' or 'no'. */
+    public $sdkopenagreementlinksiniframe = '';
+    public $sdkaudionotification = '';
     public $sdkshowfinishexambutton = '';
+    public $sdkshowsyschecksupportnew = '';
+    public $sdksyscheckhelpurl = '';
+    public $sdktranslationsoverride = '';
 
 
 
@@ -339,6 +319,24 @@ class condition extends \core_availability\condition {
             }
         }
 
+        // Public releases before the SDK model have no snapshot. Resolve those
+        // conditions from the current default (the migrated site-default preset on
+        // upgrade), then from shipped-safe values, and write the complete snapshot
+        // on the next activity save. Existing snapshots always win, including empty
+        // support URL and disabled-worker list values.
+        $sdkfallback = preset::get_default();
+        $sdkdefaults = config::sdk_snapshot_defaults();
+        foreach (config::SDK_FIELDS as $prop) {
+            if (property_exists($structure, $prop) && $structure->$prop !== null) {
+                continue;
+            }
+            if ($sdkfallback && property_exists($sdkfallback, $prop) && $sdkfallback->$prop !== null) {
+                $structure->$prop = $sdkfallback->$prop;
+            } else {
+                $structure->$prop = $sdkdefaults[$prop];
+            }
+        }
+
         $scoringdefaults = [];
         foreach (self::SCORING as $key => $row) {
             $scoringdefaults[$key] = isset($row['default']) ? $row['default'] : null;
@@ -360,15 +358,11 @@ class condition extends \core_availability\condition {
             $this->webcameramainview = $structure->webcameramainview;
         }
 
-        if (isset($structure->scheduling_required) && $structure->scheduling_required !== null) {
-            $this->schedulingrequired = $structure->scheduling_required;
-        } else {
-            $manualmodes = ['online', 'identification'];
-            $this->schedulingrequired = in_array($this->mode, $manualmodes);
-        }
-        if (isset($structure->auto_rescheduling)) {
-            $this->autorescheduling = $structure->auto_rescheduling;
-        }
+        // Calendar scheduling is no longer supported. Keep accepting legacy
+        // structures so upgraded activities still load, but never let their old
+        // values re-enable booking or automatic rescheduling at runtime.
+        $this->schedulingrequired = false;
+        $this->autorescheduling = false;
 
         foreach (self::BOOL_DEFAULTS as $key => $default) {
             $this->$key = isset($structure->$key) ? (bool) $structure->$key : $default;
@@ -434,21 +428,17 @@ class condition extends \core_availability\condition {
             $this->streamspreset = $structure->streamspreset;
         }
 
-        // NTG-185: the SDK overrides, read as one loop rather than thirteen blocks so
-        // that a parameter added to config::SDK_PER_QUIZ needs no edit here.
-        //
-        // Compared against '' rather than tested with !empty(): these parameters are
-        // three-state, so '0' means "No" and is as much a teacher's choice as '1'.
-        // !empty() rejects '0', which silently turned every "No" back into inherit --
-        // measured 2026-08-18 for five of the six, the sixth escaping only because it
-        // had a special case of its own below. save() stores '0' correctly, so the
-        // loss was invisible in the stored JSON and surfaced only at exam time.
-        //
-        // An absent key and an explicit '' must both leave the property at its
-        // initialiser, which is what "inherit" is.
-        foreach (config::SDK_PER_QUIZ as $prop) {
-            if (isset($structure->$prop) && (string) $structure->$prop !== '') {
-                $this->$prop = (string) $structure->$prop;
+        // Copy the complete hidden SDK snapshot. Empty strings are meaningful for
+        // the optional support URL and line-based disabled-worker list.
+        foreach (config::SDK_FIELDS as $prop) {
+            if (property_exists($structure, $prop) && $structure->$prop !== null) {
+                if ($prop === 'sdkdisabledworkers' && is_array($structure->$prop)) {
+                    $this->$prop = implode("\n", $structure->$prop);
+                } else {
+                    $this->$prop = is_array($structure->$prop)
+                        ? json_encode($structure->$prop)
+                        : (string) $structure->$prop;
+                }
             }
         }
 
@@ -580,43 +570,13 @@ class condition extends \core_availability\condition {
             $this->securebrowserlevel = 'basic';
         }
 
-        // NTG-185: the six SDK overrides, clamped for the same reason as the two
-        // above -- __construct takes whatever the structure hands it, so a value
-        // that did not come from the form (a structure built in code, a direct SQL
-        // edit, an option a later release removes) reached config::sdk_config()
-        // unchecked.
-        //
-        // Unrecognised falls back to SDK_INHERIT, never to SDK_NO, and that
-        // direction is the whole point. is_sdk_override() counts any non-empty
-        // string as a deliberate override, and cast_sdk_value() then reduces it
-        // with (bool) (int) -- so 'maybe' reached the browser as false, silently
-        // switching the parameter off instead of deferring to the site setting.
-        // Two of the six are focusRespectsRules and fullScreenWatchFocusAlert, so
-        // being wrong in that direction means violation alerts off.
-        //
-        // Driven off the type of the shipped default, exactly as
-        // config::cast_sdk_value() is, so a parameter added to SDK_PER_QUIZ is
-        // covered without editing this.
-        foreach (config::SDK_PER_QUIZ as $key => $prop) {
-            $value = (string) ($this->$prop ?? '');
-
-            if ($value === config::SDK_INHERIT) {
-                continue;
-            }
-
-            if (is_bool(config::SDK_CONFIG[$key] ?? null)) {
-                if ($value !== config::SDK_YES && $value !== config::SDK_NO) {
-                    $this->$prop = config::SDK_INHERIT;
-                }
-                continue;
-            }
-
-            // Room Scan, the one numeric parameter: whole seconds. ctype_digit
-            // accepts '0', which is a real choice meaning "hide the Room Scan
-            // screen", and rejects a negative or fractional value, which is not a
-            // duration.
-            if (!ctype_digit($value)) {
-                $this->$prop = config::SDK_INHERIT;
+        // A malformed saved snapshot must never disable monitoring by coercion.
+        // Reset only the damaged field to its shipped-safe value; the other fifteen
+        // remain the exact copied preset snapshot.
+        $sdkdefaults = config::sdk_snapshot_defaults();
+        foreach (config::SDK_FIELDS as $key => $prop) {
+            if (!config::is_valid_sdk_snapshot_value($key, $this->$prop)) {
+                $this->$prop = $sdkdefaults[$prop];
             }
         }
     }
@@ -787,7 +747,7 @@ class condition extends \core_availability\condition {
             'securebrowserlevel' => $this->securebrowserlevel,
             'allowtouseadditionalresources' => (bool) $this->allowtouseadditionalresources,
             // Added in NTG-185. These three were in PROPS and read by
-            // client::exam_data() but never written here, so the hosted flow has
+            // client::exam_data() but never written here, so the Webapp flow has
             // been sending the property default rather than the teacher's choice.
             // SDK mode reads them too, so leaving them out would ship three
             // settings that silently do nothing.
@@ -813,25 +773,11 @@ class condition extends \core_availability\condition {
             'webcameramainview' => $this->webcameramainview,
         ];
 
-        // NTG-185: the SDK overrides. This block is the one that matters --
-        // core_availability\tree::save() rebuilds the stored JSON exclusively from
-        // what this method returns, with no merge against what was there before, so
-        // any key omitted here is destroyed on every activity edit. That has already
-        // happened four times in this plugin (see the note on allowmultipledisplays
-        // above), which is why these are written from config::SDK_PER_QUIZ rather
-        // than listed by hand: the loop cannot fall out of step with the map.
-        //
-        // The form now offers Yes/No only, with the preset's value preselected, so a
-        // saved exam always states a value and it is written unconditionally. An
-        // empty property is still skipped rather than stored: that is what a
-        // structure built in code (or by an older build) looks like, and writing ''
-        // would turn "say nothing, take the preset" into a stored non-answer that
-        // config::is_sdk_override() would still have to special-case.
-        foreach (config::SDK_PER_QUIZ as $prop) {
-            $value = (string) ($this->$prop ?? '');
-            if ($value !== '') {
-                $data[$prop] = $value;
-            }
+        // The SDK controls are hidden on the activity form, but their snapshot is
+        // not optional. Always write all sixteen values so editing any unrelated
+        // exam field cannot destroy or change the configuration.
+        foreach (config::SDK_FIELDS as $prop) {
+            $data[$prop] = (string) $this->$prop;
         }
         if (!empty($this->presetid)) {
             $data['preset_id'] = (int) $this->presetid;
@@ -874,7 +820,9 @@ class condition extends \core_availability\condition {
         }
 
         // Validate that groups are still there.
-        [$insql, $inparams] = $DB->get_in_or_equal($groups);
+        // PHP 7.0 requires long list syntax.
+        // phpcs:disable Universal.Lists.DisallowLongListSyntax.Found
+        list($insql, $inparams) = $DB->get_in_or_equal($groups);
         $groups = $DB->get_fieldset_select('groups', 'id', 'id ' . $insql, $inparams);
         if (empty($groups)) {
             return true;

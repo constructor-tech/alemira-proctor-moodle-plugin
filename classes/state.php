@@ -40,8 +40,8 @@ class state {
     public static $attempt;
 
     /**
-     * @var bool $lockdown True when a SCORM or assign page is being accessed
-     *                     through Proctor and navigation chrome must be hidden.
+     * @var bool $lockdown True when a Proctor-controlled pre-flight or activity
+     *                     page must hide Moodle navigation chrome.
      */
     public static $lockdown = false;
 }

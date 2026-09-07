@@ -104,6 +104,22 @@ class provider implements
                 'rules'                         => 'privacy:metadata:availability_proctor_presets:rules',
                 'warnings'                      => 'privacy:metadata:availability_proctor_presets:warnings',
                 'scoring'                       => 'privacy:metadata:availability_proctor_presets:scoring',
+                'sdkallowcameraselection'       => 'privacy:metadata:availability_proctor_presets:sdkallowcameraselection',
+                'sdkalwaysshowchat'              => 'privacy:metadata:availability_proctor_presets:sdkalwaysshowchat',
+                'sdkbeforeexamlist'              => 'privacy:metadata:availability_proctor_presets:sdkbeforeexamlist',
+                'sdkdesktopcheckfirst'           => 'privacy:metadata:availability_proctor_presets:sdkdesktopcheckfirst',
+                'sdkdisabledworkers'             => 'privacy:metadata:availability_proctor_presets:sdkdisabledworkers',
+                'sdkexperimentwatchwindowsize'  => 'privacy:metadata:availability_proctor_presets:sdkexperimentwatchwindowsize',
+                'sdkfocusrespectsrules'          => 'privacy:metadata:availability_proctor_presets:sdkfocusrespectsrules',
+                'sdkfullscreenwatchfocusalert'  => 'privacy:metadata:availability_proctor_presets:sdkfullscreenwatchfocusalert',
+                'sdkidentificationbullets'      => 'privacy:metadata:availability_proctor_presets:sdkidentificationbullets',
+                'sdkobserveworkspace'            => 'privacy:metadata:availability_proctor_presets:sdkobserveworkspace',
+                'sdkopenagreementlinksiniframe' => 'privacy:metadata:availability_proctor_presets:sdkopenagreementlinksiniframe',
+                'sdkaudionotification'           => 'privacy:metadata:availability_proctor_presets:sdkaudionotification',
+                'sdkshowfinishexambutton'        => 'privacy:metadata:availability_proctor_presets:sdkshowfinishexambutton',
+                'sdkshowsyschecksupportnew'      => 'privacy:metadata:availability_proctor_presets:sdkshowsyschecksupportnew',
+                'sdksyscheckhelpurl'             => 'privacy:metadata:availability_proctor_presets:sdksyscheckhelpurl',
+                'sdktranslationsoverride'        => 'privacy:metadata:availability_proctor_presets:sdktranslationsoverride',
                 'timecreated'                   => 'privacy:metadata:availability_proctor_presets:timecreated',
                 'timemodified'                  => 'privacy:metadata:availability_proctor_presets:timemodified',
             ],
@@ -286,7 +302,12 @@ class provider implements
         $user = $contextlist->get_user();
         $userid = $user->id;
 
-        [$contextsql, $contextparams] = $DB->get_in_or_equal($contextlist->get_contextids(), SQL_PARAMS_NAMED);
+        // PHP 7.0 requires long list syntax.
+        // phpcs:disable Universal.Lists.DisallowLongListSyntax.Found
+        list($contextsql, $contextparams) = $DB->get_in_or_equal(
+            $contextlist->get_contextids(),
+            SQL_PARAMS_NAMED
+        );
         $params = $contextparams;
 
         $sql = "SELECT
@@ -364,7 +385,7 @@ class provider implements
                 // Exporting it would hand a usable key to whoever receives the file.
                 //
                 // warningtitles holds translated labels for warning *types*, identical
-                // for every student on the site. The hosted export drops the equivalent
+                // for every student on the site. The Webapp export drops the equivalent
                 // warningstitles column for the same reason.
                 $sessionexport[] = [
                     'state' => $sessionrow->state,
@@ -457,7 +478,7 @@ class provider implements
      * @param int|null $timestamp The timestamp, or null/0 when unset.
      * @return string
      */
-    protected static function datetime(?int $timestamp): string {
+    protected static function datetime($timestamp): string {
         if (empty($timestamp)) {
             return '';
         }
@@ -478,7 +499,7 @@ class provider implements
         if (empty($userids)) {
             return;
         }
-        [$userinsql, $userinparams] = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
+        list($userinsql, $userinparams) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
 
         if ($context->contextlevel == CONTEXT_MODULE) {
             $params = array_merge(['cmid' => $context->instanceid], $userinparams);

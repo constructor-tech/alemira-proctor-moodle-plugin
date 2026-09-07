@@ -58,7 +58,7 @@ class finish_session extends \core\task\adhoc_task {
      * @param int $sessionid Row id in availability_proctor_sess.
      * @return void
      */
-    public static function queue(int $sessionid): void {
+    public static function queue(int $sessionid) {
         $task = new self();
         $task->set_custom_data(['sessionid' => $sessionid]);
 
@@ -72,7 +72,7 @@ class finish_session extends \core\task\adhoc_task {
      *
      * @return void
      */
-    public function execute(): void {
+    public function execute() {
         $data = (array) $this->get_custom_data();
         $sessionid = (int) ($data['sessionid'] ?? 0);
 

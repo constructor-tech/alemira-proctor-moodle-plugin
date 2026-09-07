@@ -26,7 +26,7 @@
     * eventurl - Endpoint recording SDK session events.
     * backurl - Quiz view page, for the abnormal-exit route.
     * modulesrc - This plugin's ES module.
-    * sdksrc - The hosted SDK module URL, passed to the module rather than
+    * sdksrc - The remotely served SDK module URL, passed to the module rather than
       hardcoded a second time there.
 
     Example context (json):
@@ -80,12 +80,28 @@
         exam cannot start, which is two contradictory messages at once.
     }}
     <div id="proctor-sdk-intro" class="proctor-sdk-intro" aria-busy="true">
-        <h2>{{quizname}}</h2>
-        <div class="proctor-sdk-loading">
-            {{> core/loading }}
-            <p class="mb-0">{{#str}} launch_starting, availability_proctor {{/str}}</p>
+        <div class="proctor-sdk-intro-card">
+            <p class="proctor-sdk-brand">{{#str}} pluginname, availability_proctor {{/str}}</p>
+            <h2 class="proctor-sdk-quiz-name">{{quizname}}</h2>
+
+            <div class="proctor-sdk-loading" role="status" aria-live="polite">
+                <div class="proctor-sdk-spinner" aria-hidden="true">
+                    {{> core/loading }}
+                </div>
+                <div>
+                    <p class="proctor-sdk-status-title">
+                        {{#str}} launch_preparing, availability_proctor {{/str}}
+                    </p>
+                    <p class="proctor-sdk-status-detail">
+                        {{#str}} launch_starting, availability_proctor {{/str}}
+                    </p>
+                </div>
+            </div>
+
+            <p class="proctor-sdk-stay-note">
+                {{#str}} launch_requirement_stay, availability_proctor {{/str}}
+            </p>
         </div>
-        <p class="text-muted">{{#str}} launch_requirement_stay, availability_proctor {{/str}}</p>
     </div>
 
     {{!
@@ -160,7 +176,7 @@
 
 {{!
     A plain ES module, loaded directly rather than through Moodle's AMD pipeline,
-    because the SDK is a hosted ES module that RequireJS cannot load. This is the
+    because the SDK is a remote ES module that RequireJS cannot load. This is the
     one place in the plugin where that matters.
 }}
 <script type="module">

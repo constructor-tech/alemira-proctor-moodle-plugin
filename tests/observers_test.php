@@ -99,14 +99,14 @@ final class observers_test extends \advanced_testcase {
     }
 
     /**
-     * Unenrolling a learner clears the hosted flow's unused entries.
+     * Unenrolling a learner clears the Webapp flow's unused entries.
      *
      * SDK session rows are deliberately left alone: they carry the record of a
      * proctored exam (state, timings, result) and are evidence about an attempt
      * that still exists. They are removed when the quiz itself goes, or by
      * purge_orphans(), not when someone loses access to the course.
      */
-    public function test_unenrolling_clears_unused_hosted_entries(): void {
+    public function test_unenrolling_clears_unused_webapp_entries(): void {
         global $DB;
         $this->resetAfterTest();
 
@@ -138,7 +138,7 @@ final class observers_test extends \advanced_testcase {
 
         $this->assertFalse(
             $DB->record_exists('availability_proctor_entries', ['id' => $entry]),
-            'an unused hosted entry is cleared with the enrolment'
+            'an unused Webapp entry is cleared with the enrolment'
         );
         $this->assertTrue(
             $DB->record_exists(session::TABLE, ['id' => $session]),

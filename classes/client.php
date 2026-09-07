@@ -51,6 +51,24 @@ class client {
     const SDK_FINISH_TIMEOUT = 10;
 
     /**
+     * Create Moodle's HTTP client in web, task and CLI contexts.
+     *
+     * The legacy Webapp request path normally reaches code that has already loaded
+     * filelib.php. SDK New entry and finish retries can run without that incidental
+     * include, so loading the defining library here avoids a context-dependent
+     * fatal error.
+     *
+     * @return \curl Moodle HTTP client.
+     */
+    protected static function curl_client() {
+        global $CFG;
+
+        require_once($CFG->libdir . '/filelib.php');
+
+        return new \curl();
+    }
+
+    /**
      * Maps moodle languages to proctoring languages
      * Not used in map, because no reliable way to deduce from source lang:
      * fr_CH, it_CH.
@@ -165,7 +183,7 @@ class client {
      * NTG-185: ask Constructor Proctor to finish an SDK session.
      *
      * A separate method from finish_session() above rather than a second signature
-     * on it. That method is the call every existing customer's hosted flow makes
+     * on it. That method is the call every existing customer's Webapp flow makes
      * on submit; changing its shape to serve the SDK model would change the one
      * thing this merge must not touch. The two differ in more than arity anyway --
      * see the three points below -- so sharing one body would mean a method whose
@@ -176,18 +194,18 @@ class client {
      * condition to construct a client from in either. It reads what it needs from
      * config::get() instead.
      *
-     * Three deliberate differences from the hosted call:
+     * Three deliberate differences from the Webapp call:
      *
      * 1. sessionFinishUrl is not sent. It tells the SDK where to send the student
      *    when the exam ends, and any navigation takes the launch page down with it
-     *    -- including a video upload still in flight. The hosted flow can send it
+     *    -- including a video upload still in flight. The Webapp flow can send it
      *    safely because Constructor hosts the outer page; under the SDK model that
      *    page is ours. The student still reaches review: proctor.js redirects once
      *    videoUploaded resolves.
      * 2. It reports success or failure rather than returning the response, because
      *    its caller has to decide whether to queue a retry.
      * 3. It signs with the ported jwt::request_token() rather than Firebase. The
-     *    hosted half uses the Firebase library Moodle core bundles at lib/php-jwt
+     *    Webapp half uses the Firebase library Moodle core bundles at lib/php-jwt
      *    and carries a class_exists() branch because that library's API moved
      *    between versions; the SDK half has neither. The two JWT stacks stay
      *    separate on purpose -- see classes/jwt.php.
@@ -216,7 +234,7 @@ class client {
             rawurlencode($sessionkey)
         );
 
-        $curl = new \curl();
+        $curl = self::curl_client();
         $curl->setHeader([
             'Content-Type: application/json',
             'Authorization: JWT ' . jwt::request_token($config->jwtsecret),
@@ -249,6 +267,75 @@ class client {
         ), DEBUG_DEVELOPER);
 
         return !$retryable;
+    }
+
+    /**
+     * Get the authoritative status of an SDK session from Constructor.
+     *
+     * Used only by the instructor-controlled New entry action. A new session must
+     * never be created while the previous one is still recording, so transport,
+     * authentication and malformed-response failures are all fail-closed.
+     *
+     * @param string $sessionkey The sessionId claim identifying the session.
+     * @return \stdClass Decoded status response. A 404 is returned as status
+     *     `not_found`, which the caller may accept only for a session that never
+     *     reached Constructor.
+     * @throws \moodle_exception When the status cannot be verified safely.
+     */
+    public static function get_sdk_session_status(string $sessionkey): \stdClass {
+        $config = config::get();
+
+        if (!config::is_configured($config)) {
+            throw new \moodle_exception('error_sdk_status_unavailable', 'availability_proctor');
+        }
+
+        $url = sprintf(
+            '%s/api/v2/integration/simple/%s/sessions/%s/status/',
+            config::server_origin($config),
+            rawurlencode($config->integrationname),
+            rawurlencode($sessionkey)
+        );
+
+        $curl = self::curl_client();
+        $curl->setHeader([
+            'Content-Type: application/json',
+            'Authorization: JWT ' . jwt::request_token($config->jwtsecret),
+        ]);
+
+        $response = $curl->get($url, [], [
+            'CURLOPT_TIMEOUT' => self::SDK_FINISH_TIMEOUT,
+            'CURLOPT_CONNECTTIMEOUT' => self::SDK_FINISH_TIMEOUT,
+        ]);
+        $info = $curl->get_info();
+        $httpstatus = (int) ($info['http_code'] ?? 0);
+
+        if ($httpstatus === 404) {
+            return (object) [
+                'status' => 'not_found',
+                'sessionStart' => null,
+                'sessionEnd' => null,
+            ];
+        }
+
+        if ($httpstatus !== 200) {
+            debugging(sprintf(
+                'availability_proctor: status request returned %d (%s).',
+                $httpstatus,
+                $curl->error !== '' ? $curl->error : substr((string) $response, 0, 200)
+            ), DEBUG_DEVELOPER);
+            throw new \moodle_exception('error_sdk_status_unavailable', 'availability_proctor');
+        }
+
+        $decoded = json_decode((string) $response);
+        if (!is_object($decoded) || empty($decoded->status)) {
+            debugging(
+                'availability_proctor: Constructor returned a malformed SDK session status response.',
+                DEBUG_DEVELOPER
+            );
+            throw new \moodle_exception('error_sdk_status_unavailable', 'availability_proctor');
+        }
+
+        return $decoded;
     }
 
     /**
@@ -307,7 +394,7 @@ class client {
             'Authorization: JWT ' . $jwt,
         ];
 
-        $curl = new \curl();
+        $curl = self::curl_client();
         $curl->setHeader($headers);
 
         $result = $curl->post($url, $jsondata, [
