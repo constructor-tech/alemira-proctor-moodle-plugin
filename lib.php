@@ -28,6 +28,9 @@ use availability_proctor\state;
 use availability_proctor\utils;
 use availability_proctor\hooks;
 use availability_proctor\session_cache;
+use availability_proctor\condition;
+use availability_proctor\config;
+use availability_proctor\session;
 
 /**
  * Hooks into head rendering. Adds proctoring fader/shade and accompanying javascript
@@ -64,6 +67,15 @@ function availability_proctor_after_require_login() {
         }
 
         utils::handle_start_attempt($course, $cm, $USER);
+    }
+
+    $guardedscripts = [
+        '/mod/quiz/attempt.php' => 'attempt',
+        '/mod/quiz/summary.php' => 'summary',
+        '/mod/quiz/processattempt.php' => 'processattempt',
+    ];
+    if (isset($guardedscripts[$scriptname])) {
+        availability_proctor_guard_sdk_quiz_request($guardedscripts[$scriptname]);
     }
 
     // SCORM: intercept the view page to enforce proctoring before the SCO is launched.
@@ -104,6 +116,114 @@ function availability_proctor_after_require_login() {
 
             utils::handle_start_attempt_assign($course, $cm, $USER);
         }
+    }
+}
+
+/**
+ * Guard SDK quiz pages with the session created by the launch page.
+ *
+ * Webapp sites return before any request or database inspection. Moodle already
+ * validates the attempt itself; this adds only the proctoring-specific checks
+ * that core cannot know about.
+ *
+ * @param string $script attempt, summary or processattempt.
+ * @return void
+ */
+function availability_proctor_guard_sdk_quiz_request($script) {
+    global $DB, $USER;
+
+    if (!config::is_sdk_model()) {
+        return;
+    }
+
+    $attemptid = optional_param('attempt', 0, PARAM_INT);
+    if (empty($attemptid)) {
+        return;
+    }
+
+    $attempt = $DB->get_record(
+        'quiz_attempts',
+        ['id' => $attemptid],
+        'id, quiz, userid, preview'
+    );
+    if (!$attempt || (int) $attempt->userid !== (int) $USER->id || !empty($attempt->preview)) {
+        // Invalid ownership and preview access remain core's responsibility.
+        return;
+    }
+
+    $cm = get_coursemodule_from_instance('quiz', $attempt->quiz, 0, false, IGNORE_MISSING);
+    if (!$cm) {
+        return;
+    }
+
+    $modinfo = get_fast_modinfo($cm->course, $USER->id);
+    $cminfo = $modinfo->get_cm($cm->id);
+    $proctorcondition = condition::get_proctor_condition($cminfo);
+    if (!$proctorcondition || !$proctorcondition->user_in_proctored_groups($USER->id)) {
+        return;
+    }
+
+    if (has_capability('availability/proctor:exemptproctoring', \context_module::instance($cm->id), $USER)) {
+        return;
+    }
+
+    $proctorsession = session::get_by_attempt($attemptid);
+
+    // attempt_started normally performs this binding. Recover here if that
+    // synchronous event was interrupted, so the guard cannot strand a learner
+    // who has a valid active session.
+    if ($proctorsession === null) {
+        $open = session::get_open_for_quiz((int) $attempt->quiz, (int) $USER->id);
+        if ($open && empty($open->attemptid) && $open->state === session::STATE_ACTIVE) {
+            if (session::is_bind_expired($open)) {
+                session::transition($open, session::STATE_ABANDONED, 'bind_timeout');
+            } else {
+                session::bind_attempt($open, $attemptid);
+                if ((int) $open->attemptid === $attemptid) {
+                    $proctorsession = $open;
+                }
+            }
+        }
+    }
+
+    $continueurl = new \moodle_url('/mod/quiz/view.php', ['id' => $cm->id]);
+
+    if ($proctorsession === null) {
+        session::record_denial('no_session', $script, $attemptid, (int) $attempt->quiz);
+        throw new \moodle_exception('error_nosession', 'availability_proctor', $continueurl);
+    }
+
+    if (
+        (int) $proctorsession->userid !== (int) $USER->id
+            || (int) $proctorsession->quizid !== (int) $attempt->quiz
+    ) {
+        session::record_denial('not_owner', $script, $attemptid, (int) $attempt->quiz, $proctorsession);
+        throw new \moodle_exception('error_notyoursession', 'availability_proctor', $continueurl);
+    }
+
+    if (!session::allows_access($proctorsession)) {
+        $externallyended = !empty($proctorsession->sessionend) || !empty($proctorsession->timeresult);
+        $reason = $externallyended
+            ? 'external_session_ended'
+            : ($proctorsession->state === session::STATE_FINISHED
+                ? 'state_finished' : 'state_' . $proctorsession->state);
+        session::record_denial($reason, $script, $attemptid, (int) $attempt->quiz, $proctorsession);
+        $errorcode = $externallyended
+            ? 'error_sessionended_newentry'
+            : ($proctorsession->state === session::STATE_FINISHED
+                ? 'error_sessionfinished' : 'error_nosession');
+        throw new \moodle_exception($errorcode, 'availability_proctor', $continueurl);
+    }
+
+    // processattempt.php is a POST target rather than a rendered page. For the
+    // two rendered routes, an explicit top-level navigation is normally a
+    // direct-tab attempt. Constructor Secure Browser is the one valid top-level
+    // route: sdk_entry.php marked this separate Moodle browser session only after
+    // consuming a learner- and SDK-session-bound private key.
+    $isnativebrowser = session_cache::is_sdk_secure_browser_session((int) $proctorsession->id);
+    if ($script !== 'processattempt' && session::is_top_level_request() && !$isnativebrowser) {
+        session::record_denial('sec_fetch_dest', $script, $attemptid, (int) $attempt->quiz, $proctorsession);
+        throw new \moodle_exception('error_nosession', 'availability_proctor', $continueurl);
     }
 }
 

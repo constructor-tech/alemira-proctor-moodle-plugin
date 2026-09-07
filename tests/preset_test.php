@@ -19,10 +19,9 @@ namespace availability_proctor;
 /**
  * Tests for preset storage and its deletion guards.
  *
- * An exam stores a preset_id and reads the preset back at exam time, so deleting
- * a preset an exam still points at changes how that exam is proctored. The guards
- * in can_delete() are what prevent that, and "at least one default global preset
- * exists" is the invariant everything else assumes.
+ * Conditions keep an independent value snapshot, while preset_id records the
+ * selected source for UI and explicit refresh. Deletion guards and complete SDK
+ * fields protect the preset-management workflow.
  *
  * @package    availability_proctor
  * @copyright  2026 Constructor Tech
@@ -30,6 +29,102 @@ namespace availability_proctor;
  * @covers     \availability_proctor\preset
  */
 final class preset_test extends \advanced_testcase {
+    /**
+     * Every seeded preset has all sixteen valid SDK snapshot values.
+     */
+    public function test_seeded_presets_contain_complete_sdk_configuration(): void {
+        $this->resetAfterTest();
+
+        foreach (preset::get_all_global() as $preset) {
+            foreach (config::SDK_FIELDS as $key => $prop) {
+                $this->assertTrue(property_exists($preset, $prop), $preset->name . ': ' . $prop);
+                $this->assertTrue(
+                    config::is_valid_sdk_snapshot_value($key, $preset->$prop),
+                    $preset->name . ': ' . $prop
+                );
+            }
+        }
+    }
+
+    /**
+     * Duplicate and personal-preset saves deep-copy all sixteen SDK values.
+     */
+    public function test_duplicate_and_personal_save_copy_all_sdk_fields(): void {
+        $this->resetAfterTest();
+
+        $fields = preset::default_field_values();
+        $fields['sdkalwaysshowchat'] = config::SDK_YES;
+        $fields['sdkobserveworkspace'] = '42';
+        $fields['sdksyscheckhelpurl'] = 'https://example.org/support';
+        $fields['sdkdisabledworkers'] = "watchFocus\nwatchMic";
+        $fields['sdkidentificationbullets'] = '{"en":["Show ID"]}';
+        $fields['sdktranslationsoverride'] = '{"en":{"title":"Ready"}}';
+
+        $source = (object) array_merge($fields, [
+            'name' => 'SDK copy source',
+            'type' => preset::TYPE_GLOBAL,
+        ]);
+        $sourceid = preset::save($source);
+        $duplicate = preset::get_by_id(preset::duplicate($sourceid, 'SDK copy duplicate'));
+
+        $owner = $this->getDataGenerator()->create_user();
+        $personal = preset::get_by_id(preset::save_user_preset($owner->id, 'SDK personal copy', $fields));
+
+        foreach (config::SDK_FIELDS as $prop) {
+            $this->assertSame($fields[$prop], $duplicate->$prop, 'duplicate: ' . $prop);
+            $this->assertSame($fields[$prop], $personal->$prop, 'personal: ' . $prop);
+        }
+    }
+
+    /**
+     * Preset validation rejects unsafe Room Scan, URL and JSON values.
+     */
+    public function test_sdk_validation_rejects_invalid_values(): void {
+        $fields = preset::default_field_values();
+        $fields['sdkobserveworkspace'] = '-1';
+        $fields['sdksyscheckhelpurl'] = 'javascript:alert(1)';
+        $fields['sdkidentificationbullets'] = '{broken';
+        $fields['sdktranslationsoverride'] = 'not json';
+
+        $errors = preset::sdk_validation_errors($fields);
+
+        $this->assertArrayHasKey('sdkobserveworkspace', $errors);
+        $this->assertArrayHasKey('sdksyscheckhelpurl', $errors);
+        $this->assertArrayHasKey('sdkidentificationbullets', $errors);
+        $this->assertArrayHasKey('sdktranslationsoverride', $errors);
+    }
+
+    /**
+     * A Webapp-form edit omits SDK controls but must retain the stored values.
+     */
+    public function test_partial_update_preserves_hidden_sdk_fields(): void {
+        $this->resetAfterTest();
+
+        $fields = preset::default_field_values();
+        $fields['sdkalwaysshowchat'] = config::SDK_YES;
+        $fields['sdkobserveworkspace'] = '37';
+        $fields['sdksyscheckhelpurl'] = 'https://example.org/preserved';
+        $fields['sdkdisabledworkers'] = "watchFocus\nwatchMic";
+
+        $id = preset::save((object) array_merge($fields, [
+            'name' => 'Hidden SDK preservation',
+            'type' => preset::TYPE_GLOBAL,
+        ]));
+        $before = preset::get_by_id($id);
+
+        preset::save((object) [
+            'id' => $id,
+            'name' => 'Hidden SDK preservation edited',
+            'calculator' => 'simple',
+        ]);
+        $after = preset::get_by_id($id);
+
+        foreach (config::SDK_FIELDS as $prop) {
+            $this->assertSame($before->$prop, $after->$prop, $prop);
+        }
+        $this->assertSame('simple', $after->calculator);
+    }
+
     /**
      * Insert a global preset.
      *

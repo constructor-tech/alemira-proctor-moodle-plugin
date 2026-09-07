@@ -20,7 +20,7 @@ namespace availability_proctor;
  * Tests for the site-level proctoring model setting.
  *
  * These protect the upgrade path. The model is chosen site-wide, and an existing
- * site must keep the hosted flow it already runs; only a clean install starts on
+ * site must keep the Webapp flow it already runs; only a clean install starts on
  * SDK. Getting this wrong would move every customer's live exams onto a different
  * integration, so the fallback direction is asserted rather than assumed.
  *
@@ -31,16 +31,16 @@ namespace availability_proctor;
  */
 final class config_test extends \advanced_testcase {
     /**
-     * With nothing written, the model reads as hosted.
+     * With nothing written, the model reads as Webapp.
      *
      * This is the case a partial or failed upgrade lands in, and it must produce
      * the behaviour the site already had rather than the new one.
      */
-    public function test_unset_setting_reads_as_hosted(): void {
+    public function test_unset_setting_reads_as_webapp(): void {
         $this->resetAfterTest();
         unset_config('proctormodel', 'availability_proctor');
 
-        $this->assertSame(config::MODEL_HOSTED, config::proctoring_model());
+        $this->assertSame(config::MODEL_WEBAPP, config::proctoring_model());
         $this->assertFalse(config::is_sdk_model());
     }
 
@@ -50,8 +50,8 @@ final class config_test extends \advanced_testcase {
     public function test_known_models_are_honoured(): void {
         $this->resetAfterTest();
 
-        set_config('proctormodel', config::MODEL_HOSTED, 'availability_proctor');
-        $this->assertSame(config::MODEL_HOSTED, config::proctoring_model());
+        set_config('proctormodel', config::MODEL_WEBAPP, 'availability_proctor');
+        $this->assertSame(config::MODEL_WEBAPP, config::proctoring_model());
         $this->assertFalse(config::is_sdk_model());
 
         set_config('proctormodel', config::MODEL_SDK, 'availability_proctor');
@@ -60,20 +60,20 @@ final class config_test extends \advanced_testcase {
     }
 
     /**
-     * Anything that is not an exact known model reads as hosted.
+     * Anything that is not an exact known model reads as Webapp.
      *
      * The clamp exists because the two failure directions are not equivalent:
-     * falling back to hosted gives a site what it already had, while falling
+     * falling back to Webapp gives a site what it already had, while falling
      * through to SDK would enable an integration nobody chose.
      *
      * @dataProvider rejected_value_provider
      * @param mixed $value Value found in the config row.
      */
-    public function test_unknown_values_fall_back_to_hosted($value): void {
+    public function test_unknown_values_fall_back_to_webapp($value): void {
         $this->resetAfterTest();
         set_config('proctormodel', $value, 'availability_proctor');
 
-        $this->assertSame(config::MODEL_HOSTED, config::proctoring_model());
+        $this->assertSame(config::MODEL_WEBAPP, config::proctoring_model());
         $this->assertFalse(config::is_sdk_model());
     }
 
@@ -110,9 +110,9 @@ final class config_test extends \advanced_testcase {
     }
 
     /**
-     * The upgrade step pins the hosted model for a site that has none recorded.
+     * The upgrade step pins the Webapp model for a site that has none recorded.
      */
-    public function test_upgrade_step_pins_hosted(): void {
+    public function test_upgrade_step_pins_webapp(): void {
         global $CFG;
         $this->resetAfterTest();
         unset_config('proctormodel', 'availability_proctor');
@@ -126,7 +126,7 @@ final class config_test extends \advanced_testcase {
         set_config('version', 2026071706, 'availability_proctor');
         xmldb_availability_proctor_upgrade(2026071706);
 
-        $this->assertSame(config::MODEL_HOSTED, get_config('availability_proctor', 'proctormodel'));
+        $this->assertSame(config::MODEL_WEBAPP, get_config('availability_proctor', 'proctormodel'));
     }
 
     /**

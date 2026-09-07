@@ -111,7 +111,7 @@ class jwt {
      * @param string $secret The jwt_secret from the plugin settings.
      * @return array|null The claims, or null when the token is not acceptable.
      */
-    public static function verify(string $token, string $secret): ?array {
+    public static function verify(string $token, string $secret) {
         if ($secret === '') {
             return null;
         }
@@ -121,7 +121,9 @@ class jwt {
             return null;
         }
 
-        [$encodedheader, $encodedpayload, $encodedsignature] = $parts;
+        // PHP 7.0 requires long list syntax.
+        // phpcs:disable Universal.Lists.DisallowLongListSyntax.Found
+        list($encodedheader, $encodedpayload, $encodedsignature) = $parts;
 
         $header = json_decode((string) self::base64url_decode($encodedheader), true);
         if (!is_array($header)) {
@@ -179,7 +181,7 @@ class jwt {
      * @param string $data Encoded segment.
      * @return string|null Raw bytes, or null when the segment is not valid base64.
      */
-    protected static function base64url_decode(string $data): ?string {
+    protected static function base64url_decode(string $data) {
         // Padding is stripped when encoding and has to be restored before decoding.
         $padded = str_pad(strtr($data, '-_', '+/'), (int) (ceil(strlen($data) / 4) * 4), '=');
 

@@ -189,4 +189,29 @@ final class session_test extends \advanced_testcase {
         );
         $this->assertContains(session::STATE_ACTIVE, session::STATES_ALLOWING_ACCESS);
     }
+
+    /**
+     * Only an explicit document navigation is considered top-level. Missing
+     * headers remain fail-open so a proxy cannot lock a learner out.
+     */
+    public function test_top_level_detection_fails_open(): void {
+        $before = $_SERVER['HTTP_SEC_FETCH_DEST'] ?? null;
+
+        try {
+            unset($_SERVER['HTTP_SEC_FETCH_DEST']);
+            $this->assertFalse(session::is_top_level_request());
+
+            $_SERVER['HTTP_SEC_FETCH_DEST'] = 'iframe';
+            $this->assertFalse(session::is_top_level_request());
+
+            $_SERVER['HTTP_SEC_FETCH_DEST'] = 'document';
+            $this->assertTrue(session::is_top_level_request());
+        } finally {
+            if ($before === null) {
+                unset($_SERVER['HTTP_SEC_FETCH_DEST']);
+            } else {
+                $_SERVER['HTTP_SEC_FETCH_DEST'] = $before;
+            }
+        }
+    }
 }

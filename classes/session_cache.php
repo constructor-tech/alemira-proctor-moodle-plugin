@@ -45,7 +45,7 @@ class session_cache {
     /**
      * The proctoring accesscode carried by the current user's session, if any.
      *
-     * Its presence is what tells the hosted flow that this request came back from
+     * Its presence is what tells the Webapp flow that this request came back from
      * the WebApp rather than straight from the activity page.
      *
      * @return string|null The stored accesscode, or null if unset.
@@ -102,5 +102,28 @@ class session_cache {
      */
     public static function clear_reset() {
         self::cache()->delete('reset');
+    }
+
+    /**
+     * Mark this Moodle browser session as the authenticated Secure Browser for
+     * one SDK session.
+     *
+     * @param int $sessionid SDK session row id.
+     * @return void
+     */
+    public static function set_sdk_secure_browser_session(int $sessionid) {
+        self::cache()->set('sdksecurebrowser', $sessionid);
+    }
+
+    /**
+     * Does this Moodle browser session own the native hand-off for this SDK row?
+     *
+     * @param int $sessionid SDK session row id.
+     * @return bool
+     */
+    public static function is_sdk_secure_browser_session(int $sessionid): bool {
+        $stored = self::cache()->get('sdksecurebrowser');
+
+        return $stored !== false && (int) $stored === $sessionid;
     }
 }

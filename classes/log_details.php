@@ -47,12 +47,20 @@ class log_details {
     protected $url = null;
 
     /**
+     * @var string Source model for this numeric id.
+     */
+    protected $model = null;
+
+    /**
      * Constructor
      * @param int $id Entry id
      * @param \moodle_url $url page URL the details page was reached from
+     * @param string $model Source model. Missing legacy links are Webapp links.
      */
-    public function __construct($id, $url) {
+    public function __construct($id, $url, $model = config::MODEL_WEBAPP) {
         $this->id = $id;
+        $this->url = $url;
+        $this->model = $model;
     }
 
     /**
@@ -61,69 +69,96 @@ class log_details {
     public function render() {
         global $DB, $OUTPUT;
 
-        // NTG-185: an SDK session is a row in a different table, with different
-        // column names. Handled by a sibling method so that everything below stays
-        // the hosted page exactly as it shipped.
-        if (config::is_sdk_model()) {
+        echo $OUTPUT->action_link(
+            new \moodle_url('/availability/condition/proctor/index.php'),
+            get_string('report_back', 'availability_proctor'),
+            null,
+            ['class' => 'btn btn-secondary availability-proctor-report-back']
+        );
+        echo \html_writer::start_div('availability-proctor-report-details');
+
+        // The source travels with the link. The site's current setting controls new
+        // exams only; it must not redirect an old row to a different table with the
+        // same numeric id.
+        if ($this->model === config::MODEL_SDK) {
             $this->render_sdk();
+            echo \html_writer::end_div();
             return;
         }
 
         $entry = $DB->get_record('availability_proctor_entries', ['id' => $this->id]);
+        if (!$entry) {
+            echo $OUTPUT->notification(
+                get_string('log_entry_missing', 'availability_proctor'),
+                \core\output\notification::NOTIFY_ERROR
+            );
+            echo \html_writer::end_div();
+            return;
+        }
         $user = $DB->get_record('user', ['id' => $entry->userid]);
 
         $course = $DB->get_record('course', ['id' => $entry->courseid]);
+        $cm = null;
         if (!empty($course)) {
-            $modinfo = get_fast_modinfo($course);
-            $cm = $modinfo->get_cm($entry->cmid);
+            try {
+                $cm = get_fast_modinfo($course)->get_cm($entry->cmid);
+            } catch (\moodle_exception $e) {
+                $cm = null;
+            }
         }
 
         // NTG-185: the body of this parsing moved to parse_warnings() so that the
         // SDK page can reuse it. The logic is unchanged -- the SDK's resultwarnings
-        // and warningtitles columns hold the same two shapes as the hosted
+        // and warningtitles columns hold the same two shapes as the Webapp
         // warnings/warningstitles, because the same server writes both.
         $warnings = self::parse_warnings($entry->warnings, $entry->warningstitles);
 
         $table = new \flexible_table('availability_proctor_show');
 
         $table->define_columns(['key', 'value']);
-        $table->define_headers(['Key', 'Value']);
+        $table->define_headers([
+            get_string('report_field', 'availability_proctor'),
+            get_string('report_value', 'availability_proctor'),
+        ]);
         $table->sortable(false);
-        $table->set_attribute('class', 'generaltable generalbox');
+        $table->set_attribute('class', 'generaltable availability-proctor-report-detail-table');
         $table->define_baseurl($this->url);
         $table->setup();
 
-        $threshold = $entry->threshold ? json_decode($entry->threshold) : (object)['attention' => null, 'rejected' => null];
-
-        if ($entry->review_link !== null) {
-            $reviewlink = "<a href='" . s($entry->review_link) . "'>"
-                . get_string('log_report_link', 'availability_proctor') . "</a>";
-        } else {
-            $reviewlink = null;
+        $threshold = $entry->threshold ? json_decode($entry->threshold) : null;
+        if (!is_object($threshold)) {
+            $threshold = (object) ['attention' => null, 'rejected' => null];
         }
 
-        if ($entry->archiveurl !== null) {
-            $archivelink = "<a href='" . s($entry->archiveurl) . "'>"
-                . get_string('log_archive_link', 'availability_proctor') . "</a>";
-        } else {
-            $archivelink = null;
-        }
+        $reviewlink = log::external_link(
+            $entry->review_link,
+            get_string('log_report_link', 'availability_proctor')
+        );
+        $archivelink = log::external_link(
+            $entry->archiveurl,
+            get_string('log_archive_link', 'availability_proctor')
+        );
 
         if ($entry->attemptid) {
             $attempt = $DB->get_record('quiz_attempts', ['id' => $entry->attemptid]);
             if ($attempt) {
                 $attempturl  = new \moodle_url('/mod/quiz/review.php', ['attempt' => $entry->attemptid]);
-                $attemptlink = '<a href="' . $attempturl . '">' . $entry->attemptid . '</a>';
+                $attemptlink = \html_writer::link(
+                    $attempturl,
+                    s((string) $entry->attemptid),
+                    ['class' => 'btn btn-sm btn-outline-secondary']
+                );
             } else {
-                $attemptlink = $entry->attemptid . ' (' . get_string('log_attempt_missing', 'availability_proctor') . ')';
+                $attemptlink = s((string) $entry->attemptid) . ' ('
+                    . get_string('log_attempt_missing', 'availability_proctor') . ')';
             }
         } else {
             $attemptlink = null;
         }
 
         $table->add_data([
-            'accesscode',
-            $entry->accesscode,
+            get_string('report_accesscode', 'availability_proctor'),
+            s((string) $entry->accesscode),
         ]);
 
         $table->add_data([
@@ -137,33 +172,46 @@ class log_details {
         ]);
 
         $table->add_data([
+            get_string('log_model', 'availability_proctor'),
+            log::render_model_badge(config::MODEL_WEBAPP),
+        ]);
+
+        $table->add_data([
             get_string('username'),
-            $user->username,
+            $user ? s($user->username) : '',
         ]);
 
         $table->add_data([
             get_string('user'),
-            s($user->firstname) . " " . s($user->lastname) . "<br>" . s($user->email),
+            $user ? log::render_user($user, (int) $entry->courseid) : '',
         ]);
 
         $table->add_data([
             get_string('course'),
-            !empty($course) ? $course->fullname : null,
+            !empty($course) ? format_string($course->fullname) : '',
         ]);
 
         $table->add_data([
             get_string('module', 'availability_proctor'),
-            !empty($course) ? $cm->get_formatted_name() : null,
+            $cm ? $cm->get_formatted_name() : '',
         ]);
 
         $table->add_data([
             get_string('status', 'availability_proctor'),
-            get_string('status_' . $entry->status, 'availability_proctor'),
+            log::render_status_badge($entry->status),
+        ]);
+
+        $table->add_data([
+            get_string('report_source_status', 'availability_proctor'),
+            log::render_source_status((string) $entry->status),
         ]);
 
         $table->add_data([
             get_string('log_review', 'availability_proctor'),
-            implode(', ', array_filter([$reviewlink, $archivelink])),
+            \html_writer::div(
+                implode('', array_filter([$reviewlink, $archivelink])),
+                'availability-proctor-report-link-group'
+            ),
         ]);
 
         $table->add_data([
@@ -173,17 +221,17 @@ class log_details {
 
         $table->add_data([
             get_string('score', 'availability_proctor'),
-            $entry->score,
+            log::render_score($entry->score, $entry->threshold),
         ]);
 
         $table->add_data([
             get_string('threshold_attention', 'availability_proctor'),
-            $threshold->attention,
+            s((string) $threshold->attention),
         ]);
 
         $table->add_data([
             get_string('threshold_rejected', 'availability_proctor'),
-            $threshold->rejected,
+            s((string) $threshold->rejected),
         ]);
 
         $table->add_data([
@@ -197,21 +245,20 @@ class log_details {
 
         $table->add_data([
             get_string('comment', 'availability_proctor'),
-            $entry->comment,
+            s((string) $entry->comment),
         ]);
         $table->print_html();
 
         // NTG-185: moved to render_warnings() so the SDK page renders warnings
         // identically. Body unchanged.
         $this->render_warnings($warnings);
+        echo \html_writer::end_div();
     }
 
     /**
      * NTG-185: the details page for an SDK session.
      *
-     * A sibling of render() rather than branches inside it, for the same reason as
-     * in log::fetch_sdk_data(): the hosted page is what every existing customer
-     * opens, and the surest way not to change it is not to edit it.
+     * A sibling of render() because the two source tables have different fields.
      *
      * Presents the same rows in the same order where a row has an SDK counterpart,
      * so a reviewer who knows one page can read the other. Two rows are
@@ -220,7 +267,7 @@ class log_details {
      * @return void
      */
     protected function render_sdk() {
-        global $DB, $OUTPUT, $PAGE;
+        global $DB, $OUTPUT;
 
         $session = $DB->get_record(session::TABLE, ['id' => $this->id]);
         if (!$session) {
@@ -255,47 +302,47 @@ class log_details {
 
         $warnings = self::parse_warnings($session->resultwarnings, $session->warningtitles);
 
-        $threshold = $session->threshold
-            ? json_decode($session->threshold)
-            : (object) ['attention' => null, 'rejected' => null];
+        $threshold = $session->threshold ? json_decode($session->threshold) : null;
+        if (!is_object($threshold)) {
+            $threshold = (object) ['attention' => null, 'rejected' => null];
+        }
 
         $links = [];
-        if (!empty($session->reporturl)) {
-            $links[] = "<a href='" . s($session->reporturl) . "'>"
-                     . get_string('log_report_link', 'availability_proctor') . '</a>';
-        }
-        if (!empty($session->archiveurl)) {
-            $links[] = "<a href='" . s($session->archiveurl) . "'>"
-                     . get_string('log_archive_link', 'availability_proctor') . '</a>';
+        foreach (['reporturl' => 'log_report_link', 'archiveurl' => 'log_archive_link'] as $field => $stringid) {
+            $link = log::external_link($session->$field, get_string($stringid, 'availability_proctor'));
+            if ($link !== '') {
+                $links[] = $link;
+            }
         }
 
         // A session may have no attempt at all -- it is created before the attempt
         // exists and binds later, so an abandoned launch never acquires one. That is
-        // a normal state here rather than an error, unlike on the hosted page.
+        // a normal state here rather than an error, unlike on the Webapp page.
         $attemptlink = null;
         if (!empty($session->attemptid)) {
             if ($DB->record_exists('quiz_attempts', ['id' => $session->attemptid])) {
                 $attempturl = new \moodle_url('/mod/quiz/review.php', ['attempt' => $session->attemptid]);
-                $attemptlink = '<a href="' . $attempturl . '">' . $session->attemptid . '</a>';
+                $attemptlink = \html_writer::link(
+                    $attempturl,
+                    s((string) $session->attemptid),
+                    ['class' => 'btn btn-sm btn-outline-secondary']
+                );
             } else {
-                $attemptlink = $session->attemptid
+                $attemptlink = s((string) $session->attemptid)
                     . ' (' . get_string('log_attempt_missing', 'availability_proctor') . ')';
             }
         }
 
         $table = new \flexible_table('availability_proctor_show');
         $table->define_columns(['key', 'value']);
-        $table->define_headers(['Key', 'Value']);
+        $table->define_headers([
+            get_string('report_field', 'availability_proctor'),
+            get_string('report_value', 'availability_proctor'),
+        ]);
         $table->sortable(false);
-        $table->set_attribute('class', 'generaltable generalbox');
+        $table->set_attribute('class', 'generaltable availability-proctor-report-detail-table');
 
-        // $this->url is always null: __construct takes a $url and does not assign
-        // it. That is pre-existing on the hosted page, where define_baseurl(null)
-        // is tolerated because the table is not sortable and never builds a link.
-        // Not corrected here -- assigning it would change the hosted page too --
-        // but this path passes the real page URL rather than relying on the null
-        // being harmless.
-        $table->define_baseurl($PAGE->url);
+        $table->define_baseurl($this->url);
         $table->setup();
 
         // sessionkey is deliberately not shown. It is the JWT sessionId claim -- a
@@ -309,18 +356,23 @@ class log_details {
         ]);
 
         $table->add_data([
+            get_string('log_model', 'availability_proctor'),
+            log::render_model_badge(config::MODEL_SDK),
+        ]);
+
+        $table->add_data([
             get_string('username'),
-            $user ? $user->username : '',
+            $user ? s($user->username) : '',
         ]);
 
         $table->add_data([
             get_string('user'),
-            $user ? s($user->firstname) . ' ' . s($user->lastname) . '<br>' . s($user->email) : '',
+            $user ? log::render_user($user, $course ? (int) $course->id : 0) : '',
         ]);
 
         $table->add_data([
             get_string('course'),
-            $course ? $course->fullname : '',
+            $course ? format_string($course->fullname) : '',
         ]);
 
         $table->add_data([
@@ -330,7 +382,17 @@ class log_details {
 
         $table->add_data([
             get_string('status', 'availability_proctor'),
-            log::render_status(log::sdk_status($session)),
+            log::render_status_badge(log::sdk_status($session)),
+        ]);
+
+        $table->add_data([
+            get_string('report_source_state', 'availability_proctor'),
+            log::render_source_status((string) $session->state),
+        ]);
+
+        $table->add_data([
+            get_string('report_source_conclusion', 'availability_proctor'),
+            log::render_source_status((string) $session->conclusion),
         ]);
 
         // The row the status column cannot carry. Both ways a session reaches
@@ -343,7 +405,7 @@ class log_details {
 
         $table->add_data([
             get_string('log_review', 'availability_proctor'),
-            implode(', ', $links),
+            \html_writer::div(implode('', $links), 'availability-proctor-report-link-group'),
         ]);
 
         $table->add_data([
@@ -353,17 +415,17 @@ class log_details {
 
         $table->add_data([
             get_string('score', 'availability_proctor'),
-            $session->score,
+            log::render_score($session->score, $session->threshold),
         ]);
 
         $table->add_data([
             get_string('threshold_attention', 'availability_proctor'),
-            $threshold->attention ?? null,
+            isset($threshold->attention) ? s((string) $threshold->attention) : '',
         ]);
 
         $table->add_data([
             get_string('threshold_rejected', 'availability_proctor'),
-            $threshold->rejected ?? null,
+            isset($threshold->rejected) ? s((string) $threshold->rejected) : '',
         ]);
 
         $table->add_data([
@@ -378,7 +440,7 @@ class log_details {
 
         $table->add_data([
             get_string('comment', 'availability_proctor'),
-            $session->comment,
+            s((string) $session->comment),
         ]);
 
         $table->print_html();
@@ -391,7 +453,7 @@ class log_details {
      *
      * Extracted from render() unchanged, so that both models' pages present
      * warnings the same way. The SDK's resultwarnings / warningtitles columns hold
-     * the same two shapes as the hosted warnings / warningstitles, because the same
+     * the same two shapes as the Webapp warnings / warningstitles, because the same
      * server writes both -- a list that may hold either objects or JSON strings, and
      * a per-type title map that may hold either a string or a language map.
      *
@@ -399,7 +461,7 @@ class log_details {
      * @param string|null $titlesjson The per-type title map, as stored.
      * @return array Decoded warnings.
      */
-    protected static function parse_warnings(?string $warningsjson, ?string $titlesjson): array {
+    protected static function parse_warnings($warningsjson, $titlesjson): array {
         $warnings = [];
         $lang = current_language();
 
@@ -487,7 +549,7 @@ class log_details {
             'heading' => get_string('log_details_warnings', 'availability_proctor'),
         ]);
 
-        $table = new \flexible_table('availability_proctor_show');
+        $table = new \flexible_table('availability_proctor_warnings');
 
         $table->define_columns(['type', 'title', 'start', 'end']);
         $table->define_headers([
@@ -497,14 +559,14 @@ class log_details {
             get_string('log_details_warning_end', 'availability_proctor'),
         ]);
         $table->sortable(false);
-        $table->set_attribute('class', 'generaltable generalbox');
+        $table->set_attribute('class', 'generaltable availability-proctor-report-detail-table');
         $table->define_baseurl($this->url);
         $table->setup();
 
         foreach ($warnings as $warning) {
             $table->add_data([
-                (isset($warning['type']) ? $warning['type'] : ''),
-                (isset($warning['title']) ? $warning['title'] : ''),
+                (isset($warning['type']) ? s((string) $warning['type']) : ''),
+                (isset($warning['title']) ? s((string) $warning['title']) : ''),
                 (isset($warning['start']) ? common::format_date($warning['start']) : ''),
                 (isset($warning['end']) ? common::format_date($warning['end']) : ''),
             ]);

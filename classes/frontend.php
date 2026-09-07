@@ -43,11 +43,6 @@ class frontend extends \core_availability\frontend {
         $PAGE->requires->string_for_js('showless', 'core_form');
         $PAGE->requires->string_for_js('savechanges', 'core');
         $PAGE->requires->string_for_js('cancel', 'core');
-        // NTG-185: the SDK tab's three-state selects use core's own Yes/No, so the
-        // wording matches the rest of Moodle rather than introducing a third variant.
-        $PAGE->requires->string_for_js('yes', 'core');
-        $PAGE->requires->string_for_js('no', 'core');
-
         $strings = [
             'title', 'proctoring_mode', 'online_mode', 'offline_mode', 'auto_mode',
             'rules',
@@ -75,7 +70,7 @@ class frontend extends \core_availability\frontend {
             'save_personal_preset_hint', 'global_presets', 'personal_presets',
             'no_presets', 'preset_delete_confirm', 'preset_saved', 'delete',
             'error_preset_name_required', 'error_useragreementurl',
-            'loaded_preset', 'loaded_preset_none',
+            'loaded_preset', 'loaded_preset_none', 'loaded_preset_custom',
             // Inline hints shown under each field in the exam form.
             'proctoring_mode_help', 'sendmanualwarningstolearner_help',
             'identification_help', 'checkidphotoquality_help', 'preliminary_check_help',
@@ -97,21 +92,6 @@ class frontend extends \core_availability\frontend {
             // activity-edit form (form.js shows hint icons on these four).
             'warning_change_active_window_on_computer_help', 'warning_voice_detected_help',
             'warning_avert_eyes_help', 'warning_no_user_in_frame_help',
-            // NTG-185: the SDK parameter tab. Only the six an exam can override, plus
-            // the section chrome -- config::SDK_PER_QUIZ is the authoritative list and
-            // frontend passes it through as sdk_per_quiz.
-            'preset_section_sdk', 'sdk_section_hint', 'sdk_inherit',
-            'sdk_inherit_value', 'sdk_inherit_seconds', 'sdk_inherit_no_room_scan',
-            // The label and its help text are separate strings: the help icon reads
-            // the _help variant, so registering only the label made every SDK
-            // popover repeat the label back at the teacher.
-            'settings_sdk_allowcameraselection', 'settings_sdk_allowcameraselection_help',
-            'settings_sdk_alwaysshowchat', 'settings_sdk_alwaysshowchat_help',
-            'settings_sdk_focusrespectsrules', 'settings_sdk_focusrespectsrules_help',
-            'settings_sdk_fullscreenwatchfocusalert', 'settings_sdk_fullscreenwatchfocusalert_help',
-            'settings_sdk_observeworkspace', 'settings_sdk_observeworkspace_help',
-            'settings_sdk_showfinishexambuttonforsessionswithoutproctor',
-            'settings_sdk_showfinishexambuttonforsessionswithoutproctor_help',
         ];
 
         foreach (condition::WARNINGS as $key => $value) {
@@ -150,6 +130,18 @@ class frontend extends \core_availability\frontend {
 
         $defaultpreset = preset::get_default();
         $defaults = $defaultpreset ? clone $defaultpreset : new \stdClass();
+
+        // Version 2.7 stored Custom rules outside the fields now supported by presets.
+        // Keep using that retained value for new restrictions on upgraded sites;
+        // it is deliberately not copied into presets because it is exam-level.
+        $legacycustomrules = self::get_legacy_custom_rules_default();
+        if ($legacycustomrules !== null) {
+            $defaults->customrules = $legacycustomrules;
+        }
+
+        // Legacy group defaults are intentionally ignored. Group ids belong to a
+        // course, while presets are site-wide, and v2.7 did not persist them on the
+        // condition. Applying them now could unexpectedly exempt learners.
         $defaults->groups = [];
 
         $groups = $DB->get_records('groups', ['courseid' => $course->id], 'name', 'id,name');
@@ -171,15 +163,11 @@ class frontend extends \core_availability\frontend {
             'global_presets' => $globalpresets,
             'user_presets'  => $userpresets,
             'hidden_fields' => array_values(brand::HIDDEN_FORM_FIELDS),
-            // NTG-185: the SDK parameter tab is only meaningful under the SDK model --
-            // under the hosted one Constructor's own page supplies these, and no
-            // request this plugin makes carries them.
-            'sdk_model'     => config::is_sdk_model(),
-            'sdk_per_quiz'  => array_values(config::SDK_PER_QUIZ),
-            // What the six SDK fields are preselected to on a new restriction. The
-            // fields offer Yes/No only, so they need a real value to open on rather
-            // than an "inherit" placeholder standing in for one.
-            'sdk_defaults'  => self::sdk_form_defaults(),
+            // Hidden SDK snapshot metadata. The activity UI renders no SDK fields;
+            // JavaScript carries these values through saves and replaces them only
+            // when the user explicitly selects another preset.
+            'sdk_fields'    => array_values(config::SDK_FIELDS),
+            'sdk_defaults'  => self::sdk_snapshot_defaults($defaults),
         ];
 
         return [
@@ -194,44 +182,41 @@ class frontend extends \core_availability\frontend {
     }
 
     /**
-     * The value each per-exam SDK field is preselected to on a new restriction.
+     * Returns the site-wide Custom rules default retained from v2.7.
      *
-     * Read from the site settings, which is where the SDK parameters live: the
-     * exam form offers Yes/No only, so it needs a real value to open on. A setting
-     * that has never been written falls back to config::SDK_CONFIG, the same value
-     * config::sdk_config() would send.
+     * The legacy config row is kept during upgrade so this exam-level default can
+     * continue to prefill new restrictions without changing the preset schema.
+     * Invalid or unrelated legacy data is ignored.
      *
-     * @return array Condition property name => value ('yes'/'no', or seconds).
+     * @return string|null Custom rules text, or null when there is no valid legacy default.
      */
-    protected static function sdk_form_defaults(): array {
-        $siteconfig = config::get();
-        $defaults = [];
-
-        foreach (config::SDK_PER_QUIZ as $key => $prop) {
-            $sitevalue = $siteconfig->$prop ?? null;
-            if ($sitevalue !== null && $sitevalue !== '') {
-                // Site booleans are stored as 1/0 by admin_setting_configselect;
-                // the exam form speaks 'yes'/'no'.
-                $shipped = config::SDK_CONFIG[$key] ?? null;
-                if (is_bool($shipped)) {
-                    $defaults[$prop] = ((int) $sitevalue) ? config::SDK_YES : config::SDK_NO;
-                } else {
-                    $defaults[$prop] = (string) $sitevalue;
-                }
-                continue;
-            }
-
-            $shipped = config::SDK_CONFIG[$key] ?? null;
-            if (is_bool($shipped)) {
-                $defaults[$prop] = $shipped ? config::SDK_YES : config::SDK_NO;
-            } else if ($key === config::ROOM_SCAN_SETTING) {
-                // Seconds on the form, milliseconds in SDK_CONFIG.
-                $defaults[$prop] = (string) (int) ($shipped / config::ROOM_SCAN_SCALE);
-            } else {
-                $defaults[$prop] = (string) $shipped;
-            }
+    protected static function get_legacy_custom_rules_default() {
+        $json = get_config('availability_proctor', 'default_proctoring_settings');
+        if (!is_string($json) || $json === '') {
+            return null;
         }
 
+        $settings = json_decode($json);
+        if (!is_object($settings) || !isset($settings->customrules) || !is_string($settings->customrules)) {
+            return null;
+        }
+
+        return $settings->customrules;
+    }
+
+    /**
+     * Complete hidden snapshot fallback for the activity form.
+     *
+     * @param \stdClass $preset Current default preset.
+     * @return array Snapshot property => stored value.
+     */
+    protected static function sdk_snapshot_defaults(\stdClass $preset): array {
+        $defaults = config::sdk_snapshot_defaults();
+        foreach (config::SDK_FIELDS as $prop) {
+            if (property_exists($preset, $prop) && $preset->$prop !== null) {
+                $defaults[$prop] = $preset->$prop;
+            }
+        }
         return $defaults;
     }
 

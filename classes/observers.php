@@ -84,10 +84,10 @@ class observers {
         // agree on who is proctored. Gate 2 carries extra weight here because
         // db/events.php wires attempt_preview_started to this same callback.
         //
-        // The return is load-bearing, not tidiness. Everything below is the hosted
+        // The return is load-bearing, not tidiness. Everything below is the Webapp
         // flow's entries-table bookkeeping: falling through would mint one
         // availability_proctor_entries row per SDK attempt, with status 'started'
-        // and no accesscode, polluting the log the hosted flow reads -- and would
+        // and no accesscode, polluting the log the Webapp flow reads -- and would
         // then fire session_started naming an $entry->id that no SDK session has.
         if (config::is_sdk_model()) {
             self::bind_sdk_session($cm, $attempt);
@@ -296,7 +296,7 @@ class observers {
 
         // The SDK path runs first, and its position is load-bearing. This method
         // returns early further down when there is no accesscode, which is
-        // hosted-only logic -- an SDK session never has one. Handling it after that
+        // Webapp-only logic -- an SDK session never has one. Handling it after that
         // point would mean no SDK session ever reached FINISHED: Constructor would
         // never be told to stop recording, and the student's camera would keep
         // running after they submitted.
@@ -374,7 +374,7 @@ class observers {
      * as a submission -- the student will never return to it -- so the session must
      * not be left open.
      *
-     * Only the SDK side is done here. The hosted flow has no abandonment handling
+     * Only the SDK side is done here. The Webapp flow has no abandonment handling
      * today and this does not add one: doing so would change the behaviour of exams
      * customers are running now, and it is not what this work is for. It is also why
      * this is a separate callback rather than another entry point into
@@ -415,11 +415,11 @@ class observers {
         // attempt is gone cannot be reviewed for anything -- its attempt link would
         // 404.
         //
-        // Not guarded by config::is_sdk_model(). On a hosted site both tables are
+        // Not guarded by config::is_sdk_model(). On a Webapp site both tables are
         // empty, so these are no-ops; guarding them would instead mean that a site
         // which ever switched models kept its pre-switch rows forever. That is the
         // opposite of the routing and binding branches, where running SDK code on a
-        // hosted site would change what a student sees.
+        // Webapp site would change what a student sees.
         $DB->delete_records(session::TABLE, ['attemptid' => (int) $attempt->id]);
         $DB->delete_records(session::TABLE_DENIED, ['attemptid' => (int) $attempt->id]);
     }

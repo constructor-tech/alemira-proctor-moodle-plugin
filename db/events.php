@@ -68,11 +68,11 @@ $observers = [
         //
         // Deliberately NOT wired to attempt_submitted, which is where the plugin the
         // SDK flow came from put it. That plugin's callback did nothing but SDK work;
-        // this one carries the hosted flow's logic as well, and this event is not
+        // this one carries the Webapp flow's logic as well, and this event is not
         // safe to feed it. Core fires attempt_abandoned from process_abandon(), which
         // cron reaches for overdue attempts, and it sets no 'userid' -- so
         // \core\event\base fills in $USER->id (base.php:204), the cron user rather
-        // than the student, with the student in relateduserid instead. The hosted
+        // than the student, with the student in relateduserid instead. The Webapp
         // logic keys on $event->userid, so handing it this event would have it query
         // entries and build modinfo for the wrong user. Its accesscode check would
         // most likely return first, but "probably harmless" is not a basis for

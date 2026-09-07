@@ -75,12 +75,10 @@ BRANDS = discover_brands()
 
 # Top-level paths excluded from every build (prefix match on glob output).
 #
-# These are internal-only: nothing here may reach a customer or a Moodle
-# Marketplace reviewer. 'plans' holds internal ticket numbers and phase notes,
-# and the CLAUDE*.md working notes hold the dev server's address, credentials and
-# database names as well as a written list of known unfixed defects. All of them
-# were shipping in the ZIP because .gitignore keeps them out of git but
-# release.py walks the working tree, not the index.
+# These are internal or build-only: nothing here is needed by a customer or a
+# Moodle Marketplace reviewer. Some are gitignored, but release.py walks the
+# working tree rather than the Git index, so every local-only path must also be
+# excluded here explicitly.
 #
 # Entries are PREFIXES (see collect_source_files), which is deliberate for
 # 'CLAUDE': the list once named 'CLAUDE.md' exactly, the file was later renamed
@@ -91,11 +89,63 @@ IGNORE_PATHS = [
     'utils',        # this script
     'ci',           # moodle-plugin-ci container — build tooling, not plugin code
     'dev',          # local Moodle dev stand (docker compose) — build tooling
+    'tests',        # PHPUnit source tests — kept in Git, not needed at runtime
     'branding',     # per-brand overlay sources, applied separately
     'plans',        # internal planning notes — must not ship
+    'mylocal',      # local references, TODOs and copied service documentation
+    'AGENTS',       # repository AI context, tracked but not part of the plugin
     'CLAUDE',       # prefix: CLAUDE.md, CLAUDE.local.md, any variant
+    'Dockerfile',   # build container, not Moodle runtime
+    'Makefile',     # local build/test commands
+    'package.json', 'package-lock.json',  # local JavaScript toolchain
+    'vendor', 'coverage', '.nyc_output', '.phpunit.cache',
+    'composer.lock', '.env', '.editorconfig', '.idea',
+    'yui/build/moodle-availability_proctor-form/moodle-availability_proctor-form-coverage.js',
     'node_modules', '.git', '.cursor', '.claude', '.vscode', 'openspec',
 ]
+
+# A second, archive-level guard. The source filter above keeps builds small; this
+# list makes a release fail closed if a future packaging change or brand overlay
+# manages to reintroduce an internal path.
+FORBIDDEN_ARCHIVE_PATHS = (
+    'AGENTS.md',
+    'Dockerfile',
+    'Makefile',
+    'package.json',
+    'package-lock.json',
+    'composer.lock',
+    'vendor/',
+    'coverage/',
+    '.nyc_output/',
+    '.phpunit.cache/',
+    'mylocal/',
+    'ci/',
+    'dev/',
+    'tests/',
+    'branding/',
+    'plans/',
+    'utils/',
+    '.claude/',
+    '.cursor/',
+    '.git/',
+    '.github/',
+    '.idea/',
+    '.vscode/',
+    'openspec/',
+    'yui/build/moodle-availability_proctor-form/moodle-availability_proctor-form-coverage.js',
+)
+
+FORBIDDEN_ARCHIVE_NAMES = (
+    '.DS_Store',
+    'Thumbs.db',
+    '.env',
+    '.editorconfig',
+    '.gitignore',
+    '.phpunit.result.cache',
+)
+
+FORBIDDEN_ARCHIVE_NAME_PREFIXES = ('.env.',)
+FORBIDDEN_ARCHIVE_NAME_SUFFIXES = ('-coverage.js', '.pyc', '.pyo', '.pyd', '.swp', '.swo')
 
 # Files force-added in case some glob configurations skip dotfiles.
 APPEND_FILES = ['.htaccess']
@@ -190,6 +240,42 @@ def stage_entry(src_path, dest_path, code_patterns, text_patterns, verbose):
         print(f'  staged {src_path} -> {dest_path}')
 
 
+def audit_archive(artifact, top_level):
+    """Fail when an archive escapes its plugin root or contains internal files."""
+    root = f'{top_level}/'
+    invalid = []
+
+    with zipfile.ZipFile(artifact, 'r') as zf:
+        for name in zf.namelist():
+            if not name.startswith(root):
+                invalid.append(name)
+                continue
+
+            relative = name[len(root):]
+            parts = relative.split('/')
+            basename = os.path.basename(relative)
+            if (
+                basename in FORBIDDEN_ARCHIVE_NAMES
+                or basename.startswith(FORBIDDEN_ARCHIVE_NAME_PREFIXES)
+                or basename.endswith(FORBIDDEN_ARCHIVE_NAME_SUFFIXES)
+                or '__pycache__' in parts
+            ):
+                invalid.append(name)
+                continue
+
+            for forbidden in FORBIDDEN_ARCHIVE_PATHS:
+                if relative == forbidden.rstrip('/') or relative.startswith(forbidden):
+                    invalid.append(name)
+                    break
+
+    if invalid:
+        os.remove(artifact)
+        print(f'Release audit failed for {artifact}:')
+        for name in invalid:
+            print(f'  forbidden: {name}')
+        sys.exit(1)
+
+
 def build_brand(brand_id, brand_config, version, source_files, verbose):
     frankenstyle = brand_config['frankenstyle']
     code_patterns = brand_config['code_patterns']
@@ -233,6 +319,8 @@ def build_brand(brand_id, brand_config, version, source_files, verbose):
                 full = os.path.join(root, name)
                 arcname = os.path.relpath(full, 'releases').replace(os.sep, '/')
                 zf.write(full, arcname)
+
+    audit_archive(artifact, frankenstyle)
 
     size_kb = os.path.getsize(artifact) / 1024
     print(f'  artifact: {artifact} ({size_kb:.1f} KB)')

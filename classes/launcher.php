@@ -39,7 +39,7 @@ class launcher {
     /**
      * Where the SDK is served from.
      *
-     * Hosted ES module only: there is no npm package and no version segment in
+     * Remote ES module only: there is no npm package and no version segment in
      * the URL, so this always serves the current build. It cannot go through
      * Moodle's AMD pipeline, which is why the launch template loads it with a
      * script type="module" tag instead.
@@ -63,7 +63,7 @@ class launcher {
      * @return void
      * @throws \moodle_exception When no proctoring session could be valid.
      */
-    public static function check_can_launch(\cm_info $cm, \stdClass $user): void {
+    public static function check_can_launch(\cm_info $cm, \stdClass $user) {
         // Resolved at runtime rather than imported: the class moved into the
         // mod_quiz namespace in 4.2, and this plugin still supports older releases.
         $settingsclass = utils::quiz_settings_classname();

@@ -34,7 +34,7 @@ function xmldb_availability_proctor_install() {
 
     // A brand-new site has no exams to disturb, so it starts on the SDK model.
     // Written explicitly rather than left to the setting's default, which is the
-    // hosted model on purpose -- see settings.php and db/upgrade.php. An existing
-    // site reaches the upgrade path instead and keeps the hosted flow.
+    // Webapp model on purpose -- see settings.php and db/upgrade.php. An existing
+    // site reaches the upgrade path instead and keeps the Webapp flow.
     set_config('proctormodel', \availability_proctor\config::MODEL_SDK, 'availability_proctor');
 }

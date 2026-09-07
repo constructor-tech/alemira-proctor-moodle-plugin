@@ -154,13 +154,13 @@ class utils {
 
         // Under the SDK model the chrome is all this function contributes. A learner
         // must see the same stripped-down exam page on either model -- SDK mode is
-        // offered as a second option to customers whose browsers refuse the hosted
+        // offered as a second option to customers whose browsers refuse the Webapp
         // flow's cookies, not as a different experience -- so the lockdown above is
         // shared, and everything below it is not.
         //
-        // What follows is hosted machinery and actively breaks the SDK flow: it calls
+        // What follows is Webapp machinery and actively breaks the SDK flow: it calls
         // common::create_entry(), writing an availability_proctor_entries row for a
-        // session the SDK already tracks in its own table, and renders the hosted
+        // session the SDK already tracks in its own table, and renders the Webapp
         // hand-off form. The SDK serves the quiz inside the launch page's iframe, so
         // that form lands on top of the questions and sends the learner back to a
         // "Before the exam" screen they have already completed.
@@ -191,10 +191,6 @@ class utils {
         $attemptdata = $client->attempt_data($entry->accesscode, $starturl);
 
         $data = array_merge($data, $userdata, $timedata, $attemptdata);
-
-        if ($condition->schedulingrequired && empty($entry->timescheduled)) {
-            $data['schedule'] = true;
-        }
 
         $entryisactive = in_array($entry->status, ['started', 'scheduled', 'new']);
         $attemptinprogess = $attempt && $attempt->state == self::quiz_attempt_classname()::IN_PROGRESS;
@@ -312,15 +308,15 @@ class utils {
             body.path-mod-quiz .breadcrumb,
             body.path-mod-quiz .secondary-navigation,
             body.path-mod-quiz nav.moremenu,
-            /* Left navigation drawer */
-            body.path-mod-quiz [data-region="drawer"],
-            body.path-mod-quiz [data-region="fixed-drawer"],
+            /* Left navigation drawers only. Keep the right block drawer because
+               it contains Quiz navigation during an attempt. */
+            body.path-mod-quiz #theme_boost-drawers-courseindex,
+            body.path-mod-quiz #theme_boost-drawers-primary,
             body.path-mod-quiz #nav-drawer,
-            body.path-mod-quiz .drawer,
             body.path-mod-quiz .drawer-left,
-            body.path-mod-quiz .drawer-toggles,
-            body.path-mod-quiz button[data-toggler="drawers"],
-            body.path-mod-quiz .drawercontent,
+            body.path-mod-quiz .drawer-left-toggle,
+            body.path-mod-quiz button[data-target="theme_boost-drawers-courseindex"],
+            body.path-mod-quiz button[data-target="theme_boost-drawers-primary"],
             /* Back buttons / activity navigation / tertiary nav row */
             body.path-mod-quiz .tertiary-navigation,
             body.path-mod-quiz .btn-back,
@@ -492,7 +488,7 @@ CSS;
         // handle_start_attempt_sdk(), where it used to live.
         //
         // It was SDK-only because that is where it was needed to make the flow work
-        // at all; on a hosted site the capability existed, had a lang string, could
+        // at all; on a Webapp site the capability existed, had a lang string, could
         // be granted -- and did nothing, so a role built to skip proctoring was
         // still sent to the WebApp. Nothing about the capability is model-specific,
         // and one check covering both is one fewer place to forget.
@@ -515,10 +511,10 @@ CSS;
         // which runs the Constructor SDK and embeds the attempt in a same-origin
         // iframe, instead of being posted to a Constructor-hosted page.
         //
-        // Everything below this block is the hosted flow and is reached unchanged
+        // Everything below this block is the Webapp flow and is reached unchanged
         // whenever the site is not on the SDK model -- which is every site that
         // upgraded from an earlier release. config::is_sdk_model() is tested first
-        // for that reason: on a hosted site the cost of this branch is one already
+        // for that reason: on a Webapp site the cost of this branch is one already
         // cached config read, and nothing else here is evaluated.
         //
         // Placed after the three gates above because each one is needed: gate 1
@@ -528,11 +524,11 @@ CSS;
         // gate 3 is group scoping, so that if the known 'groups' defect is ever
         // repaired both models start honouring it in the same release.
         //
-        // Placed before the accesscode block below because that block is hosted
+        // Placed before the accesscode block below because that block is Webapp
         // machinery -- entry.php sets proctor_accesscode when the student returns
         // from the WebApp -- and it ends in an unconditional return. A branch after
         // it would be unreachable for any student still carrying an accesscode, and
-        // would mint an unused hosted entry row on every SDK launch.
+        // would mint an unused Webapp entry row on every SDK launch.
         if (config::is_sdk_model()) {
             static::handle_start_attempt_sdk($cminfo, $user);
 
@@ -540,8 +536,8 @@ CSS;
             // launch page -- redirect() exits on its own -- or returns to let the
             // launch page's own iframe through to core's startattempt.php. In the
             // second case there is nothing further for this function to do, and
-            // falling through would run the hosted flow underneath: it mints an
-            // availability_proctor_entries row and renders the hosted redirect
+            // falling through would run the Webapp flow underneath: it mints an
+            // availability_proctor_entries row and renders the Webapp redirect
             // form, so the iframe receives that form instead of the quiz, no
             // attempt is ever created, and the SDK later reports examFinished
             // against a session that never bound.
@@ -552,7 +548,7 @@ CSS;
             // the redirect template rather than a quiz page.
             //
             // The plugin this was ported from could not hit this: its lib.php
-            // gate had no hosted flow after the branch, so returning was implicit.
+            // gate had no Webapp flow after the branch, so returning was implicit.
             return;
         }
 
@@ -609,10 +605,6 @@ CSS;
 
         $data = array_merge($data, $userdata, $timedata, $attemptdata);
 
-        if ($condition->schedulingrequired) {
-            $data['schedule'] = true;
-        }
-
         $formdata = $client->get_form('start', $data);
 
         $pagetitle = get_string(
@@ -659,14 +651,14 @@ CSS;
         // which reaches both models. It was checked here because in the plugin the
         // SDK flow came from it belonged to the quiz access rule's
         // prevent_access(), which was not carried across -- but nothing about it is
-        // SDK-specific, and leaving it here left the hosted flow with a capability
+        // SDK-specific, and leaving it here left the Webapp flow with a capability
         // that silently did nothing.
 
         // Let the request through when this student already has a live session for
-        // this quiz and the request does not look like a top-level navigation. That
-        // combination is what the launch page's own iframe looks like: the session
-        // has been created and activated, and the iframe is now handing off so core
-        // can run its pre-flight chain and create the attempt.
+        // this quiz and either the launch page's iframe is handing off, or the
+        // request belongs to the separately authenticated Constructor Secure
+        // Browser Moodle session. Both routes are server-bound to the same SDK row;
+        // an ordinary top-level browser tab has neither signal and still redirects.
         //
         // Without this the iframe's request would arrive here, be redirected back to
         // the launch page, and loop forever with no attempt ever created.
@@ -689,11 +681,21 @@ CSS;
         // merely sends the student to the launch page.
         $proctorsession = session::get_open_for_quiz((int) $cminfo->instance, (int) $user->id);
 
+        $isnativebrowser = $proctorsession !== null
+            && session_cache::is_sdk_secure_browser_session((int) $proctorsession->id);
+
         if (
             $proctorsession !== null
                 && $proctorsession->state === session::STATE_ACTIVE
-                && !session::is_top_level_request()
+                && (!session::is_top_level_request() || $isnativebrowser)
         ) {
+            // The active session plus the request route proves that this is either
+            // the launch iframe or its authenticated Secure Browser replacement.
+            // Hide Moodle's site and course navigation on core's pre-flight page
+            // just as we do once the attempt exists. The quiz block drawer is
+            // deliberately preserved so Quiz navigation remains usable during
+            // the questions.
+            state::$lockdown = true;
             return;
         }
 
@@ -747,10 +749,6 @@ CSS;
         $attemptdata = $client->attempt_data($entry->accesscode, $starturl);
 
         $data = array_merge($data, $userdata, $timedata, $attemptdata);
-
-        if ($condition->schedulingrequired && empty($entry->timescheduled)) {
-            $data['schedule'] = true;
-        }
 
         $entryisactive = in_array($entry->status, ['started', 'scheduled', 'new']);
 
@@ -845,10 +843,6 @@ CSS;
 
         $data = array_merge($data, $userdata, $timedata, $attemptdata);
 
-        if ($condition->schedulingrequired) {
-            $data['schedule'] = true;
-        }
-
         $formdata = $client->get_form('start', $data);
 
         $pagetitle = get_string(
@@ -938,10 +932,6 @@ CSS;
 
         $data = array_merge($data, $userdata, $timedata, $attemptdata);
 
-        if ($condition->schedulingrequired) {
-            $data['schedule'] = true;
-        }
-
         $formdata = $client->get_form('start', $data);
 
         $pagetitle = get_string(
@@ -1007,10 +997,6 @@ CSS;
         $attemptdata = $client->attempt_data($entry->accesscode, $starturl);
 
         $data = array_merge($data, $userdata, $timedata, $attemptdata);
-
-        if ($condition->schedulingrequired && empty($entry->timescheduled)) {
-            $data['schedule'] = true;
-        }
 
         $entryisactive = in_array($entry->status, ['started', 'scheduled', 'new']);
 

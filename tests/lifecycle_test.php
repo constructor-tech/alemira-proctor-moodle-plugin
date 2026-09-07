@@ -314,4 +314,113 @@ final class lifecycle_test extends \advanced_testcase {
 
         $this->assertSame($first, $this->reload($session->id)->timefinished);
     }
+
+    /**
+     * New entry keeps the Moodle attempt but gives Constructor a fresh sessionId.
+     */
+    public function test_new_entry_preserves_attempt_and_is_idempotent(): void {
+        global $DB;
+
+        $attempt = $this->start_attempt();
+        $old = $this->make_session($attempt->get_attemptid());
+        $remote = (object) [
+            'status' => 'finished',
+            'sessionStart' => '2026-08-22T18:40:00Z',
+            'sessionEnd' => '2026-08-22T18:42:00Z',
+        ];
+
+        $new = session::create_new_entry((int) $old->id, $remote);
+
+        $this->assertNotNull($new);
+        $this->assertNotEquals($old->id, $new->id);
+        $this->assertNotSame($old->sessionkey, $new->sessionkey);
+        $this->assertEquals($attempt->get_attemptid(), $new->attemptid);
+        $this->assertSame(session::STATE_PENDING, $new->state);
+        $this->assertNotEmpty($new->timebound);
+
+        $oldafter = $this->reload($old->id);
+        $this->assertSame(session::STATE_ABANDONED, $oldafter->state);
+        $this->assertSame('new_entry', $oldafter->reason);
+        $this->assertNotEmpty($oldafter->sessionend);
+        $attemptclass = utils::quiz_attempt_classname();
+        $this->assertSame(
+            $attemptclass::IN_PROGRESS,
+            $DB->get_field('quiz_attempts', 'state', ['id' => $attempt->get_attemptid()])
+        );
+        $this->assertEquals($new->id, session::get_by_attempt($attempt->get_attemptid())->id);
+
+        $this->assertNull(
+            session::create_new_entry((int) $old->id, $remote),
+            'replaying the old action must not create a second replacement'
+        );
+        $this->assertSame(2, $DB->count_records(session::TABLE, [
+            'attemptid' => $attempt->get_attemptid(),
+        ]));
+    }
+
+    /**
+     * A teacher cannot create a parallel recording while Constructor is active.
+     */
+    public function test_new_entry_refuses_an_active_constructor_session(): void {
+        global $DB;
+
+        $attempt = $this->start_attempt();
+        $old = $this->make_session($attempt->get_attemptid());
+
+        try {
+            session::create_new_entry((int) $old->id, (object) ['status' => 'started']);
+            $this->fail('an active Constructor session must not be replaced');
+        } catch (\moodle_exception $e) {
+            $this->assertSame(
+                get_string('error_sdk_new_entry_session_active', 'availability_proctor'),
+                $e->getMessage()
+            );
+        }
+
+        $this->assertSame(session::STATE_ACTIVE, $this->reload($old->id)->state);
+        $this->assertSame(1, $DB->count_records(session::TABLE, [
+            'attemptid' => $attempt->get_attemptid(),
+        ]));
+    }
+
+    /**
+     * Submission settles only the newest session after New entry.
+     */
+    public function test_submission_after_new_entry_finishes_the_newest_session(): void {
+        $attempt = $this->start_attempt();
+        $old = $this->make_session($attempt->get_attemptid());
+        $new = session::create_new_entry((int) $old->id, (object) [
+            'status' => 'finished',
+            'sessionEnd' => '2026-08-22T18:42:00Z',
+        ]);
+        session::transition($new, session::STATE_ACTIVE, 'token_issued');
+
+        $attempt->process_finish(time(), false);
+        $this->ignore_unreachable_finish_api();
+
+        $this->assertSame(session::STATE_ABANDONED, $this->reload($old->id)->state);
+        $this->assertSame(session::STATE_FINISHED, $this->reload($new->id)->state);
+    }
+
+    /**
+     * A terminal webhook blocks silent reuse until an instructor creates New entry.
+     */
+    public function test_external_end_requires_new_entry_for_an_open_attempt(): void {
+        global $DB;
+
+        $attempt = $this->start_attempt();
+        $old = $this->make_session($attempt->get_attemptid());
+        $DB->set_field(session::TABLE, 'sessionend', time(), ['id' => $old->id]);
+        $DB->set_field(session::TABLE, 'timeresult', time(), ['id' => $old->id]);
+        $ended = $this->reload($old->id);
+
+        $this->assertFalse(session::allows_access($ended));
+        $this->assertNull(session::get_open_for_quiz((int) $this->quiz->id, (int) $this->user->id));
+
+        $this->expectException(\moodle_exception::class);
+        $this->expectExceptionMessage(
+            get_string('error_sessionended_newentry', 'availability_proctor')
+        );
+        session::get_or_create((int) $this->quiz->id, (int) $this->user->id);
+    }
 }

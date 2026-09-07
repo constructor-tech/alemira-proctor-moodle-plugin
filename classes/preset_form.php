@@ -306,8 +306,58 @@ class preset_form extends \moodleform {
             }
         }
 
-        // NTG-185: the SDK's own interface parameters.
-        //
+        // ---- SDK configuration ----
+        // The values remain stored on every preset in both models, but Webapp
+        // never reads them, so showing sixteen irrelevant controls there only
+        // makes the preset form harder to use. Existing values are preserved by
+        // preset::save() when this model gate omits them from an edit submission.
+        // The five real groups are already clear section headings; an additional
+        // outer "SDK configuration" accordion adds nesting without information.
+        if (config::is_sdk_model() && brand::is_form_field_visible('preset_section_sdk')) {
+            foreach (config::SDK_GROUPS as $groupstring => $props) {
+                $mform->addElement(
+                    'header',
+                    'preset_' . $groupstring,
+                    get_string($groupstring, 'availability_proctor')
+                );
+
+                foreach ($props as $prop) {
+                    if (!brand::is_form_field_visible($prop)) {
+                        continue;
+                    }
+
+                    $key = array_search($prop, config::SDK_FIELDS, true);
+                    if ($key === false) {
+                        continue;
+                    }
+                    $stringid = config::SDK_FIELD_STRINGS[$prop];
+                    $label = get_string($stringid, 'availability_proctor');
+                    $default = config::SDK_CONFIG[$key];
+
+                    if (is_bool($default)) {
+                        $options = $default
+                            ? [config::SDK_YES => get_string('yes'), config::SDK_NO => get_string('no')]
+                            : [config::SDK_NO => get_string('no'), config::SDK_YES => get_string('yes')];
+                        $mform->addElement('select', $prop, $label, $options);
+                        $mform->setType($prop, PARAM_ALPHA);
+                        $mform->addRule($prop, null, 'required', null, 'client');
+                    } else if ($key === config::ROOM_SCAN_SETTING) {
+                        $mform->addElement('text', $prop, $label, ['size' => 6]);
+                        $mform->setType($prop, PARAM_RAW_TRIMMED);
+                        $mform->addRule($prop, null, 'required', null, 'client');
+                    } else if (is_array($default)) {
+                        $mform->addElement('textarea', $prop, $label, ['rows' => 6, 'cols' => 70]);
+                        $mform->setType($prop, PARAM_RAW);
+                    } else {
+                        $mform->addElement('text', $prop, $label, ['size' => 70]);
+                        $mform->setType($prop, PARAM_RAW_TRIMMED);
+                    }
+
+                    $mform->addHelpButton($prop, $stringid, 'availability_proctor');
+                }
+            }
+        }
+
         $this->add_action_buttons();
     }
 
@@ -339,6 +389,7 @@ class preset_form extends \moodleform {
                 $errors['useragreementurl'] = get_string('error_useragreementurl', 'availability_proctor');
             }
         }
+        $errors = array_merge($errors, preset::sdk_validation_errors($data));
         return $errors;
     }
 }

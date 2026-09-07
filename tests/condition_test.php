@@ -58,7 +58,7 @@ final class condition_test extends \advanced_testcase {
      * the teacher's choice never leaves the form.
      *
      * All three are in PROPS and are read by client::exam_data(), but were
-     * missing from save() until NTG-185, so the hosted flow sent the property
+     * missing from save() until NTG-185, so the Webapp flow sent the property
      * default rather than what was configured. SDK mode reads them too.
      *
      * @dataProvider persisted_field_provider
@@ -164,100 +164,66 @@ final class condition_test extends \advanced_testcase {
     }
 
     /**
-     * NTG-185: a per-exam SDK override of "No" survives the constructor.
+     * Legacy booking values must not reactivate the retired scheduling flow.
      *
-     * These six parameters are three-state -- '' inherits the preset, '0' and '1'
-     * override it -- and the constructor read them with !empty(), which rejects '0'.
-     * Every "No" a teacher saved was therefore read back as inherit, silently taking
-     * the preset's value at exam time instead. save() stored '0' correctly, so the
-     * stored JSON looked right and only the exam behaved wrong; no test covered the
-     * '0' case, which is why 40 green tests never saw it. Measured 2026-08-18.
-     *
-     * @dataProvider sdk_override_provider
-     * @param string $prop The condition property carrying the override.
+     * Older conditions and migrated presets can still contain both historical
+     * field-name variants. They remain readable for upgrade compatibility, but
+     * runtime payload builders must always see scheduling disabled.
      */
-    public function test_sdk_override_no_is_read($prop): void {
+    public function test_legacy_scheduling_values_are_ignored(): void {
         $this->resetAfterTest();
 
-        $condition = new condition((object) ['type' => 'proctor', $prop => '0']);
+        $condition = new condition(self::structure([
+            'scheduling_required' => true,
+            'auto_rescheduling' => true,
+            'schedulingrequired' => true,
+            'autorescheduling' => true,
+        ]));
+        $saved = $condition->save();
 
-        $this->assertSame('0', $condition->$prop, "{$prop} must keep an explicit No");
+        $this->assertFalse($condition->schedulingrequired);
+        $this->assertFalse($condition->autorescheduling);
+        $this->assertFalse($saved->scheduling_required);
+        $this->assertFalse($saved->auto_rescheduling);
     }
 
     /**
-     * The same six, overridden to "Yes".
-     *
-     * @dataProvider sdk_override_provider
-     * @param string $prop The condition property carrying the override.
+     * An old condition with no SDK fields resolves and saves a complete safe snapshot.
      */
-    public function test_sdk_override_yes_is_read($prop): void {
+    public function test_missing_sdk_snapshot_is_completed(): void {
         $this->resetAfterTest();
 
-        $condition = new condition((object) ['type' => 'proctor', $prop => '1']);
+        $condition = new condition((object) ['type' => 'proctor']);
+        $saved = $condition->save();
 
-        $this->assertSame('1', $condition->$prop, "{$prop} must keep an explicit Yes");
-    }
-
-    /**
-     * An absent key and an explicit empty string both mean inherit, and must leave
-     * the property at its initialiser rather than becoming a '0' override.
-     *
-     * @dataProvider sdk_override_provider
-     * @param string $prop The condition property carrying the override.
-     */
-    public function test_sdk_override_inherit_stays_empty($prop): void {
-        $this->resetAfterTest();
-
-        $absent = new condition((object) ['type' => 'proctor']);
-        $explicit = new condition((object) ['type' => 'proctor', $prop => '']);
-
-        $this->assertSame('', $absent->$prop, "{$prop} must inherit when the key is absent");
-        $this->assertSame('', $explicit->$prop, "{$prop} must inherit on an empty string");
-    }
-
-    /**
-     * The six SDK parameters an exam may override.
-     *
-     * Taken from config::SDK_PER_QUIZ rather than listed here, so a parameter added
-     * to that map is covered without editing this file.
-     *
-     * @return array[]
-     */
-    public static function sdk_override_provider(): array {
-        $cases = [];
-        foreach (\availability_proctor\config::SDK_PER_QUIZ as $prop) {
-            $cases[$prop] = [$prop];
+        foreach (config::SDK_FIELDS as $key => $prop) {
+            $this->assertTrue(property_exists($saved, $prop), $prop);
+            $this->assertTrue(config::is_valid_sdk_snapshot_value($key, $saved->$prop), $prop);
         }
-        return $cases;
     }
 
     /**
-     * NTG-185: save() writes an override back and drops an inherit.
-     *
-     * The stored JSON is rebuilt exclusively from save()'s return value, so a key it
-     * omits is destroyed on every activity edit. Inherit is written as an absent key
-     * rather than an empty string, so "inherit" has one representation only.
+     * All sixteen copied values survive an unrelated activity edit and reload.
      */
-    public function test_save_round_trips_sdk_overrides(): void {
+    public function test_sdk_snapshot_round_trips_all_fields(): void {
         $this->resetAfterTest();
 
-        $structure = (object) [
-            'type' => 'proctor',
-            'sdkobserveworkspace' => '0',
-            'sdkalwaysshowchat' => '1',
-        ];
+        $snapshot = config::sdk_snapshot_defaults();
+        $snapshot['sdkalwaysshowchat'] = config::SDK_YES;
+        $snapshot['sdkobserveworkspace'] = '0';
+        $snapshot['sdksyscheckhelpurl'] = 'https://example.org/help';
+        $snapshot['sdkdisabledworkers'] = "watchFocus\nwatchMic";
+        $snapshot['sdkidentificationbullets'] = '{"en":["Show your face"]}';
+        $snapshot['sdktranslationsoverride'] = '{"en":{"beforeExam.title":"Ready"}}';
 
+        $structure = (object) array_merge(['type' => 'proctor', 'mode' => 'online'], $snapshot);
         $saved = (new condition($structure))->save();
+        $saved->mode = 'offline';
+        $resaved = (new condition($saved))->save();
 
-        $this->assertSame('0', $saved->sdkobserveworkspace);
-        $this->assertSame('1', $saved->sdkalwaysshowchat);
-        $this->assertObjectNotHasProperty('sdkallowcameraselection', $saved);
-
-        // And the round trip: what save() produced must read back the same.
-        $reread = new condition($saved);
-        $this->assertSame('0', $reread->sdkobserveworkspace);
-        $this->assertSame('1', $reread->sdkalwaysshowchat);
-        $this->assertSame('', $reread->sdkallowcameraselection);
+        foreach ($snapshot as $prop => $expected) {
+            $this->assertSame($expected, $resaved->$prop, $prop);
+        }
     }
 
     /**
@@ -296,78 +262,67 @@ final class condition_test extends \advanced_testcase {
     }
 
     /**
-     * The site setting supplies a parameter the exam says nothing about.
-     *
-     * This is the layer that replaced the preset: it is always present, so a value
-     * reaches the browser whether or not the exam is linked to anything.
+     * Editing a preset does not change an already copied condition snapshot;
+     * explicitly selecting it again does.
      */
-    public function test_site_setting_applies_when_the_exam_is_silent(): void {
+    public function test_preset_snapshot_is_stable_until_reselected(): void {
         $this->resetAfterTest();
 
-        set_config('sdkbeforeexamlist', 1, 'availability_proctor');
+        $data = (object) array_merge(preset::default_field_values(), [
+            'name' => 'Stable SDK snapshot',
+            'type' => preset::TYPE_GLOBAL,
+            'sdkalwaysshowchat' => config::SDK_NO,
+        ]);
+        $presetid = preset::save($data);
 
-        $sdk = config::sdk_config();
+        $selected = (new condition((object) [
+            'type' => 'proctor',
+            'preset_id' => $presetid,
+        ]))->save();
 
-        $this->assertTrue($sdk->beforeExamList);
+        $data->id = $presetid;
+        $data->sdkalwaysshowchat = config::SDK_YES;
+        preset::save($data);
+
+        $reloaded = new condition($selected);
+        $reselected = new condition((object) ['type' => 'proctor', 'preset_id' => $presetid]);
+
+        $this->assertSame(config::SDK_NO, $reloaded->sdkalwaysshowchat);
+        $this->assertSame(config::SDK_YES, $reselected->sdkalwaysshowchat);
     }
 
     /**
-     * An exam override beats the site setting for the six an exam may vary.
+     * Runtime uses the snapshot with correct wire types and ignores old site rows.
      */
-    public function test_exam_override_beats_the_site_setting(): void {
+    public function test_sdk_config_uses_only_snapshot_with_correct_types(): void {
         $this->resetAfterTest();
+        set_config('sdkalwaysshowchat', 0, 'availability_proctor');
 
-        set_config('sdkalwaysshowchat', 1, 'availability_proctor');
+        $snapshot = config::sdk_snapshot_defaults();
+        $snapshot['sdkalwaysshowchat'] = config::SDK_YES;
+        $snapshot['sdkobserveworkspace'] = '30';
+        $snapshot['sdksyscheckhelpurl'] = 'https://example.org/help';
+        $snapshot['sdkdisabledworkers'] = "watchFocus\nwatchMic";
+        $snapshot['sdkidentificationbullets'] = '{"en":["Show your face","Show your ID"]}';
+        $snapshot['sdktranslationsoverride'] = '{"en":{"beforeExam.title":"Ready"}}';
 
-        $condition = new condition((object) ['type' => 'proctor', 'sdkalwaysshowchat' => config::SDK_NO]);
-        $settings = (object) ['sdkalwaysshowchat' => $condition->sdkalwaysshowchat];
+        $sdk = config::sdk_config((object) $snapshot);
 
-        $this->assertFalse(
-            config::sdk_config(null, $settings)->alwaysShowChat,
-            'the teacher\'s No must win over the site Yes'
-        );
+        $this->assertTrue($sdk->alwaysShowChat);
+        $this->assertSame(30 * config::ROOM_SCAN_SCALE, $sdk->observeWorkspace);
+        $this->assertSame('https://example.org/help', $sdk->syscheckHelpURL);
+        $this->assertSame(['watchFocus', 'watchMic'], $sdk->disabledWorkers);
+        $this->assertSame(['en' => ['Show your face', 'Show your ID']], $sdk->identificationOnboardingBullets);
+        $this->assertSame(['en' => ['beforeExam.title' => 'Ready']], $sdk->translationsOverride);
     }
 
     /**
-     * With nothing configured anywhere, the shipped defaults are what is sent.
-     *
-     * The site settings page shows these as its declared defaults, so what an
-     * administrator reads there is what an unconfigured site actually uses.
+     * A blank support URL is intentionally omitted from the SDK config object.
      */
-    public function test_shipped_defaults_apply_to_an_unconfigured_site(): void {
+    public function test_empty_snapshot_support_url_is_dropped(): void {
         $this->resetAfterTest();
 
-        $sdk = config::sdk_config();
-
-        $this->assertTrue($sdk->focusRespectsRules);
-        $this->assertTrue($sdk->fullScreenWatchFocusAlert);
-        $this->assertFalse($sdk->beforeExamList);
-        $this->assertSame(config::SDK_CONFIG['observeWorkspace'], $sdk->observeWorkspace);
-    }
-
-    /**
-     * The Room Scan setting is entered in seconds and sent in milliseconds.
-     *
-     * Sending the form value unscaled would ask the SDK for 15000 seconds.
-     */
-    public function test_room_scan_is_scaled_to_milliseconds(): void {
-        $this->resetAfterTest();
-
-        set_config('sdkobserveworkspace', '30', 'availability_proctor');
-
-        $this->assertSame(30 * config::ROOM_SCAN_SCALE, config::sdk_config()->observeWorkspace);
-    }
-
-    /**
-     * An empty support URL is dropped rather than sent empty: the SDK has no
-     * default for it and an empty string is not a URL.
-     */
-    public function test_empty_support_url_is_dropped(): void {
-        $this->resetAfterTest();
-
-        $this->assertObjectNotHasProperty('syscheckHelpURL', config::sdk_config());
-
-        set_config('sdksyscheckhelpurl', 'https://example.org/help', 'availability_proctor');
-        $this->assertSame('https://example.org/help', config::sdk_config()->syscheckHelpURL);
+        $settings = (object) config::sdk_snapshot_defaults();
+        $this->assertObjectNotHasProperty('syscheckHelpURL', config::sdk_config($settings));
     }
 }

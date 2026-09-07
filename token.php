@@ -23,11 +23,12 @@
  * the gate the whole enforcement rests on: without a successful call here, the
  * access rule serves no questions.
  *
- * config carries the quiz's SDK configuration parameters -- plain client-side
- * flags for proctoring.init(), never JWT claims, so they take no part in
- * payload::build() and the server never sees them. Only values that differ from
- * the SDK's own defaults are included; proctor.js spreads them as top-level
- * init() keys, never nested under a config property, per the Developer Guide.
+ * config carries the resolved SDK configuration parameters -- plain client-side
+ * values for proctoring.init(), never JWT claims, so they take no part in
+ * payload::build() and the server never sees them. The values come from the
+ * condition's independent preset snapshot. proctor.js
+ * spreads the resolved values as top-level init() keys, never nested under a
+ * config property, per the Developer Guide.
  *
  * @package    availability_proctor
  * @copyright  2026 Constructor Tech
@@ -71,7 +72,9 @@ $quiz = $DB->get_record('quiz', ['id' => $proctorsession->quizid], '*', MUST_EXI
 $course = $DB->get_record('course', ['id' => $quiz->course], '*', MUST_EXIST);
 $cm = get_coursemodule_from_instance('quiz', $quiz->id, $course->id, false, MUST_EXIST);
 
-require_capability('mod/quiz:attempt', context_module::instance($cm->id));
+$context = context_module::instance($cm->id);
+$PAGE->set_context($context);
+require_capability('mod/quiz:attempt', $context);
 
 $settings = config::get_quiz_settings((int) $quiz->id);
 if ($settings === null) {
@@ -115,26 +118,32 @@ if (!session::transition($proctorsession, session::STATE_ACTIVE, 'token_issued')
     );
 }
 
-// NTG-185: read from site settings, not from the exam settings object.
-//
-// This previously decoded $settings->sdkconfig, which the plugin the SDK flow came
-// from stored per quiz. Here exam settings come from the availability condition,
-// and sdkconfig is not one of condition::PROPS -- so that read always found
-// nothing and every site silently got the SDK's own built-in defaults, with eight
-// dead settings shipped alongside. It did not fail loudly because an absent value
-// is a legitimate one here.
-//
 // sdk_config() returns an object rather than an array for a reason worth keeping:
 // an empty PHP array encodes as [] rather than {}, and proctor.js spreads this
 // value as an object.
-// $settings carries the exam's own SDK overrides, so a quiz can differ from the
-// site default. Resolution order is exam override -> site setting -> shipped
-// default; see config::sdk_config().
-$sdkconfig = config::sdk_config($pluginconfig, $settings);
+// $settings carries all sixteen hidden snapshot values. Runtime deliberately does
+// not read the linked preset or any site SDK configuration, so preset edits cannot
+// alter an already configured quiz.
+$sdkconfig = config::sdk_config($settings);
 
 echo json_encode([
     'serverOrigin' => config::server_origin($pluginconfig),
     'integrationName' => $pluginconfig->integrationname,
     'jwt' => $token,
     'config' => $sdkconfig,
+    // proctor.js must allow the intentional navigation from the normal browser
+    // into Constructor Secure Browser. This duplicates no secret or exam data;
+    // it only exposes the boolean already present in the signed payload.
+    'secureBrowser' => !empty($settings->securebrowser),
+    // AppDownload deliberately launches window.location.href unless the SDK's
+    // LDBLaunchUrl init parameter is supplied. That would open launch.php in the
+    // native app's empty cookie store and send the learner to Moodle login. The
+    // same one-time URL already signed as sessionUrl is the intended native
+    // hand-off; it authenticates the native cookie store and returns to launch.php
+    // so the SDK starts there. proctor.js passes it to init() only for Secure
+    // Browser sessions.
+    'secureBrowserLaunchUrl' => !empty($settings->securebrowser)
+        && get_config('availability_proctor', 'seamless_auth')
+            ? $claims['sessionUrl']
+            : null,
 ]);

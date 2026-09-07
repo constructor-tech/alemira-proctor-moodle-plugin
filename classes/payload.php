@@ -81,7 +81,9 @@ class payload {
     ): array {
 
         $duration = self::duration_minutes($quiz);
-        [$startdate, $enddate] = self::exam_window($quiz, $duration);
+        // PHP 7.0 requires long list syntax.
+        // phpcs:disable Universal.Lists.DisallowLongListSyntax.Found
+        list($startdate, $enddate) = self::exam_window($quiz, $duration);
 
         $payload = [
             // User. Only userId is mandatory; the names are sent so that the
@@ -111,7 +113,10 @@ class payload {
 
             // Session.
             'sessionId' => $session->sessionkey,
-            'sessionUrl' => self::clip(self::session_url($cm), 'sessionUrl'),
+            'sessionUrl' => self::clip(
+                self::session_url_for_settings($cm, $session, $user, $settings),
+                'sessionUrl'
+            ),
 
             // Where the proctoring result is delivered. Sent per session so the
             // result reaches this site even when several share one integration, and
@@ -279,14 +284,18 @@ class payload {
      * @param \stdClass $user The student.
      * @return string|null
      */
-    protected static function profile_picture_url(\stdClass $user): ?string {
+    protected static function profile_picture_url(\stdClass $user) {
         global $PAGE;
 
         if (empty($user->picture)) {
             return null;
         }
 
-        $picture = new \core\output\user_picture($user);
+        // user_picture is a global output class on Moodle 3.11. The namespaced
+        // core\output\user_picture class is newer and fatals on the SDK's minimum
+        // supported Moodle version. The global name remains available on current
+        // Moodle releases and is already used by the Webapp payload builder.
+        $picture = new \user_picture($user);
         $picture->size = 1;
         $picture->includetoken = $user->id;
 
@@ -388,10 +397,11 @@ class payload {
      *
      * Points at the quiz rather than at a specific attempt, because no attempt
      * exists when the token is signed -- core's startattempt.php creates it after
-     * the SDK has started. The claim is mandatory but the SDK never navigates to
-     * it: it is metadata shown in the dashboard and the proctoring report. The
-     * cost is that a reviewer following it lands on the quiz rather than on the
-     * exact attempt, which the session row records instead.
+     * the SDK has started. The claim is metadata during an ordinary SDK session,
+     * but Constructor Secure Browser opens it in the native app; the resolved
+     * per-session form therefore replaces this plain URL with a seamless-auth
+     * bridge when needed. A reviewer following the plain form lands on the quiz
+     * rather than on the exact attempt, which the session row records instead.
      *
      * @param \stdClass $cm The quiz course module.
      * @return string Absolute URL.
@@ -401,6 +411,34 @@ class payload {
         // default escapes them for embedding in HTML, which would corrupt the
         // URL once it is read as a JSON string.
         return (new \moodle_url('/mod/quiz/view.php', ['id' => $cm->id]))->out(false);
+    }
+
+    /**
+     * Resolve the session URL used by this particular SDK session.
+     *
+     * The SDK treats sessionUrl as metadata during an ordinary browser session.
+     * Constructor Secure Browser additionally opens it in the native app, whose
+     * cookie store does not contain the learner's Moodle login. When seamless
+     * authorization is enabled, use a session-bound one-time login bridge for
+     * that hand-off. All other SDK sessions retain the plain quiz URL.
+     *
+     * @param \stdClass $cm The quiz course module.
+     * @param \stdClass $session SDK session row.
+     * @param \stdClass $user Learner record.
+     * @param \stdClass $settings Resolved quiz proctoring settings.
+     * @return string Absolute URL.
+     */
+    protected static function session_url_for_settings(
+        \stdClass $cm,
+        \stdClass $session,
+        \stdClass $user,
+        \stdClass $settings
+    ): string {
+        if (!empty($settings->securebrowser) && get_config('availability_proctor', 'seamless_auth')) {
+            return secure_browser::entry_url($session, $user);
+        }
+
+        return self::session_url($cm);
     }
 
     /**
@@ -416,7 +454,7 @@ class payload {
      *
      * Sending this per session is what lets one site run both models under one set
      * of credentials. The integration's server-side review_url keeps pointing at
-     * api.php for the hosted flow; this claim overrides it for SDK sessions only.
+     * api.php for the Webapp flow; this claim overrides it for SDK sessions only.
      *
      * No query parameters: the endpoint does one thing, so there is nothing to
      * dispatch on. api.php carries a method parameter because it also handles
@@ -451,7 +489,7 @@ class payload {
      * @param string $claim Claim name, as a key of MAXLEN.
      * @return string
      */
-    protected static function clip(?string $value, string $claim): string {
+    protected static function clip($value, string $claim): string {
         $value = (string) $value;
 
         if (!isset(self::MAXLEN[$claim])) {

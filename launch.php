@@ -43,7 +43,9 @@ use availability_proctor\session;
 
 $cmid = required_param('cmid', PARAM_INT);
 
-[$course, $cm] = get_course_and_cm_from_cmid($cmid, 'quiz');
+// PHP 7.0 requires long list syntax.
+// phpcs:disable Universal.Lists.DisallowLongListSyntax.Found
+list($course, $cm) = get_course_and_cm_from_cmid($cmid, 'quiz');
 
 require_login($course, false, $cm);
 
@@ -115,7 +117,11 @@ if ($failure === null) {
 
 $proctorsession = null;
 if ($failure === null) {
-    $proctorsession = session::get_or_create((int) $cm->instance, (int) $USER->id);
+    try {
+        $proctorsession = session::get_or_create((int) $cm->instance, (int) $USER->id);
+    } catch (moodle_exception $e) {
+        $failure = $e->getMessage();
+    }
 }
 
 echo $OUTPUT->header();

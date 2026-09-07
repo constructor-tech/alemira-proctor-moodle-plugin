@@ -56,7 +56,7 @@ class purge_orphans extends \core\task\scheduled_task {
      *
      * @return void
      */
-    public function execute(): void {
+    public function execute() {
         $removed = observers::purge_orphans();
 
         // Silent when there is nothing to do, which is the normal case. A line in the

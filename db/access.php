@@ -68,7 +68,7 @@ $capabilities = [
     // whose only real use is exempting a specific student look like something
     // teachers are meant to hold.
     //
-    // Deliberately not applied to the hosted flow: adding an exemption path there
+    // Deliberately not applied to the Webapp flow: adding an exemption path there
     // would change the behaviour of exams that customers are running today.
     'availability/proctor:exemptproctoring' => [
         'riskbitmask' => RISK_PERSONAL,

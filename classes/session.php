@@ -22,8 +22,8 @@ defined('MOODLE_INTERNAL') || die();
  * The proctoring session state machine, and the access gate that reads it.
  *
  * Design note, because the states are not symmetrical and the asymmetry is
- * deliberate: only PENDING and FINISHED block access. FINISHING and ABANDONED
- * both allow it.
+ * deliberate: PENDING and FINISHED block access. FINISHING and ABANDONED allow
+ * recovery only while Constructor has not supplied terminal session data.
  *
  * The reason is that the SDK gives us no way to prevent or intercept the student
  * pressing its own "Finish exam" button, and no way to distinguish a deliberate
@@ -32,8 +32,9 @@ defined('MOODLE_INTERNAL') || die();
  * mid-attempt and lose their work. That is a worse outcome than an unproctored
  * tail, which is visible to the reviewer through the timefinishing timestamp.
  *
- * So the guarantee this class enforces is "questions are never served before a
- * session starts", NOT "questions are only served while recording".
+ * Once sessionEnd or a result webhook proves recording ended, access is blocked
+ * until an instructor creates New entry. That preserves the attempt and answers
+ * without allowing an unproctored tail or reusing a closed Constructor session.
  *
  * @package    availability_proctor
  * @copyright  2026 Constructor Tech
@@ -46,13 +47,13 @@ class session {
     /** @var string token.php signed a JWT. Blocks nothing: this is the working state. */
     const STATE_ACTIVE = 'active';
 
-    /** @var string examFinished resolved. Recording has stopped but access is still allowed. */
+    /** @var string examFinished resolved; normally followed immediately by submission. */
     const STATE_FINISHING = 'finishing';
 
     /** @var string The attempt was submitted. Terminal, and blocks access. */
     const STATE_FINISHED = 'finished';
 
-    /** @var string appUnmounted resolved. Terminal, but still allows access. */
+    /** @var string appUnmounted or an instructor replacement closed the local row. */
     const STATE_ABANDONED = 'abandoned';
 
     /** @var string Table holding session rows. */
@@ -104,17 +105,86 @@ class session {
     ];
 
     /**
-     * Fetch the session row bound to an attempt, if there is one.
+     * Fetch the newest session row bound to an attempt, if there is one.
+     *
+     * New entry deliberately permits sequential Constructor sessions to share a
+     * Moodle attempt. Every caller that enforces access or closes an attempt must
+     * therefore use the newest row, while older rows remain immutable report
+     * history.
      *
      * @param int $attemptid Quiz attempt id.
      * @return \stdClass|null The row, or null when the attempt has no session.
      */
-    public static function get_by_attempt(int $attemptid): ?\stdClass {
+    public static function get_by_attempt(int $attemptid) {
         global $DB;
 
-        $record = $DB->get_record(self::TABLE, ['attemptid' => $attemptid]);
+        $records = $DB->get_records(
+            self::TABLE,
+            ['attemptid' => $attemptid],
+            'id DESC',
+            '*',
+            0,
+            1
+        );
+        $record = $records ? reset($records) : null;
 
         return $record ?: null;
+    }
+
+    /**
+     * Fetch the newest session row for a learner and quiz, regardless of state.
+     *
+     * @param int $quizid Quiz id.
+     * @param int $userid The student.
+     * @return \stdClass|null
+     */
+    public static function get_latest_for_quiz(int $quizid, int $userid) {
+        global $DB;
+
+        $records = $DB->get_records(
+            self::TABLE,
+            ['quizid' => $quizid, 'userid' => $userid],
+            'id DESC',
+            '*',
+            0,
+            1
+        );
+
+        return $records ? reset($records) : null;
+    }
+
+    /**
+     * Create a fresh SDK session, optionally pre-bound to an existing attempt.
+     *
+     * Normal launches are unbound because core has not created the attempt yet.
+     * New entry is different: it intentionally resumes an existing in-progress
+     * attempt, so binding at creation removes any ambiguity between its old and
+     * new Constructor sessions.
+     *
+     * @param int $quizid Quiz id.
+     * @param int $userid The student.
+     * @param int|null $attemptid Existing attempt for New entry, or null.
+     * @return \stdClass The inserted row.
+     */
+    protected static function create(int $quizid, int $userid, $attemptid = null): \stdClass {
+        global $DB;
+
+        $now = time();
+        $record = new \stdClass();
+        $record->attemptid = $attemptid;
+        $record->quizid = $quizid;
+        $record->userid = $userid;
+        $record->sessionkey = self::make_session_key();
+        $record->state = self::STATE_PENDING;
+        $record->timecreated = $now;
+        $record->timemodified = $now;
+        if ($attemptid !== null) {
+            $record->timebound = $now;
+        }
+
+        $record->id = $DB->insert_record(self::TABLE, $record);
+
+        return $record;
     }
 
     /**
@@ -129,16 +199,20 @@ class session {
      * @param int $userid The student.
      * @return \stdClass|null
      */
-    public static function get_open_for_quiz(int $quizid, int $userid): ?\stdClass {
+    public static function get_open_for_quiz(int $quizid, int $userid) {
         global $DB;
 
-        [$insql, $inparams] = $DB->get_in_or_equal(self::STATES_OPEN, SQL_PARAMS_NAMED, 'st');
+        // PHP 7.0 requires long list syntax.
+        // phpcs:disable Universal.Lists.DisallowLongListSyntax.Found
+        list($insql, $inparams) = $DB->get_in_or_equal(self::STATES_OPEN, SQL_PARAMS_NAMED, 'st');
 
         $records = $DB->get_records_select(
             self::TABLE,
-            "quizid = :quizid AND userid = :userid AND state $insql",
+            "quizid = :quizid AND userid = :userid AND state $insql "
+                . 'AND (sessionend IS NULL OR sessionend = 0) '
+                . 'AND (timeresult IS NULL OR timeresult = 0)',
             array_merge($inparams, ['quizid' => $quizid, 'userid' => $userid]),
-            'timecreated DESC',
+            'id DESC',
             '*',
             0,
             1
@@ -170,20 +244,125 @@ class session {
             return $existing;
         }
 
-        $now = time();
+        // Never silently replace a session for a Moodle attempt that is still in
+        // progress. This is the timeout recovery case: Constructor ended, the
+        // answers still exist, and only an instructor may authorize a fresh
+        // sessionId through New entry.
+        $latest = self::get_latest_for_quiz($quizid, $userid);
+        if ($latest && !empty($latest->attemptid)) {
+            $attempt = $DB->get_record('quiz_attempts', ['id' => $latest->attemptid]);
+            $attemptclass = utils::quiz_attempt_classname();
+            if ($attempt && $attempt->state === $attemptclass::IN_PROGRESS) {
+                throw new \moodle_exception('error_sessionended_newentry', 'availability_proctor');
+            }
+        }
 
-        $record = new \stdClass();
-        $record->attemptid = null;
-        $record->quizid = $quizid;
-        $record->userid = $userid;
-        $record->sessionkey = self::make_session_key();
-        $record->state = self::STATE_PENDING;
-        $record->timecreated = $now;
-        $record->timemodified = $now;
+        return self::create($quizid, $userid);
+    }
 
-        $record->id = $DB->insert_record(self::TABLE, $record);
+    /**
+     * Create the instructor-requested replacement for an ended SDK session.
+     *
+     * This mirrors Webapp New entry at the Moodle boundary: it preserves the
+     * existing quiz attempt, answers and timer while creating a new Constructor
+     * sessionId. The additional remote-status check is SDK-specific and prevents
+     * two recordings being active for the same attempt.
+     *
+     * @param int $sessionid Session row selected in the report.
+     * @param \stdClass|null $remotestatus Injected Constructor status for tests;
+     *     production callers omit it and the API is queried when needed.
+     * @return \stdClass|null The new row, or null when a newer entry already exists.
+     * @throws \moodle_exception When replacement is unsafe or cannot be verified.
+     */
+    public static function create_new_entry(int $sessionid, $remotestatus = null) {
+        global $DB;
 
-        return $record;
+        $initial = $DB->get_record(self::TABLE, ['id' => $sessionid]);
+        if (!$initial) {
+            return null;
+        }
+
+        $lockpart = !empty($initial->attemptid)
+            ? 'attempt_' . (int) $initial->attemptid
+            : 'session_' . (int) $initial->id;
+        $factory = \core\lock\lock_config::get_lock_factory('availability_proctor');
+        $lock = $factory->get_lock('new_entry_' . $lockpart, 10);
+        if (!$lock) {
+            throw new \moodle_exception('error_sdk_new_entry_busy', 'availability_proctor');
+        }
+
+        try {
+            $current = $DB->get_record(self::TABLE, ['id' => $sessionid]);
+            if (!$current) {
+                return null;
+            }
+
+            // A repeated request against the old report row must not create a
+            // second replacement. This is the server-side idempotency guarantee;
+            // the form's sesskey protects a different concern (CSRF).
+            if (!empty($current->attemptid)) {
+                $latest = self::get_by_attempt((int) $current->attemptid);
+                if (!$latest || (int) $latest->id !== (int) $current->id) {
+                    return null;
+                }
+
+                $attempt = $DB->get_record('quiz_attempts', ['id' => $current->attemptid]);
+                $attemptclass = utils::quiz_attempt_classname();
+                if (!$attempt || $attempt->state !== $attemptclass::IN_PROGRESS) {
+                    throw new \moodle_exception(
+                        'error_sdk_new_entry_attempt_finished',
+                        'availability_proctor'
+                    );
+                }
+            }
+
+            $open = self::get_open_for_quiz((int) $current->quizid, (int) $current->userid);
+            if ($open && (int) $open->id !== (int) $current->id) {
+                return null;
+            }
+
+            $hasterminalresult = !empty($current->sessionend) || !empty($current->timeresult);
+            $neveractivated = $current->state === self::STATE_PENDING
+                && empty($current->timeactive)
+                && empty($current->sessionstart)
+                && empty($current->timeresult);
+
+            if (!$hasterminalresult && !$neveractivated) {
+                $status = $remotestatus ?: client::get_sdk_session_status($current->sessionkey);
+                $statusvalue = strtolower((string) ($status->status ?? ''));
+
+                if ($statusvalue !== 'finished') {
+                    // A missing unbound pending session never reached Constructor
+                    // and is safe to replace. A bound attempt with the same answer
+                    // is suspicious and stays fail-closed.
+                    $safelymissing = $statusvalue === 'not_found'
+                        && empty($current->attemptid)
+                        && empty($current->sessionstart);
+                    if (!$safelymissing) {
+                        throw new \moodle_exception(
+                            'error_sdk_new_entry_session_active',
+                            'availability_proctor'
+                        );
+                    }
+                } else {
+                    self::record_remote_status($current, $status);
+                }
+            }
+
+            // Keep the old row as report history, but remove it from the set that
+            // get_or_create() can reuse. A terminal row needs no state mutation.
+            if (in_array($current->state, self::STATES_OPEN, true)) {
+                self::transition($current, self::STATE_ABANDONED, 'new_entry');
+            }
+
+            return self::create(
+                (int) $current->quizid,
+                (int) $current->userid,
+                empty($current->attemptid) ? null : (int) $current->attemptid
+            );
+        } finally {
+            $lock->release();
+        }
     }
 
     /**
@@ -305,7 +484,7 @@ class session {
      * @param string|null $reason Which SDK event drove this, for the record.
      * @return bool True when the state changed, false when the transition was refused.
      */
-    public static function transition(\stdClass $session, string $newstate, ?string $reason = null): bool {
+    public static function transition(\stdClass $session, string $newstate, $reason = null): bool {
         global $DB;
 
         if (!isset(self::TRANSITIONS[$newstate])) {
@@ -372,7 +551,7 @@ class session {
      * @param \stdClass $session The session row.
      * @return void
      */
-    public static function record_video_uploaded(\stdClass $session): void {
+    public static function record_video_uploaded(\stdClass $session) {
         global $DB;
 
         if (!empty($session->videouploaded)) {
@@ -408,7 +587,7 @@ class session {
      * @param \stdClass $session The session row.
      * @return string|null Absolute URL, or null when the student should stay put.
      */
-    public static function return_url(\stdClass $session): ?string {
+    public static function return_url(\stdClass $session) {
         global $DB;
 
         if (empty($session->attemptid)) {
@@ -440,8 +619,12 @@ class session {
      * @param \stdClass|null $session The session row, or null when there is none.
      * @return bool
      */
-    public static function allows_access(?\stdClass $session): bool {
+    public static function allows_access($session): bool {
         if ($session === null) {
+            return false;
+        }
+
+        if (!empty($session->sessionend) || !empty($session->timeresult)) {
             return false;
         }
 
@@ -488,19 +671,8 @@ class session {
      * insert unbounded rows. Same attempt and same reason inside the configured
      * window counts once.
      *
-     * Nothing in this plugin calls it. Enforcement here is entry-only -- the
-     * routing branch in lib.php redirects a student who has no usable session to
-     * the launch page rather than refusing them -- so there is no denial to
-     * record. Every caller in the plugin this was ported from lived in the quiz
-     * access rule's prevent_access(), which was deliberately not carried across.
-     *
-     * Kept, rather than deleted with its callers, because it is the seam where
-     * mid-attempt enforcement would attach if it is ever added, and because
-     * removing it would mean diverging from the source of a file that may be
-     * ported from again. Consequence to be honest about: availability_proctor_deny
-     * is always empty in this release, so it must not be surfaced as a denial log
-     * anywhere -- an empty list reads as "no violations" when the truth is
-     * "nothing was ever recorded".
+     * The SDK-only route guard in lib.php calls this for attempt.php, summary.php
+     * and processattempt.php. Webapp requests never reach that guard.
      *
      * @param string $reason One of the documented reason codes.
      * @param string $script Entry point that denied: attempt, summary or processattempt.
@@ -512,10 +684,10 @@ class session {
     public static function record_denial(
         string $reason,
         string $script,
-        ?int $attemptid = null,
-        ?int $quizid = null,
-        ?\stdClass $session = null
-    ): void {
+        $attemptid = null,
+        $quizid = null,
+        $session = null
+    ) {
         global $DB, $USER;
 
         $now = time();
@@ -574,7 +746,7 @@ class session {
             return true;
         }
 
-        // finish_sdk_session(), not finish_session(): the latter is the hosted
+        // finish_sdk_session(), not finish_session(): the latter is the Webapp
         // flow's own call -- an instance method taking a redirect URL as well --
         // and calling it statically with one argument was a fatal Error on every
         // SDK submit. See the docblock on finish_sdk_session() for why they are
@@ -604,7 +776,7 @@ class session {
      * @param array $result Decoded webhook body.
      * @return void
      */
-    public static function record_result(\stdClass $session, array $result): void {
+    public static function record_result(\stdClass $session, array $result) {
         global $DB;
 
         $now = time();
@@ -640,12 +812,48 @@ class session {
     }
 
     /**
+     * Store the timestamps returned by Constructor's session-status endpoint.
+     *
+     * Unlike record_result(), this must not touch conclusions, scores or links:
+     * the status response does not carry them, and clearing a later webhook's
+     * forensic data while creating New entry would be data loss.
+     *
+     * @param \stdClass $session Local SDK session row.
+     * @param \stdClass $status Decoded Constructor status response.
+     * @return void
+     */
+    public static function record_remote_status(\stdClass $session, \stdClass $status) {
+        global $DB;
+
+        $update = (object) [
+            'id' => $session->id,
+            'timemodified' => time(),
+        ];
+        $changed = false;
+
+        foreach (['sessionStart' => 'sessionstart', 'sessionEnd' => 'sessionend'] as $key => $column) {
+            if (!empty($status->$key)) {
+                $parsed = self::parse_date((string) $status->$key);
+                if ($parsed !== null) {
+                    $update->$column = $parsed;
+                    $session->$column = $parsed;
+                    $changed = true;
+                }
+            }
+        }
+
+        if ($changed) {
+            $DB->update_record(self::TABLE, $update);
+        }
+    }
+
+    /**
      * Convert an ISO 8601 timestamp from the webhook into a Unix timestamp.
      *
      * @param string $value The reported date and time.
      * @return int|null Null when it cannot be parsed, so a bad value does not become 1970.
      */
-    protected static function parse_date(string $value): ?int {
+    protected static function parse_date(string $value) {
         try {
             return (new \DateTimeImmutable($value))->getTimestamp();
         } catch (\Exception $e) {
@@ -665,7 +873,7 @@ class session {
      * @param string|null $reason Why the attempt ended, when it was not a plain submission.
      * @return void
      */
-    public static function mark_submitted(int $attemptid, ?string $reason = null): void {
+    public static function mark_submitted(int $attemptid, $reason = null) {
         $session = self::get_by_attempt($attemptid);
         if ($session === null) {
             return;

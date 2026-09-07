@@ -322,7 +322,36 @@ class preset {
     public static function save($data) {
         global $DB;
 
+        // The Webapp preset form deliberately omits SDK controls. A partial edit
+        // must therefore inherit the stored snapshot instead of letting
+        // normalize_before_save() replace the missing properties with shipped
+        // defaults. This also makes every other partial-update caller safe.
+        if (!empty($data->id)) {
+            $columns = array_merge(['id'], array_values(config::SDK_FIELDS));
+            $stored = $DB->get_record(
+                self::TABLE,
+                ['id' => (int) $data->id],
+                implode(',', $columns),
+                MUST_EXIST
+            );
+            foreach (config::SDK_FIELDS as $prop) {
+                if (!property_exists($data, $prop)) {
+                    $data->$prop = $stored->$prop;
+                }
+            }
+        }
+
         self::normalize_before_save($data);
+
+        $sdkerrors = self::sdk_validation_errors($data);
+        if ($sdkerrors) {
+            throw new \moodle_exception(
+                'error_invalid_sdk_configuration',
+                'availability_proctor',
+                '',
+                implode(' ', array_values($sdkerrors))
+            );
+        }
 
         if (!empty($data->name)) {
             self::assert_name_available($data);
@@ -412,6 +441,33 @@ class preset {
      * @return void
      */
     public static function normalize_before_save($data) {
+        // Every preset row is a complete SDK snapshot source. Fill newly added or
+        // missing fields with shipped-safe values before validation and storage.
+        $sdkdefaults = config::sdk_snapshot_defaults();
+        foreach (config::SDK_FIELDS as $key => $prop) {
+            if (!property_exists($data, $prop) || $data->$prop === null) {
+                $data->$prop = $sdkdefaults[$prop];
+                continue;
+            }
+
+            if ($prop === 'sdkdisabledworkers') {
+                $lines = is_array($data->$prop)
+                    ? $data->$prop
+                    : config::split_lines((string) $data->$prop);
+                $data->$prop = implode("\n", array_map(function ($line) {
+                    return trim((string) $line);
+                }, $lines));
+            } else if ($prop === 'sdkidentificationbullets' || $prop === 'sdktranslationsoverride') {
+                if (is_array($data->$prop)) {
+                    $data->$prop = json_encode($data->$prop);
+                } else {
+                    $data->$prop = trim((string) $data->$prop);
+                }
+            } else {
+                $data->$prop = trim((string) $data->$prop);
+            }
+        }
+
         // Calculator dropdown -> allow_to_use_calculator rule.
         if (isset($data->calculator)) {
             $data->rules = isset($data->rules) ? (array) $data->rules : [];
@@ -429,6 +485,39 @@ class preset {
             }
             $data->warnings = $warnings;
         }
+    }
+
+    /**
+     * Validate the SDK fields on a preset form or normalized record.
+     *
+     * @param object|array $data Preset values.
+     * @return array Field name => localized error.
+     */
+    public static function sdk_validation_errors($data): array {
+        $values = (array) $data;
+        $errors = [];
+
+        foreach (config::SDK_FIELDS as $key => $prop) {
+            if (!array_key_exists($prop, $values)) {
+                continue;
+            }
+
+            if (config::is_valid_sdk_snapshot_value($key, $values[$prop])) {
+                continue;
+            }
+
+            if ($key === config::ROOM_SCAN_SETTING) {
+                $errors[$prop] = get_string('error_sdk_observeworkspace', 'availability_proctor');
+            } else if ($key === 'syscheckHelpURL') {
+                $errors[$prop] = get_string('error_sdk_supporturl', 'availability_proctor');
+            } else if ($key === 'identificationOnboardingBullets' || $key === 'translationsOverride') {
+                $errors[$prop] = get_string('error_sdk_json', 'availability_proctor');
+            } else {
+                $errors[$prop] = get_string('error_sdk_value', 'availability_proctor');
+            }
+        }
+
+        return $errors;
     }
 
     /**
@@ -669,7 +758,9 @@ class preset {
             $scoringdefaults[$k] = isset($row['default']) ? $row['default'] : null;
         }
 
-        return [
+        $sdkdefaults = config::sdk_snapshot_defaults();
+
+        return array_merge([
             'preliminarycheck' => 0,
             'allowroomscanauxcamera' => 0,
             'calculator' => 'off',
@@ -682,7 +773,7 @@ class preset {
             'rules' => $rulesallfalse,
             'warnings' => $warningsallon,
             'scoring' => $scoringdefaults,
-        ];
+        ], $sdkdefaults);
     }
 
     /**

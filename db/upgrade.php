@@ -112,7 +112,9 @@ function xmldb_availability_proctor_upgrade($oldversion) {
             ) {
                 continue;
             }
-            [$insql, $params] = $DB->get_in_or_equal($aliases, SQL_PARAMS_NAMED, 'alias');
+            // PHP 7.0 requires long list syntax.
+            // phpcs:disable Universal.Lists.DisallowLongListSyntax.Found
+            list($insql, $params) = $DB->get_in_or_equal($aliases, SQL_PARAMS_NAMED, 'alias');
             $params['type'] = 'global';
             $params['issystem'] = 1;
             $params['newname'] = $canonical;
@@ -128,7 +130,7 @@ function xmldb_availability_proctor_upgrade($oldversion) {
 
     if ($oldversion < 2026081700) {
         // NTG-185 introduces a second proctoring model. This site already has
-        // exams running under the hosted one, so pin it explicitly.
+        // exams running under Webapp, so pin it explicitly.
         //
         // Explicitly, not by relying on the setting's default: get_config()
         // returns an admin_setting's declared default when nothing has been
@@ -140,7 +142,7 @@ function xmldb_availability_proctor_upgrade($oldversion) {
         // Guarded so an admin who has already chosen a model -- or a site that
         // somehow gets here twice -- is not overridden.
         if (get_config('availability_proctor', 'proctormodel') === false) {
-            set_config('proctormodel', \availability_proctor\config::MODEL_HOSTED, 'availability_proctor');
+            set_config('proctormodel', \availability_proctor\config::MODEL_WEBAPP, 'availability_proctor');
         }
         upgrade_plugin_savepoint(true, 2026081700, 'availability', 'proctor');
     }
@@ -149,7 +151,7 @@ function xmldb_availability_proctor_upgrade($oldversion) {
         // NTG-185: the two tables the SDK proctoring model keeps its sessions in.
         //
         // Both are empty after this step and stay empty on any site running the
-        // hosted model, which is every site that upgrades. Nothing reads or writes
+        // Webapp model, which is every site that upgrades. Nothing reads or writes
         // them until the routing branch exists, so this step cannot change the
         // behaviour of an exam.
         //
@@ -164,7 +166,8 @@ function xmldb_availability_proctor_upgrade($oldversion) {
         // was installed or upgraded, and that only surfaces when a query fails on
         // one of them.
 
-        // One proctoring session per quiz attempt.
+        // SDK proctoring sessions. New entry may later create sequential rows for
+        // one Moodle attempt, so attemptid is deliberately not unique.
         $table = new xmldb_table('availability_proctor_sess');
         if (!$dbman->table_exists($table)) {
             // attemptid is nullable because the session is created before the
@@ -208,12 +211,9 @@ function xmldb_availability_proctor_upgrade($oldversion) {
             $table->add_key('userid', XMLDB_KEY_FOREIGN, ['userid'], 'user', ['id']);
 
             $table->add_index('sessionkey', XMLDB_INDEX_UNIQUE, ['sessionkey']);
-            // Deliberately not unique. The column is nullable, and databases
-            // disagree on whether a unique index permits several NULLs -- MySQL
-            // allows it -- and that difference must not decide whether two unbound
-            // sessions can coexist. One session per attempt is enforced instead by
-            // the conditional UPDATE in session::bind_attempt(), which is portable
-            // and also settles the race between two simultaneous binds.
+            // Deliberately not unique. Normal launches need nullable unbound rows,
+            // and New entry intentionally permits sequential Constructor sessions
+            // to share one Moodle attempt while every video remains reportable.
             $table->add_index('attemptid', XMLDB_INDEX_NOTUNIQUE, ['attemptid']);
             $table->add_index('quizid_userid_state', XMLDB_INDEX_NOTUNIQUE, ['quizid', 'userid', 'state']);
 
@@ -282,12 +282,7 @@ function xmldb_availability_proctor_upgrade($oldversion) {
             // Created from install.xml rather than by restating the columns, so there
             // is one schema definition rather than two that can drift. The file holds
             // the current shape, which is what a table being created now should look
-            // like -- so the sdk* columns 2026081709 adds and 2026082000 drops are
-            // already absent. That churn then runs over an empty table: sixteen
-            // columns added and dropped again, no rows, no data, nothing to carry.
-            // Left in place deliberately rather than guarded away, because it is the
-            // same path the GitLab line already runs, and a new conditional here would
-            // be a path nothing has exercised.
+            // like. Later field_exists() guards make the SDK-column step idempotent.
             $dbman->install_one_table_from_xmldb_file(
                 $CFG->dirroot . '/availability/condition/proctor/db/install.xml',
                 'availability_proctor_presets'
@@ -306,16 +301,12 @@ function xmldb_availability_proctor_upgrade($oldversion) {
         // broke the pattern; it also ran into Moodle drawing an unwritten checkbox as
         // unticked beside the words "Default: Yes", which a save then made permanent.
         //
-        // Every column is nullable with no default, and NULL is load-bearing: it means
-        // "this preset says nothing about the parameter", so the shipped default
-        // applies. That is what keeps the three existing system presets behaving
-        // exactly as they do today -- they get sixteen NULLs and nothing about them
-        // changes.
+        // Every column is nullable with no database default so the DDL remains
+        // portable. A later step writes a complete safe snapshot into every row.
         $table = new xmldb_table('availability_proctor_presets');
 
-        // yes/no, or NULL to say nothing. Stored as text rather than as an integer
-        // because a nullable integer would make 0 and "unset" easy to confuse, and
-        // this is precisely the distinction the three-state fields exist to keep.
+        // Booleans are stored as explicit yes/no text. Room Scan is also text so
+        // the real value '0' remains distinct from a missing value during upgrade.
         $threestate = [
             'sdkallowcameraselection', 'sdkalwaysshowchat', 'sdkbeforeexamlist',
             'sdkdesktopcheckfirst', 'sdkexperimentwatchwindowsize',
@@ -375,24 +366,16 @@ function xmldb_availability_proctor_upgrade($oldversion) {
     }
 
     if ($oldversion < 2026081902) {
-        // NTG-185 follow-up: give every preset a value for the six SDK parameters an
-        // exam can vary.
-        //
-        // The exam form used to offer a third "Use the default" option, so a NULL
-        // column was a legitimate state meaning "fall through to what Constructor
-        // ships". The form now offers Yes/No only and opens on the preset's value,
-        // which leaves a NULL column with nothing to preselect -- so the presets that
-        // already exist have to be filled in.
+        // Give every existing preset a complete value for all sixteen SDK fields.
         //
         // Filled with the same values preset::default_field_values() seeds, which are
         // config::SDK_CONFIG -- exactly what a NULL column resolved to before. No
         // preset changes behaviour: this writes down what was already being applied.
         //
-        // Only NULL and empty columns are touched. A site that set one of these on the
-        // preset form keeps its value.
+        // Only NULL and empty columns are touched.
         $defaults = \availability_proctor\preset::default_field_values();
 
-        foreach (\availability_proctor\config::SDK_PER_QUIZ as $prop) {
+        foreach (\availability_proctor\config::SDK_FIELDS as $prop) {
             if (!isset($defaults[$prop])) {
                 continue;
             }
@@ -408,41 +391,8 @@ function xmldb_availability_proctor_upgrade($oldversion) {
     }
 
     if ($oldversion < 2026082000) {
-        // NTG-185 follow-up: the SDK parameters move from preset columns to site
-        // settings, so the columns go.
-        //
-        // No data is carried across. These columns arrived with NTG-185 and exist
-        // only on this branch -- no released version ever had them, so nothing a
-        // customer configured is stored here. A site that set them while testing
-        // re-enters them on the integration settings page.
-        //
-        // Why they moved: ten of the sixteen were readable only through the exam's
-        // preset_id, and that link turned out to be fragile in three measured ways.
-        // Editing any field on the activity form dropped it, which reset all ten to
-        // the shipped defaults; preset::is_used_by_exams() finds exams by the same
-        // link, so a preset every exam had been edited away from counted as unused
-        // and became deletable; and a site that did not want presets could not reach
-        // the ten at all. A site setting is always present and nothing can unlink
-        // from it. See config::SITE_SDK_SETTINGS.
-        $table = new xmldb_table('availability_proctor_presets');
-
-        $columns = [
-            'sdkallowcameraselection', 'sdkalwaysshowchat', 'sdkbeforeexamlist',
-            'sdkdesktopcheckfirst', 'sdkdisabledworkers', 'sdkexperimentwatchwindowsize',
-            'sdkfocusrespectsrules', 'sdkfullscreenwatchfocusalert',
-            'sdkidentificationbullets', 'sdkobserveworkspace',
-            'sdkopenagreementlinksiniframe', 'sdkaudionotification',
-            'sdkshowfinishexambutton', 'sdkshowsyschecksupportnew',
-            'sdksyscheckhelpurl', 'sdktranslationsoverride',
-        ];
-
-        foreach ($columns as $name) {
-            $field = new xmldb_field($name);
-            if ($dbman->field_exists($table, $field)) {
-                $dbman->drop_field($table, $field);
-            }
-        }
-
+        // Superseded development savepoint retained only for monotonic upgrade
+        // numbering. All sixteen SDK columns remain on presets in the final design.
         upgrade_plugin_savepoint(true, 2026082000, 'availability', 'proctor');
     }
 
@@ -451,8 +401,8 @@ function xmldb_availability_proctor_upgrade($oldversion) {
         //
         // The companion to 2026081702, which created the table. Seeding is separate
         // and deliberately later: it writes rows, so it wants the schema in its final
-        // shape, which it only reaches after 2026081709, 2026081712 and 2026082000
-        // have run. Creating the table has the opposite constraint -- it has to come
+        // shape, which it reaches after 2026081709 and 2026081712 have run. Creating
+        // the table has the opposite constraint -- it has to come
         // before those three, because they read it.
         //
         // Without this the failure surfaces away from the upgrade, which reports
@@ -488,10 +438,11 @@ function xmldb_availability_proctor_upgrade($oldversion) {
         // Before presets, this plugin held one set of site defaults as a single
         // JSON blob in config_plugins under 'default_proctoring_settings', written
         // by defaults.php and read by frontend.php to prefill a new restriction.
-        // Presets replaced both. Nothing reads the blob any more, so without this
-        // an upgrading site keeps the row and loses the behaviour: every new
-        // restriction would start from the shipped Low-stakes preset instead of
-        // whatever the institution had configured.
+        // Presets replaced most of that behaviour. Without this an upgrading site
+        // would start every new restriction from the shipped Low-stakes preset
+        // instead of whatever the institution had configured. The retained blob's
+        // Custom rules value is still read by frontend.php because that exam-level
+        // field has no preset column.
         //
         // Migrated as a normal, editable preset (is_system = 0) rather than a
         // seeded one, because it is the site's own configuration and an
@@ -509,11 +460,10 @@ function xmldb_availability_proctor_upgrade($oldversion) {
         ]);
 
         if (is_object($blob) && !$alreadythere) {
-            // Only the fields a preset can hold. duration, customrules and groups
-            // are in the blob but are exam-level in this model, with no preset
-            // column to put them in -- see condition::PRESET_FIELDS. Their site
-            // defaults are not carried across, and that is a real loss rather than
-            // an oversight: there is nowhere for them to go.
+            // Only the fields a preset can hold. Duration is now derived at runtime.
+            // Custom rules remains available through the retained legacy blob.
+            // Groups is intentionally not migrated because its ids are course-level
+            // and v2.7 did not persist the selection on saved conditions.
             $fields = [];
             foreach (\availability_proctor\condition::PRESET_FIELDS as $key) {
                 if (isset($blob->$key)) {
@@ -543,10 +493,42 @@ function xmldb_availability_proctor_upgrade($oldversion) {
             }
         }
 
-        // The config row is deliberately left in place. Nothing reads it, so it is
-        // inert, and keeping it means this migration is reversible by hand and the
-        // original values are still recoverable if the mapping turns out wrong.
+        // The config row is deliberately left in place. frontend.php reads only its
+        // Custom rules value; keeping the full original also makes the migration
+        // reversible by hand if the preset mapping turns out wrong.
         upgrade_plugin_savepoint(true, 2026082004, 'availability', 'proctor');
+    }
+
+    if ($oldversion < 2026082401) {
+        // Final preset-only SDK schema. Public releases never exposed SDK site
+        // settings, so upgraded presets receive shipped-safe values rather than
+        // attempting to preserve unpublished intermediate configuration.
+        $table = new xmldb_table('availability_proctor_presets');
+        $textfields = [
+            'sdkdisabledworkers', 'sdkidentificationbullets',
+            'sdksyscheckhelpurl', 'sdktranslationsoverride',
+        ];
+
+        foreach (\availability_proctor\config::SDK_FIELDS as $name) {
+            $field = in_array($name, $textfields, true)
+                ? new xmldb_field($name, XMLDB_TYPE_TEXT, null, null, null, null, null)
+                : new xmldb_field($name, XMLDB_TYPE_CHAR, '10', null, null, null, null);
+            if (!$dbman->field_exists($table, $field)) {
+                $dbman->add_field($table, $field);
+            }
+        }
+
+        $defaults = \availability_proctor\preset::default_field_values();
+        foreach (\availability_proctor\config::SDK_FIELDS as $prop) {
+            $DB->execute(
+                "UPDATE {availability_proctor_presets}
+                    SET {$prop} = ?
+                  WHERE {$prop} IS NULL OR {$prop} = ''",
+                [$defaults[$prop]]
+            );
+        }
+
+        upgrade_plugin_savepoint(true, 2026082401, 'availability', 'proctor');
     }
 
     return true;

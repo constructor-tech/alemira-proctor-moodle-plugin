@@ -100,9 +100,17 @@ switch ($event) {
         // autosave, so what is submitted is what the student had entered. Anything
         // unanswered is submitted unanswered, exactly as pressing Finish exam
         // implies.
-        session::transition($proctorsession, session::STATE_FINISHING, 'exam_finished');
+        $enteredfinishing = session::transition(
+            $proctorsession,
+            session::STATE_FINISHING,
+            'exam_finished'
+        );
 
-        if (!empty($proctorsession->attemptid)) {
+        // A delayed callback from a session replaced through New entry must not
+        // submit the Moodle attempt now being protected by the replacement. The
+        // old row was moved to ABANDONED, so only a successful ACTIVE -> FINISHING
+        // transition owns the right to finish the attempt.
+        if ($enteredfinishing && !empty($proctorsession->attemptid)) {
             // Resolved at runtime: the class moved into the mod_quiz namespace in
             // 4.2 and this plugin still supports older releases.
             $attemptclass = utils::quiz_attempt_classname();
