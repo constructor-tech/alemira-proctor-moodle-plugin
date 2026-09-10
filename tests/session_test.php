@@ -159,6 +159,54 @@ final class session_test extends \advanced_testcase {
     }
 
     /**
+     * A stale unbound session must be replaced before Moodle creates an attempt.
+     *
+     * Otherwise a later attempt_started event rejects the session as expired,
+     * leaving a live Moodle attempt with no proctoring session and showing the
+     * learner error_nosession after all SDK checks have completed.
+     */
+    public function test_get_or_create_replaces_an_expired_unbound_session(): void {
+        global $DB;
+        $this->resetAfterTest();
+
+        $old = $this->make_session(session::STATE_ACTIVE);
+        $expired = time() - config::BIND_WINDOW - 1;
+        $DB->update_record(session::TABLE, (object) [
+            'id' => $old->id,
+            'attemptid' => null,
+            'timecreated' => $expired,
+            'timemodified' => $expired,
+            'timeactive' => $expired,
+        ]);
+
+        $new = session::get_or_create((int) $old->quizid, (int) $old->userid);
+        $old = $DB->get_record(session::TABLE, ['id' => $old->id]);
+
+        $this->assertNotEquals($old->id, $new->id);
+        $this->assertSame(session::STATE_ABANDONED, $old->state);
+        $this->assertSame('bind_timeout', $old->reason);
+        $this->assertSame(session::STATE_PENDING, $new->state);
+        $this->assertEmpty($new->attemptid);
+    }
+
+    /**
+     * Reloading during the bind window still reuses the same Constructor session.
+     */
+    public function test_get_or_create_reuses_a_fresh_unbound_session(): void {
+        global $DB;
+        $this->resetAfterTest();
+
+        $existing = $this->make_session(session::STATE_ACTIVE);
+        $DB->set_field(session::TABLE, 'attemptid', null, ['id' => $existing->id]);
+
+        $found = session::get_or_create((int) $existing->quizid, (int) $existing->userid);
+
+        $this->assertEquals($existing->id, $found->id);
+        $this->assertSame(session::STATE_ACTIVE, $found->state);
+        $this->assertSame(1, $DB->count_records(session::TABLE));
+    }
+
+    /**
      * An unknown state name is refused rather than stored.
      */
     public function test_unknown_state_is_refused(): void {
