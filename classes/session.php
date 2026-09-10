@@ -241,7 +241,17 @@ class session {
         global $DB;
 
         if ($existing = self::get_open_for_quiz($quizid, $userid)) {
-            return $existing;
+            // A previous visit can leave an active but unbound row behind when
+            // the learner closes the launch page before Moodle creates the quiz
+            // attempt. Reusing it after the bind window has expired guarantees
+            // that attempt_started will reject it, but only after core has
+            // created a live attempt. Retire it here instead, while a fresh
+            // session can still be created before the attempt exists.
+            if (empty($existing->attemptid) && self::is_bind_expired($existing)) {
+                self::transition($existing, self::STATE_ABANDONED, 'bind_timeout');
+            } else {
+                return $existing;
+            }
         }
 
         // Never silently replace a session for a Moodle attempt that is still in

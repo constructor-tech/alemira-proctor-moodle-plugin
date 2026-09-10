@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Fixed SDK relaunch after an earlier session was activated but never bound to a
+  quiz attempt. Expired unbound sessions are now replaced before Moodle creates
+  the attempt, preventing a live attempt from being stranded with `no_session`.
 - Moved the site-wide Proctoring model selector below Seamless authorization.
 - Moved all sixteen SDK configuration parameters exclusively into global and
   personal presets. The integration settings page and activity restriction form
