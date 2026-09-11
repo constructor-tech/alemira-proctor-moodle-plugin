@@ -3,5 +3,12 @@ package-lock.json
 releases
 .DS_Store
 .cursor
+.claude/*
+!.claude/commands/
+!.claude/commands/**
 openspec
 dev/.moodle
+*.swp
+*.swo
+.env
+.env.*

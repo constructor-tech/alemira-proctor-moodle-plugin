@@ -31,6 +31,10 @@ require_once($CFG->libdir . '/tablelib.php');
 
 /**
  * Displays and filters log entries
+ *
+ * @package    availability_proctor
+ * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class log {
     /**
@@ -162,7 +166,9 @@ class log {
 
         $courseids = array_keys($this->get_course_list());
         if (!empty($courseids)) {
-            $where[] = 'courseid IN('.implode(',', $courseids).')';
+            list($insql, $inparams) = $DB->get_in_or_equal($courseids, SQL_PARAMS_NAMED, 'cid');
+            $where[] = 'courseid ' . $insql;
+            $params = array_merge($params, $inparams);
         } else {
             // Always false condition. Can't use FALSE because of mssql.
             $where[] = '1=0';
@@ -246,9 +252,9 @@ class log {
                     $row[] = '';
                 }
 
-                $row[] = $entry->u_firstname . " " . $entry->u_lastname . "<br>"
-                       . $entry->u_username
-                       . ' (' . $entry->u_email . ')';
+                $row[] = s($entry->u_firstname) . " " . s($entry->u_lastname) . "<br>"
+                       . s($entry->u_username)
+                       . ' (' . s($entry->u_email) . ')';
 
                 $course = get_course($entry->courseid);
                 $modinfo = get_fast_modinfo($course);
@@ -260,12 +266,12 @@ class log {
 
                 $reportlinks = [];
                 if ($entry->review_link !== null) {
-                     $reportlinks[] = "<a href='" . $entry->review_link . "'>"
+                     $reportlinks[] = "<a href='" . s($entry->review_link) . "'>"
                                     . get_string('log_report_link', 'availability_proctor')
                                     . "</a>";
                 }
                 if ($entry->archiveurl !== null) {
-                     $reportlinks[] = "<a href='" . $entry->archiveurl . "'>"
+                     $reportlinks[] = "<a href='" . s($entry->archiveurl) . "'>"
                                     . get_string('log_archive_link', 'availability_proctor')
                                     . "</a>";
                 }
@@ -293,6 +299,7 @@ class log {
                 if (!$notstarted) {
                     $row[] =
                         "<form action='index.php' method='post'>" .
+                           "<input type='hidden' name='sesskey' value='" . sesskey() . "'>" .
                            "<input type='hidden' name='id' value='" . $entry->id . "'>" .
                            "<input type='hidden' name='action' value='renew'>" .
                            "<input type='submit' value='" . get_string('new_entry', 'availability_proctor') . "'>".
@@ -300,6 +307,7 @@ class log {
                 } else {
                     $row[] =
                         "<form action='index.php' method='post'>" .
+                           "<input type='hidden' name='sesskey' value='" . sesskey() . "'>" .
                            "<input type='hidden' name='id' value='" . $entry->id . "'>" .
                            "<input type='hidden' name='force' value='true'>" .
                            "<input type='hidden' name='action' value='renew'>" .
@@ -485,7 +493,7 @@ class log {
         );
 
         // Add user selector.
-        echo html_writer::label(get_string('selctauser'), 'menuuser', false, ['class' => 'accesshide']);
+        echo html_writer::label(get_string('selectauser', 'availability_proctor'), 'menuuser', false, ['class' => 'accesshide']);
         echo html_writer::empty_tag('input', [
             'name' => 'userquery',
             'value' => $userquery,

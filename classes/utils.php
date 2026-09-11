@@ -26,23 +26,70 @@ namespace availability_proctor;
 
 /**
  * Utils class
+ *
+ * @package    availability_proctor
+ * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class utils {
-    public static function quiz_settings_classname(){
+    /**
+     * Returns the correct quiz settings class name for this Moodle version.
+     *
+     * @return string Fully qualified class name
+     */
+    public static function quiz_settings_classname() {
         return class_exists('\mod_quiz\quiz_settings') ? '\mod_quiz\quiz_settings' : 'quiz';
     }
 
-    public static function quiz_attempt_classname(){
+    /**
+     * Returns the correct quiz attempt class name for this Moodle version.
+     *
+     * @return string Fully qualified class name
+     */
+    public static function quiz_attempt_classname() {
         return class_exists('\mod_quiz\quiz_attempt') ? '\mod_quiz\quiz_attempt' : 'quiz_attempt';
     }
 
     /**
-     * Provides logic for proctoring fader, exist as soon a possible if
-     * no protection is reqired.
+     * Queues the fader AMD module and returns a hidden marker element carrying
+     * its config. $formdata includes a signed JWT, so combined with the
+     * strings it can exceed js_call_amd()'s ~1024-character argument-size
+     * guidance (Moodle logs a debugging warning past that). The data travels
+     * via a data-attribute instead, per Moodle's own suggestion in that
+     * warning; the AMD module reads it back off the DOM.
+     *
+     * @param array $strings {awaitingProctoring, instructions, reset}
+     * @param array|null $formdata {action, method, token}
+     * @param bool $reset
+     * @return string HTML snippet to append to the page output
+     */
+    private static function fader_amd_markup($strings, $formdata, $reset) {
+        global $PAGE;
+
+        $config = json_encode([
+            'strings' => $strings,
+            'formdata' => $formdata,
+            'reset' => $reset,
+        ]);
+
+        $PAGE->requires->js_call_amd('availability_proctor/fader', 'init');
+
+        return \html_writer::tag('div', '', [
+            'id' => 'availability-proctor-fader-config',
+            'data-config' => $config,
+            'style' => 'display:none',
+        ]);
+    }
+
+    /**
+     * Provides logic for proctoring fader, exit as soon as possible if
+     * no protection is required.
+     *
      * @param \stdClass $attempt Attempt
+     * @return string HTML output for the fader overlay
      */
     public static function handle_proctoring_fader($attempt) {
-        global $DB, $USER, $PAGE, $SESSION;
+        global $DB, $USER, $PAGE;
 
         $cmid = state::$attempt['cm_id'];
         $courseid = state::$attempt['course_id'];
@@ -67,14 +114,17 @@ class utils {
             return '';
         }
 
+        // Hide Moodle chrome (header, left drawer, section breadcrumb, back button)
+        // during a proctored attempt. Always applied once we've confirmed the
+        // activity is proctored and the user is in scope.
+        $output = self::get_lockdown_css();
+
         $entry = common::create_entry($condition, $USER->id, $cm);
 
-        if (
-            !empty($SESSION->availability_proctor_accesscode) &&
-                $entry->accesscode != $SESSION->availability_proctor_accesscode
-        ) {
-            $SESSION->availability_proctor_accesscode = null;
-            $SESSION->availability_proctor_reset = true;
+        $sessionaccesscode = session_cache::get_accesscode();
+        if (!empty($sessionaccesscode) && $entry->accesscode != $sessionaccesscode) {
+            session_cache::clear_accesscode();
+            session_cache::set_reset();
         }
 
         $timebracket = common::get_timebracket_for_cm('quiz', $cm, $USER->id);
@@ -100,30 +150,213 @@ class utils {
         if ($entryisactive || $attemptinprogess) {
             // We have to pass formdata in any case because exam can be opened outside iframe.
             $formdata = $client->get_form('start', $data);
-            $entryreset = isset($SESSION->availability_proctor_reset) && $SESSION->availability_proctor_reset;
+            $entryreset = session_cache::is_reset();
 
             // Our entry is active, we are showing the user a fader.
-            ob_start();
-            include(dirname(__FILE__).'/../templates/proctoring_fader.php');
-            $output = ob_get_clean();
-            return $output;
+            $strings = [
+                'awaitingProctoring' => get_string('fader_awaiting_proctoring', 'availability_proctor'),
+                'instructions' => get_string('fader_instructions', 'availability_proctor'),
+                'reset' => get_string('fader_reset', 'availability_proctor'),
+            ];
+            $output .= self::fader_amd_markup($strings, $formdata, $entryreset);
         }
+
+        return $output;
     }
 
     /**
-     * Generate exam start url, with auth token if enabled in config
-     * @param $entry
-     * @param $user
-     * @return string
+     * CSS injected into the head during a proctored quiz attempt. Hides Moodle
+     * chrome — top header, left navigation drawer, and the section breadcrumb
+     * above the quiz title — so the learner only sees the quiz itself.
+     *
+     * Scoped to `body.path-mod-quiz` as a safety net (hook already only runs on
+     * in-progress proctored attempts, but the class scoping prevents accidental
+     * application if the hook ever fires elsewhere).
+     *
+     * @return string <style> block
+     */
+    /**
+     * Returns a <script> block that hides Moodle navigation chrome via JS.
+     * Runs after DOMContentLoaded and again after short delays to override
+     * any Moodle JS that reopens the drawer.
+     */
+    public static function get_hide_chrome_css() {
+        // CSS injected immediately via a <style> element — no body class required,
+        // no DOMContentLoaded wait. Covers first paint before any JS runs.
+        $immediate_css =
+            '#nav-drawer,[data-region="drawer"],[data-region="fixed-drawer"],' .
+            '.drawer,.drawer-left,.drawer-left-toggle,.drawer-toggles,' .
+            'button[data-toggler="drawers"],.drawercontent,' .
+            '#page-header,header#page-header,header.navbar,nav.navbar,.navbar,' .
+            '#page-navbar,.secondary-navigation,.tertiary-navigation,' .
+            '.activity-navigation,[data-region="blocks-column"]' .
+            '{display:none!important;visibility:hidden!important}' .
+            '#page,#page-wrapper,#page-content,.main-inner' .
+            '{margin-left:0!important;padding-left:0!important;' .
+            'margin-top:0!important;padding-top:0!important;' .
+            'width:100%!important;max-width:100%!important}';
+
+        return '<style>' . $immediate_css . '</style>';
+    }
+
+    // Client-side CSS/JS lockdown only — a determined user can still navigate via direct URL.
+    // The MutationObserver in amd/src/hidechrome.js re-hides elements on every DOM change;
+    // keep the selector list tight to limit observer callback cost on content-heavy pages.
+    public static function get_lockdown_css() {
+        $css = <<<CSS
+            /* Top header / navbar */
+            body.path-mod-quiz #page-header,
+            body.path-mod-quiz header#page-header,
+            body.path-mod-quiz header.navbar,
+            body.path-mod-quiz nav.navbar,
+            body.path-mod-quiz .navbar-fixed-top,
+            /* Section breadcrumb / secondary nav above the quiz title */
+            body.path-mod-quiz #page-navbar,
+            body.path-mod-quiz nav.breadcrumb-nav,
+            body.path-mod-quiz .breadcrumb-nav,
+            body.path-mod-quiz .breadcrumb,
+            body.path-mod-quiz .secondary-navigation,
+            body.path-mod-quiz nav.moremenu,
+            /* Left navigation drawer */
+            body.path-mod-quiz [data-region="drawer"],
+            body.path-mod-quiz [data-region="fixed-drawer"],
+            body.path-mod-quiz #nav-drawer,
+            body.path-mod-quiz .drawer,
+            body.path-mod-quiz .drawer-left,
+            body.path-mod-quiz .drawer-toggles,
+            body.path-mod-quiz button[data-toggler="drawers"],
+            body.path-mod-quiz .drawercontent,
+            /* Back buttons / activity navigation / tertiary nav row */
+            body.path-mod-quiz .tertiary-navigation,
+            body.path-mod-quiz .btn-back,
+            body.path-mod-quiz a.back-button,
+            body.path-mod-quiz .activity-header .back,
+            body.path-mod-quiz .activity-nav,
+            body.path-mod-quiz .activity-navigation,
+            body.path-mod-quiz [data-action="back"],
+            body.path-mod-quiz a[aria-label*="Back" i],
+            body.path-mod-quiz a[aria-label*="ack to" i],
+            body.path-mod-quiz .previouslink,
+            body.path-mod-quiz .continuelink {
+                display: none !important;
+            }
+            /* Reclaim the space freed by the hidden header/drawer */
+            body.path-mod-quiz #page,
+            body.path-mod-quiz #page-wrapper,
+            body.path-mod-quiz #page-content,
+            body.path-mod-quiz.drawer-open-left #page,
+            body.path-mod-quiz.pagelayout-incourse #page {
+                margin-left: 0 !important;
+                margin-top: 0 !important;
+                padding-left: 0 !important;
+                padding-top: 0 !important;
+            }
+            /* SCORM lockdown — mirrors the quiz rules above */
+            body.path-mod-scorm #page-header,
+            body.path-mod-scorm header#page-header,
+            body.path-mod-scorm header.navbar,
+            body.path-mod-scorm nav.navbar,
+            body.path-mod-scorm .navbar-fixed-top,
+            body.path-mod-scorm #page-navbar,
+            body.path-mod-scorm nav.breadcrumb-nav,
+            body.path-mod-scorm .breadcrumb-nav,
+            body.path-mod-scorm .breadcrumb,
+            body.path-mod-scorm .secondary-navigation,
+            body.path-mod-scorm nav.moremenu,
+            body.path-mod-scorm [data-region="drawer"],
+            body.path-mod-scorm [data-region="fixed-drawer"],
+            body.path-mod-scorm #nav-drawer,
+            body.path-mod-scorm .drawer,
+            body.path-mod-scorm .drawer-left,
+            body.path-mod-scorm .drawer-toggles,
+            body.path-mod-scorm button[data-toggler="drawers"],
+            body.path-mod-scorm .drawercontent,
+            body.path-mod-scorm .tertiary-navigation,
+            body.path-mod-scorm .btn-back,
+            body.path-mod-scorm a.back-button,
+            body.path-mod-scorm .activity-header .back,
+            body.path-mod-scorm .activity-nav,
+            body.path-mod-scorm .activity-navigation,
+            body.path-mod-scorm [data-action="back"],
+            body.path-mod-scorm a[aria-label*="Back" i],
+            body.path-mod-scorm a[aria-label*="ack to" i],
+            body.path-mod-scorm .previouslink,
+            body.path-mod-scorm .continuelink {
+                display: none !important;
+            }
+            body.path-mod-scorm #page,
+            body.path-mod-scorm #page-wrapper,
+            body.path-mod-scorm #page-content,
+            body.path-mod-scorm.drawer-open-left #page,
+            body.path-mod-scorm.pagelayout-incourse #page {
+                margin-left: 0 !important;
+                margin-top: 0 !important;
+                padding-left: 0 !important;
+                padding-top: 0 !important;
+            }
+            /* Assign lockdown — mirrors the quiz/scorm rules above */
+            body.path-mod-assign #page-header,
+            body.path-mod-assign header#page-header,
+            body.path-mod-assign header.navbar,
+            body.path-mod-assign nav.navbar,
+            body.path-mod-assign .navbar-fixed-top,
+            body.path-mod-assign #page-navbar,
+            body.path-mod-assign nav.breadcrumb-nav,
+            body.path-mod-assign .breadcrumb-nav,
+            body.path-mod-assign .breadcrumb,
+            body.path-mod-assign .secondary-navigation,
+            body.path-mod-assign nav.moremenu,
+            body.path-mod-assign [data-region="drawer"],
+            body.path-mod-assign [data-region="fixed-drawer"],
+            body.path-mod-assign #nav-drawer,
+            body.path-mod-assign .drawer,
+            body.path-mod-assign .drawer-left,
+            body.path-mod-assign .drawer-toggles,
+            body.path-mod-assign button[data-toggler="drawers"],
+            body.path-mod-assign .drawercontent,
+            body.path-mod-assign .tertiary-navigation,
+            body.path-mod-assign .btn-back,
+            body.path-mod-assign a.back-button,
+            body.path-mod-assign .activity-header .back,
+            body.path-mod-assign .activity-nav,
+            body.path-mod-assign .activity-navigation,
+            body.path-mod-assign [data-action="back"],
+            body.path-mod-assign a[aria-label*="Back" i],
+            body.path-mod-assign a[aria-label*="ack to" i],
+            body.path-mod-assign .previouslink,
+            body.path-mod-assign .continuelink {
+                display: none !important;
+            }
+            body.path-mod-assign #page,
+            body.path-mod-assign #page-wrapper,
+            body.path-mod-assign #page-content,
+            body.path-mod-assign.drawer-open-left #page,
+            body.path-mod-assign.pagelayout-incourse #page {
+                margin-left: 0 !important;
+                margin-top: 0 !important;
+                padding-left: 0 !important;
+                padding-top: 0 !important;
+            }
+CSS;
+        return '<style>' . $css . '</style>';
+    }
+
+    /**
+     * Generate exam start url, with auth token if enabled in config.
+     *
+     * @param \stdClass $entry Proctor entry record
+     * @param \stdClass $user User record
+     * @return string The start URL
      */
     public static function generate_start_url($entry, $user) {
         $urlparams = ['proctor_accesscode' => $entry->accesscode];
 
         if (get_config('availability_proctor', 'seamless_auth')) {
-            // Token is valid for 3 months.
-            // We want a timeframe log enough for the user to pass a quiz but clean the db at some point.
-            $tokenvaliduntil = time() + (3 * 60 * 60 * 24);
-            $urlparams['token'] = get_user_key('availability_proctor', $user->id, null, false, $tokenvaliduntil);
+            // Token expires in 8 hours — enough to cover any exam window.
+            // Bound to this specific entry so it cannot be replayed against a different activity.
+            // entry.php deletes the key immediately after use (single-use).
+            $tokenvaliduntil = time() + (8 * 60 * 60);
+            $urlparams['token'] = get_user_key('availability_proctor', $user->id, $entry->id, false, $tokenvaliduntil);
         }
 
         $url = new \moodle_url('/availability/condition/proctor/entry.php', $urlparams);
@@ -133,13 +366,15 @@ class utils {
 
     /**
      * When an attempt is started, see if we are in proctoring, reset old entries,
-     * redirect to proctoring if needed
-     * @param \stdClass $course course
-     * @param \stdClass $cm cm
-     * @param \stdClass $user user
+     * redirect to proctoring if needed.
+     *
+     * @param \stdClass $course Course record
+     * @param \stdClass $cm Course module record
+     * @param \stdClass $user User record
+     * @return void
      */
     public static function handle_start_attempt($course, $cm, $user) {
-        global $SESSION, $DB;
+        global $DB, $OUTPUT;
         $modinfo = get_fast_modinfo($course->id);
         $cminfo = $modinfo->get_cm($cm->id);
 
@@ -158,7 +393,7 @@ class utils {
             return;
         }
 
-        $accesscode = isset($SESSION->availability_proctor_accesscode) ? $SESSION->availability_proctor_accesscode : null;
+        $accesscode = session_cache::get_accesscode();
         $entry = null;
         $reset = false;
         if ($accesscode) {
@@ -181,8 +416,8 @@ class utils {
             }
 
             if ($reset) {
-                unset($SESSION->availability_proctor_accesscode);
-                $SESSION->availability_proctor_reset = true;
+                session_cache::clear_accesscode();
+                session_cache::set_reset();
             }
 
             // We don't want to redirect at this stage.
@@ -217,23 +452,360 @@ class utils {
 
         $formdata = $client->get_form('start', $data);
 
-        $pagetitle = "Redirecting to Proctor by Constructor";
+        $pagetitle = get_string('redirecting_to_proctor', 'availability_proctor',
+            get_string('pluginname', 'availability_proctor'));
+        $gobuttonlabel = get_string('proctor_go_to_system', 'availability_proctor');
 
-        include(dirname(__FILE__).'/../templates/redirect.php');
+        echo $OUTPUT->render_from_template('availability_proctor/redirect', [
+            'pagetitle' => $pagetitle,
+            'gobuttonlabel' => $gobuttonlabel,
+            'action' => $formdata['action'],
+            'method' => $formdata['method'],
+            'hastoken' => isset($formdata['token']),
+            'token' => $formdata['token'] ?? '',
+        ]);
         die();
     }
 
     /**
-     * If accesscode param is provided, find entry, handle it's state.
+     * Proctoring fader for SCORM activities. Shows the overlay on the SCORM view page
+     * while waiting for the Proctor WebApp confirmation signal.
+     *
+     * @param \cm_info|\stdClass $cm Course module
+     * @return string HTML output for the fader overlay
+     */
+    public static function handle_proctoring_fader_scorm($cm) {
+        global $USER, $PAGE;
+
+        $courseid = $cm->course;
+        $modinfo = get_fast_modinfo($courseid);
+        $cminfo = $modinfo->get_cm($cm->id);
+        $course = $cminfo->get_course();
+
+        $condition = condition::get_proctor_condition($cminfo);
+        if (!$condition) {
+            return '';
+        }
+
+        if (!$condition->user_in_proctored_groups($USER->id)) {
+            return '';
+        }
+
+        $output = self::get_lockdown_css();
+
+        $entry = common::create_entry($condition, $USER->id, $cminfo);
+
+        $sessionaccesscode = session_cache::get_accesscode();
+        if (!empty($sessionaccesscode) && $entry->accesscode != $sessionaccesscode) {
+            session_cache::clear_accesscode();
+            session_cache::set_reset();
+        }
+
+        $timebracket = common::get_timebracket_for_cm('scorm', $cminfo, $USER->id);
+        $lang = current_language();
+
+        $client = new client($condition);
+        $data = $client->exam_data($course, $cminfo);
+        $userdata = $client->user_data($USER, $lang);
+        $timedata = $client->time_data($timebracket);
+        $starturl = self::generate_start_url($entry, $USER);
+        $attemptdata = $client->attempt_data($entry->accesscode, $starturl);
+
+        $data = array_merge($data, $userdata, $timedata, $attemptdata);
+
+        if ($condition->schedulingrequired && empty($entry->timescheduled)) {
+            $data['schedule'] = true;
+        }
+
+        $entryisactive = in_array($entry->status, ['started', 'scheduled', 'new']);
+
+        // Always inject chrome-hiding CSS (immediate paint) + JS (re-hide on DOM changes).
+        $output .= self::get_hide_chrome_css();
+        $PAGE->requires->js_call_amd('availability_proctor/hidechrome', 'init');
+
+        if ($entryisactive) {
+            $formdata = $client->get_form('start', $data);
+            $entryreset = session_cache::is_reset();
+
+            $strings = [
+                'awaitingProctoring' => get_string('fader_awaiting_proctoring', 'availability_proctor'),
+                'instructions' => get_string('fader_instructions', 'availability_proctor'),
+                'reset' => get_string('fader_reset', 'availability_proctor'),
+            ];
+            $output .= self::fader_amd_markup($strings, $formdata, $entryreset);
+        }
+
+        return $output;
+    }
+
+    /**
+     * When a SCORM view page is accessed, check proctoring status and redirect
+     * to Proctor if no valid session exists.
+     *
+     * @param \stdClass $course Course record
+     * @param \stdClass $cm Course module record
+     * @param \stdClass $user User record
+     * @return void
+     */
+    public static function handle_start_attempt_scorm($course, $cm, $user) {
+        global $DB, $OUTPUT;
+
+        // proctor_lockdown=1 is appended by scorm.php bridge — mark lockdown immediately
+        // regardless of condition, so hooks.php can inject CSS/JS even when the CM has
+        // no availability_proctor condition configured.
+        if (optional_param('proctor_lockdown', 0, PARAM_INT)) {
+            state::$lockdown = true;
+        }
+
+        $modinfo = get_fast_modinfo($course->id);
+        $cminfo = $modinfo->get_cm($cm->id);
+
+        $condition = condition::get_proctor_condition($cminfo);
+        if (!$condition) {
+            return;
+        }
+
+        if (!$condition->user_in_proctored_groups($user->id)) {
+            return;
+        }
+
+        $accesscode = session_cache::get_accesscode();
+
+        if ($accesscode) {
+            $entry = $DB->get_record('availability_proctor_entries', ['accesscode' => $accesscode]);
+
+            if ($entry && !in_array($entry->status, ['new', 'scheduled', 'started'])) {
+                session_cache::clear_accesscode();
+                session_cache::set_reset();
+            }
+
+            if ($entry && $entry->cmid != $cminfo->id) {
+                session_cache::clear_accesscode();
+                session_cache::set_reset();
+            }
+
+            // User is coming from Proctor — mark lockdown and let through.
+            state::$lockdown = true;
+            return;
+        }
+
+        $entry = common::create_entry($condition, $user->id, $cminfo);
+
+        if ($entry->status === 'started') {
+            // Ensure session has the accesscode so handle_proctoring_fader_scorm can show the fader.
+            if (empty(session_cache::get_accesscode())) {
+                session_cache::set_accesscode($entry->accesscode);
+            }
+            return;
+        }
+
+        $timebracket = common::get_timebracket_for_cm('scorm', $cminfo, $user->id);
+        $starturl = self::generate_start_url($entry, $user);
+        $lang = current_language();
+
+        $client = new \availability_proctor\client($condition);
+        $data = $client->exam_data($course, $cminfo);
+        $userdata = $client->user_data($user, $lang);
+        $timedata = $client->time_data($timebracket);
+        $attemptdata = $client->attempt_data($entry->accesscode, $starturl);
+
+        $data = array_merge($data, $userdata, $timedata, $attemptdata);
+
+        if ($condition->schedulingrequired) {
+            $data['schedule'] = true;
+        }
+
+        $formdata = $client->get_form('start', $data);
+
+        $pagetitle = get_string('redirecting_to_proctor', 'availability_proctor',
+            get_string('pluginname', 'availability_proctor'));
+        $gobuttonlabel = get_string('proctor_go_to_system', 'availability_proctor');
+
+        echo $OUTPUT->render_from_template('availability_proctor/redirect', [
+            'pagetitle' => $pagetitle,
+            'gobuttonlabel' => $gobuttonlabel,
+            'action' => $formdata['action'],
+            'method' => $formdata['method'],
+            'hastoken' => isset($formdata['token']),
+            'token' => $formdata['token'] ?? '',
+        ]);
+        die();
+    }
+
+    /**
+     * When an assign view page is accessed, check proctoring status and redirect
+     * to Proctor if no valid session exists.
+     *
+     * @param \stdClass $course Course record
+     * @param \stdClass $cm Course module record
+     * @param \stdClass $user User record
+     * @return void
+     */
+    public static function handle_start_attempt_assign($course, $cm, $user) {
+        global $DB, $OUTPUT;
+
+        // proctor_lockdown=1 is appended by assign.php bridge.
+        if (optional_param('proctor_lockdown', 0, PARAM_INT)) {
+            state::$lockdown = true;
+        }
+
+        $modinfo = get_fast_modinfo($course->id);
+        $cminfo = $modinfo->get_cm($cm->id);
+
+        $condition = condition::get_proctor_condition($cminfo);
+        if (!$condition) {
+            return;
+        }
+
+        if (!$condition->user_in_proctored_groups($user->id)) {
+            return;
+        }
+
+        $accesscode = session_cache::get_accesscode();
+
+        if ($accesscode) {
+            $entry = $DB->get_record('availability_proctor_entries', ['accesscode' => $accesscode]);
+
+            if ($entry && !in_array($entry->status, ['new', 'scheduled', 'started'])) {
+                session_cache::clear_accesscode();
+                session_cache::set_reset();
+            }
+
+            if ($entry && $entry->cmid != $cminfo->id) {
+                session_cache::clear_accesscode();
+                session_cache::set_reset();
+            }
+
+            state::$lockdown = true;
+            return;
+        }
+
+        $entry = common::create_entry($condition, $user->id, $cminfo);
+
+        if ($entry->status === 'started') {
+            if (empty(session_cache::get_accesscode())) {
+                session_cache::set_accesscode($entry->accesscode);
+            }
+            return;
+        }
+
+        $timebracket = common::get_timebracket_for_cm('assign', $cminfo, $user->id);
+        $starturl = self::generate_start_url($entry, $user);
+        $lang = current_language();
+
+        $client = new \availability_proctor\client($condition);
+        $data = $client->exam_data($course, $cminfo);
+        $userdata = $client->user_data($user, $lang);
+        $timedata = $client->time_data($timebracket);
+        $attemptdata = $client->attempt_data($entry->accesscode, $starturl);
+
+        $data = array_merge($data, $userdata, $timedata, $attemptdata);
+
+        if ($condition->schedulingrequired) {
+            $data['schedule'] = true;
+        }
+
+        $formdata = $client->get_form('start', $data);
+
+        $pagetitle = get_string('redirecting_to_proctor', 'availability_proctor',
+            get_string('pluginname', 'availability_proctor'));
+        $gobuttonlabel = get_string('proctor_go_to_system', 'availability_proctor');
+
+        echo $OUTPUT->render_from_template('availability_proctor/redirect', [
+            'pagetitle' => $pagetitle,
+            'gobuttonlabel' => $gobuttonlabel,
+            'action' => $formdata['action'],
+            'method' => $formdata['method'],
+            'hastoken' => isset($formdata['token']),
+            'token' => $formdata['token'] ?? '',
+        ]);
+        die();
+    }
+
+    /**
+     * Proctoring fader for assignment activities. Shows the overlay on the assign view page
+     * while waiting for the Proctor WebApp confirmation signal.
+     *
+     * @param \cm_info|\stdClass $cm Course module
+     * @return string HTML output for the fader overlay
+     */
+    public static function handle_proctoring_fader_assign($cm) {
+        global $USER, $PAGE;
+
+        $courseid = $cm->course;
+        $modinfo = get_fast_modinfo($courseid);
+        $cminfo = $modinfo->get_cm($cm->id);
+        $course = $cminfo->get_course();
+
+        $condition = condition::get_proctor_condition($cminfo);
+        if (!$condition) {
+            return '';
+        }
+
+        if (!$condition->user_in_proctored_groups($USER->id)) {
+            return '';
+        }
+
+        $output = self::get_lockdown_css();
+
+        $entry = common::create_entry($condition, $USER->id, $cminfo);
+
+        $sessionaccesscode = session_cache::get_accesscode();
+        if (!empty($sessionaccesscode) && $entry->accesscode != $sessionaccesscode) {
+            session_cache::clear_accesscode();
+            session_cache::set_reset();
+        }
+
+        $timebracket = common::get_timebracket_for_cm('assign', $cminfo, $USER->id);
+        $lang = current_language();
+
+        $client = new client($condition);
+        $data = $client->exam_data($course, $cminfo);
+        $userdata = $client->user_data($USER, $lang);
+        $timedata = $client->time_data($timebracket);
+        $starturl = self::generate_start_url($entry, $USER);
+        $attemptdata = $client->attempt_data($entry->accesscode, $starturl);
+
+        $data = array_merge($data, $userdata, $timedata, $attemptdata);
+
+        if ($condition->schedulingrequired && empty($entry->timescheduled)) {
+            $data['schedule'] = true;
+        }
+
+        $entryisactive = in_array($entry->status, ['started', 'scheduled', 'new']);
+
+        // Always inject chrome-hiding CSS (immediate paint) + JS (re-hide on DOM changes).
+        $output .= self::get_hide_chrome_css();
+        $PAGE->requires->js_call_amd('availability_proctor/hidechrome', 'init');
+
+        if ($entryisactive) {
+            $formdata = $client->get_form('start', $data);
+            $entryreset = session_cache::is_reset();
+
+            $strings = [
+                'awaitingProctoring' => get_string('fader_awaiting_proctoring', 'availability_proctor'),
+                'instructions' => get_string('fader_instructions', 'availability_proctor'),
+                'reset' => get_string('fader_reset', 'availability_proctor'),
+            ];
+            $output .= self::fader_amd_markup($strings, $formdata, $entryreset);
+        }
+
+        return $output;
+    }
+
+    /**
+     * If accesscode param is provided, find entry, handle its state.
+     *
      * @param string $accesscode Accesscode/SessionId value
+     * @return array|void Returns ['modname'=>..., 'cmid'=>...] for SCORM/assign, void for quiz (redirect happens internally)
      */
     public static function handle_accesscode_param($accesscode) {
-        global $SESSION, $DB, $CFG;
+        global $DB, $CFG;
 
         // User is coming from proctor, reset is done if it was requested before.
-        unset($SESSION->availability_proctor_reset);
+        session_cache::clear_reset();
 
-        $SESSION->availability_proctor_accesscode = $accesscode;
+        session_cache::set_accesscode($accesscode);
 
         // We know accesscode is passed in params.
         $entry = $DB->get_record('availability_proctor_entries', [
@@ -253,7 +825,7 @@ class utils {
             $newentry = \availability_proctor\common::most_recent_entry($entry);
             if ($newentry && $newentry->id != $entry->id) {
                 $entry = $newentry;
-                $SESSION->availability_proctor_reset = true;
+                session_cache::set_reset();
             }
 
             $modinfo = get_fast_modinfo($entry->courseid);
@@ -262,18 +834,40 @@ class utils {
             // The entry is already finished or canceled, we need to reset it.
             if (!in_array($entry->status, ['new', 'scheduled', 'started'])) {
                 $entry = \availability_proctor\common::create_entry($condition, $entry->userid, $cminfo);
-                $SESSION->availability_proctor_reset = true;
+                session_cache::set_reset();
             }
         } else {
             // If entry does not exist, we need to create a new one and redirect.
-            $SESSION->availability_proctor_reset = true;
+            session_cache::set_reset();
         }
 
         if ($entry) {
             if (isset($CFG->availability_proctor_quiz_start_url) && is_callable($CFG->availability_proctor_quiz_start_url)) {
                 $urlfunction = $CFG->availability_proctor_quiz_start_url;
                 $quizurl = $urlfunction($entry->courseid, $cminfo->id);
+            } else if ($cminfo->modname === 'scorm') {
+                // Redirect to the bridge page (scorm.php) rather than directly to
+                // scorm/view.php.  The bridge page runs in the real browser context
+                // (Proctor's content frame, full cookies), validates the accesscode,
+                // writes it to the session, then redirects to scorm/view.php.  This
+                // avoids the require_login failure that occurs when the accesscode
+                // redirect happens inside Proctor's sandboxed entry iframe.
+                $quizurl = new \moodle_url('/availability/condition/proctor/scorm.php', [
+                    'id' => $cminfo->id,
+                    'proctor_accesscode' => $entry->accesscode,
+                ]);
+            } else if ($cminfo->modname === 'assign') {
+                $quizurl = new \moodle_url('/availability/condition/proctor/assign.php', [
+                    'id' => $cminfo->id,
+                    'proctor_accesscode' => $entry->accesscode,
+                ]);
             } else {
+                // Land on the quiz view page instead of creating the attempt here. The entry
+                // iframe is loaded by the Proctor web app while the learner is still in the
+                // system check, so jumping into startattempt.php at this point would create the
+                // attempt (and start the exam timer) before proctoring begins. The attempt is
+                // created only when the user clicks "Attempt quiz" after passing the check;
+                // handle_start_attempt() short-circuits on the accesscode stored above.
                 $quizurl = new \moodle_url('/mod/quiz/view.php', ['id' => $cminfo->id]);
             }
             redirect($quizurl);

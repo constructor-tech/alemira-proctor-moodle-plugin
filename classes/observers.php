@@ -28,8 +28,16 @@ use availability_proctor\state;
 use availability_proctor\client;
 use availability_proctor\common;
 use availability_proctor\condition;
+use availability_proctor\session_cache;
 use availability_proctor\utils;
 
+/**
+ * Event observer callbacks.
+ *
+ * @package    availability_proctor
+ * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class observers {
     /**
      * When attempt is started, update entry accordingly
@@ -37,9 +45,9 @@ class observers {
      * @param stdClass $event Event
      */
     public static function attempt_started($event) {
-        global $DB, $SESSION, $PAGE, $USER;
+        global $DB, $PAGE, $USER;
 
-        $accesscode = isset($SESSION->availability_proctor_accesscode) ? $SESSION->availability_proctor_accesscode : null;
+        $accesscode = session_cache::get_accesscode();
 
         $attempt = $event->get_record_snapshot('quiz_attempts', $event->objectid);
 
@@ -88,7 +96,7 @@ class observers {
                     // The user is coming from proctor, we can't redirect.
                     // We have to let user know that they need to restart manually.
                     $inhibitredirect = true;
-                    $SESSION->availability_proctor_reset = true;
+                    session_cache::set_reset();
                 } else {
                     // The user is not coming from proctor.
                     $inhibitredirect = false;
@@ -103,7 +111,7 @@ class observers {
 
             if ($accesscode) {
                 $inhibitredirect = true;
-                $SESSION->availability_proctor_reset = true;
+                session_cache::set_reset();
             } else {
                 $inhibitredirect = false;
             }
@@ -112,6 +120,12 @@ class observers {
         if ($inhibitredirect) {
             return;
         }
+
+        \availability_proctor\event\session_started::create([
+            'objectid' => $entry->id,
+            'context'  => \context_module::instance($cmid),
+            'userid'   => $USER->id,
+        ])->trigger();
     }
 
     /**
@@ -120,7 +134,7 @@ class observers {
      * @param stdClass $event Event
      */
     public static function attempt_submitted($event) {
-        global $DB, $SESSION;
+        global $DB;
         $cmid = $event->get_context()->instanceid;
         $attempt = $event->get_record_snapshot('quiz_attempts', $event->objectid);
         $userid = $event->userid;
@@ -129,9 +143,9 @@ class observers {
         $modinfo = get_fast_modinfo($course->id, $userid);
         $cm = $modinfo->get_cm($cmid);
 
-        if (!empty($SESSION->availability_proctor_accesscode)) {
-            $accesscode = $SESSION->availability_proctor_accesscode;
-            unset($SESSION->availability_proctor_accesscode);
+        $accesscode = session_cache::get_accesscode();
+        if (!empty($accesscode)) {
+            session_cache::clear_accesscode();
         }
 
         $entries = $DB->get_records('availability_proctor_entries', [
@@ -174,6 +188,12 @@ class observers {
 
         $client = new client();
         $client->finish_session($entry->accesscode, $redirecturl->out(false));
+
+        \availability_proctor\event\session_finished::create([
+            'objectid' => $entry->id,
+            'context'  => \context_module::instance($cmid),
+            'userid'   => $userid,
+        ])->trigger();
     }
 
     /**

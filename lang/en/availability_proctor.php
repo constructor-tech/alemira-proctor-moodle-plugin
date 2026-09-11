@@ -28,15 +28,127 @@ $string['proctor:logaccess'] = 'Proctor log access';
 $string['proctor:logaccess_course'] = 'Proctor log access for course';
 $string['proctor:logaccess_all'] = 'Proctor log access for all courses';
 
-$string['description'] = 'Allows students to use Constructor Proctor';
 $string['pluginname'] = 'Constructor Proctor';
+$string['description'] = 'Allows students to use Constructor Proctor';
 $string['title'] = 'Constructor Proctor';
 
 $string['error_no_entry_found'] = 'No exam entry found by accesscode';
+$string['error_proctoring_disabled'] = 'Proctoring is no longer enabled for this activity. Please contact your instructor.';
 $string['error_not_in_range'] = 'This value should be between %d and %d';
 $string['error_setduration'] = 'Duration must be a multiple of 30';
+$string['error_preset_cannot_delete'] = 'This preset cannot be deleted (it is the system preset, the last remaining preset, or is in use by an exam).';
+$string['error_preset_not_found'] = 'Preset not found.';
+$string['proctor:managepresets'] = 'Manage proctoring presets';
+$string['presets'] = 'Global proctoring presets';
+$string['preset_create'] = 'Create preset';
+$string['preset_edit'] = 'Edit preset';
+$string['preset_name'] = 'Preset name';
+$string['preset_is_default'] = 'Default';
+$string['preset_is_system'] = 'System';
+$string['preset_duplicate'] = 'Duplicate';
+$string['preset_set_default'] = 'Set as default';
+$string['preset_default_changed'] = 'Default preset changed.';
+$string['preset_deleted'] = 'Preset deleted.';
+$string['preset_saved'] = 'Preset saved.';
+$string['preset_delete_confirm'] = 'Delete this preset?';
+$string['preset_settings_summary'] = 'Settings';
+$string['preset_section_identity_meta'] = 'Preset';
+$string['preset_section_mode'] = 'Proctoring mode';
+$string['preset_section_identity'] = 'Identity verification';
+$string['preset_section_camera'] = 'Camera and monitoring';
+$string['preset_section_securebrowser'] = 'Secure Browser';
+$string['preset_section_resources'] = 'Exam environment';
+$string['preset_section_rules'] = 'Allow during exam';
+$string['preset_section_warnings'] = 'Alerts shown to student';
+$string['preset_section_scoring'] = 'Scoring parameters';
+$string['preset_section_exam'] = 'Exam settings';
 
-$string['settings_proctor_url'] = 'Constructor Proctor URL';
+// ---- Help strings (shown via Moodle addHelpButton and inline hints). ----
+$string['proctoring_mode_help'] = 'Live — Live proctoring mode in which the exam is monitored by a human proctor in real-time (in addition to AI monitoring).<br>Review — Post-exam review mode in which examinees take the exam at any time under AI supervision. The session is recorded and later reviewed by a human proctor to assess for violations.<br>AI review — Fully automated mode without human review. The session is monitored by AI only; violations are flagged based on the configured scoring thresholds.';
+$string['sendmanualwarningstolearner_help'] = 'Allows the proctor to send manual warnings to the learner during the exam, in addition to automatic AI warnings.';
+$string['identification_help'] = 'Method used to verify the learner before the exam.';
+$string['checkidphotoquality_help'] = 'Checks that the ID photo is readable and prompts the learner to re-take it if poor.';
+$string['preliminary_check_help'] = 'Compares the pre-exam webcam capture to the learner\'s Moodle profile picture.';
+$string['web_camera_main_view_help'] = 'Front view (default) uses the standard laptop webcam.
+Auxiliary (side view) is for specific setups with a side-mounted camera and uses different AI models.';
+$string['auxiliary_camera_help'] = 'A secondary camera accessed via a QR code scanned with the learner\'s phone. Recommended for high-stakes exams — captures the keyboard area and keeps the phone occupied.';
+$string['allowroomscanauxcamera_help'] = 'Lets the learner perform a 360° room scan with the secondary camera.';
+$string['allowmultipledisplays_help'] = 'When disabled, learners with multiple monitors connected cannot proceed (detected during the pre-exam screen-share step).';
+$string['streamspreset_help'] = 'Default — standard video recording (recommended for online exams).
+<br>No Video — disables video recording. It\'s typically used for on-campus exam rooms where the Secure Browser ' .
+    'ensures learners cannot leave the exam page, making video recording unnecessary in a controlled physical environment.';
+$string['enable_secure_browser_help'] = 'Requires learners to install the Constructor Proctor Secure Browser, a dedicated application that enforces machine-level restrictions during the exam.';
+$string['secure_browser_level_help'] = 'Basic: detects virtual machines and USB devices.
+<br>Medium: adds restrictions while allowing limited flexibility (recommended when allowing custom processes).
+<br>High: full-screen always-on-top mode, blocks background applications.';
+$string['allowtouseadditionalresources_help'] = 'Allows the learner to open additional PDF or web resources during the exam.';
+$string['allowed_processes_help'] = 'Process names (one per line) that are allowed to run under Secure Browser.';
+$string['forbidden_processes_help'] = 'Extra process names (one per line) to block under Secure Browser.';
+$string['allowvirtualenvironment_help'] = 'Allows taking the exam from within a virtual machine. Detection requires Secure Browser. Typically used for computer-science exams.';
+$string['calculator_help'] = 'Embeds an in-exam calculator widget available to the learner.';
+$string['user_agreement_url_help'] = 'Optional URL displayed at the start of the pre-exam process so learners can review your exam terms.';
+$string['is_trial_help'] = 'Runs this exam in demo mode — no video is uploaded to the proctoring dashboard. For testing equipment and flow without generating recordings.';
+$string['custom_rules_help'] = 'Additional rules specific to your organization, shown to learners on the rules page in addition to the preset allow/forbid rules.';
+$string['proctor_emails_help'] = 'Enter the emails of the proctors in this field. If nothing is entered, any available proctor will be assigned automatically.';
+$string['select_groups_help'] = 'Apply proctoring only to the selected course groups. Learners in other groups can take the exam without proctoring.';
+
+// Per-rule help — most are self-explanatory; the ones that also suppress AI warnings are called out.
+$string['allow_to_use_websites_help'] = 'Allow learners to browse the Internet. Also disables the Active Window Changed warning.';
+$string['allow_to_use_books_help'] = 'Allow learners to consult printed books or reference materials.';
+$string['allow_to_use_paper_help'] = 'Allow learners to take notes on paper during the exam.';
+$string['allow_to_use_messengers_help'] = 'Allow learners to use messaging apps.';
+$string['allow_to_use_excel_help'] = 'Allow learners to use Microsoft Excel.';
+$string['allow_to_use_human_assistant_help'] = 'Allow another person to be present with the learner.';
+$string['allow_absence_in_frame_help'] = 'Allow the learner to briefly leave the webcam frame. Disables the Test-taker absent warning.';
+$string['allow_voices_help'] = 'Allow the learner to talk during the exam. Disables the Voice Detected warning.';
+$string['allow_wrong_gaze_direction_help'] = 'Useful for open-book exams. Disables the Looking Away warning.';
+
+// Shared help for sections of uniform items. Moodle's addHelpButton requires
+// both a title string (the identifier) and a body string (identifier + _help).
+$string['warnings'] = 'Alert shown to student';
+$string['warnings_help'] = 'Pop-up shown to the learner in-exam when this violation is detected. Detection still happens regardless of this setting — only learner visibility changes.';
+$string['scoring'] = 'Scoring weight';
+$string['scoring_help'] = 'Weight applied to this violation type when computing the learner\'s cheating score.';
+$string['scoring_section_hint'] = 'Weight applied to this violation type when computing the learner\'s cheating score. Leave blank to use the default.';
+// Per-warning hints.
+$string['warning_change_active_window_on_computer_help'] = 'Detected when the learner switches windows during the exam. Automatically disabled when "Browsing the Internet" is allowed.';
+$string['warning_voice_detected_help'] = 'Detected when voice is heard during the exam. Automatically disabled when "Talking" is allowed.';
+$string['warning_avert_eyes_help'] = 'Detected when the learner looks away from the screen for a prolonged time. Automatically disabled when "Prolonged looking away from screen" is allowed.';
+$string['warning_no_user_in_frame_help'] = 'Detected when no user is visible in the webcam. Automatically disabled when "Leaving webcam frame" is allowed.';
+$string['warning_extra_user_in_frame_help'] = 'Detected when an additional person is visible in the webcam alongside the learner.';
+$string['warning_substitution_user_help'] = 'Detected when the person currently in the webcam does not match the identified learner.';
+$string['warning_forbidden_device_help'] = 'Detected when an external device (phone, tablet, second monitor) is visible in the webcam view.';
+$string['warning_phone_help'] = 'Detected when a phone is visible in the webcam view.';
+
+$string['scoring_cheater_level'] = 'Cheater score threshold';
+$string['scoring_cheater_level_help'] = 'Overall threshold (0–100). Sessions scoring above this value are auto-flagged as cheaters. Default 80.';
+$string['load_preset'] = '(change)';
+$string['save_personal_preset'] = 'Save as personal preset';
+$string['save_personal_preset_prompt'] = 'Enter a name for your personal preset.';
+$string['save_personal_preset_hint'] = 'Personal presets are saved to your account and can be reused in any of your exams. They are not visible to other users. Global presets are managed by site administrators in Site administration > Plugins.';
+$string['loaded_preset'] = 'Current preset: {$a}';
+$string['loaded_preset_none'] = 'None';
+$string['global_presets'] = 'Global presets';
+$string['personal_presets'] = 'Personal presets';
+$string['no_presets'] = 'No presets';
+$string['delete'] = 'Delete';
+$string['error_preset_name_required'] = 'Preset name is required.';
+$string['error_useragreementurl'] = 'Please enter a valid URL starting with http:// or https:// (for example: https://example.com/terms).';
+$string['error_invalid_payload'] = 'Invalid preset payload.';
+$string['error_invalid_action'] = 'Invalid action.';
+$string['error_internal'] = 'An internal error occurred. Please try again or contact your administrator.';
+$string['error_preset_name_taken'] = 'A preset with this name already exists.';
+$string['error_preset_user_quota'] = 'You have reached the maximum number of personal presets ({$a}). Delete an unused preset before saving a new one.';
+$string['error_preset_default_missing'] = 'No default proctoring preset is available and the starter set could not be created automatically. Please contact your administrator.';
+$string['preset_display_high_stakes'] = 'High-stakes exam';
+$string['preset_display_low_stakes'] = 'Low-stakes exam';
+$string['preset_display_open_book'] = 'Open-book exam';
+$string['redirecting_to_proctor'] = 'Redirecting to {$a}';
+$string['proctor_go_to_system'] = 'Go to proctoring system';
+$string['secure_browser_enabled'] = 'Enabled';
+$string['secure_browser_disabled'] = 'Disabled';
+
+$string['settings_proctor_url'] = '{$a} URL';
 $string['settings_proctor_url_desc'] = '';
 $string['settings_integration_name'] = 'Integration Name';
 $string['settings_integration_name_desc'] = '';
@@ -46,16 +158,20 @@ $string['settings_account_name'] = 'Account Name';
 $string['settings_account_name_desc'] = '';
 $string['settings_account_id'] = 'Account ID';
 $string['settings_account_id_desc'] = '';
-$string['settings_user_emails'] = 'Send user emails to Constructor Proctor';
-$string['settings_user_emails_desc'] = '';
-$string['settings_seamless_auth'] = 'Seemless authorization';
-$string['settings_seamless_auth_desc'] = 'Proctoring will store authorization token for users';
+$string['settings_user_emails'] = 'Send user emails to {$a}';
+$string['settings_user_emails_desc'] = 'If checked, Moodle will send examinee\'s email addresses to the Proctor Dashboard. If not checked, Constructor Proctor will automatically generate a mock email address for each examinee to use as a unique identifier in the Dashboard.';
+$string['event_session_started'] = 'Proctoring session started';
+$string['event_session_finished'] = 'Proctoring session finished';
+$string['event_user_logged_in_via_token'] = 'User logged in via seamless auth token';
 
-$string['description_proctor'] = 'You will be redirected to Constructor Proctor';
+$string['settings_seamless_auth'] = 'Seamless authorization';
+$string['settings_seamless_auth_desc'] = 'Forwards a short-lived, single-use Moodle authentication token to Proctor so learners are logged in automatically when redirected back. Recommended when using Secure Browser. Security note: tokens are valid for 8 hours and bound to a specific exam entry. On shared exam devices, learners should log out after completing the exam.';
+
+$string['description_proctor'] = 'You will be redirected to {$a}';
 $string['description_no_webservices'] = 'Can not be accessed via Moodle mobile app';
 
 $string['settings'] = 'Integration settings';
-$string['log_section'] = 'Constructor Proctor log';
+$string['log_section'] = '{$a} log';
 $string['status'] = 'Status';
 $string['module'] = 'Module';
 $string['new_entry'] = 'New entry';
@@ -72,27 +188,27 @@ $string['entry_exist'] = 'New entry already exist';
 $string['date_modified'] = 'Date of last change';
 
 $string['proctoring_mode'] = 'Proctoring mode';
-$string['online_mode'] = 'Live review';
-$string['offline_mode'] = 'Post-exam review';
+$string['online_mode'] = 'Live';
+$string['offline_mode'] = 'Review';
 $string['auto_mode'] = 'AI review';
-$string['identification_mode'] = 'Live identity verification';
+$string['identification_mode'] = 'Identity verification';
 
 $string['identification'] = 'Identity verification mode';
-$string['face_passport_identification'] = 'Face and Passport/ID';
-$string['passport_identification'] = 'Passport/ID';
-$string['face_identification'] = 'Face';
-$string['skip_identification'] = 'None (Skip verification)';
+$string['face_passport_identification'] = 'Face and ID';
+$string['passport_identification'] = 'Only ID';
+$string['face_identification'] = 'Only face';
+$string['skip_identification'] = 'Skip';
 
 $string['web_camera_main_view'] = 'Main camera positioning';
 $string['web_camera_main_view_front'] = 'Front view';
-$string['web_camera_main_view_side'] = 'Side view';
+$string['web_camera_main_view_side'] = 'Auxiliary (side view)';
 
 $string['calculator'] = 'Calculator';
 $string['calculator_off'] = 'Off';
 $string['calculator_simple'] = 'Simple';
 $string['calculator_scientific'] = 'Scientific';
 
-$string['streamspreset'] = 'Streams preset';
+$string['streamspreset'] = 'Recording mode';
 $string['streamspreset_default'] = 'Default';
 $string['streamspreset_no_video'] = 'No video';
 $string['streamspreset_no_ai_detection'] = 'No AI detection';
@@ -105,6 +221,8 @@ $string['select_groups'] = 'Enable proctoring for selected groups';
 $string['is_trial'] = 'Demo exam mode';
 
 $string['auxiliary_camera'] = 'Secondary camera';
+$string['auxiliary_camera_off'] = 'Off';
+$string['auxiliary_camera_on'] = 'On';
  
 
 $string['enable_secure_browser'] = 'Require Secure Browser';
@@ -112,7 +230,7 @@ $string['secure_browser_level'] = 'Secure Browser level';
 $string['secure_browser_level_basic'] = 'Basic';
 $string['secure_browser_level_medium'] = 'Medium';
 $string['secure_browser_level_high'] = 'High';
-$string['allowtouseadditionalresources'] = 'Using additional resources (PDF/web) in Secure Browser';
+$string['allowtouseadditionalresources'] = 'Allow using additional resources (PDF/web)';
 $string['allowed_processes'] = 'Allowed processes';
 $string['forbidden_processes'] = 'Forbidden processes';
 $string['processes_list_hint'] = 'One process name per line';
@@ -125,6 +243,8 @@ $string['allowroomscanauxcamera'] = 'Allow room scan using aux camera';
 
 $string['rules'] = "Allow during exam";
 $string['custom_rules'] = "Custom exam rules";
+$string['proctor_emails'] = "Assign proctors";
+$string['proctor_emails_placeholder'] = "proctor1@example.com\nproctor2@example.com";
 
 $string['user_agreement_url'] = "Terms and conditions URL";
 
@@ -142,6 +262,7 @@ $string['allow_to_use_paper'] = 'Taking notes on paper';
 $string['allow_to_use_messengers'] = 'Using messengers';
 $string['allow_to_use_calculator'] = 'Using calculator';
 $string['allow_to_use_excel'] = 'Using Microsoft Excel';
+$string['allow_to_use_spell_check_tools'] = 'Using Spell Check Tools';
 $string['allow_to_use_human_assistant'] = 'Using other person’s help';
 $string['allow_absence_in_frame'] = 'Leaving webcam frame';
 $string['allow_voices'] = 'Talking';
@@ -157,6 +278,15 @@ $string['scoring_active_window_changed'] = 'Active window is changed';
 $string['scoring_forbidden_device'] = 'Forbidden hardware';
 $string['scoring_voice'] = 'Voice detected';
 $string['scoring_phone'] = 'Phone is used';
+$string['scoring_mic_muted'] = 'Microphone is muted';
+$string['scoring_mic_no_device'] = 'Microphone is not connected';
+$string['scoring_mic_no_sound'] = 'Microphone silence';
+$string['scoring_camera_no_device'] = 'Camera is not connected';
+$string['scoring_camera_no_picture'] = 'No image from camera';
+$string['scoring_no_aux_camera_photo'] = 'No aux camera photo';
+$string['scoring_no_ping'] = 'Test taker application lost its connection with the server';
+$string['scoring_desktop_request_pending'] = 'Desktop request pending';
+$string['scoring_account_collision'] = 'Using multiple accounts across one exam';
 
 $string['status_new'] = 'New';
 $string['status_started'] = 'Started';
@@ -171,6 +301,7 @@ $string['scheduling_required'] = 'Calendar booking required';
 $string['apply_filter'] = 'Apply filter';
 $string['allcourses'] = 'All courses';
 $string['allstatuses'] = 'All statuses';
+$string['selectauser'] = 'Select a user';
 $string['userquery'] = 'Username or Email starts with';
 $string['fromdate'] = 'From date:';
 $string['todate'] = 'To date:';
@@ -228,6 +359,15 @@ $string['warning_desktop_request_pending'] = 'Desktop is not shared';
 
 $string['privacy:path'] = 'Proctor exam entries';
 $string['privacy:metadata:availability_proctor_entries'] = 'List of exam entries in proctoring system';
+$string['privacy:metadata:proctor_service'] = 'Personal data transmitted to the Constructor Proctor service to create and manage proctored exam sessions.';
+$string['privacy:metadata:proctor_service:userid'] = 'The Moodle username used as a unique identifier in the proctoring service.';
+$string['privacy:metadata:proctor_service:firstname'] = 'The first name of the user.';
+$string['privacy:metadata:proctor_service:lastname'] = 'The last name of the user.';
+$string['privacy:metadata:proctor_service:middlename'] = 'The middle name of the user.';
+$string['privacy:metadata:proctor_service:email'] = 'The email address of the user (sent only when the "Send user emails" setting is enabled).';
+$string['privacy:metadata:proctor_service:photo_url'] = 'URL of the user\'s Moodle profile picture, used for identity verification during the preliminary check.';
+$string['privacy:metadata:proctor_service:language'] = 'The interface language of the user.';
+$string['privacy:metadata:proctor_service:specialaccommodationsinfo'] = 'Special accommodations information from the user\'s custom Moodle profile field.';
 $string['privacy:metadata:availability_proctor_entries:courseid'] = 'Course ID';
 $string['privacy:metadata:availability_proctor_entries:cmid'] = 'Course Module ID';
 $string['privacy:metadata:availability_proctor_entries:attemptid'] = 'Quiz attempt ID';
@@ -238,10 +378,41 @@ $string['privacy:metadata:availability_proctor_entries:review_link'] = 'Review U
 $string['privacy:metadata:availability_proctor_entries:archiveurl'] = 'Archive URL';
 $string['privacy:metadata:availability_proctor_entries:timecreated'] = 'Time when entry was created';
 $string['privacy:metadata:availability_proctor_entries:timemodified'] = 'Time when entry was last modified';
-$string['privacy:metadata:availability_proctor_entries:timescheduled'] = '';
+$string['privacy:metadata:availability_proctor_entries:timescheduled'] = 'Time when the exam session was scheduled';
 $string['privacy:metadata:availability_proctor_entries:score'] = 'Proctoring score';
 $string['privacy:metadata:availability_proctor_entries:comment'] = 'Proctor\'s comment';
 $string['privacy:metadata:availability_proctor_entries:threshold'] = 'Score threshold';
 $string['privacy:metadata:availability_proctor_entries:warnings'] = 'List of warnings received during proctoring session';
 $string['privacy:metadata:availability_proctor_entries:sessionstart'] = 'Time when proctoring session started';
 $string['privacy:metadata:availability_proctor_entries:sessionend'] = 'Time when proctoring session ended';
+
+$string['privacy:path:presets'] = 'Personal proctoring presets';
+$string['privacy:metadata:availability_proctor_presets'] = 'Personal proctoring presets created by the user and stored in the Moodle database.';
+$string['privacy:metadata:availability_proctor_presets:userid'] = 'The ID of the user who owns this preset.';
+$string['privacy:metadata:availability_proctor_presets:name'] = 'The name given to the preset by the user.';
+$string['privacy:metadata:availability_proctor_presets:mode'] = 'Proctoring mode configured in the preset.';
+$string['privacy:metadata:availability_proctor_presets:schedulingrequired'] = 'Whether calendar booking is required.';
+$string['privacy:metadata:availability_proctor_presets:autorescheduling'] = 'Whether automatic rescheduling is enabled.';
+$string['privacy:metadata:availability_proctor_presets:identification'] = 'Identity verification method configured in the preset.';
+$string['privacy:metadata:availability_proctor_presets:checkidphotoquality'] = 'Whether ID photo quality check is enabled.';
+$string['privacy:metadata:availability_proctor_presets:useragreementurl'] = 'URL of the terms and conditions configured in the preset.';
+$string['privacy:metadata:availability_proctor_presets:preliminarycheck'] = 'Whether preliminary identity check is enabled.';
+$string['privacy:metadata:availability_proctor_presets:webcameramainview'] = 'Main camera positioning configured in the preset.';
+$string['privacy:metadata:availability_proctor_presets:auxiliarycamera'] = 'Secondary camera setting configured in the preset.';
+$string['privacy:metadata:availability_proctor_presets:allowroomscanauxcamera'] = 'Whether room scan with auxiliary camera is allowed.';
+$string['privacy:metadata:availability_proctor_presets:streamspreset'] = 'Recording mode configured in the preset.';
+$string['privacy:metadata:availability_proctor_presets:sendmanualwarningstolearner'] = 'Whether manual warnings to learner are enabled.';
+$string['privacy:metadata:availability_proctor_presets:securebrowser'] = 'Whether Secure Browser is required.';
+$string['privacy:metadata:availability_proctor_presets:securebrowserlevel'] = 'Secure Browser restriction level configured in the preset.';
+$string['privacy:metadata:availability_proctor_presets:allowedprocesses'] = 'List of allowed processes configured in the preset.';
+$string['privacy:metadata:availability_proctor_presets:forbiddenprocesses'] = 'List of forbidden processes configured in the preset.';
+$string['privacy:metadata:availability_proctor_presets:allowvirtualenvironment'] = 'Whether virtual machine access is allowed.';
+$string['privacy:metadata:availability_proctor_presets:allowtouseadditionalresources'] = 'Whether using additional resources is allowed.';
+$string['privacy:metadata:availability_proctor_presets:allowmultipledisplays'] = 'Whether multiple displays are allowed.';
+$string['privacy:metadata:availability_proctor_presets:calculator'] = 'Calculator type configured in the preset.';
+$string['privacy:metadata:availability_proctor_presets:rules'] = 'Exam rules configured in the preset.';
+$string['privacy:metadata:availability_proctor_presets:warnings'] = 'Warning visibility settings configured in the preset.';
+$string['privacy:metadata:availability_proctor_presets:scoring'] = 'Scoring parameters configured in the preset.';
+$string['privacy:metadata:availability_proctor_presets:timecreated'] = 'Time when the preset was created.';
+$string['privacy:metadata:availability_proctor_presets:timemodified'] = 'Time when the preset was last modified.';
+$string['cachedef_session'] = 'Per-session proctoring state (active accesscode, reset flag).';

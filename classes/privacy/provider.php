@@ -35,11 +35,21 @@ use core_privacy\local\request\transform;
 
 /**
  * Implementation of the privacy subsystem plugin provider.
+ *
+ * @package    availability_proctor
+ * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class provider implements
     \core_privacy\local\metadata\provider,
     \core_privacy\local\request\plugin\provider,
     \core_privacy\local\request\core_userlist_provider {
+    /**
+     * Declare the personal data this plugin stores.
+     *
+     * @param collection $collection the metadata collection to add items to
+     * @return collection the same collection (with proctor entry fields added)
+     */
     public static function get_metadata(collection $collection): collection {
         $collection->add_database_table(
             'availability_proctor_entries',
@@ -65,6 +75,55 @@ class provider implements
             'privacy:metadata:availability_proctor_entries'
         );
 
+        $collection->add_database_table(
+            'availability_proctor_presets',
+            [
+                'userid'                        => 'privacy:metadata:availability_proctor_presets:userid',
+                'name'                          => 'privacy:metadata:availability_proctor_presets:name',
+                'mode'                          => 'privacy:metadata:availability_proctor_presets:mode',
+                'schedulingrequired'            => 'privacy:metadata:availability_proctor_presets:schedulingrequired',
+                'autorescheduling'              => 'privacy:metadata:availability_proctor_presets:autorescheduling',
+                'identification'                => 'privacy:metadata:availability_proctor_presets:identification',
+                'checkidphotoquality'           => 'privacy:metadata:availability_proctor_presets:checkidphotoquality',
+                'useragreementurl'              => 'privacy:metadata:availability_proctor_presets:useragreementurl',
+                'preliminarycheck'              => 'privacy:metadata:availability_proctor_presets:preliminarycheck',
+                'webcameramainview'             => 'privacy:metadata:availability_proctor_presets:webcameramainview',
+                'auxiliarycamera'               => 'privacy:metadata:availability_proctor_presets:auxiliarycamera',
+                'allowroomscanauxcamera'        => 'privacy:metadata:availability_proctor_presets:allowroomscanauxcamera',
+                'streamspreset'                 => 'privacy:metadata:availability_proctor_presets:streamspreset',
+                'sendmanualwarningstolearner'   => 'privacy:metadata:availability_proctor_presets:sendmanualwarningstolearner',
+                'securebrowser'                 => 'privacy:metadata:availability_proctor_presets:securebrowser',
+                'securebrowserlevel'            => 'privacy:metadata:availability_proctor_presets:securebrowserlevel',
+                'allowedprocesses'              => 'privacy:metadata:availability_proctor_presets:allowedprocesses',
+                'forbiddenprocesses'            => 'privacy:metadata:availability_proctor_presets:forbiddenprocesses',
+                'allowvirtualenvironment'       => 'privacy:metadata:availability_proctor_presets:allowvirtualenvironment',
+                'allowtouseadditionalresources' => 'privacy:metadata:availability_proctor_presets:allowtouseadditionalresources',
+                'allowmultipledisplays'         => 'privacy:metadata:availability_proctor_presets:allowmultipledisplays',
+                'calculator'                    => 'privacy:metadata:availability_proctor_presets:calculator',
+                'rules'                         => 'privacy:metadata:availability_proctor_presets:rules',
+                'warnings'                      => 'privacy:metadata:availability_proctor_presets:warnings',
+                'scoring'                       => 'privacy:metadata:availability_proctor_presets:scoring',
+                'timecreated'                   => 'privacy:metadata:availability_proctor_presets:timecreated',
+                'timemodified'                  => 'privacy:metadata:availability_proctor_presets:timemodified',
+            ],
+            'privacy:metadata:availability_proctor_presets'
+        );
+
+        $collection->add_external_location_link(
+            'proctor_service',
+            [
+                'userid'                  => 'privacy:metadata:proctor_service:userid',
+                'firstname'               => 'privacy:metadata:proctor_service:firstname',
+                'lastname'                => 'privacy:metadata:proctor_service:lastname',
+                'middlename'              => 'privacy:metadata:proctor_service:middlename',
+                'email'                   => 'privacy:metadata:proctor_service:email',
+                'photo_url'               => 'privacy:metadata:proctor_service:photo_url',
+                'language'                => 'privacy:metadata:proctor_service:language',
+                'specialaccommodationsinfo' => 'privacy:metadata:proctor_service:specialaccommodationsinfo',
+            ],
+            'privacy:metadata:proctor_service'
+        );
+
         return $collection;
     }
 
@@ -76,12 +135,15 @@ class provider implements
     public static function get_users_in_context(userlist $userlist) {
         $context = $userlist->get_context();
 
-        if (!is_a($context, \context_module::class)) {
-            return;
+        if (is_a($context, \context_module::class)) {
+            $sql = "SELECT userid FROM {availability_proctor_entries} WHERE cmid = :cmid";
+            $userlist->add_from_sql('userid', $sql, ['cmid' => $context->instanceid]);
         }
 
-        $sql = "SELECT userid FROM {availability_proctor_entries} WHERE cmid = :cmid";
-        $userlist->add_from_sql('userid', $sql, ['cmid' => $context->instanceid]);
+        if (is_a($context, \context_system::class)) {
+            $sql = "SELECT userid FROM {availability_proctor_presets} WHERE type = 'user' AND userid IS NOT NULL";
+            $userlist->add_from_sql('userid', $sql, []);
+        }
     }
 
     /**
@@ -91,6 +153,7 @@ class provider implements
      * @return  contextlist   $contextlist  The list of contexts used in this plugin.
      */
     public static function get_contexts_for_userid(int $userid): contextlist {
+        global $DB;
         $contextlist = new contextlist();
 
         $sql = "SELECT c.id
@@ -101,6 +164,10 @@ class provider implements
         ";
 
         $contextlist->add_from_sql($sql, ['userid' => $userid, 'contextlevel' => CONTEXT_MODULE]);
+
+        if ($DB->record_exists('availability_proctor_presets', ['userid' => $userid, 'type' => 'user'])) {
+            $contextlist->add_system_context();
+        }
 
         return $contextlist;
     }
@@ -150,6 +217,20 @@ class provider implements
                 ->export_data([get_string('privacy:path', 'availability_proctor')], $entry);
         }
 
+        $systemcontext = \context_system::instance();
+        if (in_array($systemcontext->id, $contextlist->get_contextids())) {
+            $presets = $DB->get_records('availability_proctor_presets', ['userid' => $userid, 'type' => 'user']);
+            foreach ($presets as $preset) {
+                foreach (['timecreated', 'timemodified'] as $field) {
+                    if ($preset->{$field}) {
+                        $preset->{$field} = transform::datetime($preset->{$field});
+                    }
+                }
+                writer::with_context($systemcontext)
+                    ->export_data([get_string('privacy:path:presets', 'availability_proctor'), $preset->name], $preset);
+            }
+        }
+
     }
 
     /**
@@ -160,11 +241,13 @@ class provider implements
     public static function delete_data_for_all_users_in_context(\context $context) {
         global $DB;
 
-        if ($context->contextlevel != CONTEXT_MODULE) {
-            return;
+        if ($context->contextlevel == CONTEXT_MODULE) {
+            $DB->delete_records('availability_proctor_entries', ['cmid' => $context->instanceid]);
         }
 
-        $DB->delete_records('availability_proctor_entries', ['cmid' => $context->instanceid]);
+        if ($context->contextlevel == CONTEXT_SYSTEM) {
+            $DB->delete_records('availability_proctor_presets', ['type' => 'user']);
+        }
     }
 
     /**
@@ -176,15 +259,20 @@ class provider implements
         global $DB;
 
         $context = $userlist->get_context();
-
-        if ($context->contextlevel != CONTEXT_MODULE) {
+        $userids = $userlist->get_userids();
+        if (empty($userids)) {
             return;
         }
+        list($userinsql, $userinparams) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
 
-        list($userinsql, $userinparams) = $DB->get_in_or_equal($userlist->get_userids(), SQL_PARAMS_NAMED);
-        $params = array_merge(['cmid' => $context->instanceid], $userinparams);
+        if ($context->contextlevel == CONTEXT_MODULE) {
+            $params = array_merge(['cmid' => $context->instanceid], $userinparams);
+            $DB->delete_records_select('availability_proctor_entries', "cmid = :cmid AND userid {$userinsql}", $params);
+        }
 
-        $DB->delete_records_select('availability_proctor_entries', "cmid = :cmid AND userid {$userinsql}", $params);
+        if ($context->contextlevel == CONTEXT_SYSTEM) {
+            $DB->delete_records_select('availability_proctor_presets', "type = 'user' AND userid {$userinsql}", $userinparams);
+        }
     }
 
     /**
@@ -197,15 +285,16 @@ class provider implements
         $user = $contextlist->get_user();
         $userid = $user->id;
         foreach ($contextlist as $context) {
-            if ($context->contextlevel != CONTEXT_MODULE) {
-                continue;
+            if ($context->contextlevel == CONTEXT_MODULE) {
+                $DB->delete_records('availability_proctor_entries', [
+                    'cmid' => $context->instanceid,
+                    'userid' => $userid,
+                ]);
             }
 
-            $cmid = $context->instanceid;
-            $DB->delete_records('availability_proctor_entries', [
-                'cmid' => $cmid,
-                'userid' => $userid,
-            ]);
+            if ($context->contextlevel == CONTEXT_SYSTEM) {
+                $DB->delete_records('availability_proctor_presets', ['userid' => $userid, 'type' => 'user']);
+            }
         }
     }
 }

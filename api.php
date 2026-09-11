@@ -36,19 +36,24 @@ require_once('../../../config.php');
 
 global $DB;
 
-if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
-    $auth = $_SERVER['HTTP_AUTHORIZATION'];
-} else if (isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
-    $auth = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
-} else {
-    $auth = null;
+// Moodle has no wrapper for raw HTTP request headers; getallheaders() works
+// across supported SAPIs without touching server-level superglobals.
+// The endpoint authenticates via JWT verified below.
+$headers = function_exists('getallheaders') ? getallheaders() : [];
+$auth = null;
+foreach ($headers as $hname => $hvalue) {
+    $lname = strtolower($hname);
+    if ($lname === 'authorization' || $lname === 'redirect-http-authorization') {
+        $auth = $hvalue;
+        break;
+    }
 }
 
 if (empty($auth) || !preg_match('/JWT /', $auth)) {
     echo('Not auth provided');
     exit;
 }
-$token = explode(' ', $_SERVER['HTTP_AUTHORIZATION'])[1];
+$token = explode(' ', $auth)[1];
 
 $client = new client(null);
 
@@ -61,11 +66,17 @@ try {
 
 $requestbody = file_get_contents('php://input');
 if (empty($requestbody)) {
+    http_response_code(400);
     echo('No request body');
     exit;
 }
 
 $request = json_decode($requestbody);
+if (!is_object($request) || empty($request->sessionId)) {
+    http_response_code(400);
+    echo('Invalid request body');
+    exit;
+}
 
 $accesscode = $request->sessionId;
 

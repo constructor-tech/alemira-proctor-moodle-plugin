@@ -28,10 +28,20 @@ namespace availability_proctor;
  *
  * Used to avoid using gloals and violating either.
  * actual codestyle for globals, or written codestyle rules.
+ *
+ * @package    availability_proctor
+ * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class state {
     /**
      * @var array $attempt Array containing data about current attempt
      */
     public static $attempt;
+
+    /**
+     * @var bool $lockdown True when a SCORM or assign page is being accessed
+     *                     through Proctor and navigation chrome must be hidden.
+     */
+    public static $lockdown = false;
 }

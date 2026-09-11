@@ -28,6 +28,10 @@ use availability_proctor\condition;
 
 /**
  * Collection of static methods, used throughout the code
+ *
+ * @package    availability_proctor
+ * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class common {
     /**
@@ -284,23 +288,21 @@ class common {
     }
 
     /**
-     * Gets default proctoring settings from config
+     * Compute effective proctoring duration in minutes.
+     * If the underlying activity is a quiz with a time limit, use it.
+     * Otherwise fall back to condition::MAX_LIMIT.
      *
-     * @return stdClass
-     **/
-    public static function get_default_proctoring_settings() {
-        $json = get_config('availability_proctor', 'default_proctoring_settings');
-        $json = empty($json) ? '{}' : $json;
-        return json_decode($json);
-    }
-
-    /**
-     * Set default proctoring settings from config
-     *
-     * @return void
-     **/
-    public static function set_default_proctoring_settings($data) {
-        $json = json_encode($data);
-        set_config('default_proctoring_settings', $json, 'availability_proctor');
+     * @param \stdClass|\cm_info $cm Course module
+     * @return int duration in minutes
+     */
+    public static function get_quiz_time_limit($cm) {
+        global $DB;
+        if (!empty($cm->modname) && $cm->modname === 'quiz') {
+            $timelimit = $DB->get_field('quiz', 'timelimit', ['id' => $cm->instance]);
+            if (!empty($timelimit)) {
+                return (int) ceil($timelimit / 60);
+            }
+        }
+        return condition::MAX_LIMIT;
     }
 }

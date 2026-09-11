@@ -23,18 +23,24 @@ upload the ZIP file and install it.
 3. Choose value for `Send user emails to Constructor Proctor` field, if disabled, Proctor will not receive emails of learners.
 4. Choose value for `Seemless authorization`, if enabled, Proctor will be able to authorize learners into moodle, 
    if disabled, users will have to login into modle inside proctoring.
+   - **Security note:** when enabled, a short-lived authentication token is issued per exam entry. Tokens are single-use (deleted immediately after login), expire after 8 hours, and are bound to the specific exam entry they were issued for. If proctoring is disabled or removed from the course module after a token was issued, the token is rejected at login time rather than being honored.
 
 ## Usage
 
 ### Setting a restriction for a module
 
-1. In course editing mode, choose `Edit settings` for the module (quiz) you want to use with Proctor by Constructor proctoring. 
+Supported module types: **Quiz**, **SCORM**, **Assignment**.
+
+1. In course editing mode, choose `Edit settings` for the module you want to use with Proctor by Constructor proctoring.
    Scroll down to `Restrict access`.
 2. Choose `Add restrictions... → Proctor by Constructor` to enable proctoring for this module.
-3. Specify the duration of the proctoring session. If you already have a time restriction for the module (quiz), 
+3. Specify the duration of the proctoring session. If you already have a time restriction for the module,
    the proctoring session duration must be equal to the time restriction setting.
 4. Choose the proctoring mode.
 5. Choose the rules for the proctoring session.
+
+> **Navigation lockdown:** When a learner accesses a proctored SCORM or Assignment through Proctor, the Moodle
+> navigation chrome (top header, left sidebar) is automatically hidden so only the activity content is visible.
 
 
 ### Adding a new entry
@@ -54,11 +60,25 @@ The plugin allows passing learner's special accommodation to Constuctor Proctor,
 ## Structure
 
 ### Entrypoints
- 
+
 * `index.php` - List of student `entries` or proctoring sessions in Admin panel
 * `defaults.php` - Admin section for changing default proctored exam settings
-* `api.php` - Webhook implementing Proctor Simple API - receives information on session status changes and echeduled exams
-* `entry.php` - Learner is redirected here inside proctoring. Handles seemless auths and redirects to quiz
+* `api.php` - Webhook implementing Proctor Simple API - receives information on session status changes and scheduled exams
+* `entry.php` - Learner is redirected here inside proctoring. Handles seamless auths and redirects to quiz/SCORM/assignment
+* `scorm.php` - Bridge page for SCORM proctoring. Proctor's content frame lands here, sets the session cookie, then redirects to the SCORM view page
+* `assign.php` - Bridge page for Assignment proctoring. Same role as `scorm.php` for assignment activities
+
+### Navigation lockdown
+
+When a learner accesses a proctored **SCORM** or **Assignment** through Proctor, the plugin automatically hides
+Moodle's navigation chrome (top header, left sidebar, breadcrumbs) so only the activity content is visible.
+
+The mechanism mirrors how quiz proctoring works:
+
+1. `scorm.php` / `assign.php` bridge pages set `state::$lockdown = true` via `handle_start_attempt_scorm/assign`
+2. The `before_standard_html_head` hook reads this flag and injects a `<style>` block + JS into the page `<head>`
+3. A `MutationObserver` keeps navigation elements hidden even if Moodle's own JavaScript tries to restore them
+4. The lockdown also applies to the SCORM player page (`/mod/scorm/player.php`) after the learner clicks Enter
 
 ### Local development
 

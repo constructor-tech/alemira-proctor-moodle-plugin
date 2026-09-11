@@ -28,39 +28,42 @@ if ($hassiteconfig) {
     $settings = null;
     $pluginsettings = new admin_settingpage('manageavailabilityproctor', new lang_string('settings', 'availability_proctor'));
 
+    $pluginname = get_string('pluginname', 'availability_proctor');
+
     $logpage = new admin_externalpage(
         'availability_proctor_log',
-        get_string('log_section', 'availability_proctor'),
+        get_string('log_section', 'availability_proctor', $pluginname),
         $CFG->wwwroot . '/availability/condition/proctor/index.php',
         'availability/proctor:logaccess'
     );
 
-    $defaultspage = new admin_externalpage(
-        'availability_proctor_defaults',
-        get_string('defaults', 'availability_proctor'),
-        $CFG->wwwroot . '/availability/condition/proctor/defaults.php',
-        'availability/proctor:logaccess'
+    $presetspage = new admin_externalpage(
+        'availability_proctor_presets',
+        get_string('presets', 'availability_proctor'),
+        $CFG->wwwroot . '/availability/condition/proctor/presets.php',
+        'availability/proctor:managepresets'
     );
 
     $category = new admin_category('availability_proctor_admin', new lang_string('pluginname', 'availability_proctor'));
 
     $ADMIN->add('availabilitysettings', $category);
     $ADMIN->add('reports', $logpage);
-    $ADMIN->add('availability_proctor_admin', $defaultspage);
+    $ADMIN->add('availability_proctor_admin', $presetspage);
     $ADMIN->add('availability_proctor_admin', $pluginsettings);
 
     if ($ADMIN->fulltree) {
         $pluginsettings->add(new admin_setting_configtext('availability_proctor/proctor_url',
-            new lang_string('settings_proctor_url', 'availability_proctor'),
-            new lang_string('settings_proctor_url_desc', 'availability_proctor'), '', PARAM_HOST));
+            new lang_string('settings_proctor_url', 'availability_proctor', $pluginname),
+            new lang_string('settings_proctor_url_desc', 'availability_proctor'),
+            \availability_proctor\brand::DEFAULT_PROCTOR_URL, PARAM_HOST));
 
         $pluginsettings->add(new admin_setting_configtext('availability_proctor/integration_name',
             new lang_string('settings_integration_name', 'availability_proctor'),
             new lang_string('settings_integration_name_desc', 'availability_proctor'), '', PARAM_TEXT));
 
-        $pluginsettings->add(new admin_setting_configtext('availability_proctor/jwt_secret',
+        $pluginsettings->add(new admin_setting_configpasswordunmask('availability_proctor/jwt_secret',
             new lang_string('settings_jwt_secret', 'availability_proctor'),
-            new lang_string('settings_jwt_secret_desc', 'availability_proctor'), '', PARAM_TEXT));
+            new lang_string('settings_jwt_secret_desc', 'availability_proctor'), ''));
 
         $pluginsettings->add(new admin_setting_configtext('availability_proctor/account_id',
             new lang_string('settings_account_id', 'availability_proctor'),
@@ -70,13 +73,17 @@ if ($hassiteconfig) {
             new lang_string('settings_account_name', 'availability_proctor'),
             new lang_string('settings_account_name_desc', 'availability_proctor'), '', PARAM_TEXT));
 
-        $pluginsettings->add(new admin_setting_configcheckbox('availability_proctor/user_emails',
-            new lang_string('settings_user_emails', 'availability_proctor'),
-            new lang_string('settings_user_emails_desc', 'availability_proctor'), 1));
+        if (\availability_proctor\brand::is_setting_visible('user_emails')) {
+            $pluginsettings->add(new admin_setting_configcheckbox('availability_proctor/user_emails',
+                new lang_string('settings_user_emails', 'availability_proctor', $pluginname),
+                new lang_string('settings_user_emails_desc', 'availability_proctor'), 1));
+        }
 
-        $pluginsettings->add(new admin_setting_configcheckbox('availability_proctor/seamless_auth',
-            new lang_string('settings_seamless_auth', 'availability_proctor'),
-            new lang_string('settings_seamless_auth_desc', 'availability_proctor'), 1));
+        if (\availability_proctor\brand::is_setting_visible('seamless_auth')) {
+            $pluginsettings->add(new admin_setting_configcheckbox('availability_proctor/seamless_auth',
+                new lang_string('settings_seamless_auth', 'availability_proctor'),
+                new lang_string('settings_seamless_auth_desc', 'availability_proctor'), 1));
+        }
 
     }
 }

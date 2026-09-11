@@ -28,6 +28,10 @@ use stdClass;
 
 /**
  * Client class
+ *
+ * @package    availability_proctor
+ * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class client {
     /** @var string Date format string, default ISO8601 not accepted by API */
@@ -242,6 +246,27 @@ class client {
             }
         }
 
+        // Enforce rule -> warning suppression: when an "allow" rule is on,
+        // the corresponding warning is forced off in the API payload regardless
+        // of what is stored on the condition. Source of truth lives on preset.
+        $rules = (array) $conditiondata['rules'];
+        $warnings = (array) $conditiondata['warnings'];
+        foreach (preset::RULE_WARNING_MAP as $rkey => $wkey) {
+            if (!empty($rules[$rkey])) {
+                $warnings[$wkey] = false;
+            }
+        }
+        $conditiondata['warnings'] = (object) $warnings;
+
+        // Demo exams must never be connected to a live proctor, regardless of
+        // the preset's configured proctoring mode. This avoids proctoring
+        // costs on sessions that produce no recording (see CONTRIB ticket
+        // for demo exam mode / post-exam review override).
+        $proctoringmode = $conditiondata['mode'];
+        if (!empty($conditiondata['istrial'])) {
+            $proctoringmode = 'offline';
+        }
+
         $data = [
             'accountId' => $this->accountid,
             'accountName' => $this->accountname,
@@ -249,7 +274,7 @@ class client {
             'examName' => $cm->name,
             'courseName' => $course->fullname,
             'courseCode' => $course->shortname,
-            'duration' => $conditiondata['duration'],
+            'duration' => common::get_quiz_time_limit($cm),
             'schedule' => false,
             'proctoring' => $conditiondata['mode'],
             'userAgreementUrl' => $conditiondata['useragreementurl'],
@@ -276,6 +301,12 @@ class client {
                 ['custom_rules' => $customrules]
             ),
         ];
+
+        // Assigned proctors (Live review mode only). condition::to_json() already
+        // nulls this out for non-online modes, so only attach when present.
+        if (!empty($conditiondata['proctoremails'])) {
+            $data['proctorEmails'] = $conditiondata['proctoremails'];
+        }
 
         return $data;
     }

@@ -30,6 +30,10 @@ require_once($CFG->libdir . '/tablelib.php');
 
 /**
  * Outputs detailed info about log entry
+ *
+ * @package    availability_proctor
+ * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class log_details {
     /**
@@ -45,7 +49,7 @@ class log_details {
     /**
      * Constructor
      * @param int $id Entry id
-     * @param string $url
+     * @param \moodle_url $url page URL the details page was reached from
      */
     public function __construct($id, $url) {
         $this->id = $id;
@@ -55,7 +59,7 @@ class log_details {
      * Renders and echoes log entry detail page
      */
     public function render() {
-        global $DB;
+        global $DB, $OUTPUT;
         $entry = $DB->get_record('availability_proctor_entries', ['id' => $this->id]);
         $user = $DB->get_record('user', ['id' => $entry->userid]);
 
@@ -137,14 +141,14 @@ class log_details {
         $threshold = $entry->threshold ? json_decode($entry->threshold) : (object)['attention' => null, 'rejected' => null];
 
         if ($entry->review_link !== null) {
-            $reviewlink = "<a href='" . $entry->review_link . "'>"
+            $reviewlink = "<a href='" . s($entry->review_link) . "'>"
                 . get_string('log_report_link', 'availability_proctor') . "</a>";
         } else {
             $reviewlink = null;
         }
 
         if ($entry->archiveurl !== null) {
-            $archivelink = "<a href='" . $entry->archiveurl . "'>"
+            $archivelink = "<a href='" . s($entry->archiveurl) . "'>"
                 . get_string('log_archive_link', 'availability_proctor') . "</a>";
         } else {
             $archivelink = null;
@@ -184,7 +188,7 @@ class log_details {
 
         $table->add_data([
             get_string('user'),
-            $user->firstname . " " . $user->lastname . "<br>" . $user->email,
+            s($user->firstname) . " " . s($user->lastname) . "<br>" . s($user->email),
         ]);
 
         $table->add_data([
@@ -246,8 +250,9 @@ class log_details {
             return;
         }
 
-        echo "<hr>";
-        echo "<h2>".get_string('log_details_warnings', 'availability_proctor')."</h2>";
+        echo $OUTPUT->render_from_template('availability_proctor/log_details_separator', [
+            'heading' => get_string('log_details_warnings', 'availability_proctor'),
+        ]);
 
         $table = new \flexible_table('availability_proctor_show');
 

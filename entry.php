@@ -25,21 +25,49 @@
 require_once('../../../config.php');
 
 $token = optional_param('token', null, PARAM_ALPHANUM);
-$accesscode = required_param('proctor_accesscode', PARAM_RAW);
+$accesscode = required_param('proctor_accesscode', PARAM_ALPHANUM);
 
 $seamlessauth = get_config('availability_proctor', 'seamless_auth');
 
 if ($seamlessauth && $token) {
-    $script = 'availability_proctor';
-    $key = validate_user_key($token, $script, null);
+    // Look up the entry first so we can validate the token is bound to this specific exam.
+    if (!$entry = $DB->get_record('availability_proctor_entries', ['accesscode' => $accesscode])) {
+        throw new \moodle_exception('error_no_entry_found', 'availability_proctor');
+    }
+    // Proctoring may have been disabled/removed from this course module since the
+    // token was issued (tokens are valid for up to 8 hours) — refuse a stale token
+    // rather than logging the user in under a restriction that's no longer active.
+    $modinfo = get_fast_modinfo($entry->courseid);
+    $cm = $modinfo->get_cm($entry->cmid);
+    if (!\availability_proctor\condition::get_proctor_condition($cm)) {
+        throw new \moodle_exception('error_proctoring_disabled', 'availability_proctor');
+    }
+    $key = validate_user_key($token, 'availability_proctor', $entry->id);
 
     if (!$user = $DB->get_record('user', ['id' => $key->userid])) {
-        print_error('invaliduserid');
+        throw new \moodle_exception('invaliduserid');
     }
 
     core_user::require_active_user($user, true, true);
 
+    // Delete the key immediately — token is single-use.
+    $DB->delete_records('user_private_key', ['id' => $key->id]);
+
     complete_user_login($user);
+
+    $entry = $DB->get_record('availability_proctor_entries', ['accesscode' => $accesscode]);
+    if ($entry) {
+        \availability_proctor\event\user_logged_in_via_token::create([
+            'objectid' => $entry->id,
+            'context'  => \context_module::instance($entry->cmid),
+            'userid'   => $user->id,
+        ])->trigger();
+    }
 }
+
+// Without a token (seamless auth disabled, or learner manually following the
+// link) we still need an authenticated session before touching the session
+// cache state in handle_accesscode_param. No-op for users already logged in.
+require_login();
 
 \availability_proctor\utils::handle_accesscode_param($accesscode);
