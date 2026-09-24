@@ -1,7 +1,17 @@
 # Changelog
 
+Notable changes to the Proctor by Constructor availability condition
+(`availability_proctor`), newest first.
+
+This file starts at v2.8. Earlier releases are recorded in the Git history.
+
 ## Unreleased
 
+- Fixed the Proctor entry limit ignoring Moodle quiz attempt overrides. A learner
+  granted extra attempts by a user or group override can now start a new
+  proctored attempt instead of being returned to their last finished one.
+- Added the missing `cachedef_session` language string and replaced raw SQL in
+  the upgrade steps with Moodle's DML API (plugin review issues #39 and #40).
 - Fixed SDK relaunch after an earlier session was activated but never bound to a
   quiz attempt. Expired unbound sessions are now replaced before Moodle creates
   the attempt, preventing a live attempt from being stranded with `no_session`.
@@ -35,11 +45,6 @@
   in production code.
 - Fixed SDK launch with preliminary identity checks on Moodle 3.11 by using the
   cross-version global `user_picture` output class.
-
-Notable changes to the Proctor by Constructor availability condition
-(`availability_proctor`), newest first.
-
-This file starts at v2.8. Earlier releases are recorded in the Git history.
 
 ## v2.8 (2026-08-20)
 
