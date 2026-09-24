@@ -31,6 +31,7 @@ $string['proctor:logaccess_all'] = 'Доступ к отчету Proctor (все
 $string['description'] = 'Позволяет студентам использовать сервис Constructor Proctor';
 $string['pluginname'] = 'Constructor Proctor';
 $string['title'] = 'Constructor Proctor';
+$string['cachedef_session'] = 'Состояние прокторинга в сессии пользователя (код доступа, флаг сброса, сессия защищённого браузера)';
 
 $string['error_no_entry_found'] = 'No exam entry found by accesscode';
 $string['error_not_in_range'] = 'Значение должно быть в диапазоне от %d до %d';
