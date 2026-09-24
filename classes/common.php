@@ -95,13 +95,11 @@ class common {
         }
 
         if ($cm->modname == 'quiz') {
-            // Moodle 4.0+ uses namespaced class, older versions use global class.
-            if (class_exists('\mod_quiz\access_manager')) {
-                $quiz = \mod_quiz\access_manager::load_quiz_and_settings($cm->instance);
-            } else {
-                $quiz = \quiz_access_manager::load_quiz_and_settings($cm->instance);
-            }
-            $allowedattempts = $quiz->attempts;
+            // Use Moodle's user-aware quiz settings so user and group overrides
+            // affect the number of Proctor entries in the same way as attempts.
+            $settingsclass = utils::quiz_settings_classname();
+            $quiz = $settingsclass::create($cm->instance, $userid);
+            $allowedattempts = $quiz->get_num_attempts_allowed();
             $allowedattempts = $allowedattempts > 0 ? $allowedattempts : null;
         } else {
             $allowedattempts = null;

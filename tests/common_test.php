@@ -72,4 +72,109 @@ final class common_test extends \advanced_testcase {
 
         $this->assertSame(condition::MAX_LIMIT, common::get_quiz_time_limit($cm));
     }
+
+    /**
+     * A Moodle user override must permit the matching number of Proctor entries.
+     */
+    public function test_user_attempt_override_allows_new_entry(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+
+        $course = $this->getDataGenerator()->create_course();
+        $user = $this->getDataGenerator()->create_user();
+        $quiz = $this->getDataGenerator()->create_module('quiz', [
+            'course' => $course->id,
+            'attempts' => 1,
+        ]);
+        $DB->insert_record('quiz_overrides', (object) [
+            'quiz' => $quiz->id,
+            'userid' => $user->id,
+            'attempts' => 2,
+        ]);
+
+        $cm = get_fast_modinfo($course)->get_cm($quiz->cmid);
+        $first = condition::make_entry($course->id, $cm->id, $user->id);
+        $first->status = 'finished';
+        $first->id = $DB->insert_record('availability_proctor_entries', $first);
+
+        $created = common::create_entry(
+            new condition((object) ['type' => 'proctor']),
+            $user->id,
+            $cm
+        );
+
+        $this->assertNotEquals($first->id, $created->id);
+        $this->assertSame('new', $created->status);
+    }
+
+    /**
+     * A Moodle group override must permit the matching number of Proctor entries.
+     */
+    public function test_group_attempt_override_allows_new_entry(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+
+        $course = $this->getDataGenerator()->create_course();
+        $user = $this->getDataGenerator()->create_user();
+        $this->getDataGenerator()->enrol_user($user->id, $course->id);
+        $group = $this->getDataGenerator()->create_group(['courseid' => $course->id]);
+        $this->assertTrue(groups_add_member($group->id, $user->id));
+        $quiz = $this->getDataGenerator()->create_module('quiz', [
+            'course' => $course->id,
+            'attempts' => 1,
+        ]);
+        $DB->insert_record('quiz_overrides', (object) [
+            'quiz' => $quiz->id,
+            'groupid' => $group->id,
+            'attempts' => 2,
+        ]);
+
+        $cm = get_fast_modinfo($course)->get_cm($quiz->cmid);
+        $first = condition::make_entry($course->id, $cm->id, $user->id);
+        $first->status = 'finished';
+        $first->id = $DB->insert_record('availability_proctor_entries', $first);
+
+        $created = common::create_entry(
+            new condition((object) ['type' => 'proctor']),
+            $user->id,
+            $cm
+        );
+
+        $this->assertNotEquals($first->id, $created->id);
+        $this->assertSame('new', $created->status);
+    }
+
+    /**
+     * Without an override, the quiz-wide attempt limit must still be enforced.
+     */
+    public function test_quiz_attempt_limit_still_reuses_last_entry(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+
+        $course = $this->getDataGenerator()->create_course();
+        $user = $this->getDataGenerator()->create_user();
+        $quiz = $this->getDataGenerator()->create_module('quiz', [
+            'course' => $course->id,
+            'attempts' => 1,
+        ]);
+        $cm = get_fast_modinfo($course)->get_cm($quiz->cmid);
+        $first = condition::make_entry($course->id, $cm->id, $user->id);
+        $first->status = 'finished';
+        $first->id = $DB->insert_record('availability_proctor_entries', $first);
+
+        $returned = common::create_entry(
+            new condition((object) ['type' => 'proctor']),
+            $user->id,
+            $cm
+        );
+
+        $this->assertEquals($first->id, $returned->id);
+        $this->assertCount(1, $DB->get_records('availability_proctor_entries', [
+            'cmid' => $cm->id,
+            'userid' => $user->id,
+        ]));
+    }
 }
