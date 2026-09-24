@@ -51,7 +51,8 @@ final class secure_browser_test extends \advanced_testcase {
         parse_str((string) parse_url($url, PHP_URL_QUERY), $query);
 
         $this->setGuestUser();
-        $authenticated = secure_browser::authenticate($query['token'], (int) $session->id);
+        // Hide session header errors, as core's complete_user_login() test does.
+        $authenticated = @secure_browser::authenticate($query['token'], (int) $session->id);
 
         $this->assertEquals($session->id, $authenticated->id);
         $this->assertEquals($user->id, $USER->id);
