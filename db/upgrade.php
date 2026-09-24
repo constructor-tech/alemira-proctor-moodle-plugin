@@ -117,11 +117,11 @@ function xmldb_availability_proctor_upgrade($oldversion) {
             list($insql, $params) = $DB->get_in_or_equal($aliases, SQL_PARAMS_NAMED, 'alias');
             $params['type'] = 'global';
             $params['issystem'] = 1;
-            $params['newname'] = $canonical;
-            $DB->execute(
-                "UPDATE {availability_proctor_presets}
-                    SET name = :newname
-                  WHERE type = :type AND is_system = :issystem AND name $insql",
+            $DB->set_field_select(
+                'availability_proctor_presets',
+                'name',
+                $canonical,
+                "type = :type AND is_system = :issystem AND name $insql",
                 $params
             );
         }
@@ -379,11 +379,11 @@ function xmldb_availability_proctor_upgrade($oldversion) {
             if (!isset($defaults[$prop])) {
                 continue;
             }
-            $DB->execute(
-                "UPDATE {availability_proctor_presets}
-                    SET {$prop} = ?
-                  WHERE {$prop} IS NULL OR {$prop} = ''",
-                [$defaults[$prop]]
+            $DB->set_field_select(
+                'availability_proctor_presets',
+                $prop,
+                $defaults[$prop],
+                "{$prop} IS NULL OR {$prop} = ''"
             );
         }
 
@@ -520,11 +520,11 @@ function xmldb_availability_proctor_upgrade($oldversion) {
 
         $defaults = \availability_proctor\preset::default_field_values();
         foreach (\availability_proctor\config::SDK_FIELDS as $prop) {
-            $DB->execute(
-                "UPDATE {availability_proctor_presets}
-                    SET {$prop} = ?
-                  WHERE {$prop} IS NULL OR {$prop} = ''",
-                [$defaults[$prop]]
+            $DB->set_field_select(
+                'availability_proctor_presets',
+                $prop,
+                $defaults[$prop],
+                "{$prop} IS NULL OR {$prop} = ''"
             );
         }
 
