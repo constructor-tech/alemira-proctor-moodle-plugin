@@ -32,6 +32,7 @@ $string['proctor:exemptproctoring'] = 'Sit a proctored quiz without proctoring';
 $string['pluginname'] = 'Constructor Proctor';
 $string['description'] = 'Allows students to use Constructor Proctor';
 $string['title'] = 'Constructor Proctor';
+$string['cachedef_session'] = 'Per-session proctoring state (access code, reset flag, secure browser session)';
 
 $string['error_no_entry_found'] = 'No exam entry found by accesscode';
 $string['error_not_in_range'] = 'This value should be between %d and %d';
