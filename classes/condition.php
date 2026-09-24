@@ -271,22 +271,53 @@ class condition extends \core_availability\condition {
     /** @var bool Allow room scan using aux camera */
     public $allowroomscanauxcamera = false;
 
-    /* SDK preset snapshot. Booleans store "yes"/"no"; Room Scan stores seconds. */
+    // SDK preset snapshot. Booleans store "yes"/"no"; Room Scan stores seconds.
+    /** @var string Snapshot of the SDK allowCameraSelection parameter */
     public $sdkallowcameraselection = '';
+
+    /** @var string Snapshot of the SDK alwaysShowChat parameter */
     public $sdkalwaysshowchat = '';
+
+    /** @var string Snapshot of the SDK beforeExamList parameter */
     public $sdkbeforeexamlist = '';
+
+    /** @var string Snapshot of the SDK desktopCheckFirst parameter */
     public $sdkdesktopcheckfirst = '';
+
+    /** @var string Snapshot of the SDK disabledWorkers parameter */
     public $sdkdisabledworkers = '';
+
+    /** @var string Snapshot of the SDK experiment_watchWindowSize parameter */
     public $sdkexperimentwatchwindowsize = '';
+
+    /** @var string Snapshot of the SDK focusRespectsRules parameter */
     public $sdkfocusrespectsrules = '';
+
+    /** @var string Snapshot of the SDK fullScreenWatchFocusAlert parameter */
     public $sdkfullscreenwatchfocusalert = '';
+
+    /** @var string Snapshot of the SDK identificationOnboardingBullets parameter */
     public $sdkidentificationbullets = '';
+
+    /** @var string Snapshot of the SDK observeWorkspace parameter */
     public $sdkobserveworkspace = '';
+
+    /** @var string Snapshot of the SDK openAgreementLinksInIframe parameter */
     public $sdkopenagreementlinksiniframe = '';
+
+    /** @var string Snapshot of the SDK shouldEnableAudioNotification parameter */
     public $sdkaudionotification = '';
+
+    /** @var string Snapshot of the SDK showFinishExamButtonForSessionsWithoutProctor parameter */
     public $sdkshowfinishexambutton = '';
+
+    /** @var string Snapshot of the SDK showSyscheckSupportNew parameter */
     public $sdkshowsyschecksupportnew = '';
+
+    /** @var string Snapshot of the SDK syscheckHelpURL parameter */
     public $sdksyscheckhelpurl = '';
+
+    /** @var string Snapshot of the SDK translationsOverride parameter */
     public $sdktranslationsoverride = '';
 
 
