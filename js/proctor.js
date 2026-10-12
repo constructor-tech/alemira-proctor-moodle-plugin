@@ -33,9 +33,12 @@
  * costs the student every preparation step again and leaves a gap in the
  * recording, so all state changes happen inside the iframe or via fetch().
  *
- * There is exactly one exception, and it is the end of the flow rather than a
- * state change: once videoUploaded has resolved and the attempt is closed, the
- * student is sent to the review page. By then there are no preparation steps
+ * Retry may reload before the SDK module has loaded: no preparation or recording
+ * has started, and a fresh page clears the browser's cached module-load failure.
+ * Once the SDK has loaded, Retry stays on this page.
+ *
+ * At the end of the flow, once videoUploaded has resolved and the attempt is
+ * closed, the student is sent to the review page. By then there are no preparation steps
  * left to lose and no recording left to interrupt.
  *
  * @module     availability_proctor/proctor
@@ -197,6 +200,8 @@ export const start = (root) => {
     const errorBox = root.querySelector('#proctor-sdk-error');
     const recover = root.querySelector('#proctor-sdk-recover');
     const retry = root.querySelector('#proctor-sdk-retry');
+    let sdkLoaded = false;
+    let reloadBeforeRetry = false;
 
     /**
      * Start proctoring and wire the session lifecycle.
@@ -215,6 +220,7 @@ export const start = (root) => {
         }
         starting = true;
         retry.disabled = true;
+        reloadBeforeRetry = false;
 
         recover.classList.add('proctor-sdk-hidden');
         errorBox.classList.add('proctor-sdk-hidden');
@@ -238,6 +244,7 @@ export const start = (root) => {
             if (controller.signal.aborted) {
                 throw new DOMException('SDK start timed out', 'AbortError');
             }
+            sdkLoaded = true;
             const {
                 serverOrigin,
                 integrationName,
@@ -313,6 +320,10 @@ export const start = (root) => {
             }
         } catch (e) {
             window.console.error('proctor-sdk: init failed', e);
+            // Browsers can cache failed dynamic imports for the lifetime of a
+            // page. Reload only before the SDK has loaded, while no preparation,
+            // recording or Moodle attempt has been started by this page.
+            reloadBeforeRetry = !sdkLoaded;
             const timedout = e && e.name === 'AbortError';
             intro.classList.add('proctor-sdk-hidden');
             intro.removeAttribute('aria-busy');
@@ -398,7 +409,18 @@ export const start = (root) => {
         });
     };
 
-    retry.addEventListener('click', begin);
+    retry.addEventListener('click', () => {
+        if (starting) {
+            return;
+        }
+        if (reloadBeforeRetry) {
+            starting = true;
+            retry.disabled = true;
+            window.location.reload();
+            return;
+        }
+        begin();
+    });
 
     // Wait for the page to finish loading before starting, and not merely for the
     // DOM. The SDK injects its own stylesheet when init() runs, and CSS of equal
