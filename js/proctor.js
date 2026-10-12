@@ -43,7 +43,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-/** @type {number} Milliseconds to wait for the token fetch and SDK init before giving up. */
+/** @type {number} Milliseconds to wait for SDK import, token fetch and init before showing an error. */
 const START_TIMEOUT_MS = 30000;
 
 /** @type {boolean} Whether a session is live, so the page must not be left. */
@@ -214,6 +214,7 @@ export const start = (root) => {
             return;
         }
         starting = true;
+        retry.disabled = true;
 
         recover.classList.add('proctor-sdk-hidden');
         errorBox.classList.add('proctor-sdk-hidden');
@@ -221,11 +222,22 @@ export const start = (root) => {
         intro.setAttribute('aria-busy', 'true');
 
         const controller = new AbortController();
-        const timeout = window.setTimeout(() => controller.abort(), START_TIMEOUT_MS);
+        let timeout;
+        let initPending = false;
+        const deadline = new Promise((resolve, reject) => {
+            timeout = window.setTimeout(() => {
+                reject(new DOMException('SDK start timed out', 'AbortError'));
+                controller.abort();
+            }, START_TIMEOUT_MS);
+        });
 
-        let session;
-        try {
+        const initialization = (async() => {
             const proctoring = await import(/* webpackIgnore: true */ sdkSrc);
+            // import() cannot be cancelled. A late download must not fetch a
+            // token or start the SDK after the student has already retried.
+            if (controller.signal.aborted) {
+                throw new DOMException('SDK start timed out', 'AbortError');
+            }
             const {
                 serverOrigin,
                 integrationName,
@@ -235,6 +247,9 @@ export const start = (root) => {
                 secureBrowserLaunchUrl,
             } =
                 await getProctoringData(tokenUrl, controller.signal, root.dataset.errorserver);
+            if (controller.signal.aborted) {
+                throw new DOMException('SDK start timed out', 'AbortError');
+            }
 
             // Secure Browser deliberately replaces this browser page with the
             // native application. Treating that hand-off as an accidental page
@@ -272,28 +287,54 @@ export const start = (root) => {
                 initParams.LDBLaunchUrl = secureBrowserLaunchUrl;
             }
 
-            session = await proctoring.init(initParams);
+            initPending = true;
+            return await proctoring.init(initParams);
+        })();
+
+        let session;
+        try {
+            try {
+                session = await Promise.race([initialization, deadline]);
+            } catch (e) {
+                if (!(e && e.name === 'AbortError' && initPending)) {
+                    throw e;
+                }
+                // The deadline bounds the wait, but cannot cancel SDK init().
+                // Keep Retry locked until it settles to avoid overlapping SDKs.
+                // A late success still needs lifecycle handlers and must not
+                // leave a running recording detached from the Moodle attempt.
+                intro.classList.add('proctor-sdk-hidden');
+                intro.removeAttribute('aria-busy');
+                showError(root, root.dataset.timeoutpendingmessage, true);
+                recover.classList.remove('proctor-sdk-hidden');
+                session = await initialization;
+                errorBox.classList.add('proctor-sdk-hidden');
+                recover.classList.add('proctor-sdk-hidden');
+            }
         } catch (e) {
             window.console.error('proctor-sdk: init failed', e);
             const timedout = e && e.name === 'AbortError';
             intro.classList.add('proctor-sdk-hidden');
             intro.removeAttribute('aria-busy');
-            showError(root, timedout ? root.dataset.timeoutmessage : (e.message || String(e)), true);
+            showError(root, timedout ? root.dataset.timeoutmessage : ((e && e.message) || String(e)), true);
             // A failed start has to leave a way out, or the student is stranded on
             // a page with nothing on it.
             recover.classList.remove('proctor-sdk-hidden');
             starting = false;
-            window.clearTimeout(timeout);
+            retry.disabled = false;
             return;
+        } finally {
+            window.clearTimeout(timeout);
         }
-        window.clearTimeout(timeout);
 
         // The SDK has taken over the screen, so the holding message would only sit
         // behind it.
         intro.classList.add('proctor-sdk-hidden');
+        intro.removeAttribute('aria-busy');
 
         sessionRunning = true;
         starting = false;
+        retry.disabled = false;
         if (!secureBrowserSession && !unloadGuardAdded) {
             window.addEventListener('beforeunload', confirmLeaving);
             unloadGuardAdded = true;

@@ -214,6 +214,7 @@ $string['launch_preparing'] = 'Preparing your proctored exam';
 $string['launch_retry'] = 'Try again';
 $string['launch_starting'] = 'The system check and identification steps will open in a moment.';
 $string['launch_timeout'] = 'This is taking longer than expected. Check your connection and try again.';
+$string['launch_timeout_pending'] = 'Proctoring is taking longer than expected to start. You can wait or return to the quiz page. Try again will become available if startup fails.';
 $string['notice_recordingstopped'] = 'Recording has stopped, but your attempt is still open. Submit your answers now to finish.';
 
 $string['task_finishsession'] = 'Retry stopping a proctoring session';
