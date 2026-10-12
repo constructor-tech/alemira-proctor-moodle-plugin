@@ -45,7 +45,7 @@ async function launch({importGate, tokenGate, initGate = deferred(), initError, 
     };
     const timers = new Map();
     let nextTimer = 0;
-    const calls = {imports: 0, tokens: 0, inits: 0, events: [], guards: 0, errors: []};
+    const calls = {imports: 0, tokens: 0, inits: 0, reloads: 0, events: [], guards: 0, errors: []};
     let tokenSignal;
     const context = vm.createContext({
         AbortController, DOMException,
@@ -55,7 +55,7 @@ async function launch({importGate, tokenGate, initGate = deferred(), initError, 
             clearTimeout: (id) => timers.delete(id),
             console: {error: (...args) => calls.errors.push(args)},
             addEventListener: () => calls.guards++,
-            location: {assign() {}},
+            location: {assign() {}, reload: () => calls.reloads++},
         },
         fetch: async(url, options) => {
             if (url === '/token') {
@@ -102,11 +102,12 @@ async function launch({importGate, tokenGate, initGate = deferred(), initError, 
 
 const session = () => {
     const started = deferred();
-    return {started, value: {examStarted: started.promise, examFinished: deferred().promise,
-        videoUploaded: deferred().promise, appUnmounted: deferred().promise}};
+    const unmounted = deferred();
+    return {started, unmounted, value: {examStarted: started.promise, examFinished: deferred().promise,
+        videoUploaded: deferred().promise, appUnmounted: unmounted.promise}};
 };
 
-test('a stalled SDK download shows a timeout and allows retry without starting the expired operation', async() => {
+test('a stalled SDK download shows a timeout and retries with a reload before any SDK preparation', async() => {
     const gate = deferred();
     const app = await launch({importGate: gate});
     await app.expire();
@@ -117,10 +118,14 @@ test('a stalled SDK download shows a timeout and allows retry without starting t
     assert.equal(app.detail(), 'Start timed out');
     assert.equal(app.node('retry').disabled, false);
     await app.retry();
+    assert.equal(app.calls.reloads, 1);
+    assert.equal(app.calls.imports, 1);
+    await app.retry();
+    assert.equal(app.calls.reloads, 1);
     gate.resolve();
     await settle();
-    assert.equal(app.calls.tokens, 1);
-    assert.equal(app.calls.inits, 1);
+    assert.equal(app.calls.tokens, 0);
+    assert.equal(app.calls.inits, 0);
 });
 
 test('a stalled token request is aborted and its late reply cannot initialise the SDK', async() => {
@@ -135,7 +140,7 @@ test('a stalled token request is aborted and its late reply cannot initialise th
     assert.equal(app.calls.inits, 0);
 });
 
-test('a failed SDK download shows its error and allows another download', async() => {
+test('a failed SDK download retries by reloading instead of reusing a cached import failure', async() => {
     const gate = deferred();
     const app = await launch({importGate: gate});
     gate.reject(new Error('CDN unavailable'));
@@ -144,8 +149,10 @@ test('a failed SDK download shows its error and allows another download', async(
     assert.equal(app.node('retry').disabled, false);
     assert.equal(app.timers.size, 0);
     await app.retry();
-    assert.equal(app.calls.imports, 2);
+    assert.equal(app.calls.reloads, 1);
+    assert.equal(app.calls.imports, 1);
     assert.equal(app.calls.tokens, 0);
+    assert.equal(app.calls.inits, 0);
 });
 
 test('a failed token request shows its error without starting the SDK', async() => {
@@ -157,6 +164,9 @@ test('a failed token request shows its error without starting the SDK', async() 
     assert.equal(app.node('retry').disabled, false);
     assert.equal(app.timers.size, 0);
     assert.equal(app.calls.inits, 0);
+    await app.retry();
+    assert.equal(app.calls.reloads, 0);
+    assert.equal(app.calls.tokens, 2);
 });
 
 test('a late SDK download rejection does not replace the timeout message', async() => {
@@ -179,6 +189,7 @@ test('a pending SDK init times out without allowing a second init and adopts a l
     assert.equal(app.node('retry').disabled, true);
     await app.retry();
     assert.equal(app.calls.inits, 1);
+    assert.equal(app.calls.reloads, 0);
     const sdkSession = session();
     app.initGate.resolve(sdkSession.value);
     await settle();
@@ -201,6 +212,7 @@ test('a late init rejection unlocks retry and clears its deadline', async() => {
     assert.equal(app.timers.size, 0);
     await app.retry();
     assert.equal(app.calls.inits, 2);
+    assert.equal(app.calls.reloads, 0);
 });
 
 for (const error of [null, undefined]) {
@@ -227,5 +239,21 @@ test('normal startup clears the deadline and waits for examStarted before openin
     assert.equal(app.node('frame').src, undefined);
     sdkSession.started.resolve();
     await settle();
+    assert.equal(app.node('frame').src, '/start');
+});
+
+test('retry after the SDK closes keeps the existing quiz page and never reloads', async() => {
+    const app = await launch();
+    const sdkSession = session();
+    app.initGate.resolve(sdkSession.value);
+    await settle();
+    sdkSession.started.resolve();
+    await settle();
+    sdkSession.unmounted.resolve();
+    await settle();
+    assert.equal(hidden(app.node('recover')), false);
+    await app.retry();
+    assert.equal(app.calls.reloads, 0);
+    assert.equal(app.calls.inits, 2);
     assert.equal(app.node('frame').src, '/start');
 });
