@@ -25,7 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'availability_proctor';
-$plugin->version = 2026092401;
+$plugin->version = 2026092403;
 $plugin->release = 'v2.8';
 // Moodle 3.6, unchanged from v2.7. Deliberately not raised: this release adds
 // nothing that needs a newer core, and raising the floor would withhold the upgrade
