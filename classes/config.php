@@ -831,8 +831,15 @@ class config {
             $settings->$prop = $condition->$prop ?? null;
         }
 
+        // Demo exams never connect to a live proctor, whatever mode the preset
+        // carries -- the same rule condition::to_json() applies for the Webapp
+        // payload. Read raw, the condition still holds the preset's mode.
+        if (!empty($settings->istrial)) {
+            $settings->mode = 'offline';
+        }
+
         foreach (self::SETTINGS_ALIASES as $target => $source) {
-            $settings->$target = $condition->$source ?? null;
+            $settings->$target = $settings->$source ?? null;
         }
 
         return $settings;

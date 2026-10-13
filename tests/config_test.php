@@ -207,4 +207,33 @@ final class config_test extends \advanced_testcase {
         set_config('user_emails', 0, 'availability_proctor');
         $this->assertEmpty(config::get()->senduseremails);
     }
+
+    /**
+     * A demo exam reaches the SDK payload builder as post-exam review, even when
+     * its preset is set to live proctoring, so a demo session never connects to a
+     * live proctor. A regular exam keeps the preset's mode.
+     */
+    public function test_demo_exam_is_never_live_proctored_under_sdk(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        set_config('proctormodel', config::MODEL_SDK, 'availability_proctor');
+
+        $generator = $this->getDataGenerator();
+        $course = $generator->create_course();
+        $demo = $generator->create_module('quiz', ['course' => $course->id, 'timelimit' => 1800]);
+        $regular = $generator->create_module('quiz', ['course' => $course->id, 'timelimit' => 1800]);
+
+        foreach ([$demo->cmid => true, $regular->cmid => false] as $cmid => $istrial) {
+            $DB->set_field('course_modules', 'availability', json_encode([
+                'op' => '&',
+                'c' => [['type' => 'proctor', 'mode' => 'online', 'istrial' => $istrial]],
+                'showc' => [true],
+            ]), ['id' => $cmid]);
+        }
+        rebuild_course_cache($course->id, true);
+
+        $this->assertSame('offline', config::get_quiz_settings((int) $demo->id)->proctoringmode);
+        $this->assertSame('online', config::get_quiz_settings((int) $regular->id)->proctoringmode);
+    }
 }

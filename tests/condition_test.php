@@ -325,4 +325,23 @@ final class condition_test extends \advanced_testcase {
         $settings = (object) config::sdk_snapshot_defaults();
         $this->assertObjectNotHasProperty('syscheckHelpURL', config::sdk_config($settings));
     }
+
+    /**
+     * A demo exam is sent to the Webapp API as post-exam review even when it is
+     * configured for live proctoring, and carries no assigned proctors. A regular
+     * exam keeps its configured mode.
+     */
+    public function test_demo_exam_is_exported_as_post_exam_review(): void {
+        $this->resetAfterTest();
+
+        $demo = (new condition(self::structure([
+            'istrial' => true,
+            'proctoremails' => "proctor@example.com",
+        ])))->to_json();
+        $this->assertSame('offline', $demo['mode']);
+        $this->assertNull($demo['proctoremails']);
+
+        $regular = (new condition(self::structure()))->to_json();
+        $this->assertSame('online', $regular['mode']);
+    }
 }
