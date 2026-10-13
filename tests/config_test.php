@@ -110,6 +110,45 @@ final class config_test extends \advanced_testcase {
     }
 
     /**
+     * A brand without the SDK model runs Webapp even where 'sdk' is already stored,
+     * and leaves the stored row as it is.
+     */
+    public function test_brand_without_sdk_ignores_a_stored_sdk_model(): void {
+        global $CFG;
+        $this->resetAfterTest();
+        require_once($CFG->dirroot . '/availability/condition/proctor/tests/fixtures/config_without_sdk_brand.php');
+        set_config('proctormodel', config::MODEL_SDK, 'availability_proctor');
+
+        $this->assertFalse(config_without_sdk_brand::is_sdk_available());
+        $this->assertFalse(config_without_sdk_brand::is_sdk_model());
+        $this->assertSame(config::MODEL_SDK, get_config('availability_proctor', 'proctormodel'));
+    }
+
+    /**
+     * A brand without the SDK model starts a clean install on Webapp.
+     */
+    public function test_brand_without_sdk_installs_on_webapp(): void {
+        global $CFG;
+        require_once($CFG->dirroot . '/availability/condition/proctor/tests/fixtures/config_without_sdk_brand.php');
+
+        $this->assertSame(config::MODEL_WEBAPP, config_without_sdk_brand::initial_proctoring_model());
+    }
+
+    /**
+     * The shipped brand offers the SDK model: a clean install starts on it and a
+     * stored 'sdk' runs it on a supported Moodle.
+     */
+    public function test_default_brand_offers_the_sdk_model(): void {
+        $this->resetAfterTest();
+        set_config('proctormodel', config::MODEL_SDK, 'availability_proctor');
+
+        $this->assertTrue(brand::is_sdk_model_enabled());
+        $this->assertSame(config::MODEL_SDK, config::initial_proctoring_model());
+        $this->assertTrue(config::is_sdk_available());
+        $this->assertTrue(config::is_sdk_model());
+    }
+
+    /**
      * The upgrade step pins the Webapp model for a site that has none recorded.
      */
     public function test_upgrade_step_pins_webapp(): void {

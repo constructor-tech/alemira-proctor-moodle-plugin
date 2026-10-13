@@ -62,6 +62,13 @@ class brand {
     const HIDDEN_FORM_FIELDS = [];
 
     /**
+     * Whether this brand offers the SDK proctoring model. When false the site
+     * always runs the Webapp model, whatever proctormodel holds, and the admin
+     * page shows no model selector. Stored values are left untouched.
+     */
+    const SDK_MODEL_ENABLED = true;
+
+    /**
      * Should this integration setting be rendered on the admin page?
      *
      * @param string $key The setting name, without the plugin prefix.
@@ -83,5 +90,14 @@ class brand {
      */
     public static function is_form_field_visible($name) {
         return !in_array($name, static::HIDDEN_FORM_FIELDS, true);
+    }
+
+    /**
+     * Does this brand offer the SDK proctoring model?
+     *
+     * @return bool
+     */
+    public static function is_sdk_model_enabled() {
+        return (bool) static::SDK_MODEL_ENABLED;
     }
 }
