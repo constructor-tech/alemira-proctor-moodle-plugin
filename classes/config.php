@@ -133,15 +133,39 @@ class config {
      * Can the SDK proctoring model run on this Moodle?
      *
      * Independent of what the site has configured -- this answers only whether the
-     * platform is new enough. See is_sdk_model() for the question callers usually
-     * want.
+     * build offers the SDK and the platform is new enough. See is_sdk_model() for
+     * the question callers usually want.
      *
      * @return bool
      */
     public static function is_sdk_available(): bool {
         global $CFG;
 
-        return isset($CFG->version) && $CFG->version >= self::SDK_MIN_VERSION;
+        return static::is_sdk_enabled_for_brand()
+            && isset($CFG->version) && $CFG->version >= self::SDK_MIN_VERSION;
+    }
+
+    /**
+     * Does this build's brand offer the SDK model at all?
+     *
+     * A separate method so tests can exercise a brand without it.
+     *
+     * @return bool
+     */
+    protected static function is_sdk_enabled_for_brand(): bool {
+        return brand::is_sdk_model_enabled();
+    }
+
+    /**
+     * The model a clean install starts on: SDK when the brand offers it.
+     *
+     * Deliberately not tied to the Moodle version floor -- a stored 'sdk' below the
+     * floor runs as Webapp and takes effect once the site reaches it.
+     *
+     * @return string One of MODEL_OPTIONS.
+     */
+    public static function initial_proctoring_model(): string {
+        return static::is_sdk_enabled_for_brand() ? self::MODEL_SDK : self::MODEL_WEBAPP;
     }
 
     /**
@@ -164,7 +188,7 @@ class config {
      * @return bool
      */
     public static function is_sdk_model(): bool {
-        return self::proctoring_model() === self::MODEL_SDK && self::is_sdk_available();
+        return static::proctoring_model() === self::MODEL_SDK && static::is_sdk_available();
     }
 
     /**
