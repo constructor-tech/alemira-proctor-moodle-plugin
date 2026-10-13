@@ -232,8 +232,12 @@ def stage_entry(src_path, dest_path, code_patterns, text_patterns, verbose):
         with open(dest_path, 'wb') as f:
             f.write(raw)
         return
-    text = replace(text, code_patterns)
-    text = replace(text, text_patterns)
+    # All brands load the same SDK; its public URL is not a brand identifier.
+    sdk_url = 'https://sdk.web.proctor.constructor.app/proctoring.js'
+    text = sdk_url.join(
+        replace(replace(part, code_patterns), text_patterns)
+        for part in text.split(sdk_url)
+    )
     with open(dest_path, 'wb') as f:
         f.write(text.encode('utf-8'))
     if verbose:
