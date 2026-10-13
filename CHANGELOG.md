@@ -7,6 +7,9 @@ This file starts at v2.8. Earlier releases are recorded in the Git history.
 
 ## Unreleased
 
+- Demo (trial) exams now always start in post-exam review mode instead of the
+  preset's proctoring mode, under both the Webapp and SDK models, so a demo
+  session is never connected to a live proctor.
 - Fixed the Proctor entry limit ignoring Moodle quiz attempt overrides. A learner
   granted extra attempts by a user or group override can now start a new
   proctored attempt instead of being returned to their last finished one.
