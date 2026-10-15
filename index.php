@@ -38,24 +38,59 @@ $baseurl = '/availability/condition/proctor/index.php';
 $action = optional_param('action', 'index', PARAM_ALPHA);
 
 if ($action == 'renew') {
-    $id = required_param('id', PARAM_TEXT);
+    require_sesskey();
+    $id = required_param('id', PARAM_INT);
     $force = optional_param('force', false, PARAM_TEXT);
+    // Public v2.7 links do not carry a model and must remain Webapp actions.
+    $model = optional_param('model', \availability_proctor\config::MODEL_WEBAPP, PARAM_ALPHA);
 
-    if (\availability_proctor\common::reset_entry(['id' => $id], $force)) {
-        redirect('index.php', get_string('new_entry_created', 'availability_proctor'),
-                 null, \core\output\notification::NOTIFY_SUCCESS);
+    if (!in_array($model, \availability_proctor\config::MODEL_OPTIONS, true)) {
+        throw new \invalid_parameter_exception('Unknown proctoring model.');
+    }
+
+    try {
+        $created = $model === \availability_proctor\config::MODEL_SDK
+            ? \availability_proctor\session::create_new_entry($id)
+            : \availability_proctor\common::reset_entry(['id' => $id], $force);
+    } catch (\moodle_exception $e) {
+        redirect(
+            'index.php',
+            $e->getMessage(),
+            null,
+            \core\output\notification::NOTIFY_ERROR
+        );
+    }
+
+    if ($created) {
+        redirect(
+            'index.php',
+            get_string('new_entry_created', 'availability_proctor'),
+            null,
+            \core\output\notification::NOTIFY_SUCCESS
+        );
     } else {
-        redirect('index.php', get_string('entry_exist', 'availability_proctor'),
-                 null, \core\output\notification::NOTIFY_ERROR);
+        redirect(
+            'index.php',
+            get_string('entry_exist', 'availability_proctor'),
+            null,
+            \core\output\notification::NOTIFY_ERROR
+        );
     }
 }
 
 if ($action == 'index') {
     $PAGE->set_url(new \moodle_url($baseurl));
     $PAGE->set_context($context);
+    $PAGE->set_title(get_string('report_heading', 'availability_proctor'));
 
     echo $OUTPUT->header();
-    echo $OUTPUT->heading(get_string('pluginname', 'availability_proctor'));
+    echo html_writer::start_div('availability-proctor-report');
+    echo $OUTPUT->heading(get_string('report_heading', 'availability_proctor'));
+    echo html_writer::tag(
+        'p',
+        get_string('report_intro', 'availability_proctor'),
+        ['class' => 'availability-proctor-report-intro']
+    );
     $filters = [
         'courseid'     => optional_param('courseid', null, PARAM_INT),
         'timefinish'   => optional_param('timefinish', null, PARAM_INT),
@@ -64,42 +99,57 @@ if ($action == 'index') {
         'status'       => optional_param('status', null, PARAM_TEXT),
     ];
 
-    $from = isset($_GET['from']) ? $_GET['from'] : ['day' => null, 'month' => null, 'year' => null];
-    $to = isset($_GET['to']) ? $_GET['to'] : ['day' => date('j'), 'month' => date('n'), 'year' => date('Y')];
+    // New report links use native date inputs. Keep accepting the old array
+    // parameters so bookmarks created by the public plugin continue to work.
+    $fromdate = optional_param('fromdate', '', PARAM_RAW_TRIMMED);
+    $todate = optional_param('todate', '', PARAM_RAW_TRIMMED);
+    $fromraw = optional_param_array('from', [], PARAM_INT);
+    $toraw = optional_param_array('to', [], PARAM_INT);
 
-    if ($from['day'] > 0 && $from['month'] > 0 && $from['year'] > 0) {
-        $filters = array_merge($filters, [
-            'from[day]'     => $from['day'],
-            'from[month]'   => $from['month'],
-            'from[year]'    => $from['year'],
-        ]);
+    if ($fromdate === '' && isset($fromraw['day'], $fromraw['month'], $fromraw['year'])) {
+        $fromdate = sprintf('%04d-%02d-%02d', $fromraw['year'], $fromraw['month'], $fromraw['day']);
     }
-    if ($to['day'] > 0 && $to['month'] > 0 && $to['year'] > 0) {
-        $filters = array_merge($filters, [
-            'to[day]'     => $to['day'],
-            'to[month]'   => $to['month'],
-            'to[year]'    => $to['year'],
-        ]);
+    if ($todate === '' && isset($toraw['day'], $toraw['month'], $toraw['year'])) {
+        $todate = sprintf('%04d-%02d-%02d', $toraw['year'], $toraw['month'], $toraw['day']);
+    }
+
+    foreach (['fromdate' => $fromdate, 'todate' => $todate] as $name => $value) {
+        if (
+            preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $value, $parts)
+                && checkdate((int) $parts[2], (int) $parts[3], (int) $parts[1])
+        ) {
+            $filters[$name] = $value;
+        }
     }
 
     $page = optional_param('page', 0, PARAM_INT);
     $log = new \availability_proctor\log($filters, $page);
     $log->render_filter_form();
     $log->render_table();
+    echo html_writer::end_div();
 }
 
 if ($action == 'show') {
-    $id = required_param('id', PARAM_TEXT);
+    $id = required_param('id', PARAM_INT);
+    // Old marketplace links predate SDK reports and therefore point to Webapp.
+    // New links always carry the source so equal numeric ids cannot cross tables.
+    $model = optional_param('model', \availability_proctor\config::MODEL_WEBAPP, PARAM_ALPHA);
+    if (!in_array($model, \availability_proctor\config::MODEL_OPTIONS, true)) {
+        throw new \invalid_parameter_exception('Unknown proctoring model.');
+    }
 
-    $url = new \moodle_url($baseurl, ['action' => $action, 'id' => $id]);
+    $url = new \moodle_url($baseurl, ['action' => $action, 'id' => $id, 'model' => $model]);
     $PAGE->set_url($url);
     $PAGE->set_context($context);
+    $PAGE->set_title(get_string('report_details_heading', 'availability_proctor'));
 
     echo $OUTPUT->header();
-    echo $OUTPUT->heading(get_string('pluginname', 'availability_proctor'));
+    echo html_writer::start_div('availability-proctor-report');
+    echo $OUTPUT->heading(get_string('report_details_heading', 'availability_proctor'));
 
-    $logdetails = new \availability_proctor\log_details($id, $url);
+    $logdetails = new \availability_proctor\log_details($id, $url, $model);
     $logdetails->render();
+    echo html_writer::end_div();
 }
 
 

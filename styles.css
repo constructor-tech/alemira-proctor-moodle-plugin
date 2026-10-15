@@ -1,0 +1,392 @@
+/*
+ * This file is part of Moodle - http://moodle.org/
+ *
+ * Moodle is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Moodle is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @package    availability_proctor
+ * @copyright  2026 Constructor Tech
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+/*
+ * Styles for the launch page and the session report.
+ *
+ * Scoped entirely to plugin-specific classes. Deliberately nothing here touches
+ * the SDK's own controls: overriding them was tried twice, and both attempts
+ * were worse than the problem they tried to solve (see amd/src/proctor.js and
+ * templates/launch.mustache). If the SDK's checkboxes or buttons ever render
+ * unstyled again, the cause is stylesheet load order, not a missing rule here.
+ */
+
+/* Launch page: state containers, toggled by adding/removing this class rather
+ * than writing element.style.display from JavaScript.
+ *
+ * !important because this competes with the display rule of whatever it is
+ * hiding, and both are single-class selectors -- equal specificity, so document
+ * order decides. .proctor-sdk-frame below sets display:block and comes later,
+ * which meant the quiz iframe was never actually hidden: measured 2026-08-18,
+ * a learner part-way through the preparation steps could see core's
+ * "Start attempt / Cancel" page rendered behind the SDK. Reordering the rules
+ * would fix it today and break again the next time a state container needs a
+ * display of its own, so the hiding rule wins outright instead. */
+.proctor-sdk-hidden {
+    display: none !important;
+}
+
+.proctor-sdk-frame {
+    width: 100%;
+    height: 100vh;
+    border: 0;
+    display: block;
+}
+
+.proctor-sdk-intro {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+    background:
+        radial-gradient(circle at 50% 0%, rgba(53, 93, 177, 0.12), transparent 38rem),
+        #f5f7fb;
+}
+
+.proctor-sdk-intro-card {
+    width: 100%;
+    max-width: 40rem;
+    padding: 2.25rem;
+    border: 1px solid #e3e8f1;
+    border-radius: 1rem;
+    background: #fff;
+    box-shadow: 0 1.25rem 3.5rem rgba(25, 42, 73, 0.12);
+}
+
+.proctor-sdk-brand {
+    margin: 0 0 0.75rem;
+    color: var(--primary, #244b91);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.proctor-sdk-quiz-name {
+    margin: 0;
+    color: #17243d;
+    font-size: 1.75rem;
+    line-height: 1.25;
+}
+
+/* With JavaScript off the intro is a lie: it says proctoring is starting, while
+ * the <noscript> block right below it says the exam cannot start at all, and the
+ * student reads both at once. Hidden through Moodle's own jsenabled class rather
+ * than by having proctor.js reveal it -- page_requirements_manager emits
+ * "document.body.className += ' jsenabled'" at the top of the body, so the class
+ * is on before this page paints and there is no flash, and a module that fails
+ * to load still leaves the student the "Starting proctoring" line rather than an
+ * empty page. */
+body:not(.jsenabled) .proctor-sdk-intro {
+    display: none;
+}
+
+.proctor-sdk-loading {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-top: 1.75rem;
+    padding: 1.25rem;
+    border: 1px solid #dce5f5;
+    border-radius: 0.75rem;
+    background: #f5f8ff;
+}
+
+.proctor-sdk-spinner {
+    display: flex;
+    flex: 0 0 2rem;
+    align-items: center;
+    justify-content: center;
+    min-height: 2rem;
+    color: var(--primary, #244b91);
+}
+
+.proctor-sdk-spinner .spinner-border {
+    width: 1.75rem;
+    height: 1.75rem;
+}
+
+.proctor-sdk-spinner .loading-icon .icon {
+    width: 1.75rem;
+    height: 1.75rem;
+    margin: 0;
+    font-size: 1.75rem;
+    line-height: 1.75rem;
+}
+
+.proctor-sdk-status-title {
+    margin: 0 0 0.25rem;
+    color: #17243d;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.proctor-sdk-status-detail {
+    margin: 0;
+    color: #53627a;
+    line-height: 1.5;
+}
+
+.proctor-sdk-stay-note {
+    margin: 1.5rem 0 0;
+    padding-top: 1.25rem;
+    border-top: 1px solid #edf0f5;
+    color: #68758a;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+@media (max-width: 576px) {
+    .proctor-sdk-intro {
+        align-items: flex-start;
+        padding-top: 1rem;
+    }
+
+    .proctor-sdk-intro-card {
+        padding: 1.5rem;
+    }
+
+    .proctor-sdk-quiz-name {
+        font-size: 1.4rem;
+    }
+}
+
+.proctor-sdk-error-detail {
+    margin-top: 0.75rem;
+}
+
+.proctor-sdk-error-detail pre {
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-size: 0.85em;
+}
+
+.proctor-sdk-tail {
+    margin: 0;
+    border-radius: 0;
+}
+
+/* Session reports. All selectors remain below the component wrapper because
+ * Moodle concatenates plugin styles into one global stylesheet. */
+.availability-proctor-report .availability-proctor-report-intro {
+    max-width: 52rem;
+    margin-bottom: 1.5rem;
+    color: #5b677a;
+    font-size: 1rem;
+}
+
+.availability-proctor-report .availability-proctor-report-filters {
+    margin-bottom: 1.5rem;
+    padding: 1.25rem;
+    border: 1px solid #dfe5ee;
+    border-radius: 0.75rem;
+    background: #f8f9fb;
+}
+
+.availability-proctor-report .availability-proctor-report-filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 1rem;
+}
+
+.availability-proctor-report .availability-proctor-report-filter-field {
+    flex: 1 1 10rem;
+    min-width: 9rem;
+}
+
+.availability-proctor-report .availability-proctor-report-filter-user {
+    flex-basis: 14rem;
+}
+
+.availability-proctor-report .availability-proctor-report-filter-date {
+    flex: 0 1 11rem;
+}
+
+.availability-proctor-report .availability-proctor-report-filter-field label {
+    display: block;
+    margin-bottom: 0.35rem;
+    color: #39465a;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.availability-proctor-report .availability-proctor-report-filter-actions {
+    display: flex;
+    align-items: center;
+    min-height: 2.5rem;
+}
+
+.availability-proctor-report .availability-proctor-report-summary {
+    margin: 0 0 0.75rem;
+    color: #5b677a;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+}
+
+.availability-proctor-report .availability-proctor-report-table {
+    border: 1px solid #e1e6ed;
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.availability-proctor-report .availability-proctor-report-table th {
+    border-top: 0;
+    background: #f5f7fa;
+    color: #344054;
+    font-size: 0.75rem;
+    letter-spacing: 0.025em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.availability-proctor-report .availability-proctor-report-table th a {
+    color: inherit;
+}
+
+.availability-proctor-report .availability-proctor-report-table th a:hover,
+.availability-proctor-report .availability-proctor-report-table th a:focus {
+    color: var(--primary, #0f6cbf);
+}
+
+.availability-proctor-report .availability-proctor-report-table td {
+    vertical-align: middle;
+}
+
+.availability-proctor-report .availability-proctor-report-table tbody tr:hover {
+    background: #fafbfc;
+}
+
+.availability-proctor-report .availability-proctor-report-user-name {
+    color: #172b4d;
+    font-weight: 600;
+}
+
+.availability-proctor-report .availability-proctor-report-user-meta,
+.availability-proctor-report .availability-proctor-report-muted {
+    margin-top: 0.15rem;
+    color: #697586;
+    font-size: 0.82rem;
+}
+
+.availability-proctor-report .availability-proctor-report-model,
+.availability-proctor-report .availability-proctor-report-status {
+    padding: 0.38em 0.62em;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.availability-proctor-report .availability-proctor-report-model.badge-light,
+.availability-proctor-report .availability-proctor-report-status.badge-light {
+    border: 1px solid #d8dee8;
+    background: #fff;
+    color: #344054;
+}
+
+.availability-proctor-report .availability-proctor-report-link-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.availability-proctor-report .availability-proctor-report-link-group .btn {
+    white-space: nowrap;
+}
+
+.availability-proctor-report .availability-proctor-report-reset-form {
+    margin: 0;
+}
+
+.availability-proctor-report .availability-proctor-report-score {
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.availability-proctor-report .availability-proctor-report-score-clear {
+    color: #344054;
+}
+
+.availability-proctor-report .availability-proctor-report-score-attention {
+    color: #8a5b00;
+}
+
+.availability-proctor-report .availability-proctor-report-score-rejected {
+    color: #b42318;
+}
+
+.availability-proctor-report .availability-proctor-report-score-threshold {
+    color: #7b8798;
+    font-size: 0.82rem;
+    white-space: nowrap;
+}
+
+.availability-proctor-report .availability-proctor-report-back {
+    margin-bottom: 1rem;
+}
+
+.availability-proctor-report .availability-proctor-report-details {
+    max-width: 64rem;
+}
+
+.availability-proctor-report .availability-proctor-report-detail-table {
+    border: 1px solid #e1e6ed;
+    border-radius: 0.5rem;
+}
+
+.availability-proctor-report .availability-proctor-report-detail-table th:first-child,
+.availability-proctor-report .availability-proctor-report-detail-table td:first-child {
+    width: 15rem;
+    color: #475467;
+    font-weight: 600;
+}
+
+@media (max-width: 768px) {
+    .availability-proctor-report .availability-proctor-report-filters {
+        padding: 1rem;
+    }
+
+    .availability-proctor-report .availability-proctor-report-filter-field,
+    .availability-proctor-report .availability-proctor-report-filter-date {
+        flex-basis: calc(50% - 0.5rem);
+    }
+
+    .availability-proctor-report .availability-proctor-report-filter-actions {
+        flex-basis: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .availability-proctor-report .availability-proctor-report-filter-field,
+    .availability-proctor-report .availability-proctor-report-filter-date {
+        flex-basis: 100%;
+    }
+
+    .availability-proctor-report .availability-proctor-report-detail-table th:first-child,
+    .availability-proctor-report .availability-proctor-report-detail-table td:first-child {
+        width: 9rem;
+    }
+}

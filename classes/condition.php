@@ -34,9 +34,20 @@ use stdClass;
 
 /**
  * Proctor by Constructor condition
+ *
+ * @package    availability_proctor
+ * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class condition extends \core_availability\condition {
-    /** @var array List of (de-)serializable properties */
+    /**
+     * @var array List of (de-)serializable properties.
+     *
+     * IMPORTANT: keep this list in sync with PRESET_FIELDS below — every
+     * preset field is also a serializable property. Anything added to
+     * PROPS that should live on a preset must also be added to
+     * PRESET_FIELDS, and vice versa.
+     */
     const PROPS = [
         'duration', 'mode', 'schedulingrequired', 'autorescheduling',
         'istrial', 'identification', 'useragreementurl',
@@ -48,7 +59,49 @@ class condition extends \core_availability\condition {
         'calculator', 'auxiliarycamera',
         'forbiddenprocesses', 'allowedprocesses', 'streamspreset',
         'sendmanualwarningstolearner', 'allowroomscanauxcamera',
+        'proctoremails',
+        // Hidden SDK preset snapshot. The activity form does not render editable
+        // controls for these fields, but core rebuilds availability JSON from
+        // save(), so every value must remain serializable here.
+        'sdkallowcameraselection', 'sdkalwaysshowchat', 'sdkbeforeexamlist',
+        'sdkdesktopcheckfirst', 'sdkdisabledworkers', 'sdkexperimentwatchwindowsize',
+        'sdkfocusrespectsrules', 'sdkfullscreenwatchfocusalert',
+        'sdkidentificationbullets', 'sdkobserveworkspace',
+        'sdkopenagreementlinksiniframe', 'sdkaudionotification',
+        'sdkshowfinishexambutton', 'sdkshowsyschecksupportnew',
+        'sdksyscheckhelpurl', 'sdktranslationsoverride',
     ];
+
+    /**
+     * @var array Subset of PROPS that belongs to a reusable preset
+     * (exam conduct policy). Excludes connection settings, exam-level fields
+     * (istrial, customrules, groups) and duration (computed at runtime).
+     */
+    const PRESET_FIELDS = [
+        'mode', 'schedulingrequired', 'autorescheduling',
+        'identification', 'checkidphotoquality', 'useragreementurl', 'preliminarycheck',
+        'webcameramainview', 'auxiliarycamera', 'allowroomscanauxcamera',
+        'streamspreset', 'sendmanualwarningstolearner',
+        'securebrowser', 'securebrowserlevel',
+        'allowedprocesses', 'forbiddenprocesses', 'allowvirtualenvironment',
+        'allowtouseadditionalresources', 'allowmultipledisplays', 'calculator',
+        'rules', 'warnings', 'scoring',
+        // All SDK configuration belongs to presets. These values are also copied
+        // into each condition as a hidden, independent snapshot.
+        'sdkallowcameraselection', 'sdkalwaysshowchat', 'sdkbeforeexamlist',
+        'sdkdesktopcheckfirst', 'sdkdisabledworkers', 'sdkexperimentwatchwindowsize',
+        'sdkfocusrespectsrules', 'sdkfullscreenwatchfocusalert',
+        'sdkidentificationbullets', 'sdkobserveworkspace',
+        'sdkopenagreementlinksiniframe', 'sdkaudionotification',
+        'sdkshowfinishexambutton', 'sdkshowsyschecksupportnew',
+        'sdksyscheckhelpurl', 'sdktranslationsoverride',
+    ];
+
+    /**
+     * @var int Fallback exam duration in minutes, used when the activity
+     * (e.g. a Moodle Quiz) has no time limit configured.
+     */
+    const MAX_LIMIT = 480;
 
     /** @var array List of default values for visible warnings */
     const WARNINGS = [
@@ -87,11 +140,19 @@ class condition extends \core_availability\condition {
         'forbidden_device' => ['min' => 0, 'max' => 10, 'default' => null],
         'voice' => ['min' => 0, 'max' => 10, 'default' => null],
         'phone' => ['min' => 0, 'max' => 10, 'default' => null],
+        'mic_muted' => ['min' => 0, 'max' => 10, 'default' => null],
+        'mic_no_device' => ['min' => 0, 'max' => 10, 'default' => null],
+        'mic_no_sound' => ['min' => 0, 'max' => 10, 'default' => null],
+        'camera_no_device' => ['min' => 0, 'max' => 10, 'default' => null],
+        'camera_no_picture' => ['min' => 0, 'max' => 10, 'default' => null],
+        'no_aux_camera_photo' => ['min' => 0, 'max' => 10, 'default' => null],
+        'no_ping' => ['min' => 0, 'max' => 10, 'default' => null],
+        'desktop_request_pending' => ['min' => 0, 'max' => 10, 'default' => null],
+        'account_collision' => ['min' => 0, 'max' => 10, 'default' => null],
     ];
 
     /** @var array List of default values for boolean exam properties */
     const BOOL_DEFAULTS = [
-        'autorescheduling' => false,
         'istrial' => false,
         'securebrowser' => false,
         'allowtouseadditionalresources' => false,
@@ -114,11 +175,14 @@ class condition extends \core_availability\condition {
         'default', 'no_video', 'no_ai_detection', 'no_webcam', /* 'auxcam_and_desktop', 'auxcam_only' */
     ];
 
-    
+    /** @var array List of possible main camera positions */
+    const WEBCAMERA_MAIN_VIEW_OPTIONS = [
+        'front', 'side',
+    ];
 
-    /** @var array List of possible aux camera options */
+    /** @var array List of possible Secure Browser restriction levels */
     const SECURE_BROWSER_LEVELS = [
-        'basic', 'medium', 'high'
+        'basic', 'medium', 'high',
     ];
 
     /** @var int Exam duration */
@@ -130,8 +194,8 @@ class condition extends \core_availability\condition {
     /** @var string Main camera */
     public $webcameramainview = 'front';
 
-    /** @var string Default calendar mode */
-    public $schedulingrequired = true;
+    /** @var bool Calendar scheduling is retired and always disabled */
+    public $schedulingrequired = false;
 
     /** @var bool Reschedule when exam was missed */
     public $autorescheduling = false;
@@ -157,7 +221,7 @@ class condition extends \core_availability\condition {
     /** @var bool Auxiliary camera enabled */
     public $auxiliarycamera = false;
 
-    
+
 
     /** @var bool Allow to use multiple displays */
     public $allowmultipledisplays = false;
@@ -195,6 +259,9 @@ class condition extends \core_availability\condition {
     /** @var array Apply condition to specified groups */
     public $groups = [];
 
+    /** @var array|null Emails of proctors assigned to this exam (Live review mode only) */
+    public $proctoremails = null;
+
     /** @var string Stream settings preset */
     public $streamspreset = null;
 
@@ -204,12 +271,103 @@ class condition extends \core_availability\condition {
     /** @var bool Allow room scan using aux camera */
     public $allowroomscanauxcamera = false;
 
+    // SDK preset snapshot. Booleans store "yes"/"no"; Room Scan stores seconds.
+    /** @var string Snapshot of the SDK allowCameraSelection parameter */
+    public $sdkallowcameraselection = '';
+
+    /** @var string Snapshot of the SDK alwaysShowChat parameter */
+    public $sdkalwaysshowchat = '';
+
+    /** @var string Snapshot of the SDK beforeExamList parameter */
+    public $sdkbeforeexamlist = '';
+
+    /** @var string Snapshot of the SDK desktopCheckFirst parameter */
+    public $sdkdesktopcheckfirst = '';
+
+    /** @var string Snapshot of the SDK disabledWorkers parameter */
+    public $sdkdisabledworkers = '';
+
+    /** @var string Snapshot of the SDK experiment_watchWindowSize parameter */
+    public $sdkexperimentwatchwindowsize = '';
+
+    /** @var string Snapshot of the SDK focusRespectsRules parameter */
+    public $sdkfocusrespectsrules = '';
+
+    /** @var string Snapshot of the SDK fullScreenWatchFocusAlert parameter */
+    public $sdkfullscreenwatchfocusalert = '';
+
+    /** @var string Snapshot of the SDK identificationOnboardingBullets parameter */
+    public $sdkidentificationbullets = '';
+
+    /** @var string Snapshot of the SDK observeWorkspace parameter */
+    public $sdkobserveworkspace = '';
+
+    /** @var string Snapshot of the SDK openAgreementLinksInIframe parameter */
+    public $sdkopenagreementlinksiniframe = '';
+
+    /** @var string Snapshot of the SDK shouldEnableAudioNotification parameter */
+    public $sdkaudionotification = '';
+
+    /** @var string Snapshot of the SDK showFinishExamButtonForSessionsWithoutProctor parameter */
+    public $sdkshowfinishexambutton = '';
+
+    /** @var string Snapshot of the SDK showSyscheckSupportNew parameter */
+    public $sdkshowsyschecksupportnew = '';
+
+    /** @var string Snapshot of the SDK syscheckHelpURL parameter */
+    public $sdksyscheckhelpurl = '';
+
+    /** @var string Snapshot of the SDK translationsOverride parameter */
+    public $sdktranslationsoverride = '';
+
+
+
+    /**
+     * @var int|null Linked preset id (when the condition is preset-backed).
+     *
+     * The property is presetid; the key it is stored under in the availability
+     * JSON is still preset_id. Those cannot be brought into line: the stored key
+     * is read by yui/src/form/js/form.js and matched by preset::is_used_by_exams()
+     * with a LIKE on '"preset_id":', so renaming it would orphan every saved exam.
+     */
+    public $presetid = null;
+
     /**
      * Construct
      *
      * @param stdClass $structure Structure
      */
     public function __construct($structure) {
+        // If the saved structure references a preset, hydrate the preset
+        // fields from the DB onto the same flat properties used by all
+        // downstream code. Exam-level fields (istrial, customrules, groups)
+        // and explicit overrides on the structure are applied on top.
+        if (!empty($structure->preset_id)) {
+            $preset = preset::get_by_id((int) $structure->preset_id);
+            if ($preset) {
+                $this->presetid = (int) $structure->preset_id;
+                $structure = self::merge_preset_into_structure($structure, $preset);
+            }
+        }
+
+        // Public releases before the SDK model have no snapshot. Resolve those
+        // conditions from the current default (the migrated site-default preset on
+        // upgrade), then from shipped-safe values, and write the complete snapshot
+        // on the next activity save. Existing snapshots always win, including empty
+        // support URL and disabled-worker list values.
+        $sdkfallback = preset::get_default();
+        $sdkdefaults = config::sdk_snapshot_defaults();
+        foreach (config::SDK_FIELDS as $prop) {
+            if (property_exists($structure, $prop) && $structure->$prop !== null) {
+                continue;
+            }
+            if ($sdkfallback && property_exists($sdkfallback, $prop) && $sdkfallback->$prop !== null) {
+                $structure->$prop = $sdkfallback->$prop;
+            } else {
+                $structure->$prop = $sdkdefaults[$prop];
+            }
+        }
+
         $scoringdefaults = [];
         foreach (self::SCORING as $key => $row) {
             $scoringdefaults[$key] = isset($row['default']) ? $row['default'] : null;
@@ -231,18 +389,14 @@ class condition extends \core_availability\condition {
             $this->webcameramainview = $structure->webcameramainview;
         }
 
-        if (isset($structure->scheduling_required) && $structure->scheduling_required !== null) {
-            $this->schedulingrequired = $structure->scheduling_required;
-        } else {
-            $manualmodes = ['online', 'identification'];
-            $this->schedulingrequired = in_array($this->mode, $manualmodes);
-        }
-        if (!isset($structure->auto_rescheduling)) {
-            $this->autorescheduling = $structure->auto_rescheduling;
-        }
+        // Calendar scheduling is no longer supported. Keep accepting legacy
+        // structures so upgraded activities still load, but never let their old
+        // values re-enable booking or automatic rescheduling at runtime.
+        $this->schedulingrequired = false;
+        $this->autorescheduling = false;
 
         foreach (self::BOOL_DEFAULTS as $key => $default) {
-            $this->$key = isset($structure->$key) ? $structure->$key : $default;
+            $this->$key = isset($structure->$key) ? (bool) $structure->$key : $default;
         }
         if (isset($structure->allowtouseadditionalresources)) {
             $this->allowtouseadditionalresources = (bool) $structure->allowtouseadditionalresources;
@@ -289,7 +443,9 @@ class condition extends \core_availability\condition {
             $this->groups = $structure->groups;
         }
 
-        
+        if (!empty($structure->proctoremails)) {
+            $this->proctoremails = $structure->proctoremails;
+        }
 
         if (!empty($structure->allowedprocesses)) {
             $this->allowedprocesses = $structure->allowedprocesses;
@@ -303,7 +459,73 @@ class condition extends \core_availability\condition {
             $this->streamspreset = $structure->streamspreset;
         }
 
+        // Copy the complete hidden SDK snapshot. Empty strings are meaningful for
+        // the optional support URL and line-based disabled-worker list.
+        foreach (config::SDK_FIELDS as $prop) {
+            if (property_exists($structure, $prop) && $structure->$prop !== null) {
+                if ($prop === 'sdkdisabledworkers' && is_array($structure->$prop)) {
+                    $this->$prop = implode("\n", $structure->$prop);
+                } else {
+                    $this->$prop = is_array($structure->$prop)
+                        ? json_encode($structure->$prop)
+                        : (string) $structure->$prop;
+                }
+            }
+        }
+
+        // Brand-hidden fields are always forced to the default preset's value,
+        // overriding whatever the saved structure or a tampered submission set.
+        // This is the backend security boundary for visibility (mirror of the
+        // form-side gating in preset_form).
+        $defaultpreset = preset::get_default();
+        if ($defaultpreset) {
+            foreach (brand::HIDDEN_FORM_FIELDS as $key) {
+                if (!in_array($key, self::PRESET_FIELDS, true)) {
+                    continue;
+                }
+                if (!property_exists($defaultpreset, $key) && !isset($defaultpreset->$key)) {
+                    continue;
+                }
+                $value = $defaultpreset->$key;
+                // rules/warnings/scoring are kept as stdClass elsewhere in this
+                // class; preset::decode() returns them as arrays, so cast back.
+                if (in_array($key, ['rules', 'warnings', 'scoring'], true)) {
+                    $value = (object) (is_array($value) ? $value : (array) $value);
+                } else if (array_key_exists($key, self::BOOL_DEFAULTS)) {
+                    $value = (bool) $value;
+                }
+                $this->$key = $value;
+            }
+        }
+
         $this->validate();
+    }
+
+    /**
+     * Apply preset values to a saved structure for consumption by the
+     * existing flat-field __construct logic. Fields explicitly set on
+     * the structure win over preset values.
+     *
+     * @param stdClass $structure Saved availability structure
+     * @param stdClass $preset Decoded preset record (from preset::get_by_id)
+     * @return stdClass merged structure
+     */
+    protected static function merge_preset_into_structure($structure, $preset) {
+        $merged = clone $structure;
+        foreach (self::PRESET_FIELDS as $field) {
+            if (!isset($merged->$field) && isset($preset->$field)) {
+                $merged->$field = $preset->$field;
+            }
+        }
+
+        // Legacy field name in saved structures.
+        if (!isset($merged->scheduling_required) && isset($preset->schedulingrequired)) {
+            $merged->scheduling_required = $preset->schedulingrequired;
+        }
+        if (!isset($merged->auto_rescheduling) && isset($preset->autorescheduling)) {
+            $merged->auto_rescheduling = $preset->autorescheduling;
+        }
+        return $merged;
     }
 
     /**
@@ -312,6 +534,20 @@ class condition extends \core_availability\condition {
      * @return null
      */
     public function validate() {
+        // rules/warnings/scoring are accessed as objects below, but callers
+        // (from_json, brand-hidden-field override, raw structure import) may
+        // hand them in as arrays. Normalize once here so the loops below work
+        // regardless of how the caller wrote the field.
+        if (!is_object($this->rules)) {
+            $this->rules = (object) (array) $this->rules;
+        }
+        if (!is_object($this->warnings)) {
+            $this->warnings = (object) (array) $this->warnings;
+        }
+        if (!is_object($this->scoring)) {
+            $this->scoring = (object) (array) $this->scoring;
+        }
+
         $keys = array_keys(self::RULES);
         foreach ($this->rules as $key => $value) {
             if (!in_array($key, $keys)) {
@@ -351,6 +587,28 @@ class condition extends \core_availability\condition {
         }
         if (!in_array($this->streamspreset, self::STREAMS_PRESET_OPTIONS)) {
             $this->streamspreset = 'default';
+        }
+        // These two were not clamped while the two above were. __construct takes
+        // whatever !empty() lets through, so a value that did not come from the
+        // form -- a restored preset, a direct SQL edit, a future brand adding an
+        // option -- reached the report page and the API payload unchecked. Each
+        // falls back to its own property default, so an unrecognised value
+        // behaves as if it had never been set.
+        if (!in_array($this->webcameramainview, self::WEBCAMERA_MAIN_VIEW_OPTIONS, true)) {
+            $this->webcameramainview = 'front';
+        }
+        if (!in_array($this->securebrowserlevel, self::SECURE_BROWSER_LEVELS, true)) {
+            $this->securebrowserlevel = 'basic';
+        }
+
+        // A malformed saved snapshot must never disable monitoring by coercion.
+        // Reset only the damaged field to its shipped-safe value; the other fifteen
+        // remain the exact copied preset snapshot.
+        $sdkdefaults = config::sdk_snapshot_defaults();
+        foreach (config::SDK_FIELDS as $key => $prop) {
+            if (!config::is_valid_sdk_snapshot_value($key, $this->$prop)) {
+                $this->$prop = $sdkdefaults[$prop];
+            }
         }
     }
 
@@ -412,6 +670,23 @@ class condition extends \core_availability\condition {
         $forbiddenprocesses = array_filter($forbiddenprocesses);
         $result['forbiddenprocesses'] = empty($forbiddenprocesses) ? null : $forbiddenprocesses;
 
+        // Demo exam mode must never connect to a live proctor. Override the
+        // stored mode to offline so the proctoremails suppression below and
+        // any other mode-dependent logic automatically applies.
+        if (!empty($result['istrial'])) {
+            $result['mode'] = 'offline';
+        }
+
+        // Proctor emails: one address per line, normalized to a list of strings.
+        // Only meaningful in Live (online) review mode; cleared otherwise so the
+        // API payload never carries assigned proctors for non-live exams.
+        $proctoremails = $result['proctoremails'];
+        $proctoremails = is_string($proctoremails) ? trim($proctoremails) : '';
+        $proctoremails = preg_split('/\R+/', $proctoremails);
+        $proctoremails = array_filter(array_map('trim', $proctoremails));
+        $result['proctoremails'] = (empty($proctoremails) || $result['mode'] !== 'online')
+            ? null : array_values($proctoremails);
+
         return $result;
     }
 
@@ -458,15 +733,37 @@ class condition extends \core_availability\condition {
     /**
      * Export for moodle storage
      *
+     * Whatever this method returns IS the stored availability JSON: core's
+     * availability tree rebuilds the column from each condition's save() with no
+     * merge against the previous value (see core_availability\tree::save()). So a
+     * property omitted here is not merely left alone, it is destroyed the next
+     * time anyone edits the activity.
+     *
+     * No property in PROPS is omitted any more, and keeping it that way is the
+     * whole maintenance rule for this method: adding a field means touching PROPS,
+     * the public property, __construct AND this method, or the field is destroyed
+     * on the first activity edit after a teacher sets it. Five fields have been
+     * lost that way already -- 'groups', 'webcameramainview' and the three
+     * booleans annotated below -- each silent until a customer noticed the setting
+     * did nothing.
+     *
+     * Five repairs, and each one is a behaviour change on an upgraded site rather
+     * than a no-op, so they are written up in CHANGELOG.md rather than only here.
+     * What they have in common: the stored JSON never carried the field, so the
+     * effective value came from the property default or the preset. Now the
+     * teacher's own choice is stored and wins. Nothing is retroactive -- an exam
+     * saved by an earlier release still carries no value and behaves exactly as it
+     * did until someone re-saves the activity.
+     *
      * @return object
      */
     public function save() {
-        return (object) [
+        $data = [
             'type' => 'proctor',
             'duration' => (int) $this->duration,
             'mode' => (string) $this->mode,
-            'scheduling_required' => (bool) $this->schedulingrequired,
-            'auto_rescheduling' => (bool) $this->autorescheduling,
+            'scheduling_required' => false,
+            'auto_rescheduling' => false,
             'rules' => (array) $this->rules,
             'warnings' => (array) $this->warnings,
             'scoring' => (array) $this->scoring,
@@ -475,17 +772,48 @@ class condition extends \core_availability\condition {
             'useragreementurl' => $this->useragreementurl,
             'auxiliarycamera' => (bool) $this->auxiliarycamera,
             'customrules' => $this->customrules,
+            'proctoremails' => $this->proctoremails,
             'calculator' => $this->calculator,
             'securebrowser' => $this->securebrowser,
             'securebrowserlevel' => $this->securebrowserlevel,
             'allowtouseadditionalresources' => (bool) $this->allowtouseadditionalresources,
+            // Added in NTG-185. These three were in PROPS and read by
+            // client::exam_data() but never written here, so the Webapp flow has
+            // been sending the property default rather than the teacher's choice.
+            // SDK mode reads them too, so leaving them out would ship three
+            // settings that silently do nothing.
+            'allowmultipledisplays' => (bool) $this->allowmultipledisplays,
+            'allowvirtualenvironment' => (bool) $this->allowvirtualenvironment,
+            'checkidphotoquality' => (bool) $this->checkidphotoquality,
             'allowedprocesses' => $this->allowedprocesses,
             'forbiddenprocesses' => $this->forbiddenprocesses,
             'streamspreset' => $this->streamspreset,
             'sendmanualwarningstolearner' => (bool) $this->sendmanualwarningstolearner,
             'allowroomscanauxcamera' => (bool) $this->allowroomscanauxcamera,
-            'preliminarycheck' =>  (bool) $this->preliminarycheck,
+            'preliminarycheck' => (bool) $this->preliminarycheck,
+            // Both were in PROPS, collected by the form and read by __construct,
+            // but never written here -- so core rebuilt the stored JSON without
+            // them and the teacher's choice was destroyed on every activity edit.
+            //
+            // groups is the one that changes who sits a proctored exam:
+            // user_in_proctored_groups() treats an empty list as "everyone", so
+            // losing it silently widened each restriction to the whole course.
+            // Restrictions saved before this fix already hold an empty list --
+            // this stops further loss, it cannot recover what was already dropped.
+            'groups' => array_values((array) $this->groups),
+            'webcameramainview' => $this->webcameramainview,
         ];
+
+        // The SDK controls are hidden on the activity form, but their snapshot is
+        // not optional. Always write all sixteen values so editing any unrelated
+        // exam field cannot destroy or change the configuration.
+        foreach (config::SDK_FIELDS as $prop) {
+            $data[$prop] = (string) $this->$prop;
+        }
+        if (!empty($this->presetid)) {
+            $data['preset_id'] = (int) $this->presetid;
+        }
+        return (object) $data;
     }
 
     /**
@@ -495,7 +823,7 @@ class condition extends \core_availability\condition {
      * @param integer $userid
      * @return \stdClass entry
      */
-    public static function make_entry($courseid, $cmid, $userid=null) {
+    public static function make_entry($courseid, $cmid, $userid = null) {
         $timenow = time();
         $entry = new stdClass();
         $entry->courseid = $courseid;
@@ -510,10 +838,7 @@ class condition extends \core_availability\condition {
     }
 
     /**
-     * Check if condition is limiteted to groups, and is user is part
-     * of these groups.
-     * There is possibility to make this method private and move it
-     * to has_examus_condition, or maybe something else.
+     * Check if condition is limited to groups, and if the user is part of those groups.
      *
      * @param \cm_info $cm Cm
      * @return int $userid userid
@@ -526,7 +851,9 @@ class condition extends \core_availability\condition {
         }
 
         // Validate that groups are still there.
-        [$insql, $inparams] = $DB->get_in_or_equal($groups);
+        // PHP 7.0 requires long list syntax.
+        // phpcs:disable Universal.Lists.DisallowLongListSyntax.Found
+        list($insql, $inparams) = $DB->get_in_or_equal($groups);
         $groups = $DB->get_fieldset_select('groups', 'id', 'id ' . $insql, $inparams);
         if (empty($groups)) {
             return true;
@@ -553,8 +880,12 @@ class condition extends \core_availability\condition {
      * @param int $userid User id
      * @return bool
      */
-    public function is_available($not,
-            \core_availability\info $info, $grabthelot, $userid) {
+    public function is_available(
+        $not,
+        \core_availability\info $info,
+        $grabthelot,
+        $userid
+    ) {
 
         if ($this->user_in_proctored_groups($userid)) {
             $allow = !WS_SERVER;
@@ -580,7 +911,11 @@ class condition extends \core_availability\condition {
         if (WS_SERVER) {
             return get_string('description_no_webservices', 'availability_proctor');
         } else {
-            return get_string('description_proctor', 'availability_proctor');
+            return get_string(
+                'description_proctor',
+                'availability_proctor',
+                get_string('pluginname', 'availability_proctor')
+            );
         }
     }
 
@@ -593,5 +928,4 @@ class condition extends \core_availability\condition {
     protected function get_debug_string() {
         return '#proctoring ' . $this->mode;
     }
-
 }

@@ -15,22 +15,28 @@ volumes and `config.php` inside the per-version source clone.
 ```bash
 cd dev
 ./moodle.sh up 310        # Moodle 3.10 at http://localhost:8310
+./moodle.sh up 36         # Moodle 3.6  at http://localhost:8306
 ./moodle.sh up 500        # Moodle 5.0  at http://localhost:8500
+./moodle.sh up 405pg      # Moodle 4.5 + PostgreSQL at http://localhost:8455
 ```
 
-First run per version: clones Moodle sources (shallow), starts MariaDB +
-Apache/PHP, installs Moodle via CLI, and registers the plugin. Subsequent
+First run per version: clones Moodle sources (shallow), starts the selected
+database and Apache/PHP, installs Moodle via CLI, and registers the plugin. Subsequent
 runs just start the containers — everything you configured is still there.
+The stand enables Apache `mod_rewrite`, which the plugin's legacy `.htaccess`
+authorization-header forwarding rule requires.
 
 Admin login: `admin` / `Test-1234`
 
 ## Version matrix
 
-| Key | Moodle | PHP | MariaDB | URL |
+| Key | Moodle | PHP | Database | URL |
 |-----|--------|-----|---------|-----|
+| 36 | 3.6 (minimum supported) | 7.3 | 10.5 | http://localhost:8306 |
 | 310 | 3.10 (client-reported) | 7.4 | 10.5 | http://localhost:8310 |
 | 311 | 3.11 (first with `get_shortname()`) | 7.4 | 10.5 | http://localhost:8311 |
 | 405 | 4.5 LTS | 8.2 | 10.11 | http://localhost:8405 |
+| 405pg | 4.5 LTS | 8.2 | PostgreSQL 15 | http://localhost:8455 |
 | 500 | 5.0 | 8.3 | 10.11 | http://localhost:8500 |
 
 Versions can run simultaneously — ports and volumes do not overlap.

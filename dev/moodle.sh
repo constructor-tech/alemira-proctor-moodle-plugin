@@ -11,8 +11,9 @@
 #   ./moodle.sh ps                       show stand status
 #   ./moodle.sh urls                     print URLs and credentials
 #
-# Versions: 310 (Moodle 3.10, PHP 7.4), 311 (3.11, PHP 7.4),
-#           405 (4.5, PHP 8.2), 500 (5.0, PHP 8.3)
+# Versions: 36 (Moodle 3.6, PHP 7.3), 310 (Moodle 3.10, PHP 7.4), 311 (3.11, PHP 7.4),
+#           405 (4.5, PHP 8.2, MariaDB), 405pg (4.5, PHP 8.2, PostgreSQL),
+#           500 (5.0, PHP 8.3)
 #
 # --clean: do not mount the plugin working tree (for testing zip installs
 #          through the admin UI, like a real client).
@@ -26,20 +27,31 @@ MOODLE_GIT="https://github.com/moodle/moodle.git"
 
 branch_for() {
   case "$1" in
+    36) echo "MOODLE_36_STABLE" ;;
     310) echo "MOODLE_310_STABLE" ;;
     311) echo "MOODLE_311_STABLE" ;;
     405) echo "MOODLE_405_STABLE" ;;
+    405pg) echo "MOODLE_405_STABLE" ;;
     500) echo "MOODLE_500_STABLE" ;;
-    *) echo "Unknown version: $1 (use 310|311|405|500)" >&2; return 1 ;;
+    *) echo "Unknown version: $1 (use 36|310|311|405|405pg|500)" >&2; return 1 ;;
   esac
 }
 
 port_for() {
   case "$1" in
+    36) echo 8306 ;;
     310) echo 8310 ;;
     311) echo 8311 ;;
     405) echo 8405 ;;
+    405pg) echo 8455 ;;
     500) echo 8500 ;;
+  esac
+}
+
+dbtype_for() {
+  case "$1" in
+    405pg) echo pgsql ;;
+    *) echo mariadb ;;
   esac
 }
 
@@ -65,6 +77,7 @@ ensure_sources() {
 install_if_needed() {
   local ver="$1"
   local port; port="$(port_for "$ver")"
+  local dbtype; dbtype="$(dbtype_for "$ver")"
   if [ -f ".moodle/$ver/config.php" ]; then
     echo ">> config.php exists — skipping install (data persisted)"
     return 0
@@ -77,7 +90,7 @@ install_if_needed() {
       --lang=en \
       --wwwroot="http://localhost:$port" \
       --dataroot=/var/www/moodledata \
-      --dbtype=mariadb \
+      --dbtype="$dbtype" \
       --dbhost="db$ver" \
       --dbname=moodle \
       --dbuser=moodle \
@@ -99,7 +112,7 @@ install_if_needed() {
 cmd="${1:-}"; shift || true
 case "$cmd" in
   up)
-    ver="${1:?version required (310|311|405|500)}"; shift || true
+    ver="${1:?version required (36|310|311|405|405pg|500)}"; shift || true
     clean=0
     [ "${1:-}" = "--clean" ] && clean=1
     branch_for "$ver" >/dev/null
@@ -133,10 +146,11 @@ case "$cmd" in
     fi
     ;;
   ps)
-    docker compose -f compose.yaml --profile 310 --profile 311 --profile 405 --profile 500 ps
+    docker compose -f compose.yaml --profile 36 --profile 310 --profile 311 \
+      --profile 405 --profile 405pg --profile 500 ps
     ;;
   urls)
-    for v in 310 311 405 500; do
+    for v in 36 310 311 405 405pg 500; do
       echo "Moodle $v: http://localhost:$(port_for "$v")  ($ADMIN_USER / $ADMIN_PASS)"
     done
     ;;

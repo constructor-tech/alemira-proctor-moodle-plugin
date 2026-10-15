@@ -4,6 +4,9 @@
       "base",
       "node",
       "event",
+      "io-base",
+      "json",
+      "event-mouseenter",
       "moodle-core_availability-form"
     ]
   }

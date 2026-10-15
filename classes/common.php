@@ -28,6 +28,10 @@ use availability_proctor\condition;
 
 /**
  * Collection of static methods, used throughout the code
+ *
+ * @package    availability_proctor
+ * @copyright  2019-2022 Maksim Burnin <maksim.burnin@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class common {
     /**
@@ -91,13 +95,11 @@ class common {
         }
 
         if ($cm->modname == 'quiz') {
-            // Moodle 4.0+ uses namespaced class, older versions use global class.
-            if (class_exists('\mod_quiz\access_manager')) {
-                $quiz = \mod_quiz\access_manager::load_quiz_and_settings($cm->instance);
-            } else {
-                $quiz = \quiz_access_manager::load_quiz_and_settings($cm->instance);
-            }
-            $allowedattempts = $quiz->attempts;
+            // Use Moodle's user-aware quiz settings so user and group overrides
+            // affect the number of Proctor entries in the same way as attempts.
+            $settingsclass = utils::quiz_settings_classname();
+            $quiz = $settingsclass::create($cm->instance, $userid);
+            $allowedattempts = $quiz->get_num_attempts_allowed();
             $allowedattempts = $allowedattempts > 0 ? $allowedattempts : null;
         } else {
             $allowedattempts = null;
@@ -280,27 +282,28 @@ class common {
             $datetime = \DateTime::createFromFormat(\DateTime::ISO8601, $date);
             return $datetime->getTimestamp();
         }
-
     }
 
     /**
-     * Gets default proctoring settings from config
+     * Compute effective proctoring duration in minutes.
+     * A quiz must have a time limit; activities without a native time limit
+     * keep the existing condition::MAX_LIMIT fallback.
      *
-     * @return stdClass
-     **/
-    public static function get_default_proctoring_settings() {
-        $json = get_config('availability_proctor', 'default_proctoring_settings');
-        $json = empty($json) ? '{}' : $json;
-        return json_decode($json);
-    }
+     * @param \stdClass|\cm_info $cm Course module
+     * @return int duration in minutes
+     * @throws \moodle_exception When a quiz has no time limit.
+     */
+    public static function get_quiz_time_limit($cm) {
+        global $DB;
+        if (!empty($cm->modname) && $cm->modname === 'quiz') {
+            $timelimit = $DB->get_field('quiz', 'timelimit', ['id' => $cm->instance]);
+            if (empty($timelimit)) {
+                throw new \moodle_exception('error_notimelimit', 'availability_proctor');
+            }
 
-    /**
-     * Set default proctoring settings from config
-     *
-     * @return void
-     **/
-    public static function set_default_proctoring_settings($data) {
-        $json = json_encode($data);
-        set_config('default_proctoring_settings', $json, 'availability_proctor');
+            return (int) ceil($timelimit / 60);
+        }
+
+        return condition::MAX_LIMIT;
     }
 }
