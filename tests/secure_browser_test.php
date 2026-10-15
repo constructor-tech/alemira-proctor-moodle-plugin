@@ -65,6 +65,110 @@ final class secure_browser_test extends \advanced_testcase {
     }
 
     /**
+     * Reloading a launch page reuses its pending key without affecting another session.
+     */
+    public function test_entry_url_reuses_pending_key_for_same_session(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $user = $this->getDataGenerator()->create_user();
+        $now = time();
+        $sessionid = $DB->insert_record(session::TABLE, (object) [
+            'sessionkey' => 'secure-browser-reuse-test',
+            'quizid' => 987,
+            'userid' => $user->id,
+            'state' => session::STATE_ACTIVE,
+            'timecreated' => $now,
+            'timemodified' => $now,
+            'timeactive' => $now,
+        ]);
+        $session = $DB->get_record(session::TABLE, ['id' => $sessionid]);
+        set_config('seamless_auth', 1, 'availability_proctor');
+
+        // A bridge minted by an earlier launch-page load, a few seconds ago.
+        $pending = create_user_key(
+            secure_browser::KEY_SCRIPT,
+            (int) $user->id,
+            (int) $sessionid,
+            false,
+            $now + secure_browser::KEY_LIFETIME - 5
+        );
+        $othersessionid = $DB->insert_record(session::TABLE, (object) [
+            'sessionkey' => 'secure-browser-other-session',
+            'quizid' => 988,
+            'userid' => $user->id,
+            'state' => session::STATE_ACTIVE,
+            'timecreated' => $now,
+            'timemodified' => $now,
+            'timeactive' => $now,
+        ]);
+        $otherpending = create_user_key(
+            secure_browser::KEY_SCRIPT,
+            (int) $user->id,
+            (int) $othersessionid,
+            false,
+            $now + secure_browser::KEY_LIFETIME
+        );
+
+        $url = secure_browser::entry_url($session, $user);
+        parse_str((string) parse_url($url, PHP_URL_QUERY), $query);
+
+        $this->assertSame($pending, $query['token']);
+        $this->assertEquals(2, $DB->count_records('user_private_key', [
+            'script' => secure_browser::KEY_SCRIPT,
+            'userid' => $user->id,
+        ]));
+        $this->assertTrue($DB->record_exists('user_private_key', [
+            'script' => secure_browser::KEY_SCRIPT,
+            'value' => $otherpending,
+            'instance' => $othersessionid,
+        ]));
+    }
+
+    /**
+     * A nearly expired bridge is replaced so a new hand-off has time to open.
+     */
+    public function test_entry_url_renews_key_with_less_than_ten_minutes_left(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        $user = $this->getDataGenerator()->create_user();
+        $now = time();
+        $sessionid = $DB->insert_record(session::TABLE, (object) [
+            'sessionkey' => 'secure-browser-renew-test',
+            'quizid' => 989,
+            'userid' => $user->id,
+            'state' => session::STATE_ACTIVE,
+            'timecreated' => $now,
+            'timemodified' => $now,
+            'timeactive' => $now,
+        ]);
+        $session = $DB->get_record(session::TABLE, ['id' => $sessionid]);
+        $oldtoken = create_user_key(
+            secure_browser::KEY_SCRIPT,
+            (int) $user->id,
+            (int) $sessionid,
+            false,
+            $now + 599
+        );
+
+        $url = secure_browser::entry_url($session, $user);
+        parse_str((string) parse_url($url, PHP_URL_QUERY), $query);
+
+        $this->assertNotEquals($oldtoken, $query['token']);
+        $this->assertTrue($DB->record_exists('user_private_key', [
+            'script' => secure_browser::KEY_SCRIPT,
+            'value' => $oldtoken,
+            'instance' => $sessionid,
+        ]));
+        $this->assertEquals(2, $DB->count_records('user_private_key', [
+            'script' => secure_browser::KEY_SCRIPT,
+            'userid' => $user->id,
+            'instance' => $sessionid,
+        ]));
+    }
+
+    /**
      * A valid key for another learner cannot authenticate against the session.
      */
     public function test_authenticate_rejects_wrong_session_owner(): void {

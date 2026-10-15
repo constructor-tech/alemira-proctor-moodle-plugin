@@ -38,6 +38,9 @@ class secure_browser {
     /** @var int Eight hours, matching the established Webapp seamless-auth window. */
     const KEY_LIFETIME = 28800;
 
+    /** @var int Minimum remaining lifetime for reusing a pending hand-off key. */
+    const KEY_REUSE_MARGIN = 600;
+
     /**
      * Build the one-time URL Constructor Secure Browser opens for an SDK session.
      *
@@ -50,13 +53,34 @@ class secure_browser {
      * @return string Absolute URL.
      */
     public static function entry_url(\stdClass $session, \stdClass $user): string {
-        $validuntil = time() + self::KEY_LIFETIME;
-        $token = get_user_key(
+        global $DB;
+
+        // get_user_key() never finds an earlier key here: it matches validuntil exactly,
+        // which moves with time(). Reuse this session's pending key so a reload cannot
+        // strand a link Secure Browser may already be opening.
+        $now = time();
+        $keys = $DB->get_records_select(
+            'user_private_key',
+            'script = :script AND userid = :userid AND instance = :instance ' .
+                'AND validuntil > :minimumvaliduntil',
+            [
+                'script' => self::KEY_SCRIPT,
+                'userid' => (int) $user->id,
+                'instance' => (int) $session->id,
+                'minimumvaliduntil' => $now + self::KEY_REUSE_MARGIN,
+            ],
+            'validuntil DESC, id DESC',
+            'id, value',
+            0,
+            1
+        );
+        $key = reset($keys);
+        $token = $key ? $key->value : create_user_key(
             self::KEY_SCRIPT,
             (int) $user->id,
             (int) $session->id,
             false,
-            $validuntil
+            $now + self::KEY_LIFETIME
         );
 
         return (new \moodle_url('/availability/condition/proctor/sdk_entry.php', [
