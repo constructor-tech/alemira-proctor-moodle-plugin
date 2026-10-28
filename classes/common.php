@@ -289,14 +289,22 @@ class common {
      * A quiz must have a time limit; activities without a native time limit
      * keep the existing condition::MAX_LIMIT fallback.
      *
+     * Earlier releases took the duration from the condition instead, so an
+     * attempt started before the upgrade may run on a quiz with no time limit. Passing that
+     * stored duration lets such an attempt finish; a new attempt is refused.
+     *
      * @param \stdClass|\cm_info $cm Course module
+     * @param int|null $storedduration Condition duration for an attempt already running.
      * @return int duration in minutes
-     * @throws \moodle_exception When a quiz has no time limit.
+     * @throws \moodle_exception When a quiz has no time limit and no stored duration is given.
      */
-    public static function get_quiz_time_limit($cm) {
+    public static function get_quiz_time_limit($cm, $storedduration = null) {
         global $DB;
         if (!empty($cm->modname) && $cm->modname === 'quiz') {
             $timelimit = $DB->get_field('quiz', 'timelimit', ['id' => $cm->instance]);
+            if (empty($timelimit) && $storedduration !== null) {
+                return (int) $storedduration;
+            }
             if (empty($timelimit)) {
                 throw new \moodle_exception('error_notimelimit', 'availability_proctor');
             }

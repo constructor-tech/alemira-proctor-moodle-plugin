@@ -183,7 +183,9 @@ class utils {
         $lang = current_language();
 
         $client = new client($condition);
-        $data = $client->exam_data($course, $cm);
+        // This head runs on every page of an attempt that has already started,
+        // so it must not refuse one begun before a time limit was required.
+        $data = $client->exam_data($course, $cm, true);
         $userdata = $client->user_data($USER, $lang);
 
         $timedata = $client->time_data($timebracket);
@@ -598,7 +600,10 @@ CSS;
         $lang = current_language();
 
         $client = new \availability_proctor\client($condition);
-        $data = $client->exam_data($course, $cminfo);
+        // Continuing an attempt also passes through startattempt.php; only a
+        // new attempt needs the quiz time limit.
+        $attemptrunning = (bool) quiz_get_user_attempt_unfinished($cminfo->instance, $user->id);
+        $data = $client->exam_data($course, $cminfo, $attemptrunning);
         $userdata = $client->user_data($user, $lang);
         $timedata = $client->time_data($timebracket);
         $attemptdata = $client->attempt_data($entry->accesscode, $starturl);

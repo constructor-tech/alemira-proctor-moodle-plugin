@@ -61,6 +61,27 @@ final class common_test extends \advanced_testcase {
     }
 
     /**
+     * An attempt started before quizzes needed a time limit keeps the
+     * condition's stored duration, so it can still be finished after upgrade.
+     */
+    public function test_running_attempt_without_time_limit_uses_stored_duration(): void {
+        $this->resetAfterTest();
+
+        $course = $this->getDataGenerator()->create_course();
+        $quiz = $this->getDataGenerator()->create_module('quiz', [
+            'course' => $course->id,
+            'timelimit' => 0,
+        ]);
+        $cm = get_coursemodule_from_instance('quiz', $quiz->id, $course->id);
+        $client = new client(new condition((object) ['type' => 'proctor', 'duration' => 45]));
+
+        $this->assertSame(45, $client->exam_data($course, $cm, true)['duration']);
+
+        $this->expectException(\moodle_exception::class);
+        $client->exam_data($course, $cm);
+    }
+
+    /**
      * Activities without a native Moodle time limit keep their existing
      * fallback so this quiz-specific rule cannot break SCORM or Assignment.
      */

@@ -7,6 +7,9 @@ This file starts at v2.8. Earlier releases are recorded in the Git history.
 
 ## Unreleased
 
+- Fixed Webapp quiz attempts started before the upgrade on a quiz with no time
+  limit failing on every page. They now finish with the condition's stored
+  duration; only a new attempt requires a quiz time limit.
 - Fixed quiz answers still being autosaved after the Constructor session ended
   under the SDK model. Autosave is now refused like page navigation and submit.
 - Fixed teachers being sent to Proctor when opening a proctored assignment or

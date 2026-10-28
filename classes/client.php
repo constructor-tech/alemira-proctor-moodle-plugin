@@ -421,9 +421,10 @@ class client {
      * Format exam-related data for API
      * @param stdClass $course Course object
      * @param \cm_info $cm Cm
+     * @param bool $attemptrunning The learner already has an unfinished attempt.
      * @return array
      */
-    public function exam_data($course, $cm) {
+    public function exam_data($course, $cm, $attemptrunning = false) {
         $conditiondata = $this->condition->to_json();
 
         $customrules = $conditiondata['customrules'];
@@ -457,7 +458,10 @@ class client {
             'examName' => $cm->name,
             'courseName' => $course->fullname,
             'courseCode' => $course->shortname,
-            'duration' => common::get_quiz_time_limit($cm),
+            'duration' => common::get_quiz_time_limit(
+                $cm,
+                $attemptrunning ? $conditiondata['duration'] : null
+            ),
             'schedule' => false,
             'proctoring' => $conditiondata['mode'],
             'userAgreementUrl' => $conditiondata['useragreementurl'],
