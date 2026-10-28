@@ -705,6 +705,43 @@ CSS;
     }
 
     /**
+     * Capability that marks a user as staff for an assign or SCORM activity.
+     *
+     * The quiz equivalent of is_preview_user(): staff open the activity to grade,
+     * review or configure it, not to sit it, so proctoring must not apply to them.
+     * Both capabilities belong to teacher, editingteacher and manager by default,
+     * and never to student.
+     */
+    const STAFF_CAPABILITIES = [
+        'assign' => 'mod/assign:grade',
+        'scorm' => 'mod/scorm:viewreport',
+    ];
+
+    /**
+     * Whether the user manages this assign or SCORM activity rather than sits it.
+     *
+     * Without this a teacher opening a proctored assignment to grade it was sent to
+     * Proctor, and the fader covered every page of the activity, the settings form
+     * included. Group membership alone cannot tell them apart: with no groups set,
+     * user_in_proctored_groups() is true for everyone.
+     *
+     * @param \cm_info $cminfo Course module info.
+     * @param int $userid The user.
+     * @return bool True when proctoring must not apply to this user.
+     */
+    public static function is_activity_staff(\cm_info $cminfo, int $userid): bool {
+        if (!isset(self::STAFF_CAPABILITIES[$cminfo->modname])) {
+            return false;
+        }
+
+        return has_capability(
+            self::STAFF_CAPABILITIES[$cminfo->modname],
+            \context_module::instance($cminfo->id),
+            $userid
+        );
+    }
+
+    /**
      * Proctoring fader for SCORM activities. Shows the overlay on the SCORM view page
      * while waiting for the Proctor WebApp confirmation signal.
      *
@@ -721,6 +758,11 @@ CSS;
 
         $condition = condition::get_proctor_condition($cminfo);
         if (!$condition) {
+            return '';
+        }
+
+        // Staff grading or configuring the activity are not sitting it.
+        if (self::is_activity_staff($cminfo, (int) $USER->id)) {
             return '';
         }
 
@@ -794,6 +836,11 @@ CSS;
 
         $condition = condition::get_proctor_condition($cminfo);
         if (!$condition) {
+            return;
+        }
+
+        // Staff grading or configuring the activity are not sitting it.
+        if (self::is_activity_staff($cminfo, (int) $user->id)) {
             return;
         }
 
@@ -888,6 +935,11 @@ CSS;
             return;
         }
 
+        // Staff grading or configuring the activity are not sitting it.
+        if (self::is_activity_staff($cminfo, (int) $user->id)) {
+            return;
+        }
+
         if (!$condition->user_in_proctored_groups($user->id)) {
             return;
         }
@@ -969,6 +1021,11 @@ CSS;
 
         $condition = condition::get_proctor_condition($cminfo);
         if (!$condition) {
+            return '';
+        }
+
+        // Staff grading or configuring the activity are not sitting it.
+        if (self::is_activity_staff($cminfo, (int) $USER->id)) {
             return '';
         }
 

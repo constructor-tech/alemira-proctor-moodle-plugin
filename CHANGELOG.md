@@ -7,6 +7,10 @@ This file starts at v2.8. Earlier releases are recorded in the Git history.
 
 ## Unreleased
 
+- Fixed teachers being sent to Proctor when opening a proctored assignment or
+  SCORM activity, which blocked grading. Users who can grade the assignment or
+  view SCORM reports now see the normal Moodle page, as quiz previews already
+  did.
 - Demo (trial) exams now always start in post-exam review mode instead of the
   preset's proctoring mode, under both the Webapp and SDK models, so a demo
   session is never connected to a live proctor.
