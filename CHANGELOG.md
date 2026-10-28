@@ -7,6 +7,8 @@ This file starts at v2.8. Earlier releases are recorded in the Git history.
 
 ## Unreleased
 
+- Fixed quiz answers still being autosaved after the Constructor session ended
+  under the SDK model. Autosave is now refused like page navigation and submit.
 - Fixed teachers being sent to Proctor when opening a proctored assignment or
   SCORM activity, which blocked grading. Users who can grade the assignment or
   view SCORM reports now see the normal Moodle page, as quiz previews already

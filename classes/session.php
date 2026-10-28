@@ -703,11 +703,12 @@ class session {
      * insert unbounded rows. Same attempt and same reason inside the configured
      * window counts once.
      *
-     * The SDK-only route guard in lib.php calls this for attempt.php, summary.php
-     * and processattempt.php. Webapp requests never reach that guard.
+     * The SDK-only route guard in lib.php calls this for attempt.php, summary.php,
+     * processattempt.php and autosave.ajax.php. Webapp requests never reach that
+     * guard.
      *
      * @param string $reason One of the documented reason codes.
-     * @param string $script Entry point that denied: attempt, summary or processattempt.
+     * @param string $script Entry point that denied: attempt, summary, processattempt or autosave.
      * @param int|null $attemptid Attempt involved, when known.
      * @param int|null $quizid Quiz involved, when known.
      * @param \stdClass|null $session Session row involved, when there was one.

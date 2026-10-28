@@ -143,7 +143,7 @@
         <FIELD NAME="sessionid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Session row involved, when there was one. No foreign key: the session row may be pruned while the denial record is kept."/>
         <FIELD NAME="sessionstate" TYPE="char" LENGTH="20" NOTNULL="false" SEQUENCE="false" COMMENT="Session state at the moment of denial, copied here so the record stays meaningful after the session moves on."/>
         <FIELD NAME="reason" TYPE="char" LENGTH="40" NOTNULL="true" SEQUENCE="false" COMMENT="no_session, state_pending, state_finished, sec_fetch_dest, not_owner or no_config."/>
-        <FIELD NAME="script" TYPE="char" LENGTH="40" NOTNULL="true" SEQUENCE="false" COMMENT="Which entry point denied: attempt, summary or processattempt."/>
+        <FIELD NAME="script" TYPE="char" LENGTH="40" NOTNULL="true" SEQUENCE="false" COMMENT="Which entry point denied: attempt, summary, processattempt or autosave."/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>

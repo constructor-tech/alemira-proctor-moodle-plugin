@@ -204,6 +204,34 @@ final class access_guard_test extends \advanced_testcase {
     }
 
     /**
+     * An open attempt page keeps autosaving while the session is live.
+     */
+    public function test_live_autosave_is_allowed(): void {
+        $this->active_session();
+        $attempt = $this->start_attempt();
+        $_SERVER['HTTP_SEC_FETCH_DEST'] = 'empty';
+
+        $this->guard('autosave', (int) $attempt->id);
+        $this->assertFalse(session::is_top_level_request());
+    }
+
+    /**
+     * Once Constructor ends the session, an open attempt page cannot keep
+     * autosaving answers.
+     */
+    public function test_autosave_after_session_ended_is_blocked(): void {
+        global $DB;
+
+        $session = $this->active_session();
+        $attempt = $this->start_attempt();
+        $DB->set_field(session::TABLE, 'sessionend', time(), ['id' => $session->id]);
+        $_SERVER['HTTP_SEC_FETCH_DEST'] = 'empty';
+
+        $this->expectException(\moodle_exception::class);
+        $this->guard('autosave', (int) $attempt->id);
+    }
+
+    /**
      * The guard repairs a missed event binding instead of locking out a learner.
      */
     public function test_active_unbound_session_is_recovered(): void {
