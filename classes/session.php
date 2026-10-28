@@ -550,6 +550,28 @@ class session {
     }
 
     /**
+     * Record that the SDK reported examStarted.
+     *
+     * Only a session that is already ACTIVE is touched. examStarted is reported
+     * by the learner's own tab, so it is untrusted input, and token.php must stay
+     * the only route to ACTIVE: a PENDING row moved here would unlock the quiz
+     * without a JWT ever being signed or the SDK ever running.
+     *
+     * The ACTIVE -> ACTIVE transition keeps timeactive and only writes the reason,
+     * which distinguishes "started the exam" from "abandoned during preparation".
+     *
+     * @param \stdClass $session The session row.
+     * @return bool True when the reason was recorded.
+     */
+    public static function record_exam_started(\stdClass $session): bool {
+        if ($session->state !== self::STATE_ACTIVE) {
+            return false;
+        }
+
+        return self::transition($session, self::STATE_ACTIVE, 'exam_started');
+    }
+
+    /**
      * Record that the video upload finished.
      *
      * Kept apart from the state machine on purpose. videoUploaded can resolve

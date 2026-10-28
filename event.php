@@ -74,11 +74,14 @@ switch ($event) {
         // that the reason column shows how far the session actually got, which
         // distinguishes "never started the exam" from "started and abandoned".
         //
+        // Only an ACTIVE row is touched. A PENDING row must stay pending, or this
+        // request alone would unlock the quiz without token.php or the SDK.
+        //
         // The return value is ignored on purpose. If this arrives out of order,
-        // after examFinished or appUnmounted, the transition is refused and the
-        // session keeps its later state -- which is the safe outcome, since a
-        // report must never walk a session backwards into active.
-        session::transition($proctorsession, session::STATE_ACTIVE, 'exam_started');
+        // after examFinished or appUnmounted, nothing is written and the session
+        // keeps its later state -- which is the safe outcome, since a report must
+        // never walk a session backwards into active.
+        session::record_exam_started($proctorsession);
         break;
 
     case 'examfinished':

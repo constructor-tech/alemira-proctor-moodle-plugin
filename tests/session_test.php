@@ -159,6 +159,76 @@ final class session_test extends \advanced_testcase {
     }
 
     /**
+     * examStarted from the browser must never unlock a pending session.
+     *
+     * event.php is the learner's own tab. If examstarted could move PENDING to
+     * ACTIVE, posting it alone would open the quiz with no JWT signed and no SDK
+     * running.
+     */
+    public function test_exam_started_does_not_activate_a_pending_session(): void {
+        global $DB;
+        $this->resetAfterTest();
+
+        $session = $this->make_session(session::STATE_PENDING);
+
+        $this->assertFalse(session::record_exam_started($session));
+
+        $after = $DB->get_record(session::TABLE, ['id' => $session->id]);
+        $this->assertSame(session::STATE_PENDING, $after->state);
+        $this->assertEmpty($after->timeactive);
+        $this->assertEmpty($after->reason);
+    }
+
+    /**
+     * examStarted on an active session records the reason and keeps timeactive.
+     */
+    public function test_exam_started_records_the_reason_on_an_active_session(): void {
+        global $DB;
+        $this->resetAfterTest();
+
+        $session = $this->make_session(session::STATE_PENDING);
+        session::transition($session, session::STATE_ACTIVE, 'token_issued');
+        $first = $DB->get_field(session::TABLE, 'timeactive', ['id' => $session->id]);
+
+        $reread = $DB->get_record(session::TABLE, ['id' => $session->id]);
+        $this->assertTrue(session::record_exam_started($reread));
+
+        $after = $DB->get_record(session::TABLE, ['id' => $session->id]);
+        $this->assertSame(session::STATE_ACTIVE, $after->state);
+        $this->assertSame('exam_started', $after->reason);
+        $this->assertSame($first, $after->timeactive);
+    }
+
+    /**
+     * A late examStarted must leave a later state alone.
+     *
+     * @dataProvider later_state_provider
+     * @param string $state State the session has already moved on to.
+     */
+    public function test_exam_started_leaves_a_later_state_alone(string $state): void {
+        global $DB;
+        $this->resetAfterTest();
+
+        $session = $this->make_session($state);
+
+        $this->assertFalse(session::record_exam_started($session));
+        $this->assertSame($state, $DB->get_field(session::TABLE, 'state', ['id' => $session->id]));
+    }
+
+    /**
+     * States a session can reach after examStarted would normally arrive.
+     *
+     * @return array[]
+     */
+    public static function later_state_provider(): array {
+        return [
+            'finishing' => [session::STATE_FINISHING],
+            'finished' => [session::STATE_FINISHED],
+            'abandoned' => [session::STATE_ABANDONED],
+        ];
+    }
+
+    /**
      * A stale unbound session must be replaced before Moodle creates an attempt.
      *
      * Otherwise a later attempt_started event rejects the session as expired,
