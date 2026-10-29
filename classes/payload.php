@@ -144,10 +144,10 @@ class payload {
 
             // Environment.
             //
-            // Secure Browser is passed through because the settings form exposes it,
-            // but note the tension: this integration exists so that proctoring works
-            // without a desktop application, and the same-origin iframe design has
-            // not been tested with it switched on.
+            // With Secure Browser on, the quiz does not run in this page's
+            // same-origin iframe: the SDK hands the learner to the native app
+            // through LDBLaunchUrl and a single-use login bridge (see
+            // secure_browser).
             'secureBrowser' => (bool) $settings->securebrowser,
         ];
 
