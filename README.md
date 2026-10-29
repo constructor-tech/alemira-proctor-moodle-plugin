@@ -48,6 +48,21 @@ included `.htaccess` file in the relevant virtual host configuration.
 SDK interface configuration is managed only through global and personal
 presets; the integration settings page contains no SDK configuration section.
 
+### Content Security Policy
+
+Moodle sends no Content-Security-Policy header of its own. If your web server
+or proxy adds one, the SDK model needs at least:
+
+- `script-src`: `https://sdk.web.proctor.constructor.app`, and inline module
+  scripts, because the launch page starts the SDK from an inline
+  `<script type="module">`.
+- `connect-src`: the Proctor server URL from the integration settings.
+- `frame-src` and `frame-ancestors`: `'self'`, because the quiz runs in a
+  same-origin iframe on the launch page.
+
+The SDK may contact further Constructor services. Test a launch with the
+browser console open, and ask Constructor support for the current list.
+
 ## Add proctoring to a quiz
 
 1. In the quiz settings, set *Timing ▸ Time limit*. Both models use this value as
