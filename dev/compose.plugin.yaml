@@ -6,6 +6,12 @@
 # is shadowed with a tmpfs so Moodle never walks into it.
 
 services:
+  web36:
+    volumes:
+      - ..:/var/www/html/availability/condition/proctor
+    tmpfs:
+      - /var/www/html/availability/condition/proctor/dev
+
   web310:
     volumes:
       - ..:/var/www/html/availability/condition/proctor
@@ -19,6 +25,12 @@ services:
       - /var/www/html/availability/condition/proctor/dev
 
   web405:
+    volumes:
+      - ..:/var/www/html/availability/condition/proctor
+    tmpfs:
+      - /var/www/html/availability/condition/proctor/dev
+
+  web405pg:
     volumes:
       - ..:/var/www/html/availability/condition/proctor
     tmpfs:

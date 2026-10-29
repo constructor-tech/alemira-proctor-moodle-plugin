@@ -1,118 +1,154 @@
-# PROCTOR MOODLE PLUGIN
+# Proctor by Constructor for Moodle
 
-## Requirements
+`availability_proctor` is a Moodle availability condition that protects an
+activity with Constructor Proctor. It supports two site-wide integration models:
 
-Proctor by Constructor plugin was tested with Moodle versions 3.8 to 5.x.
+- **Webapp** redirects the learner to the Constructor-hosted proctoring page.
+- **SDK** runs Constructor Proctor on Moodle's launch page and embeds the quiz in
+  a same-origin iframe.
 
-## Installation and integration
+A Constructor Proctor account and integration credentials are required.
 
-### Plugin installation
+## Requirements and compatibility
 
-Download ZIP file from (add link), login to your Moodle site as an admin, open `Site administration → Plugins → Install plugins`, 
-upload the ZIP file and install it.
+| Model | Moodle | Activities |
+|---|---|---|
+| Webapp | 3.6 or later | Quiz, Assignment and SCORM |
+| SDK | 3.11 or later | Quiz only |
 
-### Prerequisites
-* If using `apache2 + mod_php` configuration, make sure that `mod_rewrite` is enabled and and overrides are allowed for the plugin dir. 
-  if it is impossible to to enable overrides, refer to contents of `.htaccess` and implement this configuration in your `VirtualHosts` config.
+MySQL/MariaDB and PostgreSQL are supported through Moodle's database API.
+Production PHP remains compatible with PHP 7.0 for legacy Moodle installations.
 
+Existing sites upgrading from v2.7 or earlier remain on Webapp. Clean
+installations start on SDK. The model can be changed under the plugin settings;
+Assignment and SCORM continue to use Webapp regardless of that choice.
 
-### Integration setup
+## Installation
 
-1. Request integration name, secret, account name and id form Constructor Proctor team.
-2. Go to `Admin -> Plugins -> Constructor Proctor -> Integration Settings` and fill these values.
-3. Choose value for `Send user emails to Constructor Proctor` field, if disabled, Proctor will not receive emails of learners.
-4. Choose value for `Seemless authorization`, if enabled, Proctor will be able to authorize learners into moodle, 
-   if disabled, users will have to login into modle inside proctoring.
+1. Download the latest ZIP from the
+   [GitHub releases page](https://github.com/constructor-tech/alemira-proctor-moodle-plugin/releases).
+2. In Moodle, open *Site administration ▸ Plugins ▸ Install plugins*.
+3. Upload the ZIP and complete the installation.
 
-## Usage
+For Apache with `mod_php`, enable `mod_rewrite` and allow `.htaccess` overrides
+for the plugin directory. If overrides are disabled, apply the rules from the
+included `.htaccess` file in the relevant virtual host configuration.
 
-### Setting a restriction for a module
+## Integration setup
 
-1. In course editing mode, choose `Edit settings` for the module (quiz) you want to use with Proctor by Constructor proctoring. 
-   Scroll down to `Restrict access`.
-2. Choose `Add restrictions... → Proctor by Constructor` to enable proctoring for this module.
-3. Specify the duration of the proctoring session. If you already have a time restriction for the module (quiz), 
-   the proctoring session duration must be equal to the time restriction setting.
-4. Choose the proctoring mode.
-5. Choose the rules for the proctoring session.
+1. Request the integration name, secret, account name and account ID from the
+   Constructor Proctor team.
+2. Open *Site administration ▸ Plugins ▸ Availability restrictions ▸ Proctor by
+   Constructor ▸ Settings*.
+3. Enter the integration values and choose the site-wide **Webapp** or **SDK**
+   model.
+4. Configure whether learner email addresses are sent and whether seamless
+   Moodle authentication is enabled.
 
+SDK interface configuration is managed only through global and personal
+presets; the integration settings page contains no SDK configuration section.
 
-### Adding a new entry
+### Content Security Policy
 
-If the student attempted the module once, for every following attempt a new Proctor by Constructor entry must be created in the following way.
-1. Login as an admin. Go to `Site administration → Reports → Proctor by Constructor settings`.
-2. Find the exam you want to allow a new attempt for. Click the button `New entry`.
+Moodle sends no Content-Security-Policy header of its own. If your web server
+or proxy adds one, the SDK model needs at least:
 
+- `script-src`: `https://sdk.web.proctor.constructor.app`, and inline module
+  scripts, because the launch page starts the SDK from an inline
+  `<script type="module">`.
+- `connect-src`: the Proctor server URL from the integration settings.
+- `frame-src` and `frame-ancestors`: `'self'`, because the quiz runs in a
+  same-origin iframe on the launch page.
 
-### Special accomodation field
-The plugin allows passing learner's special accommodation to Constuctor Proctor, a custom profile field has to be created for that.
-1. Go to `Admin -> Users -> User profile fields`
-2. Click `Create a new profile field -> Text area`
-3. Set short name to `proctor_special_accommodations`, set name to something readable, e.g. "Proctoring special accommodations"
+The SDK may contact further Constructor services. Test a launch with the
+browser console open, and ask Constructor support for the current list.
 
+## Add proctoring to a quiz
 
-## Structure
+1. In the quiz settings, set *Timing ▸ Time limit*. Both models use this value as
+   the proctoring duration; a proctored quiz without a time limit cannot start.
+2. Under *Restrict access*, choose *Add restriction… ▸ Proctor by Constructor*.
+3. Load a preset or configure the visible exam fields such as proctoring mode,
+   identification, cameras, secure browser, rules, warnings and scoring.
+4. Add exam-specific Custom rules when needed.
+5. Optionally select Moodle groups. With no groups selected, every learner in
+   scope is proctored; otherwise only members of the selected groups are.
 
-### Entrypoints
- 
-* `index.php` - List of student `entries` or proctoring sessions in Admin panel
-* `defaults.php` - Admin section for changing default proctored exam settings
-* `api.php` - Webhook implementing Proctor Simple API - receives information on session status changes and echeduled exams
-* `entry.php` - Learner is redirected here inside proctoring. Handles seemless auths and redirects to quiz
+Calendar booking and automatic rescheduling are not supported by this version.
 
-### Local development
+Each preset always stores all sixteen SDK configuration parameters. They are
+shown as five direct groups on the preset form only while the site uses the SDK
+model; Webapp sites hide them because Webapp ignores them. Selecting a preset
+copies those values into the quiz as a hidden snapshot. Editing another exam
+field changes the displayed preset state to **Custom** but preserves the SDK
+snapshot. Later preset edits do not change configured quizzes; select the preset
+again to refresh the snapshot intentionally. Assignment, SCORM and every Webapp
+flow ignore these SDK values.
 
-* Install moodle by following the official [installation guide](https://docs.moodle.org/500/en/Installing_Moodle). 
-  Use a PHP version required for your Moodle version of choice. The setup process will guide you through additional requirements.
-* Clone this repository into `[moodle_dir]/availability/condition/proctor`
-* Enable Developer mode and debug messages output in `Site administration → Development`
-* For rebuilding the frontend part, you have to use YUI and Shifter, see the [official guide](https://moodledev.io/docs/5.0/guides/javascript/yui)
+## Reports and additional attempts
 
+The report under *Site administration ▸ Reports ▸ Proctor by Constructor* shows
+historical Webapp and SDK sessions together, even after the site model changes.
 
-### Build and release
+For Webapp, an administrator can use **New entry** to create a fresh Constructor
+entry. For SDK, the button is available on the latest ended session while its
+Moodle quiz attempt is still in progress. It creates a new Constructor session
+and recording while preserving the learner's Moodle attempt, saved answers and
+remaining time. The current Constructor session must be confirmed as ended, so
+two recordings cannot be active for the same attempt.
 
-Local build requirements (no Docker):
-- Node.js 20 + npm
-- Python 3
-- zip
-- shifter (`npm install -g shifter`)
+## Special accommodations
 
-Local release build:
+The Webapp payload can include a learner's special accommodations:
+
+1. Open *Site administration ▸ Users ▸ User profile fields*.
+2. Create a **Text area** profile field.
+3. Set its short name to `proctor_special_accommodations`.
+
+## Upgrade behavior
+
+- Existing sites remain on Webapp and retain their stored exams and history.
+- Legacy site defaults that fit the preset model are migrated into an editable
+  global preset.
+- The legacy site-wide Custom rules text continues to prefill new restrictions.
+- Legacy site-wide group defaults are not applied because group IDs are
+  course-specific and v2.7 did not persist them on saved conditions.
+
+See [CHANGELOG.md](CHANGELOG.md) for complete release impact.
+
+## Development
+
+These commands apply to the source repository, not the customer release ZIP.
+
+Clone the repository into:
+
+```text
+[moodle-root]/availability/condition/proctor
 ```
+
+For the included Docker development environments and PHPUnit commands, see the
+[development guide](https://github.com/constructor-tech/alemira-proctor-moodle-plugin/blob/master/dev/README.md)
+in the source repository.
+
+To build locally:
+
+```bash
+npm install
+make yui-build
 make release
 ```
 
-Local YUI-only build:
-```
-make yui-build
-```
+Requirements are Node.js 20, npm and Python 3. Docker alternatives are available:
 
-Dockerized release build (no local deps needed beyond Docker):
-```
+```bash
+make yui-build-docker
 make release-docker
 ```
 
-Dockerized YUI-only build:
-```
-make yui-build-docker
-```
+Before creating a release, bump `$plugin->version` in `version.php`. Do not reuse
+a version already installed by a customer. `utils/release.py --force` overwrites
+an existing local archive and must only be used deliberately.
 
-Release commands rebuild YUI assets and create the release archive.
-
-### How to release new version of the plugin
-
-1. Build with python utils/release.py -f
-
-1. Create a tag based on version from version.php: git tag v2026012100
-
-1. Push tag to the origin git push origin --tags
-
-1. Go to Releases: https://github.com/constructor-tech/alemira-proctor-moodle-plugin/releases → Draft new release
-
-1. Select your fresh tag (“Select tag”), check auto-generated Release title and click “Generate release notes”. Review the notes. 
-
-1. Attach release archive (*.zip file you’ve generated on the step 1). Mark as ‘pre-release’ if you’re still on your branch, do not mark if on master.
-
-1. Check “Set as the latest release”
-
-1. Click “Publish release”
+After building, inspect every ZIP before publishing. The archive must contain one
+top-level plugin directory and must not contain local notes, credentials, build
+containers or release tooling.

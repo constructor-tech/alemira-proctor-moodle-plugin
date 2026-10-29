@@ -49,4 +49,32 @@ $capabilities = [
         ],
     ],
 
+    'availability/proctor:managepresets' => [
+        'riskbitmask' => RISK_CONFIG,
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => [
+            'manager' => CAP_ALLOW,
+        ],
+    ],
+
+    // Sit a proctored quiz without proctoring, under either model.
+    //
+    // Granted to no archetype by default, which differs from the plugin the SDK
+    // flow was taken from -- it gave this to editingteacher and manager. Both
+    // already reach the questions unproctored through the preview check, which
+    // tests mod/quiz:preview, and core grants that to both roles. So the defaults
+    // would add no access that anyone actually has, while making a capability
+    // whose only real use is exempting a specific student look like something
+    // teachers are meant to hold.
+    //
+    // New in this release and granted to no role, so applying it to the Webapp
+    // flow as well changes no exam a site is running today.
+    'availability/proctor:exemptproctoring' => [
+        'riskbitmask' => RISK_PERSONAL,
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => [],
+    ],
+
 ];

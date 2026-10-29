@@ -27,6 +27,13 @@ namespace availability_proctor;
 use availability_proctor\utils;
 
 
+/**
+ * Hook callbacks for Moodle 4.4+ hook system.
+ *
+ * @package    availability_proctor
+ * @copyright  2019-2024 Maksim Burnin <maksim.burnin@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class hooks {
     /**
      * Hooks into head rendering. Adds proctoring fader/shade and accompanying javascript
@@ -39,11 +46,11 @@ class hooks {
      * @return string|void The legacy implementation will return a string, the hook implementation will return nothing.
      */
     public static function before_standard_head_html_generation($hook = null) {
-        global $DB, $USER;
+        global $DB, $USER, $PAGE;
 
         $html = '';
 
-        // If there is no active attempt, do nothing.
+        // Quiz: existing behaviour — fader shown on in-progress quiz attempt pages.
         if (isset(state::$attempt['attempt_id'])) {
             $attemptid = state::$attempt['attempt_id'];
             $attempt = $DB->get_record('quiz_attempts', ['id' => $attemptid]);
@@ -51,6 +58,36 @@ class hooks {
                 $html = '';
             } else {
                 $html = utils::handle_proctoring_fader($attempt);
+            }
+        }
+
+        // SCORM: fader shown on the SCORM view page when there is an active proctoring entry.
+        // Note: $PAGE->cm is exposed via moodle_page::__get(), and moodle_page defines no
+        // __isset(), so empty()/isset() on it always report "unset" regardless of the real
+        // value — compare against null directly instead.
+        if (!$html && $PAGE->cm !== null && $PAGE->cm->modname === 'scorm') {
+            $html = utils::handle_proctoring_fader_scorm($PAGE->cm);
+        }
+
+        // Assign: fader shown on the assign view page when there is an active proctoring entry.
+        if (!$html && $PAGE->cm !== null && $PAGE->cm->modname === 'assign') {
+            $html = utils::handle_proctoring_fader_assign($PAGE->cm);
+        }
+
+        // Lockdown: hide Moodle navigation chrome while Proctor is active.
+        // Quiz uses this on core's start-attempt pre-flight page before an attempt
+        // exists; SCORM and assign use it throughout their protected flow.
+        if (state::$lockdown) {
+            if (!$html) {
+                $html .= utils::get_lockdown_css();
+            }
+
+            // Quiz CSS intentionally preserves the right block drawer because it
+            // contains Quiz navigation. The stronger legacy JS hides every drawer
+            // and remains limited to SCORM/assign, where that is still expected.
+            $isquiz = $PAGE->cm !== null && $PAGE->cm->modname === 'quiz';
+            if (!$isquiz) {
+                $html .= utils::get_hide_chrome_js();
             }
         }
 

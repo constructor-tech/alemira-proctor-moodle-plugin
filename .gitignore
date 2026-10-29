@@ -1,7 +1,44 @@
-node_modules
-package-lock.json
-releases
+# Dependencies and generated artifacts.
+/node_modules/
+/vendor/
+/package-lock.json
+/composer.lock
+/releases/
+/coverage/
+*-coverage.js
+/.nyc_output/
+/.phpunit.cache/
+/.phpunit.result.cache
+__pycache__/
+*.py[cod]
+
+# Local configuration and secrets.
+/.env
+/.env.*
+!/.env.example
+
+# Editor and operating-system files.
 .DS_Store
-.cursor
-openspec
-dev/.moodle
+Thumbs.db
+/.cursor/
+/.claude/
+/.idea/
+/.vscode/
+*.swp
+*.swo
+
+# Internal work that must not be committed or released.
+/ci/
+/mylocal/
+/openspec/
+/plans/
+/CLAUDE.md
+/CLAUDE.local.md
+AGENTS.md
+
+# Per-brand overlay sources. The Constructor source tree is canonical; release.py
+# applies these local overlays only while building the corresponding brand ZIP.
+/branding/
+
+# Local Moodle source clones and persistent development state.
+/dev/.moodle/

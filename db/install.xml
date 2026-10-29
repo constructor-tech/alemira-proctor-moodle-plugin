@@ -1,9 +1,67 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="availability/condition/proctor/db" VERSION="20230503" COMMENT="XMLDB file for Moodle availability/condition/proctor"
+<XMLDB PATH="availability/condition/proctor/db" VERSION="20260824" COMMENT="XMLDB file for Moodle availability/condition/proctor"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../../lib/xmldb/xmldb.xsd"
 >
   <TABLES>
+    <TABLE NAME="availability_proctor_presets" COMMENT="Reusable proctoring presets (exam conduct policy)">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="is_default" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="is_system" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="type" TYPE="char" LENGTH="10" NOTNULL="true" DEFAULT="global" SEQUENCE="false" COMMENT="global or user"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Owner of user-type preset"/>
+        <FIELD NAME="mode" TYPE="char" LENGTH="30" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="schedulingrequired" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="autorescheduling" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="identification" TYPE="char" LENGTH="30" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="checkidphotoquality" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="useragreementurl" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="preliminarycheck" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="webcameramainview" TYPE="char" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="auxiliarycamera" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="allowroomscanauxcamera" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="streamspreset" TYPE="char" LENGTH="30" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sendmanualwarningstolearner" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="securebrowser" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="securebrowserlevel" TYPE="char" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="allowedprocesses" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="forbiddenprocesses" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="allowvirtualenvironment" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="allowtouseadditionalresources" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="allowmultipledisplays" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="calculator" TYPE="char" LENGTH="20" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="rules" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON rules object"/>
+        <FIELD NAME="warnings" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON warnings object"/>
+        <FIELD NAME="scoring" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON scoring object"/>
+        <FIELD NAME="sdkallowcameraselection" TYPE="char" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sdkalwaysshowchat" TYPE="char" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sdkbeforeexamlist" TYPE="char" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sdkdesktopcheckfirst" TYPE="char" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sdkdisabledworkers" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="One SDK background worker name per line"/>
+        <FIELD NAME="sdkexperimentwatchwindowsize" TYPE="char" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sdkfocusrespectsrules" TYPE="char" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sdkfullscreenwatchfocusalert" TYPE="char" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sdkidentificationbullets" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON identification onboarding configuration"/>
+        <FIELD NAME="sdkobserveworkspace" TYPE="char" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sdkopenagreementlinksiniframe" TYPE="char" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sdkaudionotification" TYPE="char" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sdkshowfinishexambutton" TYPE="char" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sdkshowsyschecksupportnew" TYPE="char" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sdksyscheckhelpurl" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sdktranslationsoverride" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON SDK translation overrides"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="type_default" UNIQUE="false" FIELDS="type, is_default"/>
+      </INDEXES>
+    </TABLE>
     <TABLE NAME="availability_proctor_entries" COMMENT="List of proctoring attempts">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
@@ -34,6 +92,66 @@
       </KEYS>
       <INDEXES>
         <INDEX NAME="accesscode" UNIQUE="true" FIELDS="accesscode"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="availability_proctor_sess" COMMENT="SDK proctoring sessions. One Moodle attempt may have sequential sessions after an instructor creates New entry. The Webapp model uses availability_proctor_entries instead. Each row is retained as forensic history because the SDK exposes no error channel.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="attemptid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Nullable until a normal launch binds to an attempt. Instructor-created New entries are pre-bound to the existing in-progress attempt so its answers and timer survive while Constructor receives a fresh sessionId."/>
+        <FIELD NAME="quizid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="sessionkey" TYPE="char" LENGTH="230" NOTNULL="true" SEQUENCE="false" COMMENT="The sessionId JWT claim. 230 is the maximum the Developer Guide allows. Generated once and read back from this row on every relaunch -- never re-derived, because a reload must reuse the same sessionId."/>
+        <FIELD NAME="state" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="pending" SEQUENCE="false" COMMENT="pending, active, finishing, finished or abandoned. Transitions are one-way; see classes/session.php."/>
+        <FIELD NAME="reason" TYPE="char" LENGTH="100" NOTNULL="false" SEQUENCE="false" COMMENT="Which SDK event drove the move to finishing or abandoned. The SDK has no error channel, so without this there is no record of why a session ended."/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timeactive" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="When the JWT was signed and the session became active."/>
+        <FIELD NAME="timebound" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="When the session bound to an attempt. The gap between timeactive and this is the window in which an active session is an unspent permission, so it is recorded to make that window auditable."/>
+        <FIELD NAME="timefinishing" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="When examFinished resolved: recording stopped here, so anything after this timestamp is an unproctored tail."/>
+        <FIELD NAME="timefinished" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="When the attempt was submitted. Submission alone drives the finished state."/>
+        <FIELD NAME="timeabandoned" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="When appUnmounted resolved."/>
+        <FIELD NAME="videouploaded" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="When videoUploaded resolved. Deliberately NOT a state condition: it can resolve after the row is already finished, and a finished row with a null value here is a reviewer signal (video may be incomplete), not a broken state."/>
+        <FIELD NAME="timefinishsent" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="When the server-to-server finish request succeeded. Stops the request being repeated, and shows whether the recording was stopped by us on submission or by the learner pressing Finish exam."/>
+        <FIELD NAME="conclusion" TYPE="char" LENGTH="20" NOTNULL="false" SEQUENCE="false" COMMENT="Proctoring conclusion from the result webhook: accepted, rejected or unknown. Null until a result arrives."/>
+        <FIELD NAME="score" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Proctoring score, 0-100. Null when the webhook omitted it, which is not the same as zero."/>
+        <FIELD NAME="comment" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Proctor notes from the result webhook."/>
+        <FIELD NAME="threshold" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="The attention and rejected score thresholds, as JSON. Needed to interpret the score, since the boundaries are per-exam."/>
+        <FIELD NAME="reporturl" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Link to the session warnings report on the Constructor side."/>
+        <FIELD NAME="archiveurl" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Link to the video archive for the session."/>
+        <FIELD NAME="resultwarnings" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="The warnings registered during the exam, as JSON. Named to distinguish it from the per-exam visibleWarnings setting, which is a different thing entirely."/>
+        <FIELD NAME="warningtitles" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Translated titles for the warning types, as JSON."/>
+        <FIELD NAME="sessionstart" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="When proctoring started, as reported by Constructor."/>
+        <FIELD NAME="sessionend" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="When proctoring finished, as reported by Constructor."/>
+        <FIELD NAME="timeresult" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="When the most recent result webhook was accepted. The guide says Constructor repeats the call as fields become known, so this moves."/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="sessionkey" UNIQUE="true" FIELDS="sessionkey"/>
+        <INDEX NAME="attemptid" UNIQUE="false" FIELDS="attemptid" COMMENT="Not unique: New entry intentionally creates sequential Constructor sessions for the same Moodle attempt, and normal launches also need multiple nullable unbound rows across users and quizzes."/>
+        <INDEX NAME="quizid_userid_state" UNIQUE="false" FIELDS="quizid, userid, state" COMMENT="Supports the open-session lookup: does this learner have a live session for this quiz?"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="availability_proctor_deny" COMMENT="Blocked access attempts under the SDK proctoring model. Separate from the session table because a denial can occur with no session row at all, which is the most interesting case, and because denials are high-volume and want pruning while session rows are evidence to keep.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="attemptid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Nullable: the attempt may not exist or may not be identifiable on the denied request."/>
+        <FIELD NAME="quizid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="sessionid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Session row involved, when there was one. No foreign key: the session row may be pruned while the denial record is kept."/>
+        <FIELD NAME="sessionstate" TYPE="char" LENGTH="20" NOTNULL="false" SEQUENCE="false" COMMENT="Session state at the moment of denial, copied here so the record stays meaningful after the session moves on."/>
+        <FIELD NAME="reason" TYPE="char" LENGTH="40" NOTNULL="true" SEQUENCE="false" COMMENT="no_session, state_pending, state_finished, sec_fetch_dest, not_owner or no_config."/>
+        <FIELD NAME="script" TYPE="char" LENGTH="40" NOTNULL="true" SEQUENCE="false" COMMENT="Which entry point denied: attempt, summary, processattempt or autosave."/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="attemptid_reason_time" UNIQUE="false" FIELDS="attemptid, reason, timecreated" COMMENT="Supports the dedupe lookup, which asks for the most recent row with this attempt and reason."/>
       </INDEXES>
     </TABLE>
   </TABLES>
