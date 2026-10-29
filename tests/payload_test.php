@@ -24,6 +24,7 @@ namespace availability_proctor;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @covers     \availability_proctor\payload
  * @covers     \availability_proctor\utils::profile_picture_needs_token
+ * @covers     \availability_proctor\jwt::verify
  */
 final class payload_test extends \advanced_testcase {
     /**
@@ -154,6 +155,49 @@ final class payload_test extends \advanced_testcase {
         set_config('forceloginforprofileimage', 1);
         $url = $client->user_data($user)['preliminaryCheck']['photo_url'];
         $this->assertStringContainsString('/tokenpluginfile.php/', $url);
+    }
+
+    /**
+     * The learner's token is signed with the same secret as the result webhook,
+     * and the webhook refuses it only because it carries no exp claim. Pin that,
+     * so adding exp to the learner payload cannot go unnoticed.
+     */
+    public function test_learner_token_is_not_accepted_as_a_webhook_token(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+        set_config('proctormodel', config::MODEL_SDK, 'availability_proctor');
+        set_config('proctor_url', 'https://proctor.invalid', 'availability_proctor');
+        set_config('integration_name', 'test-integration', 'availability_proctor');
+        set_config('jwt_secret', 'test-secret', 'availability_proctor');
+        set_config('account_id', 'test-account-id', 'availability_proctor');
+        set_config('account_name', 'test-account', 'availability_proctor');
+
+        $course = $this->getDataGenerator()->create_course();
+        $user = $this->getDataGenerator()->create_user();
+        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id, 'timelimit' => 1800]);
+        $DB->set_field('course_modules', 'availability', json_encode([
+            'op' => '&',
+            'c' => [['type' => 'proctor']],
+            'showc' => [true],
+        ]), ['id' => $quiz->cmid]);
+        rebuild_course_cache($course->id, true);
+
+        $session = session::get_or_create((int) $quiz->id, (int) $user->id);
+        $cm = get_coursemodule_from_instance('quiz', $quiz->id, $course->id, false, MUST_EXIST);
+        $config = config::get();
+        $claims = payload::build(
+            utils::quiz_for_user((int) $quiz->id, (int) $user->id),
+            $course,
+            $user,
+            config::get_quiz_settings((int) $quiz->id),
+            $session,
+            $config,
+            $cm
+        );
+
+        $this->assertArrayNotHasKey('exp', $claims);
+        $this->assertNull(jwt::verify(jwt::sign($claims, $config->jwtsecret), $config->jwtsecret));
     }
 
     /**
