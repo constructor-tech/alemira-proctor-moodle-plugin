@@ -70,6 +70,23 @@ class utils {
     }
 
     /**
+     * Whether a profile picture URL sent to Constructor Proctor needs a user key.
+     *
+     * The Constructor server fetches the picture with no Moodle session. Moodle
+     * serves profile pictures to anyone unless forcelogin or
+     * forceloginforprofileimage is on, so only then does the URL need the
+     * learner's core_files key. That key never expires and opens every file the
+     * learner can see, so it is not sent when the picture is public anyway.
+     *
+     * @return bool
+     */
+    public static function profile_picture_needs_token(): bool {
+        global $CFG;
+
+        return !empty($CFG->forcelogin) || !empty($CFG->forceloginforprofileimage);
+    }
+
+    /**
      * Returns the correct quiz attempt class name for this Moodle version.
      *
      * @return string Fully qualified class name

@@ -512,7 +512,9 @@ class client {
 
         $userpicture = new \user_picture($user);
         $userpicture->size = 1; // Size f1.
-        $userpicture->includetoken = $user->id;
+        if (utils::profile_picture_needs_token()) {
+            $userpicture->includetoken = $user->id;
+        }
         $profileimageurl = $userpicture->get_url($PAGE)->out(false);
 
         $special = null;

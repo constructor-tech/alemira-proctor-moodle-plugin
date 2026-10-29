@@ -180,9 +180,9 @@ class payload {
         }
 
         // The preliminary check compares the student against a reference picture,
-        // so it needs one. Moodle's profile picture is the only candidate, and the
-        // URL has to carry a token: the Constructor server fetches it with no Moodle
-        // session, and would otherwise get the login page instead of an image.
+        // so it needs one. Moodle's profile picture is the only candidate. The
+        // Constructor server fetches it with no Moodle session; see
+        // profile_picture_url() for when the URL has to carry a token.
         if (!empty($settings->preliminarycheck)) {
             $photourl = self::profile_picture_url($user);
             if ($photourl !== null) {
@@ -276,10 +276,12 @@ class payload {
     }
 
     /**
-     * A tokenised URL for the student's profile picture, or null if they have none.
+     * A URL for the student's profile picture, or null if they have none.
      *
-     * The token matters: the Constructor server fetches this without a Moodle
-     * session, so an ordinary pluginfile URL would return the login page.
+     * The Constructor server fetches this without a Moodle session. When the site
+     * requires login to see profile pictures, an ordinary pluginfile URL returns
+     * the default avatar, so the URL carries the student's token; otherwise it
+     * does not (see utils::profile_picture_needs_token()).
      *
      * @param \stdClass $user The student.
      * @return string|null
@@ -297,7 +299,9 @@ class payload {
         // Moodle releases and is already used by the Webapp payload builder.
         $picture = new \user_picture($user);
         $picture->size = 1;
-        $picture->includetoken = $user->id;
+        if (utils::profile_picture_needs_token()) {
+            $picture->includetoken = $user->id;
+        }
 
         return $picture->get_url($PAGE)->out(false);
     }

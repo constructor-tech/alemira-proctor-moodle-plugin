@@ -23,6 +23,7 @@ namespace availability_proctor;
  * @copyright  2026 Constructor Tech
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @covers     \availability_proctor\payload
+ * @covers     \availability_proctor\utils::profile_picture_needs_token
  */
 final class payload_test extends \advanced_testcase {
     /**
@@ -102,16 +103,69 @@ final class payload_test extends \advanced_testcase {
     public function test_profile_picture_url_uses_compatible_output_class(): void {
         $this->resetAfterTest();
         $this->setAdminUser();
+        set_config('forceloginforprofileimage', 1);
 
         $user = $this->getDataGenerator()->create_user();
         $user->picture = 1;
 
-        $method = new \ReflectionMethod(payload::class, 'profile_picture_url');
-        $method->setAccessible(true);
-        $url = $method->invoke(null, $user);
+        $url = $this->profile_picture_url($user);
 
         $this->assertNotEmpty($url);
         $this->assertStringContainsString('/tokenpluginfile.php/', $url);
         $this->assertStringContainsString('/user/icon/', $url);
+    }
+
+    /**
+     * The learner's file key goes off-site only when Moodle hides profile
+     * pictures from visitors who are not logged in.
+     */
+    public function test_profile_picture_url_carries_token_only_when_login_required(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $user = $this->getDataGenerator()->create_user();
+        $user->picture = 1;
+
+        $url = $this->profile_picture_url($user);
+        $this->assertStringContainsString('/pluginfile.php/', $url);
+        $this->assertStringNotContainsString('/tokenpluginfile.php/', $url);
+
+        set_config('forcelogin', 1);
+        $this->assertStringContainsString('/tokenpluginfile.php/', $this->profile_picture_url($user));
+    }
+
+    /**
+     * The Webapp payload follows the same rule as the SDK payload.
+     */
+    public function test_webapp_photo_url_carries_token_only_when_login_required(): void {
+        global $CFG;
+        require_once($CFG->dirroot . '/user/profile/lib.php');
+
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $user = $this->getDataGenerator()->create_user();
+        $user->picture = 1;
+        $client = new client(new condition((object) ['type' => 'proctor', 'preliminarycheck' => true]));
+
+        $url = $client->user_data($user)['preliminaryCheck']['photo_url'];
+        $this->assertStringNotContainsString('/tokenpluginfile.php/', $url);
+
+        set_config('forceloginforprofileimage', 1);
+        $url = $client->user_data($user)['preliminaryCheck']['photo_url'];
+        $this->assertStringContainsString('/tokenpluginfile.php/', $url);
+    }
+
+    /**
+     * Calls the protected payload::profile_picture_url().
+     *
+     * @param \stdClass $user The student.
+     * @return string|null
+     */
+    private function profile_picture_url(\stdClass $user) {
+        $method = new \ReflectionMethod(payload::class, 'profile_picture_url');
+        $method->setAccessible(true);
+
+        return $method->invoke(null, $user);
     }
 }

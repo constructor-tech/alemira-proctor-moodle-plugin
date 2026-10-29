@@ -7,6 +7,10 @@ This file starts at v2.8. Earlier releases are recorded in the Git history.
 
 ## Unreleased
 
+- The profile picture URL sent to Constructor Proctor for the preliminary check
+  now carries the learner's file access key only when the site requires login
+  to see profile pictures (`forcelogin` or `forceloginforprofileimage`). On
+  other sites the picture is public and the key is no longer sent.
 - Fixed user and group quiz overrides being ignored in the duration sent to
   Constructor Proctor, and under the SDK model also in the exam window. A
   learner with extra time or a later close date now gets it in Proctor too.
