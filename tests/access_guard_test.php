@@ -274,4 +274,39 @@ final class access_guard_test extends \advanced_testcase {
             'reason' => 'external_session_ended',
         ]));
     }
+
+    /**
+     * After the SDK unmounts, the quiz and autosave are blocked and the learner
+     * is told an instructor must create a New entry.
+     */
+    public function test_unmounted_session_requires_new_entry(): void {
+        global $DB;
+
+        $session = $this->active_session();
+        $attempt = $this->start_attempt();
+        $this->guard('attempt', (int) $attempt->id);
+        session::transition(
+            $DB->get_record(session::TABLE, ['id' => $session->id]),
+            session::STATE_ABANDONED,
+            'app_unmounted'
+        );
+        $_SERVER['HTTP_SEC_FETCH_DEST'] = 'empty';
+
+        foreach (['attempt', 'autosave'] as $script) {
+            try {
+                $this->guard($script, (int) $attempt->id);
+                $this->fail("an unmounted session must not serve {$script}");
+            } catch (\moodle_exception $e) {
+                $this->assertSame(
+                    get_string('error_sessionended_newentry', 'availability_proctor'),
+                    $e->getMessage()
+                );
+            }
+        }
+
+        $this->assertTrue($DB->record_exists(session::TABLE_DENIED, [
+            'attemptid' => $attempt->id,
+            'reason' => 'state_abandoned',
+        ]));
+    }
 }

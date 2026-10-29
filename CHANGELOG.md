@@ -7,6 +7,9 @@ This file starts at v2.8. Earlier releases are recorded in the Git history.
 
 ## Unreleased
 
+- Fixed a quiz staying open without proctoring after the SDK closed
+  unexpectedly. The attempt is now blocked until an instructor creates a New
+  entry, as it already was when Constructor ended the session.
 - Fixed a learner exempt from proctoring being sent to Proctor in the middle of
   a quiz attempt under the Webapp model. The exemption now covers the attempt
   pages, not only the start of the attempt.

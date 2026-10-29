@@ -211,7 +211,7 @@ function availability_proctor_guard_sdk_quiz_request($script) {
             : ($proctorsession->state === session::STATE_FINISHED
                 ? 'state_finished' : 'state_' . $proctorsession->state);
         session::record_denial($reason, $script, $attemptid, (int) $attempt->quiz, $proctorsession);
-        $errorcode = $externallyended
+        $errorcode = ($externallyended || $proctorsession->state === session::STATE_ABANDONED)
             ? 'error_sessionended_newentry'
             : ($proctorsession->state === session::STATE_FINISHED
                 ? 'error_sessionfinished' : 'error_nosession');

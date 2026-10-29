@@ -158,8 +158,9 @@ switch ($event) {
 
     case 'appunmounted':
         // The SDK closed before the normal end of the flow, and it does not tell
-        // us whether that was deliberate or a crash. Access stays allowed for the
-        // same reason as examfinished.
+        // us whether that was deliberate or a crash. Nothing is recorded from here
+        // on, so the attempt is blocked until an instructor creates a New entry,
+        // the same as a session Constructor ended.
         session::transition($proctorsession, session::STATE_ABANDONED, 'app_unmounted');
         break;
 }

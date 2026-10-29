@@ -177,7 +177,7 @@ $string['settings_user_emails_desc'] = 'If enabled, Moodle sends learner email a
 // scheduled task. Only used when the site runs the SDK model.
 $string['backtoquiz'] = 'Back to the quiz';
 
-$string['error_abandoned'] = 'Proctoring stopped unexpectedly. Any answers you have already saved are kept, but the rest of your attempt is not being recorded. Contact your teacher before continuing.';
+$string['error_abandoned'] = 'Proctoring stopped unexpectedly. Your Moodle attempt and saved answers are kept, but your teacher must create a New entry before you can continue.';
 $string['error_nojavascript'] = 'JavaScript is turned off in your browser. The proctoring software needs it, and this quiz cannot be attempted without a proctoring session. Turn JavaScript on and reload this page.';
 $string['error_noquestions'] = 'This quiz has no questions yet, so it cannot be attempted. Contact your teacher.';
 

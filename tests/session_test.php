@@ -306,6 +306,11 @@ final class session_test extends \advanced_testcase {
             'a pending session must never serve the quiz'
         );
         $this->assertContains(session::STATE_ACTIVE, session::STATES_ALLOWING_ACCESS);
+        $this->assertNotContains(
+            session::STATE_ABANDONED,
+            session::STATES_ALLOWING_ACCESS,
+            'an unmounted SDK session must not keep serving the quiz unrecorded'
+        );
     }
 
     /**

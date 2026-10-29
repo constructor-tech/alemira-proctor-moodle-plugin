@@ -53,7 +53,10 @@ class session {
     /** @var string The attempt was submitted. Terminal, and blocks access. */
     const STATE_FINISHED = 'finished';
 
-    /** @var string appUnmounted or an instructor replacement closed the local row. */
+    /**
+     * @var string appUnmounted or an instructor replacement closed the local row.
+     * Blocks access: the attempt continues only after an instructor's New entry.
+     */
     const STATE_ABANDONED = 'abandoned';
 
     /** @var string Table holding session rows. */
@@ -90,11 +93,18 @@ class session {
         self::STATE_ABANDONED => [self::STATE_PENDING, self::STATE_ACTIVE, self::STATE_FINISHING],
     ];
 
-    /** @var array States in which a guarded quiz script may be served. */
+    /**
+     * States in which a guarded quiz script may be served.
+     *
+     * ABANDONED is not one: once the SDK has closed nothing is recorded, so the
+     * learner waits for an instructor's New entry, as after any other ended
+     * session.
+     *
+     * @var array
+     */
     const STATES_ALLOWING_ACCESS = [
         self::STATE_ACTIVE,
         self::STATE_FINISHING,
-        self::STATE_ABANDONED,
     ];
 
     /** @var array States in which a session is still live and may be reused. */

@@ -396,14 +396,15 @@ export const start = (root) => {
 
         session.appUnmounted.then(() => {
             // The SDK closed before the normal end of the flow, and does not say
-            // whether that was deliberate or a crash. The quiz stays available for
-            // the same reason as above; the student is told proctoring has stopped
-            // so the silence is not mistaken for everything being fine, and Retry
-            // is offered exactly as it would be after an init() failure.
+            // whether that was deliberate or a crash. Nothing is recorded from here
+            // on, so the server blocks the attempt until an instructor creates a
+            // New entry. The quiz is hidden to match, and Retry is not offered:
+            // this session cannot be restarted, only replaced.
+            frame.classList.add('proctor-sdk-hidden');
             tail.classList.add('proctor-sdk-hidden');
             showError(root, '', false);
             root.querySelector('#proctor-sdk-error-lead').textContent = root.dataset.abandonedmessage;
-            recover.classList.remove('proctor-sdk-hidden');
+            recover.classList.add('proctor-sdk-hidden');
             sessionRunning = false;
             return report(eventUrl, 'appunmounted');
         });
