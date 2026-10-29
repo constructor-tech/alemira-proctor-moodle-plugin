@@ -59,6 +59,44 @@ final class payload_test extends \advanced_testcase {
     }
 
     /**
+     * A learner's override of the time limit and close date reaches the
+     * duration and endDate claims, so Proctor gets the time Moodle gives them.
+     */
+    public function test_user_override_sets_duration_and_end_date(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+
+        $course = $this->getDataGenerator()->create_course();
+        $user = $this->getDataGenerator()->create_user();
+        $now = time();
+        $quiz = $this->getDataGenerator()->create_module('quiz', [
+            'course' => $course->id,
+            'timelimit' => 1800,
+            'timeclose' => $now + HOURSECS,
+        ]);
+        $DB->insert_record('quiz_overrides', (object) [
+            'quiz' => $quiz->id,
+            'userid' => $user->id,
+            'timelimit' => 5400,
+            'timeclose' => $now + 3 * HOURSECS,
+        ]);
+
+        $effective = utils::quiz_for_user((int) $quiz->id, (int) $user->id);
+        $duration = payload::duration_minutes($effective);
+        $this->assertSame(90, $duration);
+
+        // PHP 7.0 requires long list syntax.
+        // phpcs:disable Universal.Lists.DisallowLongListSyntax.Found
+        list(, $enddate) = payload::exam_window($effective, $duration);
+        // phpcs:enable Universal.Lists.DisallowLongListSyntax.Found
+        $expected = (new \DateTimeImmutable('@' . ($now + 3 * HOURSECS)))
+            ->setTimezone(new \DateTimeZone('UTC'))
+            ->format(\DateTimeInterface::ATOM);
+        $this->assertSame($expected, $enddate);
+    }
+
+    /**
      * A profile picture URL must use the output class available on Moodle 3.11.
      */
     public function test_profile_picture_url_uses_compatible_output_class(): void {

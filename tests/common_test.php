@@ -82,6 +82,31 @@ final class common_test extends \advanced_testcase {
     }
 
     /**
+     * A learner's time limit override sets the Webapp duration.
+     */
+    public function test_user_time_limit_override_sets_duration(): void {
+        global $DB;
+
+        $this->resetAfterTest();
+
+        $course = $this->getDataGenerator()->create_course();
+        $user = $this->getDataGenerator()->create_user();
+        $quiz = $this->getDataGenerator()->create_module('quiz', [
+            'course' => $course->id,
+            'timelimit' => 1800,
+        ]);
+        $DB->insert_record('quiz_overrides', (object) [
+            'quiz' => $quiz->id,
+            'userid' => $user->id,
+            'timelimit' => 5400,
+        ]);
+        $cm = get_coursemodule_from_instance('quiz', $quiz->id, $course->id);
+
+        $this->assertSame(90, common::get_quiz_time_limit($cm, null, $user->id));
+        $this->assertSame(30, common::get_quiz_time_limit($cm));
+    }
+
+    /**
      * Activities without a native Moodle time limit keep their existing
      * fallback so this quiz-specific rule cannot break SCORM or Assignment.
      */

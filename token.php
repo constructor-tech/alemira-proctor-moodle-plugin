@@ -43,6 +43,7 @@ use availability_proctor\config;
 use availability_proctor\jwt;
 use availability_proctor\payload;
 use availability_proctor\session;
+use availability_proctor\utils;
 
 $sessionid = required_param('sessionid', PARAM_INT);
 
@@ -68,7 +69,7 @@ if ((int) $proctorsession->userid !== (int) $USER->id) {
     throw new moodle_exception('error_notyoursession', 'availability_proctor');
 }
 
-$quiz = $DB->get_record('quiz', ['id' => $proctorsession->quizid], '*', MUST_EXIST);
+$quiz = utils::quiz_for_user((int) $proctorsession->quizid, (int) $USER->id);
 $course = $DB->get_record('course', ['id' => $quiz->course], '*', MUST_EXIST);
 $cm = get_coursemodule_from_instance('quiz', $quiz->id, $course->id, false, MUST_EXIST);
 

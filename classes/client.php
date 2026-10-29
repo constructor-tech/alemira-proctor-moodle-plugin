@@ -422,9 +422,10 @@ class client {
      * @param stdClass $course Course object
      * @param \cm_info $cm Cm
      * @param bool $attemptrunning The learner already has an unfinished attempt.
+     * @param int|null $userid Learner whose quiz overrides set the duration.
      * @return array
      */
-    public function exam_data($course, $cm, $attemptrunning = false) {
+    public function exam_data($course, $cm, $attemptrunning = false, $userid = null) {
         $conditiondata = $this->condition->to_json();
 
         $customrules = $conditiondata['customrules'];
@@ -460,7 +461,8 @@ class client {
             'courseCode' => $course->shortname,
             'duration' => common::get_quiz_time_limit(
                 $cm,
-                $attemptrunning ? $conditiondata['duration'] : null
+                $attemptrunning ? $conditiondata['duration'] : null,
+                $userid
             ),
             'schedule' => false,
             'proctoring' => $conditiondata['mode'],

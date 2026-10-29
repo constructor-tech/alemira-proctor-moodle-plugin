@@ -7,6 +7,9 @@ This file starts at v2.8. Earlier releases are recorded in the Git history.
 
 ## Unreleased
 
+- Fixed user and group quiz overrides being ignored in the duration sent to
+  Constructor Proctor, and under the SDK model also in the exam window. A
+  learner with extra time or a later close date now gets it in Proctor too.
 - Fixed Webapp quiz attempts started before the upgrade on a quiz with no time
   limit failing on every page. They now finish with the condition's stored
   duration; only a new attempt requires a quiz time limit.

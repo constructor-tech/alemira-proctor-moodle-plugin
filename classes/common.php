@@ -295,13 +295,18 @@ class common {
      *
      * @param \stdClass|\cm_info $cm Course module
      * @param int|null $storedduration Condition duration for an attempt already running.
+     * @param int|null $userid Learner whose quiz overrides apply; none reads the quiz as set.
      * @return int duration in minutes
      * @throws \moodle_exception When a quiz has no time limit and no stored duration is given.
      */
-    public static function get_quiz_time_limit($cm, $storedduration = null) {
+    public static function get_quiz_time_limit($cm, $storedduration = null, $userid = null) {
         global $DB;
         if (!empty($cm->modname) && $cm->modname === 'quiz') {
-            $timelimit = $DB->get_field('quiz', 'timelimit', ['id' => $cm->instance]);
+            if ($userid) {
+                $timelimit = utils::quiz_for_user((int) $cm->instance, (int) $userid)->timelimit;
+            } else {
+                $timelimit = $DB->get_field('quiz', 'timelimit', ['id' => $cm->instance]);
+            }
             if (empty($timelimit) && $storedduration !== null) {
                 return (int) $storedduration;
             }

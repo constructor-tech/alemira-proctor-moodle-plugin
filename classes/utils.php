@@ -54,6 +54,22 @@ class utils {
     }
 
     /**
+     * The quiz row as Moodle applies it to one learner.
+     *
+     * User and group overrides can give a learner a longer time limit or a
+     * different open or close date. Anything sent to Constructor Proctor must use
+     * these values, or Proctor is told the learner has less time than Moodle
+     * gives them.
+     *
+     * @param int $quizid Quiz id.
+     * @param int $userid The learner.
+     * @return \stdClass Quiz row with the learner's overrides applied.
+     */
+    public static function quiz_for_user(int $quizid, int $userid): \stdClass {
+        return self::quiz_settings_classname()::create($quizid, $userid)->get_quiz();
+    }
+
+    /**
      * Returns the correct quiz attempt class name for this Moodle version.
      *
      * @return string Fully qualified class name
@@ -185,7 +201,7 @@ class utils {
         $client = new client($condition);
         // This head runs on every page of an attempt that has already started,
         // so it must not refuse one begun before a time limit was required.
-        $data = $client->exam_data($course, $cm, true);
+        $data = $client->exam_data($course, $cm, true, $USER->id);
         $userdata = $client->user_data($USER, $lang);
 
         $timedata = $client->time_data($timebracket);
@@ -603,7 +619,7 @@ CSS;
         // Continuing an attempt also passes through startattempt.php; only a
         // new attempt needs the quiz time limit.
         $attemptrunning = (bool) quiz_get_user_attempt_unfinished($cminfo->instance, $user->id);
-        $data = $client->exam_data($course, $cminfo, $attemptrunning);
+        $data = $client->exam_data($course, $cminfo, $attemptrunning, $user->id);
         $userdata = $client->user_data($user, $lang);
         $timedata = $client->time_data($timebracket);
         $attemptdata = $client->attempt_data($entry->accesscode, $starturl);
