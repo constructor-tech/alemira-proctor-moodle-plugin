@@ -7,6 +7,9 @@ This file starts at v2.8. Earlier releases are recorded in the Git history.
 
 ## Unreleased
 
+- Fixed a learner exempt from proctoring being sent to Proctor in the middle of
+  a quiz attempt under the Webapp model. The exemption now covers the attempt
+  pages, not only the start of the attempt.
 - Fixed a command-line install starting on the Webapp proctoring model while a
   web install started on SDK. The setting's default is now the model a clean
   install picks. Upgraded sites keep their recorded model.

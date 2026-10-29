@@ -180,6 +180,12 @@ class utils {
             return '';
         }
 
+        // An exempt learner was never sent to Proctor, so the Webapp fader would
+        // send them there mid-attempt once its wait ran out.
+        if (has_capability('availability/proctor:exemptproctoring', \context_module::instance($cm->id), $USER)) {
+            return '';
+        }
+
         // Hide Moodle chrome (header, left drawer, section breadcrumb, back button)
         // during a proctored attempt. Always applied once we've confirmed the
         // activity is proctored and the user is in scope.
@@ -552,12 +558,13 @@ CSS;
         // for that reason: on a Webapp site the cost of this branch is one already
         // cached config read, and nothing else here is evaluated.
         //
-        // Placed after the three gates above because each one is needed: gate 1
+        // Placed after the four gates above because each one is needed: gate 1
         // produces the condition the exam settings come from, gate 2 keeps teacher
         // previews unproctored under both models (db/events.php wires
-        // attempt_preview_started to the same observer, which relies on it), and
+        // attempt_preview_started to the same observer, which relies on it),
         // gate 3 is group scoping, so that if the known 'groups' defect is ever
-        // repaired both models start honouring it in the same release.
+        // repaired both models start honouring it in the same release, and gate 4
+        // is the exemption.
         //
         // Placed before the accesscode block below because that block is Webapp
         // machinery -- entry.php sets proctor_accesscode when the student returns

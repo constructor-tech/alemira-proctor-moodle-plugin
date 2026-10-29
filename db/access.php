@@ -58,7 +58,7 @@ $capabilities = [
         ],
     ],
 
-    // Sit a proctored quiz without proctoring, under the SDK model.
+    // Sit a proctored quiz without proctoring, under either model.
     //
     // Granted to no archetype by default, which differs from the plugin the SDK
     // flow was taken from -- it gave this to editingteacher and manager. Both
@@ -68,8 +68,8 @@ $capabilities = [
     // whose only real use is exempting a specific student look like something
     // teachers are meant to hold.
     //
-    // Deliberately not applied to the Webapp flow: adding an exemption path there
-    // would change the behaviour of exams that customers are running today.
+    // New in this release and granted to no role, so applying it to the Webapp
+    // flow as well changes no exam a site is running today.
     'availability/proctor:exemptproctoring' => [
         'riskbitmask' => RISK_PERSONAL,
         'captype' => 'read',

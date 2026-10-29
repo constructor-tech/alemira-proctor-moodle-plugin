@@ -73,13 +73,17 @@ class observers {
             return;
         }
 
+        if (has_capability('availability/proctor:exemptproctoring', $event->get_context(), $USER)) {
+            return;
+        }
+
         // Under the SDK model this is where the session binds to the attempt. The
         // session was created before the attempt existed -- the launch page hands
         // off to core's startattempt.php, which runs the pre-flight chain and
         // creates the attempt itself -- so this event is the first moment that
         // knows both halves.
         //
-        // The three gates above are deliberately the same three, in the same order,
+        // The four gates above are deliberately the same four, in the same order,
         // as handle_start_attempt(): the two methods are halves of one flow and must
         // agree on who is proctored. Gate 2 carries extra weight here because
         // db/events.php wires attempt_preview_started to this same callback.
