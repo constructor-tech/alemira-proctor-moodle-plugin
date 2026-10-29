@@ -110,6 +110,30 @@ final class config_test extends \advanced_testcase {
     }
 
     /**
+     * A CLI install applies every declared default after the install hook, so the
+     * declared default must be the model the hook chose or it overwrites it.
+     */
+    public function test_cli_install_defaults_keep_the_install_choice(): void {
+        global $CFG;
+        $this->resetAfterTest();
+        // settings.php builds its page only for a user with site config.
+        $this->setAdminUser();
+        unset_config('proctormodel', 'availability_proctor');
+
+        require_once($CFG->libdir . '/adminlib.php');
+        require_once($CFG->dirroot . '/availability/condition/proctor/db/install.php');
+        xmldb_availability_proctor_install();
+
+        // The same call install_cli_database() makes, limited to this plugin's page.
+        $page = admin_get_root(true, true)->locate('manageavailabilityproctor');
+        $this->assertNotNull($page);
+        admin_apply_default_settings($page, true);
+
+        $this->assertSame(config::initial_proctoring_model(), get_config('availability_proctor', 'proctormodel'));
+        $this->assertSame(config::MODEL_SDK, config::proctoring_model());
+    }
+
+    /**
      * A brand without the SDK model runs Webapp even where 'sdk' is already stored,
      * and leaves the stored row as it is.
      */

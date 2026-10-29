@@ -116,13 +116,13 @@ if ($hassiteconfig) {
             // Seamless authorization. SDK configuration belongs only to presets, so no
             // SDK configuration section follows on this integration settings page.
             //
-            // The default is deliberately the Webapp model rather than the newer SDK
-            // one. db/install.php writes 'sdk' for a clean install and db/upgrade.php
-            // writes 'webapp' for an existing site, so this default is only ever
-            // reached if neither ran -- and in that case an existing site must come up
-            // with the behaviour it already had. Declaring 'sdk' here would invert
-            // that: a partial or failed upgrade would silently move live exams onto a
-            // different integration.
+            // The default is the model a clean install picks. A CLI install, and the
+            // PHPUnit and Behat sites, apply every declared default after
+            // db/install.php has run and overwrite what it wrote, so a 'webapp'
+            // default here put those sites on Webapp while a web install got SDK.
+            // Existing sites are not affected: db/upgrade.php writes 'webapp' before
+            // Moodle applies defaults, and an upgrade only fills settings that have no
+            // value.
             //
             // NTG-185: the SDK model requires Moodle 3.11, so on an older site it is not
             // offered -- an administrator should not be able to choose a model that
@@ -155,7 +155,7 @@ if ($hassiteconfig) {
                 'availability_proctor/proctormodel',
                 new lang_string('settings_proctormodel', 'availability_proctor'),
                 new lang_string('settings_proctormodel_desc', 'availability_proctor', $pluginname),
-                \availability_proctor\config::MODEL_WEBAPP,
+                \availability_proctor\config::initial_proctoring_model(),
                 $modeloptions
             ));
         }

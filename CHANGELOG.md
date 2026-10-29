@@ -7,6 +7,9 @@ This file starts at v2.8. Earlier releases are recorded in the Git history.
 
 ## Unreleased
 
+- Fixed a command-line install starting on the Webapp proctoring model while a
+  web install started on SDK. The setting's default is now the model a clean
+  install picks. Upgraded sites keep their recorded model.
 - The profile picture URL sent to Constructor Proctor for the preliminary check
   now carries the learner's file access key only when the site requires login
   to see profile pictures (`forcelogin` or `forceloginforprofileimage`). On
