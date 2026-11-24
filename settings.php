@@ -54,6 +54,10 @@ if ($hassiteconfig) {
             new lang_string('settings_proctor_url', 'availability_proctor'),
             new lang_string('settings_proctor_url_desc', 'availability_proctor'), '', PARAM_HOST));
 
+        $pluginsettings->add(new admin_setting_configtext('availability_proctor/path_prefix',
+            new lang_string('settings_path_prefix', 'availability_proctor'),
+            new lang_string('settings_path_prefix_desc', 'availability_proctor'), '', PARAM_ALPHANUMEXT));
+
         $pluginsettings->add(new admin_setting_configtext('availability_proctor/integration_name',
             new lang_string('settings_integration_name', 'availability_proctor'),
             new lang_string('settings_integration_name_desc', 'availability_proctor'), '', PARAM_TEXT));

@@ -38,6 +38,8 @@ $string['error_setduration'] = 'Длительность в минутах до�
 
 $string['settings_proctor_url'] = 'Proctor by Constructor URL';
 $string['settings_proctor_url_desc'] = '';
+$string['settings_path_prefix'] = 'Префикс пути';
+$string['settings_path_prefix_desc'] = 'Оставьте пустым, если команда Proctor by Constructor не выдала префикс пути вместе с URL. С префиксом студенты открывают страницы по пути /PREFIX/integration/, а Moodle вызывает API по пути /api/PREFIX/v2/.';
 $string['settings_integration_name'] = 'Integration Name';
 $string['settings_integration_name_desc'] = '';
 $string['settings_jwt_secret'] = 'JWT Secret';

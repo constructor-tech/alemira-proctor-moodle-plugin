@@ -72,6 +72,9 @@ class client {
     /** @var string API URL */
     protected $proctorurl;
 
+    /** @var string Path under which a shared host serves Proctor, empty for Proctor's own host */
+    protected $pathprefix;
+
     /** @var string Account id withing company */
     protected $accountid;
 
@@ -91,6 +94,7 @@ class client {
     public function __construct($condition=null) {
         $this->condition = $condition;
         $this->proctorurl = get_config('availability_proctor', 'proctor_url');
+        $this->pathprefix = (string) get_config('availability_proctor', 'path_prefix');
         $this->integrationname = get_config('availability_proctor', 'integration_name');
         $this->jwtsecret = get_config('availability_proctor', 'jwt_secret');
         $this->accountid = get_config('availability_proctor', 'account_id');
@@ -106,7 +110,8 @@ class client {
      * @return string
      */
     public function api_url($method, $sessionid=null, $sessionmethod=null) {
-        $url = 'https://'.$this->proctorurl.'/api/v2/integration/simple/'.$this->integrationname.'/';
+        $apiroot = $this->pathprefix === '' ? '/api/v2' : '/api/'.$this->pathprefix.'/v2';
+        $url = 'https://'.$this->proctorurl.$apiroot.'/integration/simple/'.$this->integrationname.'/';
 
         $url .= $method.'/';
 
@@ -127,7 +132,8 @@ class client {
      * @return string
      */
     public function form_url($method) {
-        $baseurl = 'https://'.$this->proctorurl.'/integration/simple/'.$this->integrationname.'/';
+        $pageroot = $this->pathprefix === '' ? '' : '/'.$this->pathprefix;
+        $baseurl = 'https://'.$this->proctorurl.$pageroot.'/integration/simple/'.$this->integrationname.'/';
 
         return $baseurl.$method.'/';
     }
