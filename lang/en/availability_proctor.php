@@ -38,6 +38,8 @@ $string['error_setduration'] = 'Duration must be a multiple of 30';
 
 $string['settings_proctor_url'] = 'Constructor Proctor URL';
 $string['settings_proctor_url_desc'] = '';
+$string['settings_path_prefix'] = 'Path prefix';
+$string['settings_path_prefix_desc'] = 'Leave empty unless the Constructor Proctor team gave you a path prefix together with the URL. With a prefix, learners open pages under /PREFIX/integration/ and Moodle calls the API under /api/PREFIX/v2/.';
 $string['settings_integration_name'] = 'Integration Name';
 $string['settings_integration_name_desc'] = '';
 $string['settings_jwt_secret'] = 'JWT Secret';

@@ -20,6 +20,7 @@ upload the ZIP file and install it.
 
 1. Request integration name, secret, account name and id form Constructor Proctor team.
 2. Go to `Admin -> Plugins -> Constructor Proctor -> Integration Settings` and fill these values.
+   Fill `Path prefix` only if the Constructor Proctor team gave you one with the URL; otherwise leave it empty.
 3. Choose value for `Send user emails to Constructor Proctor` field, if disabled, Proctor will not receive emails of learners.
 4. Choose value for `Seemless authorization`, if enabled, Proctor will be able to authorize learners into moodle, 
    if disabled, users will have to login into modle inside proctoring.
